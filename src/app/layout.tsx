@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={karla.variable}>
+    <html lang="en" className={`${karla.variable} font-sans`}>
       {/* Apply custom background and text colors, and font family */}
       <body className="bg-background-primary text-text-primary font-sans">
         <header className="w-full bg-background-secondary border-b border-border-accent sticky top-0 z-50 px-6 py-4">

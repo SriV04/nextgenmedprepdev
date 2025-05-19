@@ -84,4 +84,8 @@
     background-clip: text;
     color: transparent;
   }
+  
+  body {
+    font-family: 'Karla', sans-serif;
+  }
 }
