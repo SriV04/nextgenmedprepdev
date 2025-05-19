@@ -2,47 +2,66 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class', // Enable dark mode support
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/styles/**/*.css',
+  ],
   theme: {
     extend: {
       colors: {
-        // Light theme base
-        background: '#F7FAFC',
-        surface:    '#FFFFFF',
-        text:       '#1A202C',
-        muted:      '#718096',
+        // Using CSS variables for theme colors
+        // Backgrounds
+        'background-primary': 'var(--color-background-primary)', 
+        'background-secondary': 'var(--color-background-secondary)',
+        'background-accent': 'var(--color-background-accent)',
 
-        // Branding & accents
-        primary:   '#2C3E50',
-        accent:    '#16A085',
-        highlight: '#1ABC9C',
-        success:    '#16A085',
-        info:       '#3182CE',
-        warning:    '#D69E2E',
-        danger:     '#E53E3E',
+        // Text
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-accent': 'var(--color-text-accent)',
+        'text-on-accent': 'var(--color-text-on-accent)',
+
+        // Borders
+        'border-primary': 'var(--color-border-primary)',
+        'border-accent': 'var(--color-border-accent)',
+
+        // Interactive Elements
+        'accent-primary': 'var(--color-accent-primary)',
+        'accent-primary-hover': 'var(--color-accent-primary-hover)',
+        'accent-primary-focus': 'var(--color-accent-primary-focus)',
+        'accent-secondary': 'var(--color-accent-secondary)',
+        'accent-secondary-hover': 'var(--color-accent-secondary-hover)',
+
+        // Semantic Colors
+        'success': 'var(--color-success)',
+        'warning': 'var(--color-warning)',
+        'error': 'var(--color-error)',
+        'info': 'var(--color-info)',
       },
       fontFamily: {
-        sans: ['var(--font-josefin)', 'sans-serif'],
-        heading: ['"Josefin Sans"', 'sans-serif'],
+        sans: ['var(--font-karla)', 'sans-serif'], // Using Karla from layout.tsx
       },
-      fontSize: {
-        h1: ['2.25rem', { lineHeight: '2.5rem', fontWeight: '600' }],
-        h2: ['1.875rem', { lineHeight: '2.25rem', fontWeight: '600' }],
-        h3: ['1.5rem', { lineHeight: '2rem', fontWeight: '600' }],
-        body: ['1rem', { lineHeight: '1.75rem' }],
-        sm: ['0.875rem', { lineHeight: '1.25rem' }],
+      spacing: {
+        // You can define custom spacing here if needed
+        // e.g., '128': '32rem',
       },
       borderRadius: {
-        md: '0.5rem',
-        lg: '0.75rem',
+        'xl': '0.75rem', // Slightly larger default for a softer look
+        '2xl': '1rem',
+        '3xl': '1.5rem',
       },
       boxShadow: {
-        card:  '0 4px 6px rgba(0,0,0,0.05)',
-        dialog:'0 8px 16px rgba(0,0,0,0.1)',
-      },
+        'subtle': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04)',
+        'DEFAULT': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)', // Softer default shadow
+        'lg': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+      }
     },
   },
-  plugins: [],
+  plugins: [
+    // require('@tailwindcss/forms'), // Useful for styling form elements
+  ],
 };
-
 export default config;

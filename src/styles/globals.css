@@ -1,96 +1,87 @@
-/* @import "tailwindcss";
+/* Import Karla font */
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@300;400;600;700&display=swap');
 
-:root {
-  --background: #2C3E50;
-  --foreground: #171717;
-  --primary: #2C3E50;
-  --accent: #16A085;
-  --highlight: #1ABC9C;
-  --deep: #0A0E14;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-karla-sans);
-  --font-mono: var(--font-karla-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--accent);
-  font-family: 'Josefin Sans', Helvetica, sans-serif;
-} */
-
-
-/* src/styles/globals.css */
-
+/* Include Tailwind's base styles, components, and utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #F7FAFC;
-  --surface:    #FFFFFF;
-  --text:       #1A202C;
-  --muted:      #718096;
-  --primary:    #2C3E50;
-  --accent:     #16A085;
-  --highlight:  #1ABC9C;
-  --success:    #16A085;
-  --info:       #3182CE;
-  --warning:    #D69E2E;
-  --danger:     #E53E3E;
+/* 3. Define CSS Variables for theme colors */
+@layer base {
+  :root {
+    /* Backgrounds */
+    --color-background-primary: #F7FAFC;
+    --color-background-secondary: #FFFFFF;
+    --color-background-accent: #EBF8FF;
+
+    /* Text */
+    --color-text-primary: #2D3748;
+    --color-text-secondary: #1a5bcb;
+    --color-text-accent: #2B6CB0;
+    --color-text-on-accent: #FFFFFF;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(to right, var(--color-text-primary), var(--color-text-secondary));
+
+    /* Borders */
+    --color-border-primary: #E2E8F0;
+    --color-border-accent: #90CDF4;
+
+    /* Interactive Elements */
+    --color-accent-primary: #3182CE;
+    --color-accent-primary-hover: #2B6CB0;
+    --color-accent-primary-focus: #2C5282;
+    --color-accent-secondary: #63B3ED;
+    --color-accent-secondary-hover: #4299E1;
+
+    /* Semantic Colors */
+    --color-success: #38A169;
+    --color-warning: #DD6B20;
+    --color-error: #E53E3E;
+    --color-info: #3182CE;
+  }
+
+  /* Dark mode theme using the class strategy */
+  .dark {
+    /* Backgrounds */
+    --color-background-primary: #1A202C;
+    --color-background-secondary: #2D3748;
+    --color-background-accent: #2A4365;
+
+    /* Text */
+    --color-text-primary: #F7FAFC;
+    --color-text-secondary: #E2E8F0;
+    --color-text-accent: #90CDF4;
+    --color-text-on-accent: #1A202C;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(to right, var(--color-text-primary), var(--color-text-secondary));
+
+    /* Borders */
+    --color-border-primary: #4A5568;
+    --color-border-accent: #4299E1;
+
+    /* Interactive Elements */
+    --color-accent-primary: #4299E1;
+    --color-accent-primary-hover: #63B3ED;
+    --color-accent-primary-focus: #90CDF4;
+    --color-accent-secondary: #2B6CB0;
+    --color-accent-secondary-hover: #3182CE;
+
+    /* Semantic Colors */
+    --color-success: #48BB78;
+    --color-warning: #F6AD55;
+    --color-error: #FC8181;
+    --color-info: #4299E1;
+  }
 }
 
-body {
-  background: var(--background);
-  color: var(--text);
-  font-family: var(--font-sans);
-}
-
-.card {
-  background: var(--surface);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 1.5rem;
-}
-
-.btn {
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-md);
-  padding: 0.5rem 1rem;
-}
-.btn-primary {
-  background: var(--primary);
-  color: white;
-
-}
-.btn-secondary {
-  background: var(--muted);
-  color: var(--text);
-}
-
-.alert {
-  border-radius: var(--border-radius-md);
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-.alert-info    { background: var(--info); border-left: 4px solid var(--info); color: var(--text); }
-.alert-success { background: var(--success); border-left: 4px solid var(--success); color: var(--text); }
-.alert-warning { background: var(--warning); border-left: 4px solid var(--warning); color: var(--text); }
-.alert-danger  { background: var(--danger); border-left: 4px solid var(--danger); color: var(--text); }
-
-a {
-  color: var(--accent);
-  &:hover {
-    color: var(--highlight);
+/* Add custom utilities for things Tailwind doesn't provide out of the box */
+@layer utilities {
+  .text-gradient-primary {
+    background-image: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }

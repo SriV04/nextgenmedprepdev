@@ -28,8 +28,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={karla.variable}>
-      <body className="bg-white text-deep font-sans">
-        <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50 px-6 py-4">
+      {/* Apply custom background and text colors, and font family */}
+      <body className="bg-background-primary text-text-primary font-sans">
+        <header className="w-full bg-background-secondary border-b border-border-accent sticky top-0 z-50 px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <img
@@ -37,16 +38,17 @@ export default function RootLayout({
                 alt="NextGenMedPrep Logo"
                 className="w-12 h-12"
               />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-400">
+              {/* Using our custom gradient text utility */}
+              <span className="text-xl font-bold text-gradient-primary">
                 NextGenMedPrep
               </span>
             </div>
             <nav className="hidden md:flex">
               {['About Us', 'UCAT', 'Tutoring', 'Conferences'].map((item) => (
-                <a 
+                <a
                   key={item}
                   href={`/${item.toLowerCase().replace(' ', '-')}`}
-                  className="px-5 py-2 mx-1 rounded-full text-deep hover:bg-gray-100 transition-all duration-300 font-medium text-sm"
+                  className="px-5 py-2 mx-1 rounded-full text-text-secondary hover:bg-background-accent transition-all duration-300 font-medium text-sm"
                 >
                   {item}
                 </a>
@@ -59,19 +61,19 @@ export default function RootLayout({
             </button>
           </div>
         </header>
-        
+
         <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
-        
-        <footer className="bg-gray-50 border-t border-gray-100 py-10 px-6">
+
+        <footer className="bg-gray-50 border-t border-gray-100 py-10 px-6"> {/* Consider using background-primary and border-primary here as well */}
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
               <div className="flex items-center mb-6 md:mb-0">
-                <img 
-                  src="/NGMP logo.png" 
-                  alt="NextGenMedPrep Logo" 
-                  className="w-10 h-10 mr-2" 
+                <img
+                  src="/NGMP logo.png"
+                  alt="NextGenMedPrep Logo"
+                  className="w-10 h-10 mr-2"
                 />
-                <span className="text-lg font-semibold text-deep">NextGenMedPrep</span>
+                <span className="text-lg font-bold text-text-primary">NextGenMedPrep</span>
               </div>
               <div className="flex space-x-4">
                 {[
@@ -83,12 +85,12 @@ export default function RootLayout({
                   <a
                     key={social.name}
                     href={socialLinks[social.name as keyof typeof socialLinks]}
-                    className="bg-white p-3 rounded-full shadow-sm hover:shadow-md transition-all duration-300"
+                    className="bg-background-secondary p-3 rounded-full shadow-subtle hover:shadow-DEFAULT transition-all duration-300"
                     aria-label={social.name}
                   >
-                    <svg 
-                      className="w-5 h-5 fill-current text-deep"
-                      viewBox="0 0 24 24" 
+                    <svg
+                      className="w-5 h-5 fill-current text-text-primary"
+                      viewBox="0 0 24 24"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path d={social.icon} />
@@ -97,7 +99,7 @@ export default function RootLayout({
                 ))}
               </div>
             </div>
-            <div className="text-center text-gray-500 text-sm">
+            <div className="text-center text-text-secondary text-sm">
               &copy; {new Date().getFullYear()} NextGenMedPrep. All rights reserved.
             </div>
           </div>
