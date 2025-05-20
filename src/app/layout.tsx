@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Karla } from "next/font/google";
 import "@/styles/globals.css";
+import Link from "next/link";
+import MegaMenu from "@/components/MegaMenu";
 
 const karla = Karla({
   subsets: ['latin'],
@@ -15,6 +17,15 @@ const socialLinks: Record<string, string> = {
   "TikTok": "https://www.tiktok.com/@nextgenmedprep",
   "Facebook": "https://www.facebook.com/people/NextGen-MedPrep/61566778581462/",
 }
+
+const megaMenuItems: Record<string, string[]> = {
+  "About Us": ["Our Story", "Meet the Tutors", "Careers"],
+  "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
+  "Interviews": ["Panel Interviews", "MMIs", "Interview Tutoring", "Interview Conferences"],
+  "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
+  "Get Started": ["Book a Free Consultation", "Contact Us"],
+  "Conferences & Events": ["All Conferences", "Upcoming", "Past"],
+};
 
 export const metadata: Metadata = {
   title: "NextGenMedPrep",
@@ -33,18 +44,19 @@ export default function RootLayout({
         <header className="w-full bg-background-secondary border-b border-border-accent sticky top-0 z-50 px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img
+              <a href="/">
+                <img
                 src="/NGMP logo.png"
                 alt="NextGenMedPrep Logo"
                 className="w-12 h-12"
-              />
-              {/* Using our custom gradient text utility */}
+                />
+              </a>
               <span className="text-xl font-bold text-gradient-primary">
                 NextGenMedPrep
               </span>
             </div>
             <nav className="hidden md:flex">
-              {['About Us', 'UCAT', 'Tutoring', 'Conferences'].map((item) => (
+              {Object.keys(megaMenuItems).map((item) => (
                 <a
                   key={item}
                   href={`/${item.toLowerCase().replace(' ', '-')}`}
