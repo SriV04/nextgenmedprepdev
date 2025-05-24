@@ -25,7 +25,7 @@ const medicineAppSteps = [
   },
   {
     id: 'mocks',
-    title: 'Mastering Mock Interviews', // Title made slightly more descriptive
+    title: 'Interviews: Secure Your Offer', // Title made slightly more descriptive
     information:
       'After submitting your UCAS application (by October 15th in Year 13), strong candidates are invited for interviews, usually held between November and March. Universities use various formats, including Multiple Mini Interviews (MMIs) and traditional panel interviews. Prepare to discuss your motivation for medicine, understanding of the NHS, ethical scenarios, work experience reflections, and personal qualities. Practice articulating your thoughts clearly and confidently.',
   },
