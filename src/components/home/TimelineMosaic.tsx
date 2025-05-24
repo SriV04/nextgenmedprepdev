@@ -24,73 +24,98 @@ interface MilestoneData {
 const milestones: MilestoneData[] = [
   {
     id: 'year9',
-    name: 'Year 9: Foundation & Exploration', // More concise title
+    name: 'Year 9: Foundation Building',
     tiles: [
-    //   { id: 'y9-explanation', title: 'Subject Choices', content: 'Guidance on early subject selections and extracurriculars to build a strong profile for medicine or dentistry.', type: 'explanation', colSpan: 2 },
-      { id: 'y9-service', title: 'Early Mentorship', content: 'Personalized consultations, academic tracking, and initial exposure to healthcare careers.', type: 'service' },
+      { id: 'y9-service', title: 'Early Guidance', content: 'Subject choices & career exploration', type: 'service' },
       {
         id: 'y9-stat',
-        title: 'Confident Start',
-        content: 'Students starting early feel significantly more prepared.',
+        title: 'Early Success',
+        content: 'Students feel more prepared',
         type: 'statistic',
         statValue: '95%',
-        statLabel: 'more confident in their path',
+        statLabel: 'confidence boost',
       },
-      { id: 'y9-comparison', title: 'Med vs. Dentistry', content: 'Explore career differences and similarities to help you consider your preferred path early on.', type: 'comparison', rowSpan: 2 },
-      { id: 'y9-moreinfo', title: 'Year 9 Program', content: 'Discover our tailored Year 9 program details.', type: 'moreInfo', link: '/services/year-9-program' },
+      { id: 'y9-comparison', title: 'Career Paths', content: 'Medicine vs. Dentistry overview', type: 'comparison' },
     ],
   },
   {
     id: 'ucat',
-    name: 'UCAT: Mastering the Test', // More concise title
+    name: 'UCAT: Test Mastery',
     tiles: [
-    //   { id: 'ucat-explanation', title: 'What is UCAT?', content: 'The University Clinical Aptitude Test (UCAT) is a critical admissions exam for medical and dental schools.', type: 'explanation', colSpan: 2 },
-      { id: 'ucat-service', title: 'UCAT Prep', content: 'Intensive workshops, realistic mock exams, and personalized feedback to boost your UCAT score.', type: 'service' },
+      { id: 'ucat-service', title: 'UCAT Training', content: 'Mock exams & targeted practice', type: 'service' },
       {
         id: 'ucat-stat',
-        title: 'Top Percentile Scores',
-        content: 'Our students consistently achieve high UCAT scores.',
+        title: 'Top Scores',
+        content: 'High UCAT achievements',
         type: 'statistic',
         statValue: '85%',
-        statLabel: 'score in the top 20th percentile',
+        statLabel: 'top 20th percentile',
       },
-      { id: 'ucat-comparison', title: 'UCAT for Both', content: 'Understand subtle UCAT differences and strategic preparation for medicine vs. dentistry.', type: 'comparison', colSpan: 2 },
-      { id: 'ucat-moreinfo', title: 'UCAT Resources', content: 'Access our comprehensive UCAT preparation materials.', type: 'moreInfo', link: '/services/ucat-preparation', colSpan: 2 },
+      { id: 'ucat-comparison', title: 'Strategy Focus', content: 'Med vs. Dental UCAT prep', type: 'comparison' },
+    ],
+  },
+  {
+    id: 'personalStatement',
+    name: 'Personal Statement: Stand Out',
+    tiles: [
+      { id: 'ps-service', title: 'Statement Coaching', content: 'Expert guidance & feedback', type: 'service' },
+      {
+        id: 'ps-stat',
+        title: 'Success Rate',
+        content: 'Strong personal statements',
+        type: 'statistic',
+        statValue: '98%',
+        statLabel: 'satisfaction rate',
+      },
+      { id: 'ps-comparison', title: 'Unique Approach', content: 'Medicine vs. Dental focus', type: 'comparison' },
     ],
   },
   {
     id: 'alevels',
-    name: 'A-Levels: Academic Excellence', // More concise title
+    name: 'A-Levels: Academic Excellence',
     tiles: [
-    //   { id: 'alevels-explanation', title: 'Crucial Grades', content: 'Achieving top A-Level grades, especially in sciences, is essential for medical and dental school entry.', type: 'explanation', colSpan: 2, rowSpan: 2 },
-      { id: 'alevels-service', title: 'A-Level Tutoring', content: 'Targeted tutoring, effective revision strategies, and exam technique coaching for key subjects.', type: 'service' },
+      { id: 'alevels-service', title: 'Subject Tutoring', content: 'Science & exam technique focus', type: 'service' },
       {
         id: 'alevels-stat',
-        title: 'A/A* Success',
-        content: 'We help students achieve their desired A-Level results.',
+        title: 'Grade Success',
+        content: 'A-Level achievements',
         type: 'statistic',
         statValue: '90%',
-        statLabel: 'achieve A/A* in science A-Levels',
+        statLabel: 'A/A* grades',
       },
-      { id: 'alevels-moreinfo', title: 'A-Level Support', content: 'Learn how we support A-Level students.', type: 'moreInfo', link: '/services/a-level-support' },
+      { id: 'alevels-comparison', title: 'Grade Requirements', content: 'Medicine vs. Dental requirements', type: 'comparison' },
     ],
   },
   {
-    id: 'interviews', // Renamed 'mocks' to 'interviews' for clarity
-    name: 'Interviews: Secure Your Offer', // More concise title
+    id: 'mocks',
+    name: 'Interviews: Final Step',
     tiles: [
-    //   { id: 'interviews-explanation', title: 'The Interview Process', content: 'Medical and dental interviews (MMI or traditional) assess your suitability beyond academics.', type: 'explanation', colSpan: 2 },
-      { id: 'interviews-service', title: 'Interview Coaching', content: 'Realistic mock interviews, detailed feedback, and strategies for common and challenging questions.', type: 'service', rowSpan: 2 },
+      { id: 'interviews-service', title: 'Interview Prep', content: 'MMI & panel interview training', type: 'service' },
       {
         id: 'interviews-stat',
-        title: 'High Offer Rate',
-        content: 'Our interview coaching leads to outstanding offer rates.',
+        title: 'Offer Success',
+        content: 'Outstanding offer rates',
         type: 'statistic',
         statValue: '92%',
-        statLabel: 'success rate in receiving offers',
+        statLabel: 'success rate',
       },
-      { id: 'interviews-comparison', title: 'Interview Nuances', content: 'Understand the distinct focuses of medical vs. dental interviews and how to prepare for each.', type: 'comparison' },
-      { id: 'interviews-moreinfo', title: 'Interview Prep', content: 'Explore comprehensive interview coaching details.', type: 'moreInfo', link: '/services/interview-coaching' },
+      { id: 'interviews-comparison', title: 'Interview Types', content: 'Medical vs. Dental focus areas', type: 'comparison' },
+    ],
+  },
+  {
+    id: 'dreamUni',
+    name: 'Success: Dream Achieved',
+    tiles: [
+      { id: 'success-service', title: 'Ongoing Support', content: 'Continued mentorship & guidance', type: 'service' },
+      {
+        id: 'success-stat',
+        title: 'Dreams Realized',
+        content: 'Student success stories',
+        type: 'statistic',
+        statValue: '100%',
+        statLabel: 'journey complete',
+      },
+      { id: 'success-celebration', title: 'Celebration', content: 'Welcome to medical school!', type: 'comparison' },
     ],
   },
 ];
@@ -118,17 +143,17 @@ const hoverVariants = {
 const getTileStyle = (type: TileData['type']) => {
   switch (type) {
     case 'explanation':
-      return 'bg-sky-700 text-white'; // Darker sky blue
+      return 'bg-gradient-to-br from-sky-500 to-sky-600 text-white';
     case 'service':
-      return 'bg-teal-600 text-white'; // Darker teal
+      return 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white';
     case 'statistic':
-      return 'bg-gradient-to-br from-purple-600 to-indigo-700 text-white'; // Gradient for stat tiles
+      return 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white';
     case 'comparison':
-      return 'bg-slate-700 text-white';
+      return 'bg-gradient-to-br from-slate-600 to-slate-700 text-white';
     case 'moreInfo':
-      return 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer'; // Darker rose
+      return 'bg-gradient-to-br from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white cursor-pointer';
     default:
-      return 'bg-gray-200 text-gray-800';
+      return 'bg-gradient-to-br from-gray-400 to-gray-500 text-white';
   }
 };
 
@@ -137,7 +162,7 @@ interface TimelineMosaicProps {
 }
 
 const TimelineMosaic: React.FC<TimelineMosaicProps> = ({ milestoneIdToShow }) => {
-  const milestone = milestones.find(m => m.id === milestoneIdToShow || (milestoneIdToShow === 'mocks' && m.id === 'interviews'));
+  const milestone = milestones.find(m => m.id === milestoneIdToShow || (milestoneIdToShow === 'mocks' && m.id === 'mocks') || (milestoneIdToShow === 'dreamUni' && m.id === 'dreamUni'));
 
   if (!milestone) {
     return null;
@@ -145,7 +170,7 @@ const TimelineMosaic: React.FC<TimelineMosaicProps> = ({ milestoneIdToShow }) =>
 
   return (
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 mt-6 px-4" // Added responsive columns and padding
+      className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
@@ -159,7 +184,7 @@ const TimelineMosaic: React.FC<TimelineMosaicProps> = ({ milestoneIdToShow }) =>
               href: tile.link,
               target: '_blank',
               rel: 'noopener noreferrer',
-              className: 'block h-full', // Ensure the anchor tag fills the tile
+              className: 'block h-full',
             }
           : {};
 
@@ -169,32 +194,30 @@ const TimelineMosaic: React.FC<TimelineMosaicProps> = ({ milestoneIdToShow }) =>
             custom={index}
             variants={tileVariants}
             whileHover="hover"
-            className={`p-6 rounded-xl shadow-lg flex flex-col ${isStatistic ? 'justify-center items-center text-center' : 'justify-between'}
+            className={`p-4 rounded-xl shadow-lg flex flex-col ${isStatistic ? 'justify-center items-center text-center' : 'justify-between'}
                         ${getTileStyle(tile.type)}
-                        ${tile.colSpan ? `sm:col-span-${tile.colSpan}` : ''}
-                        ${tile.rowSpan ? `sm:row-span-${tile.rowSpan}` : ''}
-                        min-h-[180px] md:min-h-[220px] lg:min-h-[200px]`} // Adjusted min-heights for better screen fit
-            {...linkWrapperProps} // Apply link wrapper props if it's a moreInfo tile
+                        min-h-[120px]`}
+            {...linkWrapperProps}
           >
             {isStatistic ? (
               <div className="flex flex-col items-center justify-center h-full">
-                <div className="text-5xl md:text-6xl font-extrabold text-white leading-tight"> {/* Larger, bolder number */}
+                <div className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
                   {tile.statValue}
                 </div>
-                <p className="text-sm md:text-base mt-2 opacity-90">
+                <p className="text-xs md:text-sm mt-1 opacity-90">
                   {tile.statLabel}
                 </p>
               </div>
             ) : (
               <div className="flex flex-col h-full">
                 <div>
-                  <h3 className="text-xl font-semibold mb-2 leading-tight">{tile.title}</h3> {/* Concise title */}
-                  <p className="text-sm opacity-90 flex-grow">{tile.content}</p>
+                  <h3 className="text-sm font-semibold mb-2 leading-tight">{tile.title}</h3>
+                  <p className="text-xs opacity-90">{tile.content}</p>
                 </div>
                 {tile.type === 'moreInfo' && tile.link && (
-                  <div className="mt-auto pt-3">
-                    <span className="inline-block px-4 py-2 text-xs font-semibold rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-                      Learn More &rarr;
+                  <div className="mt-auto pt-2">
+                    <span className="inline-block px-2 py-1 text-xs font-medium rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+                      Learn More →
                     </span>
                   </div>
                 )}
