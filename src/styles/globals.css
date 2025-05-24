@@ -87,8 +87,11 @@
   
   body {
     font-family: 'Karla', sans-serif;
+    height: 100%;
   }
 }
+
+
 
 /* Team Member Card Styles */
 .team-member-card {
