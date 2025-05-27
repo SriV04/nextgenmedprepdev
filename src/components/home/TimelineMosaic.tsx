@@ -126,8 +126,8 @@ const tileVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      delay: i * 0.08, // Slightly reduced delay for snappier appearance
-      duration: 0.5,
+      delay: i * 0.03, // Much faster delay
+      duration: 0.2, // Faster duration
     },
   }),
 };
@@ -136,7 +136,7 @@ const hoverVariants = {
   hover: {
     scale: 1.03, // Reduced scale for subtler hover
     boxShadow: '0px 12px 25px rgba(0,0,0,0.25)', // Slightly more pronounced shadow
-    transition: { duration: 0.3 },
+    transition: { duration: 0.15 }, // Faster hover transition
   },
 };
 
@@ -174,7 +174,7 @@ const TimelineMosaic: React.FC<TimelineMosaicProps> = ({ milestoneIdToShow }) =>
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ staggerChildren: 0.1 }}
+      transition={{ staggerChildren: 0.04 }}
     >
       {milestone.tiles.map((tile, index) => {
         const isStatistic = tile.type === 'statistic';

@@ -2,11 +2,9 @@ import React from 'react';
 
 const Hero: React.FC = () => {
   return (
-    <div className="w-screen relative min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-fixed text-white" 
+    <div className="w-screen relative min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-fixed text-white -mx-4" 
          style={{ 
-           backgroundImage: "url('/Hero_background.jpg')",
-           marginLeft: '-50vw', // Centers the background perfectly
-           left: '50%' 
+           backgroundImage: "url('/Hero_background.jpg')"
          }}>
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-black opacity-50"></div>

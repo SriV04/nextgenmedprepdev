@@ -19,12 +19,12 @@ const socialLinks: Record<string, string> = {
 }
 
 const megaMenuItems: Record<string, string[]> = {
-  "About Us": ["Our Story", "Meet the Tutors", "Careers"],
+  "About": ["Our Story", "Meet the Tutors", "Join the Team"],
   "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
   "Interviews": ["Panel Interviews", "MMIs", "Interview Tutoring", "Interview Conferences"],
   "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
   "Get Started": ["Book a Free Consultation", "Contact Us"],
-  "Conferences & Events": ["All Conferences", "Upcoming", "Past"],
+  "Events": ["All Conferences", "Upcoming", "Past"],
 };
 
 export const metadata: Metadata = {
@@ -40,41 +40,48 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${karla.variable} font-sans`}>
       {/* Apply custom background and text colors, and font family */}
-      <body className="bg-background-primary text-text-primary font-sans">
-        <header className="w-full bg-background-secondary border-b border-border-accent sticky top-0 z-50 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <a href="/">
-                <img
-                src="/NGMP logo.png"
-                alt="NextGenMedPrep Logo"
-                className="w-12 h-12"
-                />
-              </a>
-              <span className="text-xl font-bold text-gradient-primary">
-                NextGenMedPrep
-              </span>
-            </div>
-            <nav className="hidden md:flex">
-              {Object.keys(megaMenuItems).map((item) => (
-                <a
-                  key={item}
-                  href={`/${item.toLowerCase().replace(' ', '-')}`}
-                  className="px-5 py-2 mx-1 rounded-full text-text-secondary hover:bg-background-accent transition-all duration-300 font-medium text-sm"
-                >
-                  {item}
+      <body className="bg-background-primary text-text-primary font-sans overflow-x-hidden">
+        <header className="w-full bg-background-secondary border-b border-border-accent fixed top-0 z-50">
+          <div className="w-full px-3 sm:px-4 py-3 mx-auto max-w-[100vw]">
+            <div className="flex items-center justify-between min-w-0">
+              <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
+                <a href="/" className="flex-shrink-0">
+                  <img
+                  src="/NGMP logo.png"
+                  alt="NextGenMedPrep Logo"
+                  className="w-8 h-8 sm:w-10 sm:h-10"
+                  />
                 </a>
-              ))}
-            </nav>
-            <button className="md:hidden focus:outline-none">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+                <span className="text-sm sm:text-lg font-bold text-gradient-primary truncate hidden sm:block">
+                  NextGenMedPrep
+                </span>
+                <span className="text-xs font-bold text-gradient-primary truncate sm:hidden">
+                  NGMP
+                </span>
+              </div>
+              
+              <nav className="hidden lg:flex items-center justify-center flex-1 max-w-3xl mx-4">
+                <div className="flex items-center space-x-1">
+                  {Object.entries(megaMenuItems).map(([title, items]) => (
+                    <MegaMenu
+                      key={title}
+                      title={title}
+                      items={items}
+                    />
+                  ))}
+                </div>
+              </nav>
+              
+              <button className="lg:hidden focus:outline-none flex-shrink-0 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
+        <main className="max-w-7xl mx-auto px-4 pb-8 mt-16">{children}</main>
 
         <footer className="bg-gray-50 border-t border-gray-100 py-10 px-6"> {/* Consider using background-primary and border-primary here as well */}
           <div className="max-w-7xl mx-auto">

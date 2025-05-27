@@ -9,15 +9,15 @@ import React from 'react';
 
 export default function HomePage() {
   return (
-    <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla p-4 sm:p-8 scroll-smooth snap-y snap-mandatory">
+    <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla scroll-smooth snap-y snap-mandatory">
       {/* Hero Section */}
-      <div className="-mx-4 -mt-4 sm:-mx-8 sm:-mt-8"> {/* Negative margins to counteract parent padding */}
+      <div> {/* No negative margins needed */}
         <Hero />
       </div>
 
       {/* Timeline Section - Its children (the steps) will be snap points */}
       {/* The TimelineSection component itself doesn't need snap-start, its rendered steps will have it. */}
-      <div className="md:py-16"> {/* Added wrapper div for consistent padding around timeline section if needed */}
+      <div className="px-4 sm:px-8 md:py-16"> {/* Move padding here instead */}
         <TimelineSection />
       </div>
       
@@ -28,9 +28,11 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true, amount: 0.3 }}
-        className="py-16 md:py-24 snap-start" // Added snap-start & padding
+        className="px-4 sm:px-8 py-16 md:py-24 snap-start flex justify-center items-center"
       >
-        <ComprehensiveServices />
+        <div className="max-w-6xl mx-auto w-full">
+          <ComprehensiveServices />
+        </div>
       </motion.section>
 
       {/* Success Stories */}
@@ -39,9 +41,11 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true, amount: 0.3 }}
-        className="py-16 md:py-24 snap-start" // Added snap-start & padding
+        className="px-4 sm:px-8 py-16 md:py-24 snap-start flex justify-center items-center"
       >
-        <SuccessStories stories={[]} />
+        <div className="max-w-6xl mx-auto w-full">
+          <SuccessStories stories={[]} />
+        </div>
       </motion.section>
     </main>
   );
