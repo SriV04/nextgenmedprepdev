@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Karla } from "next/font/google";
 import "@/styles/globals.css";
 import Link from "next/link";
-import MegaMenu from "@/components/MegaMenu";
+import MegaMenu from "@/components/home/MegaMenu";
 
 const karla = Karla({
   subsets: ['latin'],
@@ -20,10 +20,10 @@ const socialLinks: Record<string, string> = {
 
 const megaMenuItems: Record<string, string[]> = {
   "About": ["Our Story", "Meet the Tutors", "Join the Team"],
+  "Get Started": ["Book a Free Consultation", "Contact Us"],
+  "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
   "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
   "Interviews": ["Panel Interviews", "MMIs", "Interview Tutoring", "Interview Conferences"],
-  "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
-  "Get Started": ["Book a Free Consultation", "Contact Us"],
   "Events": ["All Conferences", "Upcoming", "Past"],
 };
 
@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${karla.variable} font-sans`}>
       {/* Apply custom background and text colors, and font family */}
-      <body className="bg-background-primary text-text-primary font-sans overflow-x-hidden">
+      <body className="bg-background-primary text-text-primary font-sans">
         <header className="w-full bg-background-secondary border-b border-border-accent fixed top-0 z-50">
           <div className="w-full px-3 sm:px-4 py-3 mx-auto max-w-[100vw]">
             <div className="flex items-center justify-between min-w-0">
@@ -59,17 +59,17 @@ export default function RootLayout({
                   NGMP
                 </span>
               </div>
-              
-              <nav className="hidden lg:flex items-center justify-center flex-1 max-w-3xl mx-4">
-                <div className="flex items-center space-x-1">
-                  {Object.entries(megaMenuItems).map(([title, items]) => (
-                    <MegaMenu
-                      key={title}
-                      title={title}
-                      items={items}
-                    />
-                  ))}
-                </div>
+              <div className="hidden lg:block"></div>
+                <nav className="hidden lg:flex items-center justify-center flex-1 max-w-2xl mx-4">
+                  <div className="flex items-center space-x-1">
+                    {Object.entries(megaMenuItems).map(([title, items]) => (
+                      <MegaMenu
+                        key={title}
+                        title={title}
+                        items={items}
+                      />
+                    ))}
+                  </div>
               </nav>
               
               <button className="lg:hidden focus:outline-none flex-shrink-0 p-2">
@@ -83,7 +83,7 @@ export default function RootLayout({
 
         <main className="max-w-7xl mx-auto px-4 pb-8 mt-16">{children}</main>
 
-        <footer className="bg-gray-50 border-t border-gray-100 py-10 px-6"> {/* Consider using background-primary and border-primary here as well */}
+        <footer className="bg-gray-50 border-t border-gray-100 py-10 px-6 w-full"> {/* Consider using background-primary and border-primary here as well */}
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
               <div className="flex items-center mb-6 md:mb-0">

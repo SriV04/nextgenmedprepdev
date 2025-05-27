@@ -9,9 +9,9 @@ import React from 'react';
 
 export default function HomePage() {
   return (
-    <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla scroll-smooth snap-y snap-mandatory">
+    <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla scroll-smooth w-screen">
       {/* Hero Section */}
-      <div> {/* No negative margins needed */}
+      <div className='snap-start flex justify-center items-center'> {/* No negative margins needed */}
         <Hero />
       </div>
 
@@ -28,7 +28,7 @@ export default function HomePage() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true, amount: 0.3 }}
-        className="px-4 sm:px-8 py-16 md:py-24 snap-start flex justify-center items-center"
+        className="snap-start flex justify-center items-center "
       >
         <div className="max-w-6xl mx-auto w-full">
           <ComprehensiveServices />

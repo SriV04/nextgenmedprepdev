@@ -21,7 +21,7 @@ const MegaMenu = ({ title, items }: MegaMenuProps) => {
         href={`/${title.toLowerCase().replace(/\s+/g, '-')}`}
         className="px-2 py-1.5 mx-0.5 rounded-full text-text-secondary hover:bg-background-accent transition-all duration-300 font-medium text-xs whitespace-nowrap flex items-center gap-1"
       >
-        <span className="truncate max-w-20">{title}</span>
+        <span className="whitespace-nowrap">{title}</span>
         <svg 
           className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
           fill="none" 
