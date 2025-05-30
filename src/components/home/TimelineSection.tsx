@@ -52,11 +52,44 @@ const medicineAppSteps = [
 const TimelineSection: React.FC = () => {
   const [scrollY, setScrollY] = React.useState(0);
   const [activeStep, setActiveStep] = React.useState(0);
+  const [visibleSteps, setVisibleSteps] = React.useState<boolean[]>(new Array(medicineAppSteps.length).fill(false));
+  const stepRefs = React.useRef<(HTMLDivElement | null)[]>([]);
 
   React.useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+      
+      // Check which steps are in view
+      const newVisibleSteps = stepRefs.current.map((ref, index) => {
+        if (!ref) return false;
+        const rect = ref.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        // Consider a step "active" if it's in the upper half of the viewport
+        return rect.top <= windowHeight * 0.6 && rect.bottom >= 0;
+      });
+      
+      setVisibleSteps(newVisibleSteps);
+      
+      // Update active step to the highest visible step
+      const lastVisibleIndex = newVisibleSteps.lastIndexOf(true);
+      if (lastVisibleIndex >= 0) {
+        setActiveStep(lastVisibleIndex);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToStep = React.useCallback((stepIndex: number) => {
+    const stepRef = stepRefs.current[stepIndex];
+    if (stepRef) {
+      stepRef.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center'
+      });
+    }
   }, []);
 
   const updateActiveStep = React.useCallback((stepIndex: number) => {
@@ -98,6 +131,8 @@ const TimelineSection: React.FC = () => {
           return (
             <motion.div
               key={step.id}
+              id={step.id}
+              ref={(el) => { stepRefs.current[idx] = el; }}
               className={`relative flex items-start ${
                 isEven ? 'md:flex-row' : 'md:flex-row-reverse'
               }`}
@@ -269,51 +304,150 @@ const TimelineSection: React.FC = () => {
       </div>
 
       {/* Progress Tracker */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-30 hidden lg:flex flex-col items-center space-y-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
-        {medicineAppSteps.map((step, idx) => (
-          <motion.div
-            key={idx}
-            className="relative group cursor-pointer"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.2 }}
-            onViewportEnter={() => updateActiveStep(idx)}
-          >
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-30 hidden lg:flex flex-col items-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
+        {medicineAppSteps.map((step, idx) => {
+          // A step is completed if it's been visited (activeStep >= idx)
+          const isCompleted = activeStep >= idx;
+          // A step is currently active if it's the current step being viewed
+          const isCurrent = activeStep === idx;
+          // Check if this is the final step
+          const isFinalStep = idx === medicineAppSteps.length - 1;
+          
+          return (
             <motion.div
-              className="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-transparent relative overflow-hidden"
-              transition={{ duration: 0.5 }}
+              key={idx}
+              className="relative group cursor-pointer flex flex-col items-center"
+              whileHover={{ scale: 1.1 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => scrollToStep(idx)}
             >
-              {/* Fill circle */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-sky-500 to-purple-600 rounded-full"
-                initial={{ scale: 0 }}
-                whileInView={{ 
-                  scale: 1,
+                className={`${isFinalStep ? 'w-5 h-5' : 'w-4 h-4'} rounded-full border-2 relative overflow-hidden ${
+                  isCompleted 
+                    ? isFinalStep 
+                      ? 'border-emerald-500 dark:border-emerald-400' 
+                      : 'border-sky-500 dark:border-sky-400'
+                    : 'border-slate-300 dark:border-slate-600'
+                } ${
+                  isCurrent 
+                    ? isFinalStep
+                      ? 'shadow-lg shadow-emerald-500/50 scale-110'
+                      : 'shadow-lg shadow-sky-500/50 scale-110'
+                    : ''
+                }`}
+                animate={{ 
+                  scale: isCurrent ? 1.1 : 1,
                 }}
-                viewport={{ once: false, amount: 0.5 }}
-                transition={{ duration: 0.2, delay: idx * 0.05 }}
-              />
-            </motion.div>
-            
-            {/* Step label on hover */}
-            <div className="absolute right-6 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-              <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs px-3 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                {step.title.split(' - ')[0] || step.title.split(':')[0]}
+                transition={{ duration: 0.3 }}
+              >
+                {/* Fill circle */}
+                <motion.div
+                  className={`absolute inset-0 rounded-full ${
+                    isFinalStep 
+                      ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500'
+                      : 'bg-gradient-to-r from-sky-500 to-purple-600'
+                  }`}
+                  initial={{ scale: 0 }}
+                  animate={{ 
+                    scale: isCompleted ? 1 : 0,
+                  }}
+                  transition={{ 
+                    duration: 0.4, 
+                    ease: "easeInOut",
+                    delay: isCompleted ? idx * 0.1 : 0
+                  }}
+                />
+                
+                {/* Special crown icon for final step when completed */}
+                {isCompleted && isFinalStep && (
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3, type: 'spring', stiffness: 150 }}
+                  >
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  </motion.div>
+                )}
+                
+                {/* Checkmark for completed steps (except final step) */}
+                {isCompleted && !isCurrent && !isFinalStep && (
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.2 }}
+                  >
+                    <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </motion.div>
+                )}
+                
+                {/* Pulse effect for current step */}
+                {isCurrent && (
+                  <motion.div
+                    className={`absolute inset-0 rounded-full ${
+                      isFinalStep ? 'bg-emerald-500/30' : 'bg-sky-500/30'
+                    }`}
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                )}
+                
+                {/* Golden glow effect for final step when completed */}
+                {isCompleted && isFinalStep && (
+                  <motion.div
+                    className="absolute -inset-1 rounded-full bg-gradient-to-r from-yellow-400 via-emerald-400 to-green-400 opacity-30 blur-sm"
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0.5, 0.3]
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                  />
+                )}
+              </motion.div>
+              
+              {/* Step label on hover */}
+              <div className="absolute right-6 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                <div className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs px-3 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                  {step.title.split(' - ')[0] || step.title.split(':')[0]}
+                </div>
               </div>
-            </div>
-            
-            {/* Connecting line */}
-            {idx < medicineAppSteps.length - 1 && (
-              <motion.div
-                className="absolute top-6 left-1/2 w-0.5 h-6 bg-slate-300 dark:bg-slate-600 transform -translate-x-1/2"
-                initial={{ scaleY: 0 }}
-                whileInView={{ scaleY: 1 }}
-                viewport={{ once: false, amount: 0.5 }}
-                transition={{ duration: 0.2, delay: idx * 0.05 + 0.1 }}
-                style={{ transformOrigin: 'top' }}
-              />
-            )}
-          </motion.div>
-        ))}
+              
+              {/* Connecting line */}
+              {idx < medicineAppSteps.length - 1 && (
+                <motion.div
+                  className="w-0.5 h-6 mt-2 relative"
+                >
+                  {/* Background line */}
+                  <div className="absolute inset-0 bg-slate-300 dark:bg-slate-600 rounded-full" />
+                  
+                  {/* Progress line */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-b from-sky-500 to-purple-600 rounded-full"
+                    initial={{ scaleY: 0 }}
+                    animate={{ 
+                      scaleY: isCompleted ? 1 : 0,
+                    }}
+                    transition={{ 
+                      duration: 0.4, 
+                      ease: "easeInOut",
+                      delay: isCompleted ? idx * 0.1 + 0.2 : 0
+                    }}
+                    style={{ transformOrigin: 'top' }}
+                  />
+                </motion.div>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
 export default function InterviewsPage() {
   const services = [
@@ -7,7 +8,7 @@ export default function InterviewsPage() {
       title: "Mock Panel Interviews",
       description: "Master traditional medical school interviews with our experienced panel of medical professionals.",
       features: ["Mock interview sessions", "Personalized feedback", "Question bank practice", "Confidence building"],
-      icon: "👥",
+      icon: UserGroupIcon,
       color: "bg-blue-50 border-blue-200",
       buttonColor: "bg-blue-600 hover:bg-blue-700"
     },
@@ -15,7 +16,7 @@ export default function InterviewsPage() {
       title: "Mock MMIs (Multiple Mini Interviews)",
       description: "Excel in MMI stations with targeted practice and expert guidance from our tutors.",
       features: ["Station-based practice", "Ethical scenarios", "Communication skills", "Time management"],
-      icon: "🎯",
+      icon: ReceiptPercentIcon,
       color: "bg-green-50 border-green-200",
       buttonColor: "bg-green-600 hover:bg-green-700"
     },
@@ -23,7 +24,7 @@ export default function InterviewsPage() {
       title: "Interview Tutoring",
       description: "One-on-one personalized coaching to help you shine in any interview format.",
       features: ["Individual coaching", "Tailored preparation", "Personal statement alignment", "Body language tips"],
-      icon: "🎓",
+      icon: AcademicCapIcon,
       color: "bg-purple-50 border-purple-200",
       buttonColor: "bg-purple-600 hover:bg-purple-700"
     },
@@ -31,7 +32,7 @@ export default function InterviewsPage() {
       title: "Interview Conferences",
       description: "Join our intensive group sessions and learn alongside fellow medical school applicants.",
       features: ["Group workshops", "Peer learning", "Expert seminars", "Networking opportunities"],
-      icon: "📚",
+      icon: ReceiptPercentIcon,
       color: "bg-orange-50 border-orange-200",
       buttonColor: "bg-orange-600 hover:bg-orange-700"
     }
@@ -129,7 +130,8 @@ export default function InterviewsPage() {
             {services.map((service, index) => (
               <div key={index} className={`p-8 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300`}>
                 <div className="flex items-start gap-4 mb-6">
-                  <span className="text-4xl">{service.icon}</span>
+                  {/* <span className="text-4xl">{service.icon}</span> */}
+                  <service.icon className="w-10 h-10 text-current" />
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">{service.title}</h3>
                     <p className="text-gray-600">{service.description}</p>

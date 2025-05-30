@@ -81,9 +81,9 @@ export default function RootLayout({
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto px-4 pb-8 mt-16">{children}</main>
+        <main className="mt-16">{children}</main>
 
-        <footer className="bg-gray-50 border-t border-gray-100 py-10 px-6 w-full"> {/* Consider using background-primary and border-primary here as well */}
+        <footer className="w-full bg-gray-50 border-t border-gray-100 py-10 px-4"> {/* Consider using background-primary and border-primary here as well */}
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
               <div className="flex items-center mb-6 md:mb-0">
