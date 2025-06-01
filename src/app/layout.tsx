@@ -30,6 +30,13 @@ const megaMenuItems: Record<string, string[]> = {
 export const metadata: Metadata = {
   title: "NextGenMedPrep",
   description: "High-impact tutoring and guidance for medicine & dentistry applicants.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/NGMP logo.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: { url: "/NGMP logo.png", sizes: "180x180", type: "image/png" },
+  },
 };
 
 export default function RootLayout({

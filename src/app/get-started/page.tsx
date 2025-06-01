@@ -102,17 +102,17 @@ export default function GetStartedPage() {
 
   const nextSteps = [
     {
-      step: "1",
+    step: "1", 
+    title: "Complete Career Assessment",
+    description: "Take our comprehensive assessment to understand your strengths and interests",
+    action: "Start Assessment",
+    color: "bg-blue-600"
+    },
+    {
+      step: "2",
       title: "Book Your Free Consultation",
       description: "Schedule a 30-minute career guidance call with our expert advisors",
       action: "Book Now",
-      color: "bg-blue-600"
-    },
-    {
-      step: "2", 
-      title: "Complete Career Assessment",
-      description: "Take our comprehensive assessment to understand your strengths and interests",
-      action: "Start Assessment",
       color: "bg-green-600"
     },
     {
