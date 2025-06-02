@@ -10,8 +10,19 @@
 !.yarn/releases
 !.yarn/versions
 
+# monorepo specific
+apps/*/node_modules
+packages/*/node_modules
+apps/*/dist
+packages/*/dist
+apps/*/build
+packages/*/build
+apps/frontend/.next/
+
 # testing
 /coverage
+apps/*/coverage
+packages/*/coverage
 
 # next.js
 /.next/

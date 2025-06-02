@@ -20,7 +20,7 @@ const socialLinks: Record<string, string> = {
 
 const megaMenuItems: Record<string, string[]> = {
   "About": ["Our Story", "Meet the Tutors", "Join the Team"],
-  "Get Started": ["Book a Free Consultation", "Contact Us"],
+  "Get Started": ["Ultimate Medicine Application Guide", "Ultimate Dentistry Application Guide"],
   "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
   "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
   "Interviews": ["Panel Interviews", "MMIs", "Interview Tutoring", "Interview Conferences"],

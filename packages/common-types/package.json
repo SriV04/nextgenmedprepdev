@@ -1,0 +1,24 @@
+{
+  "name": "@nextgenmedprep/common-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for NextGen MedPrep monorepo",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "nextgen",
+    "medprep",
+    "types",
+    "typescript",
+    "shared"
+  ],
+  "author": "NextGen MedPrep",
+  "license": "MIT"
+}
