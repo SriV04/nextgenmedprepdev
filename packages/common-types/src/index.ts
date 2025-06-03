@@ -14,7 +14,7 @@ export interface User {
 export interface Subscription {
   email: string;
   user_id?: string;
-  subscription_tier: 'free' | 'newsletter_only' | 'premium_basic' | 'premium_plus';
+  subscription_tier: 'free' | 'medical_free' | 'dentist_free';
   opt_in_newsletter: boolean;
   stripe_subscription_id?: string;
   stripe_subscription_status?: 'active' | 'canceled' | 'past_due' | 'trialing' | 'incomplete' | 'incomplete_expired' | 'unpaid';
@@ -26,14 +26,33 @@ export interface Subscription {
   updated_at: string;
 }
 
+export interface Resource {
+  id: string;
+  name: string;
+  description?: string;
+  file_path: string;
+  allowed_tiers: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResourceDownload {
+  id: string;
+  email: string;
+  resource_id: string;
+  download_source?: string;
+  downloaded_at: string;
+}
+
 export interface CreateSubscriptionRequest {
   email: string;
-  subscription_tier?: 'free' | 'newsletter_only' | 'premium_basic' | 'premium_plus';
+  subscription_tier?: 'free' | 'medical_free' | 'dentist_free';
   opt_in_newsletter?: boolean;
 }
 
 export interface UpdateSubscriptionRequest {
-  subscription_tier?: 'free' | 'newsletter_only' | 'premium_basic' | 'premium_plus';
+  subscription_tier?: 'free' | 'medical_free' | 'dentist_free';
   opt_in_newsletter?: boolean;
 }
 

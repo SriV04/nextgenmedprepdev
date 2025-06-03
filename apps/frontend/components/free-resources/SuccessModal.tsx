@@ -5,6 +5,7 @@ interface SuccessModalProps {
   onClose: () => void;
   downloadUrl: string;
   guideName: string;
+  isExistingSubscription?: boolean;
 }
 
 const SuccessModal: React.FC<SuccessModalProps> = ({
@@ -12,6 +13,7 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   onClose,
   downloadUrl,
   guideName,
+  isExistingSubscription = false,
 }) => {
   if (!isOpen) return null;
 
@@ -55,11 +57,15 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
             </div>
 
             <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              Success! 🎉
+              {isExistingSubscription ? 'Your Guide is Ready! 📄' : 'Welcome to the NextGenMedPrep Family! 🎉'}
             </h3>
             
-            <p className="text-lg text-gray-600 mb-6">
-              Thank you for subscribing! Your free {guideName} is ready for download.
+            <p className="text-lg text-gray-600 mb-2">
+              {isExistingSubscription ? 'Great to see you again!' : 'Thank you for subscribing!'} 
+            </p>
+            
+            <p className="text-base text-gray-500 mb-6">
+              Your free {guideName} is ready for download.
             </p>
 
             <div className="space-y-4">
@@ -81,11 +87,19 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
               </button>
             </div>
 
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>What's next?</strong> Check your email for a confirmation message and keep an eye out for more helpful tips and resources for your medical school journey!
-              </p>
-            </div>
+            {!isExistingSubscription && (
+              <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <strong className="text-blue-800">Welcome to the team!</strong>
+                </div>
+                <p className="text-sm text-blue-700">
+                  You're now part of our exclusive community! Check your email for a confirmation message and keep an eye out for more helpful tips, resources, and insider strategies for your medical school journey.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

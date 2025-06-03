@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 
 interface EmailGateFormProps {
-  onSubmit: (email: string, firstName: string, lastName: string) => Promise<void>;
-  isLoading?: boolean;
+  onSuccess: (downloadUrl: string, isExistingSubscription: boolean) => void;
+  resourceId: string;
   guideName: string;
+  source?: string;
 }
 
 const EmailGateForm: React.FC<EmailGateFormProps> = ({
-  onSubmit,
-  isLoading = false,
+  onSuccess,
+  resourceId,
   guideName,
+  source = 'resource_download',
 }) => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -17,6 +19,9 @@ const EmailGateForm: React.FC<EmailGateFormProps> = ({
     email: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const API_VERSION = 'v1';
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -46,10 +51,53 @@ const EmailGateForm: React.FC<EmailGateFormProps> = ({
       return;
     }
 
+    setIsLoading(true);
+    
     try {
-      await onSubmit(formData.email, formData.firstName, formData.lastName);
+      // Step 1: Create subscription with free tier
+      const subscriptionResponse = await fetch(`http://localhost:5001/api/${API_VERSION}/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          subscriptionTier: 'free',
+          source: source,
+        }),
+      });
+
+      // Check if user already exists (409 Conflict) or if subscription was created successfully
+      const isExisting = subscriptionResponse.status === 409;
+
+      if (!subscriptionResponse.ok && subscriptionResponse.status !== 409) {  
+        throw new Error('Failed to create subscription');
+      }
+
+      // Step 2: Get the resource download URL
+      const resourceResponse = await fetch(`http://localhost:5001/api/${API_VERSION}/resources/${formData.email}/${resourceId}/download`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!resourceResponse.ok) {
+        throw new Error('Failed to get resource - status code: ' + resourceResponse.status);
+      }
+
+      const resourceData = await resourceResponse.json();
+
+      // Call the success callback with the download URL and subscription status
+      onSuccess(resourceData.downloadUrl, isExisting);
+
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error('Error processing request:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 

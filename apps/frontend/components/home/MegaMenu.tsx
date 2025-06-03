@@ -41,7 +41,7 @@ const MegaMenu = ({ title, items }: MegaMenuProps) => {
             {items.map((item) => (
               <a
                 key={item}
-                href={`/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                href={`/${title.toLowerCase().replace(/\s+/g, '-')}/${item.toLowerCase().replace(/\s+/g, '-')}`}
                 className="block px-2 py-1.5 text-text-secondary hover:text-text-primary hover:bg-background-accent rounded-md transition-all duration-200 text-xs"
               >
                 {item}

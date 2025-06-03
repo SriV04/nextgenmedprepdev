@@ -8,6 +8,8 @@ export class SubscriptionController {
   async createSubscription(req: Request, res: Response): Promise<void> {
     const { email, subscription_tier, opt_in_newsletter }: CreateSubscriptionRequest = req.body;
 
+    console.log("Subscription Controller: Creating subscription for email:", email);
+
     // Check if subscription already exists
     const existingSubscription = await supabaseService.getSubscriptionByEmail(email);
     if (existingSubscription) {
@@ -23,6 +25,13 @@ export class SubscriptionController {
       opt_in_newsletter: opt_in_newsletter !== undefined ? opt_in_newsletter : true,
       user_id: existingUser?.id,
     };
+
+    console.log("Subscription Controller: Creating subscription", {
+      email,
+      subscription_tier: subscriptionData.subscription_tier,
+      opt_in_newsletter: subscriptionData.opt_in_newsletter,
+      user_id: subscriptionData.user_id,
+    });
 
     const subscription = await supabaseService.createSubscription(subscriptionData);
 
@@ -53,6 +62,11 @@ export class SubscriptionController {
     if (!subscription) {
       throw new AppError('Subscription not found', 404);
     }
+
+    console.log("Subscription Controller: Fetched subscription", {  
+      email,
+      subscription_tier: subscription.subscription_tier,
+    });
 
     const response: ApiResponse<Subscription> = {
       success: true,
@@ -218,10 +232,9 @@ export class SubscriptionController {
 
     // Define access levels
     const accessLevels = {
-      free: ['basic_resources'],
-      newsletter_only: ['basic_resources', 'newsletters'],
-      premium_basic: ['basic_resources', 'newsletters', 'premium_content', 'mock_interviews'],
-      premium_plus: ['basic_resources', 'newsletters', 'premium_content', 'mock_interviews', 'tutoring', 'unlimited_tests'],
+      free: ['basic_resources', 'medical_resources', 'dentist_resources'],
+      medical_free: ['basic_resources', 'medical_resources'],
+      dentist_free: ['basic_resources', 'dentist_resources'],
     };
 
     const userAccess = accessLevels[subscription.subscription_tier as keyof typeof accessLevels] || [];

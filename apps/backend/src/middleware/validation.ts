@@ -29,6 +29,32 @@ export const subscriptionFiltersSchema = z.object({
   stripe_subscription_status: z.enum(['active', 'canceled', 'past_due', 'trialing', 'incomplete', 'incomplete_expired', 'unpaid']).optional(),
 });
 
+// Resource validation schemas
+export const resourceIdSchema = z.object({
+  resourceId: z.string().min(1, 'Resource ID is required'),
+});
+
+export const resourceDownloadParamsSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  resourceId: z.string().min(1, 'Resource ID is required'),
+});
+
+export const createResourceSchema = z.object({
+  id: z.string().min(1, 'Resource ID is required'),
+  name: z.string().min(1, 'Resource name is required'),
+  description: z.string().optional(),
+  file_path: z.string().min(1, 'File path is required'),
+  allowed_tiers: z.array(z.enum(['free', 'newsletter_only', 'premium_basic', 'premium_plus'])).min(1, 'At least one tier must be allowed'),
+});
+
+export const updateResourceSchema = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  file_path: z.string().min(1).optional(),
+  allowed_tiers: z.array(z.enum(['free', 'newsletter_only', 'premium_basic', 'premium_plus'])).min(1).optional(),
+  is_active: z.boolean().optional(),
+});
+
 // Validation middleware factory
 export const validate = (schema: z.ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {

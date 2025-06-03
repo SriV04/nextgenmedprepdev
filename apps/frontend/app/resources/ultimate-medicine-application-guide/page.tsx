@@ -4,48 +4,22 @@ import React, { useState, useRef } from 'react';
 import FreeResourceHero from '@/components/free-resources/FreeResourceHero';
 import EmailGateForm from '@/components/free-resources/EmailGateForm';
 import WhyGetThisGuide from '@/components/free-resources/WhyGetThisGuide';
-import TestimonialsSection from '@/components/TestimonialsSection';
 import SuccessModal from '@/components/free-resources/SuccessModal';
 
 export default function UltimateGuideApplicationMedicinePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState<string>('');
+  const [isExistingSubscription, setIsExistingSubscription] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   const scrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleEmailSubmit = async (email: string, firstName: string, lastName: string) => {
-    setIsLoading(true);
-    
-    try {
-      // Simulate API call to backend
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          firstName,
-          lastName,
-          subscriptionTier: 'free_guide',
-          source: 'ugam_download',
-        }),
-      });
-
-      if (response.ok) {
-        setIsModalOpen(true);
-      } else {
-        throw new Error('Subscription failed');
-      }
-    } catch (error) {
-      console.error('Error subscribing:', error);
-      alert('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleFormSuccess = (downloadUrl: string, isExistingSubscription: boolean) => {
+    setDownloadUrl(downloadUrl);
+    setIsExistingSubscription(isExistingSubscription);
+    setIsModalOpen(true);
   };
 
   const benefits = [
@@ -238,9 +212,10 @@ export default function UltimateGuideApplicationMedicinePage() {
       {/* Email Gate Form */}
       <div ref={formRef}>
         <EmailGateForm
-          onSubmit={handleEmailSubmit}
-          isLoading={isLoading}
+          onSuccess={handleFormSuccess}
+          resourceId="ultimate-medicine-guide"
           guideName="Ultimate Guide on Applying to Medicine"
+          source="ugam_download"
         />
       </div>
 
@@ -270,8 +245,9 @@ export default function UltimateGuideApplicationMedicinePage() {
       <SuccessModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        downloadUrl="/guides/UGAM.png" // This would be the actual PDF in production
+        downloadUrl={downloadUrl}
         guideName="Ultimate Guide on Applying to Medicine"
+        isExistingSubscription={isExistingSubscription}
       />
     </div>
   );

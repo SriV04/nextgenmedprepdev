@@ -180,9 +180,8 @@ export class EmailController {
       newsletter_subscribers: subscriptions.filter(sub => sub.opt_in_newsletter && !sub.unsubscribed_at).length,
       by_tier: {
         free: subscriptions.filter(sub => sub.subscription_tier === 'free' && !sub.unsubscribed_at).length,
-        newsletter_only: subscriptions.filter(sub => sub.subscription_tier === 'newsletter_only' && !sub.unsubscribed_at).length,
-        premium_basic: subscriptions.filter(sub => sub.subscription_tier === 'premium_basic' && !sub.unsubscribed_at).length,
-        premium_plus: subscriptions.filter(sub => sub.subscription_tier === 'premium_plus' && !sub.unsubscribed_at).length,
+        medical_free: subscriptions.filter(sub => sub.subscription_tier === 'medical_free' && !sub.unsubscribed_at).length,
+        dentist_free: subscriptions.filter(sub => sub.subscription_tier === 'dentist_free' && !sub.unsubscribed_at).length,
       },
       unsubscribed: subscriptions.filter(sub => sub.unsubscribed_at).length,
     };

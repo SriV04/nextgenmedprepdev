@@ -177,6 +177,133 @@ class SupabaseService {
     return data;
   }
 
+  // Resource methods
+  async getResourceSignedUrl(filePath: string): Promise<string> {
+    console.log("SupabaseService: Generating signed URL for file path:", filePath);
+    
+    const { data, error } = await this.supabase.storage
+      .from('free-resources')
+      .createSignedUrl(filePath, 3600); // 1 hour expiry
+    
+      console.log("SupabaseService: Signed URL generation result:", { data, error });
+
+    if (error) {
+      throw new Error(`Failed to generate signed URL: ${error.message}`);
+    }
+
+    return data.signedUrl;
+  }
+
+  async getResourceById(resourceId: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('resources')
+      .select('*')
+      .eq('id', resourceId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to get resource: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async getResourcesForTier(subscriptionTier: string): Promise<any[]> {
+    const { data, error } = await this.supabase
+      .from('resources')
+      .select('*')
+      .contains('allowed_tiers', [subscriptionTier])
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get resources: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async getAllResources(): Promise<any[]> {
+    const { data, error } = await this.supabase
+      .from('resources')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get all resources: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async createResource(resource: {
+    id: string;
+    name: string;
+    description: string;
+    file_path: string;
+    allowed_tiers: string[];
+  }): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('resources')
+      .insert({
+        ...resource,
+        is_active: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create resource: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async updateResource(resourceId: string, updates: any): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('resources')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', resourceId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update resource: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async deleteResource(resourceId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('resources')
+      .delete()
+      .eq('id', resourceId);
+
+    if (error) {
+      throw new Error(`Failed to delete resource: ${error.message}`);
+    }
+  }
+
+  async logResourceDownload(email: string, resourceId: string, source?: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('resource_downloads')
+      .insert({
+        email,
+        resource_id: resourceId,
+        download_source: source || 'unknown',
+        downloaded_at: new Date().toISOString(),
+      });
+
+    if (error) {
+      console.error('Failed to log resource download:', error);
+      // Don't throw error - logging is optional
+    }
+  }
+
   // Get client for direct queries if needed
   getClient(): SupabaseClient {
     return this.supabase;
