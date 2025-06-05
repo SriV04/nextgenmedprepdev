@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon, BookOpenIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import CalendlyPopup from '../../components/CalendlyPopup';
 
 export default function InterviewsPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -121,9 +122,20 @@ export default function InterviewsPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <Link href="/get-started" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300">
+            <CalendlyPopup 
+              url="https://calendly.com/sri-nextgenmedprep/30min" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+              prefill={{
+                  name: "Potential Student"
+              }}
+              utm={{
+                utmCampaign: 'interviews-page',
+                utmSource: 'website',
+                utmMedium: 'hero-button'
+              }}
+            >
               Book Free Consultation
-            </Link>
+            </CalendlyPopup>
             <Link href="#services" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               View Services
             </Link>
@@ -363,12 +375,20 @@ export default function InterviewsPage() {
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
                 Get personalized interview coaching, mock sessions, and expert feedback to maximize your success rate.
               </p>
-              <Link 
-                href="/get-started"
+              <CalendlyPopup 
+                url="https://calendly.com/sri-nextgenmedprep/30min"
                 className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                prefill={{
+                  name: "Potential Student"
+                }}
+                utm={{
+                  utmCampaign: 'interviews-page-cta',
+                  utmSource: 'website',
+                  utmMedium: 'cta-section'
+                }}
               >
                 Book Free Consultation
-              </Link>
+            </CalendlyPopup>
             </div>
           </div>
         </div>

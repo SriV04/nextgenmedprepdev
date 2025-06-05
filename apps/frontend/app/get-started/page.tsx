@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import CalendlyPopup from '../../components/CalendlyPopup';
 import { 
   MapIcon, 
   PhoneIcon, 
@@ -141,9 +142,20 @@ export default function GetStartedPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <Link href="#consultation" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300">
+            <CalendlyPopup 
+              url="https://calendly.com/sri-nextgenmedprep/get-started-free-consultation" 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+              prefill={{
+                name: "Prospective Student"
+              }}
+              utm={{
+                utmCampaign: 'get-started-free-consultation',
+                utmSource: 'website',
+                utmMedium: 'hero-button'
+              }}
+            >
               Book Free Consultation
-            </Link>
+            </CalendlyPopup>
             <Link href="#comparison" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Compare Careers
             </Link>
@@ -272,9 +284,26 @@ export default function GetStartedPage() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
                 <p className="text-gray-600 mb-6">{step.description}</p>
-                <button className={`${step.color} text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all duration-300`}>
-                  {step.action}
-                </button>
+                {step.step === "2" ? (
+                  <CalendlyPopup
+                    url="https://calendly.com/sri-nextgenmedprep/get-started-free-consultation"
+                    className={`${step.color} text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all duration-300`}
+                    prefill={{
+                      name: "Career Guidance Seeker"
+                    }}
+                    utm={{
+                      utmCampaign: 'get-started-free-consultation',
+                      utmSource: 'website',
+                      utmMedium: 'next-steps-section'
+                    }}
+                  >
+                    {step.action}
+                  </CalendlyPopup>
+                ) : (
+                  <button className={`${step.color} text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all duration-300`}>
+                    {step.action}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -322,10 +351,21 @@ export default function GetStartedPage() {
             Join our network of successful students and get the guidance you need to make the right career choice
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2">
+            <CalendlyPopup 
+              url="https://calendly.com/sri-nextgenmedprep/get-started-free-consultation"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2"
+              prefill={{
+                name: "Potential Student"
+              }}
+              utm={{
+                utmCampaign: 'get-started-free-consultation',
+                utmSource: 'website',
+                utmMedium: 'cta-section'
+              }}
+            >
               <PhoneIcon className="w-5 h-5" />
               Book Free Consultation
-            </Link>
+            </CalendlyPopup>
             <Link href="/about-us" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
               Learn About Our Team
             </Link>
