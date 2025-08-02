@@ -17,7 +17,7 @@ export default function HomePage() {
 
       {/* Timeline Section - Its children (the steps) will be snap points */}
       {/* The TimelineSection component itself doesn't need snap-start, its rendered steps will have it. */}
-      <div className="px-4 sm:px-8 md:py-16"> 
+      <div id="timeline-section" className="px-4 sm:px-8 md:py-16"> 
         <TimelineSection />
       </div>
       
