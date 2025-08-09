@@ -53,6 +53,7 @@ const TimelineSection: React.FC = () => {
   const [scrollY, setScrollY] = React.useState(0);
   const [activeStep, setActiveStep] = React.useState(0);
   const [visibleSteps, setVisibleSteps] = React.useState<boolean[]>(new Array(medicineAppSteps.length).fill(false));
+  const [renderedSteps, setRenderedSteps] = React.useState<boolean[]>(new Array(medicineAppSteps.length).fill(false));
   const stepRefs = React.useRef<(HTMLDivElement | null)[]>([]);
 
   React.useEffect(() => {
@@ -61,26 +62,40 @@ const TimelineSection: React.FC = () => {
       
       // Check which steps are in view
       const newVisibleSteps = stepRefs.current.map((ref, index) => {
-        if (!ref) return false;
+        if (!ref) return false; // Reset to false if ref is not available
         const rect = ref.getBoundingClientRect();
         const windowHeight = window.innerHeight;
         // Consider a step "active" if it's in the upper half of the viewport
-        return rect.top <= windowHeight * 0.6 && rect.bottom >= 0;
+        const isInView = rect.top <= windowHeight * 0.6 && rect.bottom >= 0;
+        return isInView;
       });
       
-      setVisibleSteps(newVisibleSteps);
+      // Update visible steps
+      setVisibleSteps(prevVisible => {
+        const hasChanged = prevVisible.some((prev, index) => prev !== newVisibleSteps[index]);
+        return hasChanged ? newVisibleSteps : prevVisible;
+      });
+      
+      // Update rendered steps - once a step is visible, mark it as rendered permanently
+      setRenderedSteps(prevRendered => {
+        const updatedRendered = prevRendered.map((wasRendered, index) => 
+          wasRendered || newVisibleSteps[index]
+        );
+        const hasChanged = prevRendered.some((prev, index) => prev !== updatedRendered[index]);
+        return hasChanged ? updatedRendered : prevRendered;
+      });
       
       // Update active step to the highest visible step
       const lastVisibleIndex = newVisibleSteps.lastIndexOf(true);
       if (lastVisibleIndex >= 0) {
-        setActiveStep(lastVisibleIndex);
+        setActiveStep(prevActive => Math.max(lastVisibleIndex, prevActive)); // Never go backwards
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, []); // Remove dependencies to prevent infinite loop
 
   const scrollToStep = React.useCallback((stepIndex: number) => {
     const stepRef = stepRefs.current[stepIndex];
@@ -93,8 +108,8 @@ const TimelineSection: React.FC = () => {
   }, []);
 
   const updateActiveStep = React.useCallback((stepIndex: number) => {
-    setActiveStep(Math.max(stepIndex, activeStep));
-  }, [activeStep]);
+    setActiveStep(prevActive => Math.max(stepIndex, prevActive));
+  }, []);
 
   return (
     <div className="relative max-w-4xl mx-auto px-4 py-16">
@@ -138,7 +153,7 @@ const TimelineSection: React.FC = () => {
               }`}
               initial={{ opacity: 0, x: isEven ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: false, amount: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
               transition={{ 
                 duration: 0.4, 
                 delay: idx * 0.1,
@@ -154,7 +169,7 @@ const TimelineSection: React.FC = () => {
                   className="relative"
                   initial={{ scale: 0, rotate: -180 }}
                   whileInView={{ scale: 1, rotate: 0 }}
-                  viewport={{ once: false, amount: 0.5 }}
+                  viewport={{ once: true, amount: 0.5 }}
                   transition={{ 
                     duration: 0.4, 
                     delay: idx * 0.1,
@@ -186,7 +201,7 @@ const TimelineSection: React.FC = () => {
                           strokeLinecap="round"
                           initial={{ pathLength: 0 }}
                           whileInView={{ pathLength: (idx + 1) / medicineAppSteps.length }}
-                          viewport={{ once: false, amount: 0.5 }}
+                          viewport={{ once: true, amount: 0.5 }}
                           transition={{ duration: 0.8, delay: idx * 0.15 }}
                         />
                         <defs>
@@ -202,7 +217,7 @@ const TimelineSection: React.FC = () => {
                         className="w-12 h-12 rounded-full bg-gradient-to-r from-sky-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg relative z-10"
                         initial={{ scale: 0 }}
                         whileInView={{ scale: 1 }}
-                        viewport={{ once: false, amount: 0.5 }}
+                        viewport={{ once: true, amount: 0.5 }}
                         transition={{ duration: 0.3, delay: idx * 0.1 + 0.2 }}
                       >
                         {idx + 1}
@@ -217,7 +232,7 @@ const TimelineSection: React.FC = () => {
                 className={`flex-1 ml-20 md:ml-0 ${isEven ? 'md:ml-0' : 'md:mr-0'}`}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.2 }}
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.3, delay: idx * 0.1 + 0.1 }}
               >
                 <div className={`relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-6 md:p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 group max-w-lg ${
@@ -236,7 +251,7 @@ const TimelineSection: React.FC = () => {
                     className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-4 mt-4 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    viewport={{ once: false, amount: 0.3 }}
+                    viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.2, delay: idx * 0.1 + 0.2 }}
                   >
                     {step.title}
@@ -247,7 +262,7 @@ const TimelineSection: React.FC = () => {
                     className="text-slate-600 dark:text-slate-300 text-base leading-relaxed mb-6"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    viewport={{ once: false, amount: 0.3 }}
+                    viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.2, delay: idx * 0.1 + 0.3 }}
                   >
                     {step.information}
@@ -258,7 +273,7 @@ const TimelineSection: React.FC = () => {
                     className="mb-6"
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    viewport={{ once: false, amount: 0.3 }}
+                    viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.2, delay: idx * 0.1 + 0.4 }}
                   >
                     <a
@@ -286,7 +301,7 @@ const TimelineSection: React.FC = () => {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: false, amount: 0.1 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     transition={{ duration: 0.2, delay: idx * 0.1 + 0.5 }}
                   >
                     <TimelineMosaic milestoneIdToShow={step.id} />

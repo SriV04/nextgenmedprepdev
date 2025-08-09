@@ -23,7 +23,7 @@ const megaMenuItems: Record<string, string[]> = {
   "Get Started": ["Ultimate Medicine Application Guide", "Ultimate Dentistry Application Guide"],
   "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
   "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
-  "Interviews": ["Panel Interviews", "MMIs", "Interview Tutoring", "Interview Conferences"],
+  "Interviews": ["Panel Interviews", "MMIs", "Prometheus"],
   "Events": ["All Conferences", "Upcoming", "Past"],
 };
 
