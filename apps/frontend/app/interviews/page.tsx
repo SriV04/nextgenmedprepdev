@@ -137,7 +137,7 @@ export default function InterviewsPage() {
               Book Free Consultation
             </CalendlyPopup>
             <Link href="#services" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
-              View Services
+              View Packages
             </Link>
           </div>
         </div>
@@ -213,6 +213,152 @@ export default function InterviewsPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Interview Packages */}
+      <section id="interview-packages" className="py-16 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Interview Packages</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Choose from our tailored interview preparation packages to maximize your success
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Essentials Package */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
+              <div className="bg-blue-500 p-6 text-white">
+                <h3 className="text-2xl font-bold mb-2">Tailored Mock Interview – Essentials</h3>
+                <p className="opacity-90">Perfect for individual interview practice</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>A mock interview tailored to the university you are applying to</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Using our Prometheus Question bank which is updated daily with the current interview questions and answers</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Ensuring that your mock interview is as realistic as possible</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>All of our tutors are current medical students with at least 3+ offers</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>We will aim to match you with a tutor who has sat the interview you are sitting</span>
+                  </li>
+                </ul>
+                <div className="border-t pt-6 mt-4">
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-3xl font-bold text-gray-900">£50</span>
+                    <span className="text-sm text-gray-500">per interview</span>
+                  </div>
+                  <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300">
+                    Book Now
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Core Package */}
+            <div className="relative bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 transform scale-105 z-10">
+              {/* Ribbon */}
+              <div className="absolute -top-2 -right-12 rotate-45 z-20 pointer-events-none">
+                <span className="block w-44 py-1 text-center bg-yellow-400 text-purple-900 text-xs font-extrabold tracking-widest shadow-md">
+                  POPULAR
+                </span>
+              </div>
+
+              <div className="bg-purple-600 p-6 text-white">
+                <h3 className="text-2xl font-bold mb-2">Core Interview Preparation</h3>
+                <p className="opacity-90">Comprehensive interview training</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>3 University-specific mock interviews generated with our Prometheus Question bank</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>+3 Prometheus mocks to do in your own time (FREE)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Mock interviews tailored to the universities you are applying to</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Strategy Session – all the background knowledge for success at the interview</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Coverage of ethical scenarios, common trick questions, and general interview technique</span>
+                  </li>
+                </ul>
+                <div className="border-t pt-6 mt-4">
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-3xl font-bold text-gray-900">£180</span>
+                    <span className="text-sm text-gray-500">complete package</span>
+                  </div>
+                  <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300">
+                    Book Now
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            
+            {/* Premium Package */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
+              <div className="bg-indigo-600 p-6 text-white">
+                <h3 className="text-2xl font-bold mb-2">Premium Interview Intensive</h3>
+                <p className="opacity-90">The ultimate interview preparation</p>
+              </div>
+              <div className="p-6">
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>5 University-specific mock interviews generated with our Prometheus Question bank</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>+5 Prometheus mocks to do in your own time (FREE)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Access to 24/7 business phone for medicine related questions</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Premium booking and support</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2 mt-1">✓</span>
+                    <span>Strategy Session with coverage of ethical scenarios, common trick questions, and interview techniques</span>
+                  </li>
+                </ul>
+                <div className="border-t pt-6 mt-4">
+                  <div className="flex justify-between items-center mb-6">
+                    <span className="text-3xl font-bold text-gray-900">£275</span>
+                    <span className="text-sm text-gray-500">complete package</span>
+                  </div>
+                  <button className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300">
+                    Book Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </div>
       </section>
 
@@ -367,30 +513,6 @@ export default function InterviewsPage() {
             </div>
           </div>
           
-          {/* Call to Action */}
-          <div className="text-center mt-12">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <span className="text-4xl block mb-4">🛍️</span>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Need More Than Free Resources?</h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Get personalized interview coaching, mock sessions, and expert feedback to maximize your success rate.
-              </p>
-              <CalendlyPopup 
-                url="https://calendly.com/sri-nextgenmedprep/30min"
-                className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-                prefill={{
-                  name: "Potential Student"
-                }}
-                utm={{
-                  utmCampaign: 'interviews-page-cta',
-                  utmSource: 'website',
-                  utmMedium: 'cta-section'
-                }}
-              >
-                Book Free Consultation
-            </CalendlyPopup>
-            </div>
-          </div>
         </div>
       </section>
 
