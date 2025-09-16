@@ -1,377 +1,371 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import CalendlyPopup from '../../components/CalendlyPopup';
-import { 
-  MapIcon, 
-  PhoneIcon, 
-  UserGroupIcon, 
-  LightBulbIcon,
-  HeartIcon,
-  BeakerIcon,
-  ClipboardDocumentCheckIcon,
-  ChatBubbleLeftRightIcon,
-  AcademicCapIcon,
-  StarIcon
-} from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
-export default function GetStartedPage() {
-  const services = [
-    {
-      title: "Career Path Consultation",
-      description: "One-on-one guidance to help you discover whether medicine or dentistry aligns with your goals, interests, and strengths.",
-      features: ["Personalized assessment", "Career exploration", "Goal alignment", "Decision framework"],
-      icon: MapIcon,
-      color: "bg-blue-50 border-blue-200",
-      buttonColor: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      title: "Medicine vs Dentistry Workshop",
-      description: "Comprehensive group sessions exploring both career paths with current professionals and recent graduates.",
-      features: ["Professional panels", "Day-in-the-life insights", "Q&A sessions", "Peer discussions"],
-      icon: UserGroupIcon,
-      color: "bg-green-50 border-green-200",
-      buttonColor: "bg-green-600 hover:bg-green-700"
-    },
-    {
-      title: "Specialty Exploration Call",
-      description: "Deep dive into different medical and dental specialties to help you understand your options.",
-      features: ["Specialty overviews", "Entry requirements", "Career prospects", "Work-life balance"],
-      icon: LightBulbIcon,
-      color: "bg-purple-50 border-purple-200",
-      buttonColor: "bg-purple-600 hover:bg-purple-700"
-    },
-    {
-      title: "Mentorship Network Access",
-      description: "Connect with our network of medical and dental professionals for ongoing guidance and support.",
-      features: ["Professional mentors", "Ongoing support", "Network events", "Career updates"],
-      icon: ChatBubbleLeftRightIcon,
-      color: "bg-orange-50 border-orange-200",
-      buttonColor: "bg-orange-600 hover:bg-orange-700"
-    }
-  ];
+// Define application stages
+const applicationStages = {
+  medicine: [
+    { id: 'research', name: 'Research & Planning', 
+      description: 'Researching medical schools and planning your application strategy' },
+    { id: 'ucat', name: 'UCAT Preparation', 
+      description: 'Preparing for the University Clinical Aptitude Test' },
+    { id: 'personal-statement', name: 'Personal Statement', 
+      description: 'Drafting and refining your personal statement' },
+    { id: 'interviews', name: 'Interviews', 
+      description: 'Preparing for MMIs and Panel interviews' },
+    { id: 'post-offer', name: 'Post-Offer', 
+      description: 'After receiving offers, preparing for medical school' },
+  ],
+  dentistry: [
+    { id: 'research', name: 'Research & Planning', 
+      description: 'Researching dental schools and planning your application strategy' },
+    { id: 'ucat', name: 'UCAT Preparation', 
+      description: 'Preparing for the University Clinical Aptitude Test' },
+    { id: 'personal-statement', name: 'Personal Statement', 
+      description: 'Crafting a compelling personal statement for dentistry' },
+    { id: 'interviews', name: 'Interviews', 
+      description: 'Preparing for dental school interviews' },
+    { id: 'post-offer', name: 'Post-Offer', 
+      description: 'After receiving offers, preparing for dental school' },
+  ]
+};
 
-  const careerComparison = [
-    {
-      aspect: "Patient Interaction",
-      medicine: "Varied patient ages and conditions, often long-term relationships",
-      dentistry: "Regular patients, often preventative care, family-oriented practice",
-      icon: HeartIcon
-    },
-    {
-      aspect: "Work Environment",
-      medicine: "Hospitals, clinics, diverse settings, potential for emergency work",
-      dentistry: "Private practice, controlled environment, regular hours",
-      icon: BeakerIcon
-    },
-    {
-      aspect: "Training Duration",
-      medicine: "5-6 years degree + 2+ years foundation + 3-8 years specialty training",
-      dentistry: "5 years degree + 1 year foundation + optional specialty training",
-      icon: AcademicCapIcon
-    },
-    {
-      aspect: "Career Flexibility",
-      medicine: "Multiple specialties, research, public health, global opportunities",
-      dentistry: "General practice, specialties, teaching, practice ownership",
-      icon: ClipboardDocumentCheckIcon
-    }
-  ];
+// Define resources for each stage and course type
+const resources = {
+  medicine: {
+    research: [
+      { name: 'Ultimate Medicine Application Guide', path: '/resources/ultimate-medicine-application-guide', type: 'Guide' },
+      { name: 'Medical School Events', path: '/events', type: 'Event' },
+      { name: 'Free Consultation', path: '/free-consultation', type: 'Service' },
+    ],
+    ucat: [
+      { name: 'UCAT Preparation Services', path: '/ucat', type: 'Service' },
+      { name: 'Free UCAT Resources', path: '/ucat/free-resources', type: 'Resource' },
+    ],
+    'personal-statement': [
+      { name: 'Personal Statement Review', path: '/personal-statements', type: 'Service' },
+      { name: 'Personal Statement Workshops', path: '/events', type: 'Event' },
+    ],
+    interviews: [
+      { name: 'MMI Preparation', path: '/interviews/mmi', type: 'Service' },
+      { name: 'Panel Interview Preparation', path: '/interviews/panel', type: 'Service' },
+      { name: 'Ethics Guide', path: '/resources/ultimate-ethics-guide', type: 'Guide' },
+      { name: 'Medical Hot Topics Guide', path: '/resources/ultimate-medical-hot-topics', type: 'Guide' },
+    ],
+    'post-offer': [
+      { name: 'Medical School Preparation', path: '/events', type: 'Event' },
+      { name: 'Free Consultation', path: '/free-consultation', type: 'Service' },
+    ],
+  },
+  dentistry: {
+    research: [
+      { name: 'Dental School Application Guide', path: '/free-consultation', type: 'Service' },
+      { name: 'Dentistry Events', path: '/events', type: 'Event' },
+      { name: 'Free Consultation', path: '/free-consultation', type: 'Service' },
+    ],
+    ucat: [
+      { name: 'UCAT Preparation Services', path: '/ucat', type: 'Service' },
+      { name: 'Free UCAT Resources', path: '/ucat/free-resources', type: 'Resource' },
+    ],
+    'personal-statement': [
+      { name: 'Dentistry Personal Statement Review', path: '/personal-statements', type: 'Service' },
+      { name: 'Personal Statement Workshops', path: '/events', type: 'Event' },
+    ],
+    interviews: [
+      { name: 'Dentistry MMI Preparation', path: '/interviews/mmi', type: 'Service' },
+      { name: 'Panel Interview Preparation', path: '/interviews/panel', type: 'Service' },
+      { name: 'Ethics Guide', path: '/resources/ultimate-ethics-guide', type: 'Guide' },
+    ],
+    'post-offer': [
+      { name: 'Dental School Preparation', path: '/events', type: 'Event' },
+      { name: 'Free Consultation', path: '/free-consultation', type: 'Service' },
+    ],
+  }
+};
 
-  const testimonials = [
-    {
-      name: "Emma T.",
-      career: "Now studying Medicine at Oxford",
-      quote: "The career consultation helped me realize that medicine's variety and research opportunities matched my interests perfectly.",
-      rating: 5,
-      initialConfusion: "Was torn between medicine and dentistry"
-    },
-    {
-      name: "David R.",
-      career: "Now studying Dentistry at King's",
-      quote: "Understanding the work-life balance in dentistry made my decision clear. I wanted a stable practice with regular patients.",
-      rating: 5,
-      initialConfusion: "Unsure about career direction"
-    },
-    {
-      name: "Sophie L.",
-      career: "Medicine at Imperial",
-      quote: "The mentorship program connected me with amazing doctors who guided me through my application journey.",
-      rating: 5,
-      initialConfusion: "Needed clarity on medical specialties"
-    }
-  ];
+// Type definitions
+type CourseType = 'medicine' | 'dentistry';
+type StageId = string;
 
-  const nextSteps = [
-    {
-    step: "1", 
-    title: "Complete Career Assessment",
-    description: "Take our comprehensive assessment to understand your strengths and interests",
-    action: "Start Assessment",
-    color: "bg-blue-600"
-    },
-    {
-      step: "2",
-      title: "Book Your Free Consultation",
-      description: "Schedule a 30-minute career guidance call with our expert advisors",
-      action: "Book Now",
-      color: "bg-green-600"
-    },
-    {
-      step: "3",
-      title: "Join Our Network",
-      description: "Get connected with mentors and ongoing support throughout your journey",
-      action: "Join Network", 
-      color: "bg-purple-600"
+// Resource type icon mapping
+const resourceIcons = {
+  Guide: (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  ),
+  Event: (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  ),
+  Service: (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  ),
+  Resource: (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+  ),
+};
+
+const StageCard = ({ 
+  stage, 
+  isSelected, 
+  onClick 
+}: { 
+  stage: { id: string; name: string; description: string }; 
+  isSelected: boolean; 
+  onClick: () => void 
+}) => (
+  <div 
+    className={`p-5 rounded-xl cursor-pointer transition-all duration-300 ${
+      isSelected 
+        ? 'bg-gradient-to-br from-blue-600 to-cyan-700 text-white shadow-lg transform scale-105' 
+        : 'bg-white border border-gray-200 hover:shadow-md hover:border-blue-300'
+    }`}
+    onClick={onClick}
+  >
+    <h3 className={`text-xl font-bold mb-2 ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+      {stage.name}
+    </h3>
+    <p className={`text-sm ${isSelected ? 'text-white/90' : 'text-gray-600'}`}>
+      {stage.description}
+    </p>
+  </div>
+);
+
+const ResourceCard = ({ resource }: { resource: { name: string; path: string; type: string } }) => (
+  <Link href={resource.path} className="block">
+    <div className="p-5 rounded-xl bg-white border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all duration-300">
+      <div className="flex items-center mb-3 text-blue-600">
+        {resourceIcons[resource.type as keyof typeof resourceIcons]}
+        <span className="text-sm font-semibold">{resource.type}</span>
+      </div>
+      <h3 className="text-lg font-bold text-gray-800 mb-2">{resource.name}</h3>
+      <div className="flex items-center text-blue-600 text-sm font-semibold">
+        Learn more
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
+    </div>
+  </Link>
+);
+
+export default function GetStarted() {
+  const [selectedCourse, setSelectedCourse] = useState<CourseType | null>(null);
+  const [selectedStage, setSelectedStage] = useState<StageId | null>(null);
+
+  // Animation variants for framer-motion
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
     }
-  ];
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const handleCourseSelect = (course: CourseType) => {
+    setSelectedCourse(course);
+    setSelectedStage(null); // Reset stage selection when course changes
+  };
+
+  const handleStageSelect = (stageId: StageId) => {
+    setSelectedStage(stageId);
+  };
+
+  // Get resources for the selected course and stage
+  const getResources = () => {
+    if (!selectedCourse || !selectedStage) return [];
+    return resources[selectedCourse][selectedStage as keyof typeof resources[typeof selectedCourse]];
+  };
 
   return (
-    <div className="min-h-screen">
+    <div className="bg-[var(--color-background-primary)] min-h-screen pb-20">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="mb-8">
-            <span className="text-6xl mb-4 block">🚀</span>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Find Your Perfect
-              <span className="block text-gradient-primary">Healthcare Career Path</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Confused between medicine and dentistry? Our expert career guidance will help you make an informed decision and connect you with ongoing support throughout your journey.
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <CalendlyPopup 
-              url="https://calendly.com/sri-nextgenmedprep/get-started-free-consultation" 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-              prefill={{
-                name: "Prospective Student"
-              }}
-              utm={{
-                utmCampaign: 'get-started-free-consultation',
-                utmSource: 'website',
-                utmMedium: 'hero-button'
-              }}
-            >
-              Book Free Consultation
-            </CalendlyPopup>
-            <Link href="#comparison" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
-              Compare Careers
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Career Guidance Matters */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose the Right Career Path?</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Making the right choice early saves years of uncertainty and helps you focus your preparation efforts effectively.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
-              <StarIcon className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Avoid Wrong Turns</h3>
-              <p className="text-gray-600">Many students switch careers mid-study, losing valuable time and resources</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
-              <LightBulbIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Maximize Success</h3>
-              <p className="text-gray-600">Targeted preparation for your chosen path increases admission chances</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-purple-50 border border-purple-100">
-              <HeartIcon className="w-12 h-12 mx-auto text-purple-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Find Your Passion</h3>
-              <p className="text-gray-600">Align your career with your values, interests, and lifestyle goals</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Medicine vs Dentistry Comparison */}
-      <section id="comparison" className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Medicine vs Dentistry: Key Differences</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Understanding the core differences helps you make an informed decision
-            </p>
-          </div>
-          
-          <div className="space-y-8">
-            {careerComparison.map((item, index) => (
-              <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <div className="flex items-start gap-4 mb-4">
-                  <item.icon className="w-8 h-8 text-blue-600 flex-shrink-0 mt-1" />
-                  <h3 className="text-xl font-bold text-gray-900">{item.aspect}</h3>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6 ml-12">
-                  <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                    <h4 className="font-semibold text-blue-900 mb-2">Medicine</h4>
-                    <p className="text-gray-700">{item.medicine}</p>
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
-                    <h4 className="font-semibold text-green-900 mb-2">Dentistry</h4>
-                    <p className="text-gray-700">{item.dentistry}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="consultation" className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Career Guidance Services</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Personalized support to help you discover and pursue your ideal healthcare career
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className={`p-8 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300`}>
-                <div className="flex items-start gap-4 mb-6">
-                  <service.icon className="w-10 h-10 text-current" />
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                    <p className="text-gray-600">{service.description}</p>
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
-                  <ul className="space-y-2">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-gray-600">
-                        <span className="text-green-500">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
-                  Learn More
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Next Steps */}
-      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Get Started in 3 Simple Steps</h2>
-            <p className="text-lg text-gray-600">Your journey to the right healthcare career starts here</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {nextSteps.map((step, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-sm text-center relative">
-                <div className={`w-12 h-12 ${step.color} text-white rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4`}>
-                  {step.step}
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{step.title}</h3>
-                <p className="text-gray-600 mb-6">{step.description}</p>
-                {step.step === "2" ? (
-                  <CalendlyPopup
-                    url="https://calendly.com/sri-nextgenmedprep/get-started-free-consultation"
-                    className={`${step.color} text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all duration-300`}
-                    prefill={{
-                      name: "Career Guidance Seeker"
-                    }}
-                    utm={{
-                      utmCampaign: 'get-started-free-consultation',
-                      utmSource: 'website',
-                      utmMedium: 'next-steps-section'
-                    }}
-                  >
-                    {step.action}
-                  </CalendlyPopup>
-                ) : (
-                  <button className={`${step.color} text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all duration-300`}>
-                    {step.action}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Success Stories */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Student Success Stories</h2>
-            <p className="text-lg text-gray-600">See how our career guidance helped students find their path</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <span key={i} className="text-yellow-400">⭐</span>
-                    ))}
-                  </div>
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
-                    Success Story
-                  </span>
-                </div>
-                <p className="text-gray-600 mb-4 italic">"{testimonial.quote}"</p>
-                <div className="mb-2">
-                  <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500">{testimonial.career}</p>
-                </div>
-                <p className="text-xs text-gray-400">Initially: {testimonial.initialConfusion}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Discover Your Path?</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join our network of successful students and get the guidance you need to make the right career choice
+      <div className="bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-700 text-white py-20 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-cover" />
+        <div className="relative max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
+            Find Your Path to <span className="text-cyan-300">Success</span>
+          </h1>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto opacity-90">
+            Discover tailored resources and services to support your medical or dental school application journey
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <CalendlyPopup 
-              url="https://calendly.com/sri-nextgenmedprep/get-started-free-consultation"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300 flex items-center justify-center gap-2"
-              prefill={{
-                name: "Potential Student"
-              }}
-              utm={{
-                utmCampaign: 'get-started-free-consultation',
-                utmSource: 'website',
-                utmMedium: 'cta-section'
-              }}
+        </div>
+      </div>
+
+      
+      {/* Service Finder */}
+      <div className="max-w-6xl mx-auto px-4 -mt-8">
+        <motion.div 
+          className="bg-white rounded-2xl shadow-xl p-6 md:p-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Step 1: Choose Course */}
+          <div className="mb-10">
+            <h2 className="text-2xl font-bold mb-6 text-center">Step 1: Select Your Course</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Medicine Card */}
+              <div 
+                className={`p-6 rounded-xl cursor-pointer transition-all duration-300 flex flex-col items-center text-center ${
+                  selectedCourse === 'medicine' 
+                    ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg transform scale-105' 
+                    : 'bg-white border border-gray-200 hover:shadow-md hover:border-blue-300'
+                }`}
+                onClick={() => handleCourseSelect('medicine')}
+              >
+                <div className="w-20 h-20 mb-4 relative">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-full h-full ${selectedCourse === 'medicine' ? 'text-white' : 'text-blue-600'}`}>
+                    <path fill="currentColor" d="M10.5 15.429h1.5v1.5h-1.5v-1.5zm0-9h1.5v7.5h-1.5v-7.5zm7.125-3h-11.25c-.825 0-1.5.675-1.5 1.5v15c0 .825.675 1.5 1.5 1.5h11.25c.825 0 1.5-.675 1.5-1.5v-15c0-.825-.675-1.5-1.5-1.5zm0 16.5h-11.25v-15h11.25v15z"/>
+                  </svg>
+                </div>
+                <h3 className={`text-xl font-bold mb-2 ${selectedCourse === 'medicine' ? 'text-white' : 'text-gray-800'}`}>
+                  Medicine
+                </h3>
+                <p className={`text-sm ${selectedCourse === 'medicine' ? 'text-white/90' : 'text-gray-600'}`}>
+                  Preparing for medical school applications
+                </p>
+              </div>
+              
+              {/* Dentistry Card */}
+              <div 
+                className={`p-6 rounded-xl cursor-pointer transition-all duration-300 flex flex-col items-center text-center ${
+                  selectedCourse === 'dentistry' 
+                    ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg transform scale-105' 
+                    : 'bg-white border border-gray-200 hover:shadow-md hover:border-blue-300'
+                }`}
+                onClick={() => handleCourseSelect('dentistry')}
+              >
+                <div className="w-20 h-20 mb-4 relative">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={`w-full h-full ${selectedCourse === 'dentistry' ? 'text-white' : 'text-blue-600'}`}>
+                    <path fill="currentColor" d="M12 2c-4.97 0-9 4.03-9 9 0 3.63 2.5 7.53 5.04 9.83.79.74 1.34 1.18 1.68 1.38.35.21.62.28.96.28s.61-.07.96-.28c.34-.2.89-.64 1.68-1.38 2.54-2.3 5.04-6.2 5.04-9.83 0-4.97-4.03-9-9-9zm0 12.75c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                </div>
+                <h3 className={`text-xl font-bold mb-2 ${selectedCourse === 'dentistry' ? 'text-white' : 'text-gray-800'}`}>
+                  Dentistry
+                </h3>
+                <p className={`text-sm ${selectedCourse === 'dentistry' ? 'text-white/90' : 'text-gray-600'}`}>
+                  Preparing for dental school applications
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Step 2: Choose Stage */}
+          {selectedCourse && (
+            <motion.div 
+              className="mb-10"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.5 }}
             >
-              <PhoneIcon className="w-5 h-5" />
-              Book Free Consultation
-            </CalendlyPopup>
-            <Link href="/about-us" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
-              Learn About Our Team
-            </Link>
+              <h2 className="text-2xl font-bold mb-6 text-center">Step 2: Select Your Application Stage</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {applicationStages[selectedCourse].map((stage) => (
+                  <StageCard
+                    key={stage.id}
+                    stage={stage}
+                    isSelected={selectedStage === stage.id}
+                    onClick={() => handleStageSelect(stage.id)}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+          
+          {/* Step 3: Recommended Resources */}
+          {selectedCourse && selectedStage && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="mt-8"
+            >
+              <h2 className="text-2xl font-bold mb-6 text-center">Recommended Resources & Services</h2>
+              
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                {getResources().map((resource, index) => (
+                  <motion.div key={index} variants={itemVariants}>
+                    <ResourceCard resource={resource} />
+                  </motion.div>
+                ))}
+              </motion.div>
+              
+              <motion.div 
+                className="mt-12 text-center"
+                variants={itemVariants}
+              >
+                <h3 className="text-xl font-bold mb-4">Need personalized guidance?</h3>
+                <Link href="/free-consultation" className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300">
+                  Book a Free Consultation
+                </Link>
+              </motion.div>
+            </motion.div>
+          )}
+        </motion.div>
+        
+        {/* FAQ Section */}
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <div className="space-y-6">
+              <div className="border-b border-gray-200 pb-4">
+                <h3 className="text-xl font-bold mb-2">When should I start preparing for medical/dental school?</h3>
+                <p className="text-gray-700">
+                  Ideally, you should start preparing at least 12-18 months before you plan to submit your application. 
+                  This gives you ample time to prepare for entrance exams, gain relevant experience, and craft a compelling application.
+                </p>
+              </div>
+              
+              <div className="border-b border-gray-200 pb-4">
+                <h3 className="text-xl font-bold mb-2">What UCAT score do I need?</h3>
+                <p className="text-gray-700">
+                  UCAT score requirements vary by institution. Competitive medical schools typically look for scores in the top 25-30%, 
+                  which is around 2700+. However, some universities place less emphasis on the UCAT and more on other aspects of your application.
+                </p>
+              </div>
+              
+              <div className="border-b border-gray-200 pb-4">
+                <h3 className="text-xl font-bold mb-2">How should I prepare for interviews?</h3>
+                <p className="text-gray-700">
+                  Preparation should include understanding different interview formats (MMI vs. traditional), practicing common scenarios and questions,
+                  staying updated on medical ethics and current healthcare topics, and participating in mock interviews for feedback.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-xl font-bold mb-2">What makes a good personal statement?</h3>
+                <p className="text-gray-700">
+                  A strong personal statement demonstrates your motivation for studying medicine/dentistry, relevant experiences, understanding of the profession,
+                  and key skills and qualities. It should be reflective, specific, and authentic to you.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

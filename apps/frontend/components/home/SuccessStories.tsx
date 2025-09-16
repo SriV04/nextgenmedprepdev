@@ -47,7 +47,7 @@ const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories }) => {
                     A
                   </div>
                   <div className="ml-4">
-                    <p className="font-semibold text-lg">Sriharsha V.</p>
+                    <p className="font-semibold text-lg">Thuva T.</p>
                     <p className="text-[var(--color-text-secondary)]">Accepted to Imperial College London</p>
                   </div>
                 </div>
@@ -151,8 +151,8 @@ const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories }) => {
               <p className="text-sm mt-2">get into their first-choice university</p>
             </div>
             <div className="p-6 bg-[var(--color-background-accent)] rounded-xl">
-              <div className="text-3xl font-bold text-[var(--color-accent-primary]">350+</div>
-              <p className="text-sm mt-2">students coached since 2018</p>
+              <div className="text-3xl font-bold text-[var(--color-accent-primary]">500+</div>
+              <p className="text-sm mt-2">students coached since 2024</p>
             </div>
             <div className="p-6 bg-[var(--color-background-accent)] rounded-xl">
               <div className="text-3xl font-bold text-[var(--color-accent-primary]">27</div>

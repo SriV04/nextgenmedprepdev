@@ -194,26 +194,6 @@ const ConferencesPage = () => {
               Interactive workshops designed to accelerate your medical school journey with expert guidance and practical strategies.
             </p>
           </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <CalendlyPopup 
-              url="https://calendly.com/sri-nextgenmedprep/30min" 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-              prefill={{
-                  name: "Potential Student"
-              }}
-              utm={{
-                utmCampaign: 'conferences-page',
-                utmSource: 'website',
-                utmMedium: 'hero-button'
-              }}
-            >
-              Book Free Consultation
-            </CalendlyPopup>
-            <Link href="#calendar" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
-              View Calendar
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -378,10 +358,7 @@ const ConferencesPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
-              Explore All Services
-            </Link>
-            <Link href="/about" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
-              Learn About Our Team
+              Book Now
             </Link>
           </div>
         </div>

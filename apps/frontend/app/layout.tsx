@@ -19,12 +19,13 @@ const socialLinks: Record<string, string> = {
 }
 
 const megaMenuItems: Record<string, string[]> = {
-  "About": ["Our Story", "Meet the Tutors", "Join the Team"],
+  "About": ["Join the Team"],
   "Get Started": ["Ultimate Medicine Application Guide", "Ultimate Dentistry Application Guide"],
-  "Personal Statements": ["Guide", "Medicine Statements", "Dentistry Statements", "Reviews"],
+  "Interviews": ["Panel Interviews", "MMIs"],
   "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
-  "Interviews": ["Panel Interviews", "MMIs", "Prometheus"],
+  "Personal Statements": ["Free Personal Statement Guide", "Medicine Statements", "Dental Statements", "PS Reviews"],
   "Events": ["All Conferences", "Upcoming", "Past"],
+  "Prometheus": [],
 };
 
 export const metadata: Metadata = {
@@ -59,9 +60,11 @@ export default function RootLayout({
                   className="w-8 h-8 sm:w-10 sm:h-10"
                   />
                 </a>
-                <span className="text-sm sm:text-lg font-bold text-gradient-primary truncate hidden sm:block">
-                  NextGenMedPrep
-                </span>
+                <a href="/" className="flex items-center space-x-2 min-w-0">
+                  <span className="text-sm sm:text-lg font-bold text-gradient-primary truncate hidden sm:block">
+                    NextGenMedPrep
+                  </span>
+                </a>
                 <span className="text-xs font-bold text-gradient-primary truncate sm:hidden">
                   NGMP
                 </span>

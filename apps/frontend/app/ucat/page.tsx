@@ -49,15 +49,15 @@ export default function UCATPage() {
 
   const services = [
     {
-      title: "UCAT Comprehensive Course",
-      description: "Complete preparation covering all five UCAT sections with expert tutoring and proven strategies.",
+      title: "Free ",
+      description: "Complete preparation covering all four UCAT sections with expert tutoring and proven strategies.",
       features: ["All section coverage", "Practice tests", "Expert tutoring", "Score improvement guarantee"],
       icon: AcademicCapIcon,
       color: "bg-blue-50 border-blue-200",
       buttonColor: "bg-blue-600 hover:bg-blue-700"
     },
     {
-      title: "Verbal Reasoning Mastery",
+      title: "Tutoring",
       description: "Master reading comprehension, critical thinking, and inference skills for the VR section.",
       features: ["Speed reading techniques", "Question analysis", "Inference strategies", "Time management"],
       icon: BookOpenIcon,
@@ -65,37 +65,14 @@ export default function UCATPage() {
       buttonColor: "bg-green-600 hover:bg-green-700"
     },
     {
-      title: "Quantitative Reasoning Pro",
+      title: "Personalised Revision Plan",
       description: "Excel in mathematical problem-solving with our structured QR preparation program.",
       features: ["Math fundamentals", "Calculator techniques", "Data interpretation", "Formula shortcuts"],
       icon: CalculatorIcon,
       color: "bg-purple-50 border-purple-200",
       buttonColor: "bg-purple-600 hover:bg-purple-700"
     },
-    {
-      title: "Abstract & Decision Making",
-      description: "Develop pattern recognition and logical reasoning skills for AR and DM sections.",
-      features: ["Pattern identification", "Logical sequences", "Decision analysis", "Strategic thinking"],
-      icon: PuzzlePieceIcon,
-      color: "bg-orange-50 border-orange-200",
-      buttonColor: "bg-orange-600 hover:bg-orange-700"
-    },
-    {
-      title: "Situational Judgement Training",
-      description: "Master ethical reasoning and professional behavior scenarios in healthcare settings.",
-      features: ["Medical ethics", "Professional scenarios", "Appropriateness scaling", "Effectiveness rating"],
-      icon: UserGroupIcon,
-      color: "bg-indigo-50 border-indigo-200",
-      buttonColor: "bg-indigo-600 hover:bg-indigo-700"
-    },
-    {
-      title: "Mock Tests & Analytics",
-      description: "Practice with full-length mock tests and receive detailed performance analytics.",
-      features: ["Timed practice tests", "Score tracking", "Weakness identification", "Progress monitoring"],
-      icon: ChartBarIcon,
-      color: "bg-cyan-50 border-cyan-200",
-      buttonColor: "bg-cyan-600 hover:bg-cyan-700"
-    }
+
   ];
 
   const testimonials = [
@@ -126,7 +103,7 @@ export default function UCATPage() {
     {
       name: "Verbal Reasoning",
       description: "Reading comprehension and critical thinking",
-      duration: "21 minutes",
+      duration: "22 minutes",
       questions: "44 questions",
       icon: BookOpenIcon,
       color: "border-blue-500"
@@ -134,24 +111,16 @@ export default function UCATPage() {
     {
       name: "Quantitative Reasoning", 
       description: "Mathematical problem solving and data analysis",
-      duration: "24 minutes",
+      duration: "26 minutes",
       questions: "36 questions", 
       icon: CalculatorIcon,
       color: "border-green-500"
     },
     {
-      name: "Abstract Reasoning",
-      description: "Pattern recognition and logical relationships",
-      duration: "13 minutes",
-      questions: "55 questions",
-      icon: PuzzlePieceIcon,
-      color: "border-purple-500"
-    },
-    {
       name: "Decision Making",
       description: "Logical reasoning and problem solving",
-      duration: "31 minutes", 
-      questions: "29 questions",
+      duration: "37 minutes", 
+      questions: "35 questions",
       icon: TrophyIcon,
       color: "border-orange-500"
     },
@@ -174,7 +143,7 @@ export default function UCATPage() {
             <span className="text-6xl mb-4 block">🧠</span>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Master the
-              <span className="block text-gradient-primary">UCAT Exam</span>
+              <span className="block text-gradient-primary">UCAT</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Achieve your target UCAT score with our comprehensive preparation program. Expert tutoring, proven strategies, and unlimited practice tests.
@@ -182,114 +151,12 @@ export default function UCATPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <Link href="/get-started" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300">
-              Book a Free Consultation
+            <Link href="/ucat/free-resources" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300">
+              Improve My Score!
             </Link>
             <Link href="#services" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
-              View Courses
+              Join our Programs
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why UCAT Prep Matters */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why UCAT Preparation is Essential</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The UCAT is a crucial component of your medical school application. Don't leave it to chance.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
-              <ClockIcon className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Time Pressure</h3>
-              <p className="text-gray-600">Only 2 hours to complete 233 questions across 5 sections</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
-              <TrophyIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">High Stakes</h3>
-              <p className="text-gray-600">UCAT scores significantly impact medical school admission chances</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-purple-50 border border-purple-100">
-              <ChartBarIcon className="w-12 h-12 mx-auto text-purple-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Skill-Based</h3>
-              <p className="text-gray-600">Success requires specific strategies and extensive practice</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* UCAT Sections Overview */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">UCAT Test Sections</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Understanding each section is key to effective preparation
-            </p>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {ucatSections.map((section, index) => (
-              <div key={index} className={`bg-white p-6 rounded-xl border-l-4 ${section.color} shadow-sm hover:shadow-md transition-all duration-300`}>
-                <div className="flex items-start gap-4 mb-4">
-                  <section.icon className="w-8 h-8 text-current flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{section.name}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{section.description}</p>
-                  </div>
-                </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>{section.duration}</span>
-                  <span>{section.questions}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our UCAT Preparation Services</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Comprehensive courses designed to maximize your UCAT score
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className={`p-6 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300`}>
-                <div className="flex items-start gap-4 mb-6">
-                  <service.icon className="w-10 h-10 text-current flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                    <p className="text-gray-600 text-sm">{service.description}</p>
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 mb-3">Key features:</h4>
-                  <ul className="space-y-2">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-gray-600 text-sm">
-                        <span className="text-green-500">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
-                  Learn More
-                </button>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -412,6 +279,110 @@ export default function UCATPage() {
         </div>
       </section>
 
+      {/* Why UCAT Prep Matters */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why UCAT Preparation is Essential</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              The UCAT is a crucial component of your medical school application. Don't leave it to chance.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
+              <ClockIcon className="w-12 h-12 mx-auto text-blue-600 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Time Pressure</h3>
+              <p className="text-gray-600">Only 2 hours to complete 233 questions across 5 sections</p>
+            </div>
+            <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
+              <TrophyIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">High Stakes</h3>
+              <p className="text-gray-600">UCAT scores significantly impact medical school admission chances</p>
+            </div>
+            <div className="text-center p-6 rounded-xl bg-purple-50 border border-purple-100">
+              <ChartBarIcon className="w-12 h-12 mx-auto text-purple-600 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Skill-Based</h3>
+              <p className="text-gray-600">Success requires specific strategies and extensive practice</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* UCAT Sections Overview */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">UCAT Test Sections</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Understanding each section is key to effective preparation
+            </p>
+          </div>
+          
+          <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {ucatSections.map((section, index) => (
+              <div key={index} className={`bg-white p-6 rounded-xl border-l-4 ${section.color} shadow-sm hover:shadow-md transition-all duration-300`}>
+                <div className="flex items-start gap-4 mb-4">
+                  <section.icon className="w-8 h-8 text-current flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{section.name}</h3>
+                    <p className="text-gray-600 text-sm mb-3">{section.description}</p>
+                  </div>
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{section.duration}</span>
+                  <span>{section.questions}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section id="services" className="py-16 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our UCAT Preparation Services</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Comprehensive courses designed to maximize your UCAT score
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {services.map((service, index) => (
+              <div key={index} className={`p-6 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300`}>
+                <div className="flex items-start gap-4 mb-6">
+                  <service.icon className="w-10 h-10 text-current flex-shrink-0" />
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
+                    <p className="text-gray-600 text-sm">{service.description}</p>
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-900 mb-3">Key features:</h4>
+                  <ul className="space-y-2">
+                    {service.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-gray-600 text-sm">
+                        <span className="text-green-500">✓</span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
+                  Learn More
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      
+
       {/* Score Improvement Stats */}
       <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="max-w-6xl mx-auto">
@@ -430,7 +401,7 @@ export default function UCATPage() {
               <div className="text-gray-600">Students Improve Score</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-purple-600 mb-2">2850+</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">2100+</div>
               <div className="text-gray-600">Average Final Score</div>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -564,7 +535,7 @@ export default function UCATPage() {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>4 additional hours of targeted question-specific perfection sessions</span>
+                    <span>8 hours of targeted question-specific perfection sessions</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
@@ -601,7 +572,7 @@ export default function UCATPage() {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>4 extra hours of high-intensity question-perfection sessions based on your data</span>
+                    <span>12 hours of high-intensity question-perfection sessions based on your data</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
@@ -634,8 +605,9 @@ export default function UCATPage() {
             Join our proven program and unlock your medical school dreams
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {/* TODO: update link  go to courses */}
             <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
-              Start Your Preparation
+              Join Our Programs
             </Link>
             <CalendlyPopup 
               url="https://calendly.com/nextgenmedprep/consultation"
@@ -646,7 +618,7 @@ export default function UCATPage() {
                 utmMedium: 'cta-section'
               }}
             >
-              Book Consultation
+              Calculate Hours Needed
             </CalendlyPopup>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import TimelineMosaic from './TimelineMosaic'; // Ensure this path is correct
+import { timelineCardStyles, timelineNodeStyles, timelineProgressStyles } from './TimelineStyles';
 
 const medicineAppSteps = [
   {
@@ -10,14 +11,14 @@ const medicineAppSteps = [
     title: 'Year 9 - Just Starting Out',
     information:
       'Focus on achieving strong GCSE grades, particularly in science subjects (Biology, Chemistry, Physics) and Maths. Begin exploring medicine as a career path: research what it means to be a doctor, the different specialties, and the challenges involved. Start looking for volunteering opportunities (e.g., in care homes, hospitals, or charities) and work experience placements to gain insight into healthcare environments and develop crucial skills like empathy and communication. These experiences are vital for your personal statement and interviews.',
-    moreInfoLink: '/services/year-9-program',
+    moreInfoLink: '/get-started',
   },
   {
     id: 'ucat',
     title: 'UCAT Preparation',
     information:
       'The University Clinical Aptitude Test (UCAT) is a mandatory admissions test for most UK medical and dental schools. It assesses cognitive abilities and professional behaviours. Typically, you will register and sit the UCAT in the summer between Year 12 and Year 13 (or equivalent). Thorough preparation is crucial. Familiarise yourself with the five sections: Verbal Reasoning, Decision Making, Quantitative Reasoning, Abstract Reasoning, and Situational Judgement. Utilise official practice materials and timed mock tests.',
-    moreInfoLink: '/services/ucat-preparation',
+    moreInfoLink: '/ucat',
   },
   {
     id: 'personalStatement',
@@ -30,7 +31,7 @@ const medicineAppSteps = [
     id: 'alevels',
     title: 'A-Levels Excellence',
     information:
-      'Achieving the required A-Level grades (or equivalent qualifications) is the final academic hurdle. Most medical schools require A*AA-AAA, typically including Chemistry and Biology. Some may also prefer or require a third science/maths subject. Consistent revision, deep understanding of the curriculum, and effective exam technique throughout Year 12 and Year 13 are vital. Your final exams will usually take place in May-June of Year 13.',
+      'Achieving the required A-Level grades (or equivalent qualifications) is the final academic hurdle. Most medical schools require AAA with some, typically including Chemistry and Biology. Some may also prefer or require a third science/maths subject. Consistent revision, deep understanding of the curriculum, and effective exam technique throughout Year 12 and Year 13 are vital. Your final exams will usually take place in May-June of Year 13.',
     moreInfoLink: '/services/a-level-support',
   },
   {
@@ -38,14 +39,13 @@ const medicineAppSteps = [
     title: 'Interviews: Secure Your Offer',
     information:
       'After submitting your UCAS application (by October 15th in Year 13), strong candidates are invited for interviews, usually held between November and March. Universities use various formats, including Multiple Mini Interviews (MMIs) and traditional panel interviews. Prepare to discuss your motivation for medicine, understanding of the NHS, ethical scenarios, work experience reflections, and personal qualities. Practice articulating your thoughts clearly and confidently.',
-    moreInfoLink: '/services/interview-coaching',
+    moreInfoLink: '/interviews',
   },
   {
     id: 'dreamUni',
     title: 'Dream University! Completed Journey',
     information:
       'Congratulations! You\'ve navigated the challenging path to medical or dental school. All your hard work, dedication, and perseverance have paid off. This is the beginning of an incredible new chapter. We are immensely proud to have been a part of your journey!',
-    moreInfoLink: '/about-us',
   },
 ];
 
@@ -178,8 +178,8 @@ const TimelineSection: React.FC = () => {
                   }}
                 >
                   {/* Outer Ring */}
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-r from-sky-400 to-purple-600 p-1 shadow-2xl">
-                    <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center">
+                  <div className={timelineNodeStyles.outer}>
+                    <div className={timelineNodeStyles.inner}>
                       {/* Progress Ring */}
                       <svg className="w-16 h-16 transform -rotate-90 absolute">
                         <circle
@@ -214,7 +214,7 @@ const TimelineSection: React.FC = () => {
                       
                       {/* Step Number */}
                       <motion.div
-                        className="w-12 h-12 rounded-full bg-gradient-to-r from-sky-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg relative z-10"
+                        className={timelineNodeStyles.number}
                         initial={{ scale: 0 }}
                         whileInView={{ scale: 1 }}
                         viewport={{ once: true, amount: 0.5 }}
@@ -235,20 +235,20 @@ const TimelineSection: React.FC = () => {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.3, delay: idx * 0.1 + 0.1 }}
               >
-                <div className={`relative bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl p-6 md:p-8 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2 group max-w-lg ${
-                  idx === medicineAppSteps.length - 1 ? 'bg-gradient-to-br from-emerald-50/90 to-sky-50/90 dark:from-emerald-900/30 dark:to-sky-900/30 border-emerald-200 dark:border-emerald-700' : ''
+                <div className={`${timelineCardStyles.base} max-w-2xl ${
+                  idx === medicineAppSteps.length - 1 ? timelineCardStyles.final : ''
                 } ${isEven ? 'md:mr-auto' : 'md:ml-auto'}`}>
                   
                   {/* Step Badge */}
-                  <div className={`absolute -top-3 ${isEven ? 'left-6' : 'right-6'}`}>
-                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-sky-500 to-purple-600 text-white shadow-lg">
+                  <div className={`${timelineCardStyles.badge.container} ${isEven ? 'left-6' : 'right-6'}`}>
+                    <span className={timelineCardStyles.badge.content}>
                       Step {idx + 1}
                     </span>
                   </div>
 
                   {/* Title */}
                   <motion.h3
-                    className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 mb-4 mt-4 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors"
+                    className={timelineCardStyles.title}
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
@@ -259,7 +259,7 @@ const TimelineSection: React.FC = () => {
 
                   {/* Information */}
                   <motion.p
-                    className="text-slate-600 dark:text-slate-300 text-base leading-relaxed mb-6"
+                    className={timelineCardStyles.content}
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
@@ -278,7 +278,7 @@ const TimelineSection: React.FC = () => {
                   >
                     <a
                       href={step.moreInfoLink}
-                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-sky-500 to-purple-600 text-white rounded-lg font-medium hover:from-sky-600 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg"
+                      className={timelineCardStyles.button}
                     >
                       Learn More
                       <svg
@@ -319,7 +319,7 @@ const TimelineSection: React.FC = () => {
       </div>
 
       {/* Progress Tracker */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-30 hidden lg:flex flex-col items-center bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-slate-200/50 dark:border-slate-700/50">
+      <div className={timelineProgressStyles.container}>
         {medicineAppSteps.map((step, idx) => {
           // A step is completed if it's been visited (activeStep >= idx)
           const isCompleted = activeStep >= idx;

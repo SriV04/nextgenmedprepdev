@@ -69,7 +69,7 @@ const Hero: React.FC = () => {
             href="/about"
             className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300"
           >
-            Learn More About Us
+            Already on your journey?
           </Link>
         </div>
 

@@ -28,7 +28,7 @@ export default function UCATFreeResourcesPage() {
         imagePath="/guides/UCAT-guide.png"
         imageAlt="UCAT Preparation Guide Cover"
         benefits={[
-          "Comprehensive breakdown of all five UCAT subtests",
+          "Comprehensive breakdown of all four UCAT subtests",
           "Time-saving strategies to maximize your score",
           "Practice questions with detailed solutions",
           "Expert tips from students who scored in the top 10%",
@@ -42,7 +42,7 @@ export default function UCATFreeResourcesPage() {
           {
             icon: <span>📊</span>,
             title: "Complete Coverage",
-            description: "Detailed strategies for all five subtests of the UCAT exam"
+            description: "Detailed strategies for all four subtests of the UCAT exam"
           },
           {
             icon: <span>⏱️</span>,

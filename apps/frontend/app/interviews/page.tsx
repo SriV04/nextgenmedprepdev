@@ -51,14 +51,6 @@ export default function InterviewsPage() {
 
   const services = [
     {
-      title: "Mock Panel Interviews",
-      description: "Master traditional medical school interviews with our experienced panel of medical professionals.",
-      features: ["Mock interview sessions", "Personalized feedback", "Question bank practice", "Confidence building"],
-      icon: UserGroupIcon,
-      color: "bg-blue-50 border-blue-200",
-      buttonColor: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
       title: "Mock MMIs (Multiple Mini Interviews)",
       description: "Excel in MMI stations with targeted practice and expert guidance from our tutors.",
       features: ["Station-based practice", "Ethical scenarios", "Communication skills", "Time management"],
@@ -67,7 +59,15 @@ export default function InterviewsPage() {
       buttonColor: "bg-green-600 hover:bg-green-700"
     },
     {
-      title: "Interview Tutoring",
+      title: "Mock Panel Interviews",
+      description: "Master traditional medical school interviews with our experienced panel of medical professionals.",
+      features: ["Mock interview sessions", "Personalized feedback", "Question bank practice", "Confidence building"],
+      icon: UserGroupIcon,
+      color: "bg-blue-50 border-blue-200",
+      buttonColor: "bg-blue-600 hover:bg-blue-700"
+    },
+    {
+      title: "Interview Background knowledger",
       description: "One-on-one personalized coaching to help you shine in any interview format.",
       features: ["Individual coaching", "Tailored preparation", "Personal statement alignment", "Body language tips"],
       icon: AcademicCapIcon,
@@ -134,7 +134,7 @@ export default function InterviewsPage() {
                 utmMedium: 'hero-button'
               }}
             >
-              Book Free Consultation
+              Book Mock Interview
             </CalendlyPopup>
             <Link href="#services" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               View Packages
@@ -204,6 +204,15 @@ export default function InterviewsPage() {
                         {feature}
                       </li>
                     ))}
+                    <li className="mt-4 pt-2 border-t border-dashed border-gray-200">
+                      <Link href="/prometheus" className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-all duration-200 group">
+                        <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">NEW</span>
+                        <span className="font-medium">Powered by our innovative <span className="underline decoration-2 decoration-purple-400 group-hover:decoration-purple-600">Prometheus</span> mock generator</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                    </li>
                   </ul>
                 </div>
                 
@@ -241,7 +250,7 @@ export default function InterviewsPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Using our Prometheus Question bank which is updated daily with the current interview questions and answers</span>
+                    <span>Using our <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link> Question bank which is updated daily with the current interview questions and answers</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
@@ -258,7 +267,7 @@ export default function InterviewsPage() {
                 </ul>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£50</span>
+                    <span className="text-3xl font-bold text-gray-900">£45</span>
                     <span className="text-sm text-gray-500">per interview</span>
                   </div>
                   <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300">
@@ -285,11 +294,11 @@ export default function InterviewsPage() {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>3 University-specific mock interviews generated with our Prometheus Question bank</span>
+                    <span>3 University-specific mock interviews generated with our <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link> Question bank</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>+3 Prometheus mocks to do in your own time (FREE)</span>
+                    <span>+3 new <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link> mocks to do in your own time <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium">FREE</span></span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-500 mr-2 mt-1">✓</span>
@@ -306,7 +315,7 @@ export default function InterviewsPage() {
                 </ul>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£180</span>
+                    <span className="text-3xl font-bold text-gray-900">£130</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
                   <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300">
@@ -348,7 +357,7 @@ export default function InterviewsPage() {
                 </ul>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£275</span>
+                    <span className="text-3xl font-bold text-gray-900">£210</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
                   <button className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300">
@@ -516,43 +525,17 @@ export default function InterviewsPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Success Stories</h2>
-            <p className="text-lg text-gray-600">Hear from students who aced their interviews</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-subtle border border-gray-100">
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="text-yellow-400">⭐</span>
-                  ))}
-                </div>
-                <p className="text-gray-600 mb-4 italic">"{testimonial.quote}"</p>
-                <div>
-                  <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500">{testimonial.school}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Ace Your Interview?</h2>
+          <h2 className="text-3xl font-bold mb-4">Need More than Free Resources</h2>
           <p className="text-xl mb-8 opacity-90">
             Join hundreds of successful applicants who prepared with NextGenMedPrep
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
-              Start Your Preparation
+              Book Mock Interview Now!
             </Link>
             <Link href="/contact" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
               Ask Questions
