@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   description: "High-impact tutoring and guidance for medicine & dentistry applicants.",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+      // { url: "/favicon.ico", sizes: "32x32", type: "image/x-icon" },
       { url: "/NGMP logo.png", sizes: "192x192", type: "image/png" },
     ],
     apple: { url: "/NGMP logo.png", sizes: "180x180", type: "image/png" },
@@ -53,21 +53,16 @@ export default function RootLayout({
           <div className="w-full px-3 sm:px-4 py-3 mx-auto max-w-[100vw]">
             <div className="flex items-center justify-between min-w-0">
               <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
-                <a href="/" className="flex-shrink-0">
+                <a href="/" className="flex items-center space-x-2">
                   <img
-                  src="/NGMP logo.png"
-                  alt="NextGenMedPrep Logo"
-                  className="w-8 h-8 sm:w-10 sm:h-10"
+                    src="/NGMP logo.png"
+                    alt="NextGenMedPrep Logo"
+                    className="h-8 sm:h-10 w-auto"
                   />
-                </a>
-                <a href="/" className="flex items-center space-x-2 min-w-0">
-                  <span className="text-sm sm:text-lg font-bold text-gradient-primary truncate hidden sm:block">
+                  <span className="text-sm sm:text-lg font-bold text-gradient-primary">
                     NextGenMedPrep
                   </span>
                 </a>
-                <span className="text-xs font-bold text-gradient-primary truncate sm:hidden">
-                  NGMP
-                </span>
               </div>
               <div className="hidden lg:block"></div>
                 <nav className="hidden lg:flex items-center justify-center flex-1 max-w-2xl mx-4">

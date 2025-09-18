@@ -10,14 +10,15 @@ interface MegaMenuProps {
 const MegaMenu = ({ title, items }: MegaMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Determine if this is the Prometheus menu item
+  // Determine if this is the Prometheus menu item or if there are no items
   const isPrometheus = title === "Prometheus";
+  const hasItems = items.length > 0;
   
   return (
     <div 
       className="relative group"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={() => hasItems && setIsOpen(true)}
+      onMouseLeave={() => hasItems && setIsOpen(false)}
     >
       {/* Trigger */}
       <a
@@ -29,24 +30,27 @@ const MegaMenu = ({ title, items }: MegaMenuProps) => {
         }`}
       >
         <span className="whitespace-nowrap">{title}</span>
-        <svg 
-          className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        {hasItems && (
+          <svg 
+            className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
       </a>
       
-      {/* Mega Menu Panel */}
-      <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 ${
-        isPrometheus ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-background-secondary'
-      } border ${
-        isPrometheus ? 'border-purple-200' : 'border-border-accent'
-      } rounded-lg shadow-lg z-50 transition-all duration-300 ${
-        isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-      }`}>
+      {/* Mega Menu Panel - Only render if there are items */}
+      {hasItems && (
+        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 ${
+          isPrometheus ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-background-secondary'
+        } border ${
+          isPrometheus ? 'border-purple-200' : 'border-border-accent'
+        } rounded-lg shadow-lg z-50 transition-all duration-300 ${
+          isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+        }`}>
         <div className="p-3">
           <div className="grid gap-1">
             {items.map((item) => (
@@ -74,6 +78,7 @@ const MegaMenu = ({ title, items }: MegaMenuProps) => {
           }`}></div>
         </div>
       </div>
+      )}
     </div>
   );
 };

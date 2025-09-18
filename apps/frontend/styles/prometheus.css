@@ -1,0 +1,95 @@
+/* Additional styles for Prometheus vault page */
+
+/* Glowing effect for orange elements */
+.glow-orange {
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+  animation: pulse-orange 2s infinite;
+}
+
+@keyframes pulse-orange {
+  0% {
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+  }
+}
+
+/* Animated background grid */
+.grid-background {
+  background-image: linear-gradient(rgba(249, 115, 22, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center center;
+}
+
+/* Vault door spinner animation */
+.vault-spinner {
+  animation: spin 10s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Number counter animation */
+@keyframes countup {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-countup {
+  animation: countup 0.5s ease-out forwards;
+}
+
+/* Gradient text for special emphasis */
+.text-gradient-orange {
+  background: linear-gradient(90deg, #f97316, #ea580c, #c2410c);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Card hover effects */
+.feature-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.25), 
+              0 8px 10px -6px rgba(249, 115, 22, 0.1);
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
