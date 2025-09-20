@@ -1,27 +1,27 @@
 /* Additional styles for Prometheus vault page */
 
-/* Glowing effect for orange elements */
-.glow-orange {
-  box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
-  animation: pulse-orange 2s infinite;
+/* Glowing effects for vault aurora (blue/purple) */
+.glow-aurora {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
+  animation: pulse-aurora 3s ease-in-out infinite;
 }
 
-@keyframes pulse-orange {
+@keyframes pulse-aurora {
   0% {
-    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(249, 115, 22, 0.8);
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.8), 0 0 60px rgba(168, 85, 247, 0.5);
   }
   100% {
-    box-shadow: 0 0 15px rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
   }
 }
 
 /* Animated background grid */
 .grid-background {
-  background-image: linear-gradient(rgba(249, 115, 22, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(249, 115, 22, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.06) 1px, transparent 1px);
   background-size: 20px 20px;
   background-position: center center;
 }
@@ -56,9 +56,9 @@
   animation: countup 0.5s ease-out forwards;
 }
 
-/* Gradient text for special emphasis */
-.text-gradient-orange {
-  background: linear-gradient(90deg, #f97316, #ea580c, #c2410c);
+/* Gradient text for special emphasis (indigo/purple/cyan) */
+.text-gradient-aurora {
+  background: linear-gradient(90deg, #67e8f9, #6366f1, #a78bfa);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -72,8 +72,8 @@
 
 .feature-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.25), 
-              0 8px 10px -6px rgba(249, 115, 22, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.25), 
+              0 8px 10px -6px rgba(168, 85, 247, 0.15);
 }
 
 /* Scrollbar customization */
@@ -86,10 +86,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #f97316;
+  background: #6366f1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ea580c;
+  background: #8b5cf6;
 }

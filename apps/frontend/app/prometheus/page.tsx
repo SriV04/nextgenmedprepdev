@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import '@/styles/prometheus.css';
+import VaultIllustration from '@/components/VaultIllustration';
 
 export default function PrometheusPage() {
   const [count, setCount] = useState<{ questions: number; universities: number; success: number }>({
@@ -41,49 +42,20 @@ export default function PrometheusPage() {
                 repeatType: "mirror", 
                 delay: i * 0.05 % 2 
               }}
-              className="border border-orange-500"
+              className="border border-indigo-500/40"
             />
           ))}
         </div>
 
-        {/* Vault Door Animation */}
+        {/* Vault Illustration */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <div className="relative w-full max-w-4xl aspect-square">
-            {/* Circular vault elements */}
-            {[1, 2, 3].map((ring) => (
-              <motion.div
-                key={ring}
-                className={`absolute inset-0 border-4 rounded-full border-orange-${300 + ring*100}`}
-                initial={{ opacity: 0, scale: 0.8, rotate: 0 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1 - (ring * 0.1), 
-                  rotate: ring % 2 === 0 ? 180 : -180 
-                }}
-                transition={{ 
-                  duration: 2.5, 
-                  delay: ring * 0.3,
-                  ease: "easeInOut" 
-                }}
-              />
-            ))}
-            
-            {/* Central vault icon */}
-            <motion.div 
-              className="absolute inset-0 flex items-center justify-center"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 1.8 }}
-            >
-              <div className="bg-orange-500 text-black w-40 h-40 rounded-full flex items-center justify-center glow-orange">
-                <span className="text-6xl font-bold">P</span>
-              </div>
-            </motion.div>
+          <div className="relative w-[90vw] max-w-4xl aspect-square">
+            <VaultIllustration className="absolute inset-0" />
           </div>
         </motion.div>
 
@@ -95,21 +67,21 @@ export default function PrometheusPage() {
           transition={{ duration: 1, delay: 2.3 }}
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-            <span className="text-orange-500">PROMETHEUS</span> VAULT
+            <span className="text-indigo-400">PROMETHEUS</span> VAULT
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-300">
             Unlock the ultimate question bank for medical and dental interview preparation
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <motion.button
-              className="px-8 py-4 text-lg font-bold bg-orange-500 text-black rounded-md hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/30"
+              className="px-8 py-4 text-lg font-bold bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/30"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
               ACCESS THE VAULT
             </motion.button>
             <motion.button
-              className="px-8 py-4 text-lg font-bold border-2 border-orange-500 text-orange-500 rounded-md hover:bg-orange-500/10 transition-all"
+              className="px-8 py-4 text-lg font-bold border-2 border-purple-500 text-purple-400 rounded-md hover:bg-purple-500/10 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -125,7 +97,7 @@ export default function PrometheusPage() {
           transition={{ duration: 1.5, repeat: Infinity }}
         >
           <svg 
-            className="w-8 h-8 text-orange-500" 
+            className="w-8 h-8 text-indigo-400" 
             fill="none" 
             stroke="currentColor" 
             viewBox="0 0 24 24" 
@@ -142,7 +114,7 @@ export default function PrometheusPage() {
       </section>
 
       {/* Statistics Section */}
-      <section className="bg-gradient-to-b from-black to-orange-900 py-20">
+      <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -152,13 +124,13 @@ export default function PrometheusPage() {
             ].map((stat, index) => (
               <motion.div
                 key={index}
-                className="bg-black/40 p-8 rounded-lg backdrop-blur-sm border border-orange-500/30"
+                className="bg-black/40 p-8 rounded-lg backdrop-blur-sm border border-indigo-500/30"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <div className="text-4xl mb-4 text-orange-500">{stat.icon}</div>
+                <div className="text-4xl mb-4 text-indigo-400">{stat.icon}</div>
                 <div className="text-5xl font-bold mb-2">
                   {stat.value}{stat.suffix || ''}
                 </div>
@@ -180,7 +152,7 @@ export default function PrometheusPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="text-gradient-orange">Forge</span> Your Interview Success
+              <span className="text-gradient-aurora">Forge</span> Your Interview Success
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Prometheus Vault provides comprehensive interview preparation tools designed
@@ -223,14 +195,14 @@ export default function PrometheusPage() {
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                className="bg-gradient-to-br from-orange-900/40 to-black p-8 rounded-lg border border-orange-500/30 hover:border-orange-400 transition-all group feature-card"
+                className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-8 rounded-lg border border-indigo-500/30 hover:border-indigo-400 transition-all group feature-card"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -5 }}
               >
-                <div className="text-5xl mb-6 text-orange-500 group-hover:scale-110 transition-transform">
+                <div className="text-5xl mb-6 text-indigo-400 group-hover:scale-110 transition-transform">
                   {feature.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
@@ -242,7 +214,7 @@ export default function PrometheusPage() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-20 bg-gradient-to-t from-black to-orange-900">
+      <section className="py-20 bg-gradient-to-t from-black via-indigo-950 to-purple-950">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             className="max-w-3xl mx-auto"
@@ -252,7 +224,7 @@ export default function PrometheusPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ready to <span className="text-orange-500">Unlock</span> Your Potential?
+              Ready to <span className="text-indigo-400">Unlock</span> Your Potential?
             </h2>
             <p className="text-xl mb-8 text-gray-300">
               Join thousands of successful medical and dental students who prepared with Prometheus Vault
@@ -262,7 +234,7 @@ export default function PrometheusPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Link href="/get-started" className="px-10 py-5 text-xl font-bold bg-orange-500 text-black rounded-md hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/30">
+              <Link href="/get-started" className="px-10 py-5 text-xl font-bold bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/30">
                 GET STARTED NOW
               </Link>
             </motion.div>
@@ -281,7 +253,7 @@ export default function PrometheusPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Success <span className="text-orange-500">Stories</span>
+              Success <span className="text-indigo-400">Stories</span>
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
               Hear from students who secured their dream places at medical and dental schools
@@ -308,17 +280,17 @@ export default function PrometheusPage() {
             ].map((testimonial, index) => (
               <motion.div
                 key={index}
-                className="bg-black p-8 rounded-lg border border-orange-500/30 relative"
+                className="bg-black p-8 rounded-lg border border-indigo-500/30 relative"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
               >
-                <div className="text-6xl text-orange-500/20 absolute top-4 left-4">"</div>
+                <div className="text-6xl text-indigo-400/20 absolute top-4 left-4">"</div>
                 <div className="relative z-10">
                   <p className="text-lg mb-6 text-gray-300">{testimonial.quote}</p>
                   <div>
-                    <div className="font-bold text-orange-500">{testimonial.name}</div>
+                    <div className="font-bold text-indigo-400">{testimonial.name}</div>
                     <div className="text-gray-400 text-sm">{testimonial.school}</div>
                   </div>
                 </div>
@@ -329,7 +301,7 @@ export default function PrometheusPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-gradient-to-b from-black to-orange-900">
+      <section className="py-20 bg-gradient-to-b from-black via-indigo-950 to-purple-950">
         <div className="container mx-auto px-4">
           <motion.div 
             className="text-center mb-16"
@@ -339,7 +311,7 @@ export default function PrometheusPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Frequently Asked <span className="text-orange-500">Questions</span>
+              Frequently Asked <span className="text-indigo-400">Questions</span>
             </h2>
           </motion.div>
 
@@ -370,13 +342,13 @@ export default function PrometheusPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <div className="bg-black/60 p-6 rounded-lg backdrop-blur-sm border border-orange-500/30">
+                <div className="bg-black/60 p-6 rounded-lg backdrop-blur-sm border border-indigo-500/30">
                   <h3 className="text-xl font-bold mb-3 flex items-center">
-                    <span className="text-orange-500 mr-3">Q:</span>
+                    <span className="text-indigo-400 mr-3">Q:</span>
                     {item.question}
                   </h3>
                   <p className="text-gray-300 pl-7">
-                    <span className="text-orange-500 font-bold">A: </span>
+                    <span className="text-indigo-400 font-bold">A: </span>
                     {item.answer}
                   </p>
                 </div>
@@ -401,7 +373,7 @@ export default function PrometheusPage() {
                 repeatType: "mirror", 
                 delay: i * 0.01 % 3
               }}
-              className="border border-orange-500"
+              className="border border-purple-500/40"
             />
           ))}
         </div>
@@ -415,7 +387,7 @@ export default function PrometheusPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Unlock the <span className="text-orange-500">Prometheus Vault</span> Today
+              Unlock the <span className="text-indigo-400">Prometheus Vault</span> Today
             </h2>
             <p className="text-xl mb-10 text-gray-300">
               Start your journey to interview success with our comprehensive question bank
@@ -425,7 +397,7 @@ export default function PrometheusPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Link href="/get-started" className="px-12 py-6 text-2xl font-bold bg-orange-500 text-black rounded-md hover:bg-orange-600 transition-all shadow-xl shadow-orange-500/30 inline-flex items-center">
+              <Link href="/get-started" className="px-12 py-6 text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-md hover:from-indigo-600 hover:to-purple-600 transition-all shadow-xl shadow-indigo-500/30 inline-flex items-center">
                 <span>ACCESS NOW</span>
                 <svg 
                   className="w-6 h-6 ml-2" 

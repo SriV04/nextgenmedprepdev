@@ -77,21 +77,36 @@ const EmailGateForm: React.FC<EmailGateFormProps> = ({
       }
 
       // Step 2: Get the resource download URL
-      const resourceResponse = await fetch(`http://localhost:5001/api/${API_VERSION}/resources/${formData.email}/${resourceId}/download`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Backend returns an ApiResponse envelope: { success, data: { downloadUrl, expiresIn }, message }
+      const resourceResponse = await fetch(
+        `http://localhost:5001/api/${API_VERSION}/resources/${encodeURIComponent(formData.email)}/${encodeURIComponent(resourceId)}/download?source=${encodeURIComponent(source)}`,
+        {
+          method: 'GET',
+        }
+      );
 
       if (!resourceResponse.ok) {
+        // Attempt to read error body for easier debugging
+        let errText = '';
+        try {
+          errText = await resourceResponse.text();
+        } catch {}
+        console.error('Failed to get resource', {
+          status: resourceResponse.status,
+          body: errText,
+        });
         throw new Error('Failed to get resource - status code: ' + resourceResponse.status);
       }
 
-      const resourceData = await resourceResponse.json();
+      const resourceJson = await resourceResponse.json();
+      const downloadUrl = resourceJson?.data?.downloadUrl;
+      if (!downloadUrl) {
+        console.error('Unexpected resource response shape. Expected { data: { downloadUrl } } but got:', resourceJson);
+        throw new Error('Invalid resource response');
+      }
 
       // Call the success callback with the download URL and subscription status
-      onSuccess(resourceData.downloadUrl, isExisting);
+      onSuccess(downloadUrl, isExisting);
 
     } catch (error) {
       console.error('Error processing request:', error);

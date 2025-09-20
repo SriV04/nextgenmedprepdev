@@ -136,7 +136,7 @@ export default function InterviewsPage() {
             >
               Book Mock Interview
             </CalendlyPopup>
-            <Link href="#services" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
+            <Link href="#interview-packages" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               View Packages
             </Link>
           </div>

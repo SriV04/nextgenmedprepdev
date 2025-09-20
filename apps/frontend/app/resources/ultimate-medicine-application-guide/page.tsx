@@ -18,6 +18,7 @@ export default function UltimateGuideApplicationMedicinePage() {
 
   const handleFormSuccess = (downloadUrl: string, isExistingSubscription: boolean) => {
     setDownloadUrl(downloadUrl);
+    console.log("Download URL:", downloadUrl);
     setIsExistingSubscription(isExistingSubscription);
     setIsModalOpen(true);
   };
