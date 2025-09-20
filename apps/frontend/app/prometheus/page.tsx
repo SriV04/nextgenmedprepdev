@@ -1,29 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import Link from 'next/link';
 import '@/styles/prometheus.css';
 import VaultIllustration from '@/components/VaultIllustration';
 
 export default function PrometheusPage() {
-  const [count, setCount] = useState<{ questions: number; universities: number; success: number }>({
-    questions: 0,
-    universities: 0,
-    success: 0,
+  // Last updated date (rendered as a friendly string)
+  const lastUpdated = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCount((prev: { questions: number; universities: number; success: number }) => ({
-        questions: prev.questions < 3500 ? prev.questions + 35 : 3500,
-        universities: prev.universities < 32 ? prev.universities + 1 : 32,
-        success: prev.success < 95 ? prev.success + 1 : 95
-      }));
-    }, 20);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <main className="bg-black text-white overflow-hidden">
@@ -117,26 +106,20 @@ export default function PrometheusPage() {
       <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { value: count.questions, label: 'Practice Questions', icon: '❓' },
-              { value: count.universities, label: 'Universities Covered', icon: '🏫' },
-              { value: count.success, label: 'Success Rate', suffix: '%', icon: '🎯' },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                className="bg-black/40 p-8 rounded-lg backdrop-blur-sm border border-indigo-500/30"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-              >
-                <div className="text-4xl mb-4 text-indigo-400">{stat.icon}</div>
-                <div className="text-5xl font-bold mb-2">
-                  {stat.value}{stat.suffix || ''}
-                </div>
-                <div className="text-xl text-gray-400">{stat.label}</div>
-              </motion.div>
-            ))}
+            {/* Practice Questions */}
+            <StatCard icon="❓" label="Practice Questions">
+              <CountUp end={3500} duration={1500} />
+            </StatCard>
+
+            {/* Universities Covered */}
+            <StatCard icon="🏫" label="Universities Covered">
+              <CountUp end={32} duration={1200} />
+            </StatCard>
+
+            {/* Last Updated (date) */}
+            <StatCard icon="📅" label="Last Updated">
+              <span className="text-2xl md:text-3xl font-semibold">{lastUpdated}</span>
+            </StatCard>
           </div>
         </div>
       </section>
@@ -419,5 +402,54 @@ export default function PrometheusPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+// Small presentational card for stats
+function StatCard({ icon, label, children }: { icon: string; label: string; children: React.ReactNode }) {
+  return (
+    <motion.div
+      className="bg-black/40 p-8 rounded-lg backdrop-blur-sm border border-indigo-500/30 text-center"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      viewport={{ once: true }}
+    >
+      <div className="text-4xl mb-4 text-indigo-400">{icon}</div>
+      <div className="text-5xl font-bold mb-2 leading-none">{children}</div>
+      <div className="text-xl text-gray-400">{label}</div>
+    </motion.div>
+  );
+}
+
+// Animated count-up that starts when visible
+function CountUp({ end, duration = 1500, suffix = '' }: { end: number; duration?: number; suffix?: string }) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<HTMLSpanElement | null>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+
+  useEffect(() => {
+    if (!inView) return;
+    let start: number | null = null;
+    const startValue = 0;
+    const diff = end - startValue;
+
+    const step = (timestamp: number) => {
+      if (start === null) start = timestamp;
+      const elapsed = timestamp - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutCubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(startValue + diff * eased));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+
+    const raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, end, duration]);
+
+  const formatted = new Intl.NumberFormat('en-GB').format(value);
+  return (
+    <span ref={ref} className="tabular-nums">{formatted}{suffix}</span>
   );
 }
