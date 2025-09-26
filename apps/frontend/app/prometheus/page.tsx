@@ -4,7 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Link from 'next/link';
 import '@/styles/prometheus.css';
-import VaultIllustration from '@/components/VaultIllustration';
+import Starfield from '@/components/prometheus/Starfield';
+import GlobeIllustration from '@/components/prometheus/GlobeIllustration';
+import UKMedicalSchoolsMap from '@/components/prometheus/UKMedicalSchoolsMap';
 
 export default function PrometheusPage() {
   // Last updated date (rendered as a friendly string)
@@ -16,7 +18,7 @@ export default function PrometheusPage() {
 
   return (
     <main className="bg-black text-white overflow-hidden">
-      {/* Hero Section with Vault Animation */}
+  {/* Hero Section with Globe Animation */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Animation Grid */}
         <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 opacity-20">
@@ -36,7 +38,10 @@ export default function PrometheusPage() {
           ))}
         </div>
 
-        {/* Vault Illustration */}
+        {/* Starfield overlay */}
+        <Starfield className="z-[1]" />
+
+        {/* Globe Illustration */}
         <motion.div
           className="absolute inset-0 flex items-center justify-center"
           initial={{ opacity: 0 }}
@@ -44,7 +49,7 @@ export default function PrometheusPage() {
           transition={{ duration: 1 }}
         >
           <div className="relative w-[90vw] max-w-4xl aspect-square">
-            <VaultIllustration className="absolute inset-0" />
+            <GlobeIllustration className="absolute inset-0" />
           </div>
         </motion.div>
 
@@ -56,10 +61,10 @@ export default function PrometheusPage() {
           transition={{ duration: 1, delay: 2.3 }}
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-            <span className="text-indigo-400">PROMETHEUS</span> VAULT
+            <span className="text-indigo-400">PROMETHEUS</span> ATLAS
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-300">
-            Unlock the ultimate question bank for medical and dental interview preparation
+            Navigate the global hub for medical and dental interview mastery, tailored to where you want to study
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <motion.button
@@ -67,14 +72,14 @@ export default function PrometheusPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              ACCESS THE VAULT
+              EXPLORE THE ATLAS
             </motion.button>
             <motion.button
               className="px-8 py-4 text-lg font-bold border-2 border-purple-500 text-purple-400 rounded-md hover:bg-purple-500/10 transition-all"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              LEARN MORE
+              VIEW FEATURES
             </motion.button>
           </div>
         </motion.div>
@@ -100,6 +105,30 @@ export default function PrometheusPage() {
             />
           </svg>
         </motion.div>
+      </section>
+
+      {/* UK Medical Schools Explorer */}
+      <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-24">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="text-center max-w-3xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Discover UK Medical Schools
+            </h2>
+            <p className="text-lg md:text-xl text-gray-300">
+              Tap on a university to reveal bespoke interview insights powered by Prometheus intelligence.
+            </p>
+          </motion.div>
+
+          <div className="bg-black/50 border border-indigo-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-xl">
+            <UKMedicalSchoolsMap />
+          </div>
+        </div>
       </section>
 
       {/* Statistics Section */}
