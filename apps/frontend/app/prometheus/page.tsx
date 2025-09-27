@@ -18,11 +18,11 @@ export default function PrometheusPage() {
 
   return (
     <main className="bg-black text-white overflow-hidden">
-  {/* Hero Section with Globe Animation */}
+      {/* Hero Section with Globe Animation */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Animation Grid */}
         <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 opacity-20">
-          {Array(64).fill(0).map((_, i) => (
+          {Array.from({length: 64}).map((_, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0 }}
@@ -107,30 +107,6 @@ export default function PrometheusPage() {
         </motion.div>
       </section>
 
-      {/* UK Medical Schools Explorer */}
-      <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-24">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center max-w-3xl mx-auto mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Discover UK Medical Schools
-            </h2>
-            <p className="text-lg md:text-xl text-gray-300">
-              Tap on a university to reveal bespoke interview insights powered by Prometheus intelligence.
-            </p>
-          </motion.div>
-
-          <div className="bg-black/50 border border-indigo-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-xl">
-            <UKMedicalSchoolsMap />
-          </div>
-        </div>
-      </section>
-
       {/* Statistics Section */}
       <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-20">
         <div className="container mx-auto px-4">
@@ -152,6 +128,32 @@ export default function PrometheusPage() {
           </div>
         </div>
       </section>
+
+      {/* UK Medical Schools Explorer */}
+      <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-24">
+        <div className="container mx-auto px-4">
+          <motion.div
+            className="text-center max-w-3xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Discover UK Medical Schools
+            </h2>
+            <p className="text-lg md:text-xl text-gray-300">
+              Tap on a university to reveal bespoke interview insights powered by Prometheus intelligence.
+            </p>
+          </motion.div>
+
+          <div className="bg-black/50 border border-indigo-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-xl">
+            {typeof window !== "undefined" && <UKMedicalSchoolsMap />}
+          </div>
+        </div>
+      </section>
+
+      
 
       {/* Features Section */}
       <section className="py-20 bg-black grid-background">
@@ -204,23 +206,25 @@ export default function PrometheusPage() {
                 description: 'Targeted preparation for individual university interview styles and formats.',
                 icon: '🎓'
               }
-            ].map((feature, index) => (
-              <motion.div
-                key={index}
-                className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-8 rounded-lg border border-indigo-500/30 hover:border-indigo-400 transition-all group feature-card"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-              >
-                <div className="text-5xl mb-6 text-indigo-400 group-hover:scale-110 transition-transform">
-                  {feature.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
-              </motion.div>
-            ))}
+            ].map((feature, index) => {
+              return (
+                <motion.div
+                  key={index}
+                  className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-8 rounded-lg border border-indigo-500/30 hover:border-indigo-400 transition-all group feature-card"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="text-5xl mb-6 text-indigo-400 group-hover:scale-110 transition-transform">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
+                  <p className="text-gray-400">{feature.description}</p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -289,25 +293,27 @@ export default function PrometheusPage() {
                 name: "Aisha K.",
                 school: "University of Edinburgh Medical School"
               }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                className="bg-black p-8 rounded-lg border border-indigo-500/30 relative"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-              >
-                <div className="text-6xl text-indigo-400/20 absolute top-4 left-4">"</div>
-                <div className="relative z-10">
-                  <p className="text-lg mb-6 text-gray-300">{testimonial.quote}</p>
-                  <div>
-                    <div className="font-bold text-indigo-400">{testimonial.name}</div>
-                    <div className="text-gray-400 text-sm">{testimonial.school}</div>
+            ].map((testimonial, index) => {
+              return (
+                <motion.div
+                  key={index}
+                  className="bg-black p-8 rounded-lg border border-indigo-500/30 relative"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="text-6xl text-indigo-400/20 absolute top-4 left-4">"</div>
+                  <div className="relative z-10">
+                    <p className="text-lg mb-6 text-gray-300">{testimonial.quote}</p>
+                    <div>
+                      <div className="font-bold text-indigo-400">{testimonial.name}</div>
+                      <div className="text-gray-400 text-sm">{testimonial.school}</div>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -345,27 +351,29 @@ export default function PrometheusPage() {
                 question: "How often is the content updated?",
                 answer: "Our content is regularly updated to reflect the latest interview trends, healthcare policies, and ethical considerations relevant to medical and dental education."
               }
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                className="mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <div className="bg-black/60 p-6 rounded-lg backdrop-blur-sm border border-indigo-500/30">
-                  <h3 className="text-xl font-bold mb-3 flex items-center">
-                    <span className="text-indigo-400 mr-3">Q:</span>
-                    {item.question}
-                  </h3>
-                  <p className="text-gray-300 pl-7">
-                    <span className="text-indigo-400 font-bold">A: </span>
-                    {item.answer}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+            ].map((item, index) => {
+              return (
+                <motion.div
+                  key={index}
+                  className="mb-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <div className="bg-black/60 p-6 rounded-lg backdrop-blur-sm border border-indigo-500/30">
+                    <h3 className="text-xl font-bold mb-3 flex items-center">
+                      <span className="text-indigo-400 mr-3">Q:</span>
+                      {item.question}
+                    </h3>
+                    <p className="text-gray-300 pl-7">
+                      <span className="text-indigo-400 font-bold">A: </span>
+                      {item.answer}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -374,7 +382,7 @@ export default function PrometheusPage() {
       <section className="py-20 bg-black relative overflow-hidden">
         {/* Background grid effect */}
         <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10">
-          {Array(144).fill(0).map((_, i) => (
+          {Array.from({length: 144}).map((_, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0 }}

@@ -8,10 +8,10 @@ interface Story { // Ensure this matches the type used in the page
 }
 
 interface SuccessStoriesProps {
-    stories: Story[];
+    stories?: Story[];
 }
 
-const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories }) => {
+const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories = [] }) => {
     return (
         <div className="relative">
           {/* Large Quote Mark (Decorative) */}
@@ -143,19 +143,19 @@ const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories }) => {
           {/* Success Stats */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="p-6 bg-[var(--color-background-accent)] rounded-xl">
-              <div className="text-3xl font-bold text-[var(--color-accent-primary]">94%</div>
+              <div className="text-3xl font-bold text-[var(--color-accent-primary)]">94%</div>
               <p className="text-sm mt-2">of our students receive at least one offer</p>
             </div>
             <div className="p-6 bg-[var(--color-background-accent)] rounded-xl">
-              <div className="text-3xl font-bold text-[var(--color-accent-primary]">78%</div>
+              <div className="text-3xl font-bold text-[var(--color-accent-primary)]">78%</div>
               <p className="text-sm mt-2">get into their first-choice university</p>
             </div>
             <div className="p-6 bg-[var(--color-background-accent)] rounded-xl">
-              <div className="text-3xl font-bold text-[var(--color-accent-primary]">500+</div>
+              <div className="text-3xl font-bold text-[var(--color-accent-primary)]">500+</div>
               <p className="text-sm mt-2">students coached since 2024</p>
             </div>
             <div className="p-6 bg-[var(--color-background-accent)] rounded-xl">
-              <div className="text-3xl font-bold text-[var(--color-accent-primary]">27</div>
+              <div className="text-3xl font-bold text-[var(--color-accent-primary)]">27</div>
               <p className="text-sm mt-2">UK medical schools with our alumni</p>
             </div>
           </div>
