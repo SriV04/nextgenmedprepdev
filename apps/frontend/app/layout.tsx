@@ -53,7 +53,7 @@ export default function RootLayout({
           <div className="w-full px-3 sm:px-4 py-3 mx-auto max-w-[100vw]">
             <div className="flex items-center justify-between min-w-0">
               <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
-                <a href="/" className="flex items-center space-x-2">
+                <Link href="/" className="flex items-center space-x-2">
                   <img
                     src="/NGMP logo.png"
                     alt="NextGenMedPrep Logo"
@@ -62,7 +62,7 @@ export default function RootLayout({
                   <span className="text-sm sm:text-lg font-bold text-gradient-primary">
                     NextGenMedPrep
                   </span>
-                </a>
+                </Link>
               </div>
               <div className="hidden lg:block"></div>
                 <nav className="hidden lg:flex items-center justify-center flex-1 max-w-2xl mx-4">

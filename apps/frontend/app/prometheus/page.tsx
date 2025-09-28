@@ -7,6 +7,12 @@ import '@/styles/prometheus.css';
 import Starfield from '@/components/prometheus/Starfield';
 import GlobeIllustration from '@/components/prometheus/GlobeIllustration';
 import UKMedicalSchoolsMap from '@/components/prometheus/UKMedicalSchoolsMap';
+import dynamic from 'next/dynamic'
+
+const DynamicUkMedicalSchoolsMap = dynamic(
+  () => import('../../components/prometheus/UKMedicalSchoolsMap'),
+  { ssr: false }
+)
 
 export default function PrometheusPage() {
   // Last updated date (rendered as a friendly string)
@@ -148,7 +154,7 @@ export default function PrometheusPage() {
           </motion.div>
 
           <div className="bg-black/50 border border-indigo-500/30 rounded-2xl p-8 md:p-12 backdrop-blur-xl">
-            {typeof window !== "undefined" && <UKMedicalSchoolsMap />}
+            <DynamicUkMedicalSchoolsMap />
           </div>
         </div>
       </section>

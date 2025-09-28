@@ -203,29 +203,24 @@ export default function UKMedicalSchoolsMap() {
               style={{ width: '100%', height: '100%' }}
             >
               <Geographies geography={geoUrl}>
-                {({ geographies }) => {
-                  // Make sure we explicitly return a React fragment with Geography elements inside
-                  return (
-                    <>
-                      {geographies
-                        .filter(geo => geo.properties.name === 'United Kingdom')
-                        .map(geo => (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            fill="rgba(79, 70, 229, 0.12)"
-                            stroke="rgba(129, 140, 248, 0.45)"
-                            strokeWidth={0.8}
-                            style={{
-                              default: { outline: 'none' },
-                              hover: { outline: 'none' },
-                              pressed: { outline: 'none' },
-                            }}
-                          />
-                        ))}
-                    </>
-                  );
-                }}
+                {({ geographies }) =>
+                  geographies
+                    .filter(geo => geo.properties.name === 'United Kingdom')
+                    .map(geo => (
+                      <Geography
+                        key={geo.rsmKey}
+                        geography={geo}
+                        fill="rgba(79, 70, 229, 0.12)"
+                        stroke="rgba(129, 140, 248, 0.45)"
+                        strokeWidth={0.8}
+                        style={{
+                          default: { outline: 'none' },
+                          hover: { outline: 'none' },
+                          pressed: { outline: 'none' },
+                        }}
+                      />
+                    ))
+                }
               </Geographies>
 
               {medicalSchools.map(school => (
