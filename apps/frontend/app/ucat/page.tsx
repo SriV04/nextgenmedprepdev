@@ -17,6 +17,7 @@ export default function UCATPage() {
   const [currentScore, setCurrentScore] = useState<number>(2000);
   const [targetScore, setTargetScore] = useState<number>(2500);
   const [calculatedHours, setCalculatedHours] = useState<number>(0);
+  const [showContactForm, setShowContactForm] = useState<boolean>(false);
 
   const calculateTutoringHours = () => {
     const scoreDifference = targetScore - currentScore;
@@ -27,7 +28,7 @@ export default function UCATPage() {
       return;
     }
     
-    let baseHours = Math.max(5, Math.ceil(scoreDifference / 25)); // At least 5 hours minimum
+    let baseHours = Math.max(3, Math.ceil(scoreDifference / 25)); // At least 3 hours minimum
     
     // Add extra hours for higher target scores (premium positioning)
     if (targetScore >= 2500) {
@@ -43,8 +44,8 @@ export default function UCATPage() {
       baseHours += 2;
     }
     
-    // Ensure minimum of 5 hours
-    setCalculatedHours(Math.max(5, baseHours));
+    // Ensure minimum of 3 hours
+    setCalculatedHours(Math.max(3, baseHours));
   };
 
   const services = [
@@ -239,33 +240,212 @@ export default function UCATPage() {
                   <span className="text-4xl font-bold text-blue-600">{calculatedHours}</span>
                   <span className="text-lg text-gray-700 ml-2">hours</span>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {targetScore <= currentScore ? "Recommended Maintenance Hours" : "Recommended Tutoring Hours"}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  {targetScore <= currentScore 
-                    ? `Since you're already at or above your target score, we recommend ${calculatedHours} hours of targeted practice to solidify your performance and build full confidence for test day.`
-                    : `Based on your score gap of ${targetScore - currentScore} points, our algorithm recommends ${calculatedHours} hours of intensive tutoring to achieve your target score.`
-                  }
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-                  <Link 
-                    href="/get-started" 
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300"
-                  >
-                    Book {calculatedHours} Hour Package
-                  </Link>
-                  <CalendlyPopup 
-                    url="https://calendly.com/nextgenmedprep/consultation"
-                    className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300"
-                    utm={{
-                      utmCampaign: 'ucat-calculator',
-                      utmSource: 'website',
-                      utmMedium: 'calculator-result'
-                    }}
-                  >
-                    Discuss Custom Plan
-                  </CalendlyPopup>
+                
+                {/* 0-4 hours: UCAT Kickstart */}
+                {calculatedHours >= 0 && calculatedHours <= 4 && (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      You matched with UCAT Kickstart! 🎯
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Perfect for building strong foundations. Our Kickstart package will give you the essential background knowledge across all UCAT sections to boost your performance.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                      <CalendlyPopup 
+                        url="https://calendly.com/sri-nextgenmedprep/30min"
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300"
+                        prefill={{
+                          name: "UCAT Kickstart Inquiry"
+                        }}
+                        utm={{
+                          utmCampaign: 'ucat-kickstart',
+                          utmSource: 'calculator',
+                          utmMedium: 'recommendation'
+                        }}
+                      >
+                        Book UCAT Kickstart - £200
+                      </CalendlyPopup>
+                    </div>
+                  </>
+                )}
+                
+                {/* 4-8 hours: UCAT Advance */}
+                {calculatedHours > 4 && calculatedHours <= 8 && (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      This suits UCAT Advance! 📈
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Ideal for refining and targeting performance. Our Advance package includes everything in Kickstart plus 8 hours of targeted question-specific perfection sessions.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                      <CalendlyPopup 
+                        url="https://calendly.com/sri-nextgenmedprep/30min"
+                        className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300"
+                        prefill={{
+                          name: "UCAT Advance Inquiry"
+                        }}
+                        utm={{
+                          utmCampaign: 'ucat-advance',
+                          utmSource: 'calculator',
+                          utmMedium: 'recommendation'
+                        }}
+                      >
+                        Book UCAT Advance - £375
+                      </CalendlyPopup>
+                    </div>
+                  </>
+                )}
+                
+                {/* 8-12 hours: UCAT Mastery */}
+                {calculatedHours > 8 && calculatedHours <= 12 && (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Matches with UCAT Mastery! 🎖️
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Perfect for aiming for top 10% scores. Our Mastery package includes everything in Advance plus 12 hours of high-intensity question-perfection sessions.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                      <CalendlyPopup 
+                        url="https://calendly.com/sri-nextgenmedprep/30min"
+                        className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300"
+                        prefill={{
+                          name: "UCAT Mastery Inquiry"
+                        }}
+                        utm={{
+                          utmCampaign: 'ucat-mastery',
+                          utmSource: 'calculator',
+                          utmMedium: 'recommendation'
+                        }}
+                      >
+                        Book UCAT Mastery - £550
+                      </CalendlyPopup>
+                    </div>
+                  </>
+                )}
+                
+                {/* Above 12 hours: Contact form */}
+                {calculatedHours > 12 && (
+                  <>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Custom Tutoring Plan Needed 📚
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Your score gap requires more intensive tutoring. Let's create a personalized plan that fits your specific needs and timeline.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+                      <button
+                        onClick={() => setShowContactForm(true)}
+                        className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300"
+                      >
+                        Get Custom Tutoring Plan
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            
+            {/* Contact Form Modal */}
+            {showContactForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-2xl font-bold text-gray-900">Get Custom Tutoring Plan</h3>
+                    <button
+                      onClick={() => setShowContactForm(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <form className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Your full name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Your phone number"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Current UCAT Score</label>
+                      <input
+                        type="text"
+                        value={currentScore}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Target UCAT Score</label>
+                      <input
+                        type="text"
+                        value={targetScore}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Hours Needed</label>
+                      <input
+                        type="text"
+                        value={`${calculatedHours} hours`}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Additional Information</label>
+                      <textarea
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Tell us about your UCAT preparation timeline, specific challenges, or any other relevant information..."
+                      ></textarea>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowContactForm(false)}
+                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-300"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300"
+                      >
+                        Submit Request
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             )}
