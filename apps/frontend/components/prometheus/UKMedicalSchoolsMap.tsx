@@ -205,11 +205,11 @@ export default function UKMedicalSchoolsMap() {
               <Geographies geography={geoUrl}>
                 {({ geographies }) =>
                   geographies
-                    .filter(geo => geo.properties.name === 'United Kingdom')
+                    .filter(geo => geo.properties?.name === 'United Kingdom')
                     .map(geo => (
                       <Geography
                         key={geo.rsmKey}
-                        geography={geo}
+                        geography={geo} 
                         fill="rgba(79, 70, 229, 0.12)"
                         stroke="rgba(129, 140, 248, 0.45)"
                         strokeWidth={0.8}
@@ -224,7 +224,7 @@ export default function UKMedicalSchoolsMap() {
               </Geographies>
 
               {medicalSchools.map(school => (
-                <Marker key={school.id} coordinates={school.coordinates}>
+                <Marker key={String(school.id)} coordinates={school.coordinates}>
                   <g>
                     {selectedSchool.id === school.id ? (
                       <motion.circle
@@ -349,7 +349,7 @@ export default function UKMedicalSchoolsMap() {
               </div>
 
               <p className="text-gray-300 mb-4 text-sm leading-relaxed">
-                Practice with AI-powered mock interviews specifically tailored for {selectedSchool.name}'s interview
+                Practice with AI-powered mock interviews specifically tailored for {String(selectedSchool.name)}'s interview
                 format and style.
               </p>
 
@@ -382,7 +382,7 @@ export default function UKMedicalSchoolsMap() {
             </div>
 
             <button className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors font-semibold">
-              Learn More About {selectedSchool.location}
+              Learn More About {String(selectedSchool.location)}
             </button>
           </motion.div>
         </div>
