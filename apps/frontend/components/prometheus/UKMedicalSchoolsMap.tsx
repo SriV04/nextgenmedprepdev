@@ -209,7 +209,7 @@ export default function UKMedicalSchoolsMap() {
                     .map(geo => (
                       <Geography
                         key={geo.rsmKey}
-                        geography={geo?.geometry ?? geo} 
+                        geography={geo} 
                         fill="rgba(79, 70, 229, 0.12)"
                         stroke="rgba(129, 140, 248, 0.45)"
                         strokeWidth={0.8}
