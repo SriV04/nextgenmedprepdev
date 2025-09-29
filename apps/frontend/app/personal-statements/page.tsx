@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 
 const PersonalStatementPage = () => {
@@ -96,7 +97,7 @@ const PersonalStatementPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {shopItems.map((item) => (
             <div key={item.id} className="border rounded-lg shadow-lg overflow-hidden">
-              <img src={item.imageUrl} alt={item.name} className="w-full h-48 object-cover"/>
+              <Image src={item.imageUrl} alt={item.name} className="w-full h-48 object-cover"/>
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.name}</h3>
                 <p className="text-gray-600 mb-4">{item.description}</p>
