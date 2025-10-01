@@ -29,7 +29,14 @@ const Hero: React.FC = () => {
               <span key={i} className="text-yellow-400 text-xs">⭐</span>
             ))}
           </div>
-          <span className="text-xs font-medium text-gray-700">Trusted by 500+ students</span>
+            <a
+            href="https://uk.trustpilot.com/review/nextgenmedprep.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-gray-700 underline hover:text-blue-600 transition-colors"
+            >
+            Trusted by 500+ students
+            </a>
         </div>
 
         {/* Main headline */}
@@ -43,7 +50,7 @@ const Hero: React.FC = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-blue-200 font-medium mb-3">
-            Welcome, future Doctors.
+            Welcome, Future Doctors.
           </p>
         </div>
 
