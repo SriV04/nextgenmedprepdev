@@ -2,19 +2,25 @@
 
 import { useState } from 'react';
 
-interface MegaMenuProps {
+interface MenuItem {
   title: string;
-  items: string[];
+  href: string;
 }
 
-const MegaMenu = ({ title, items }: MegaMenuProps) => {
+interface MegaMenuProps {
+  title: string;
+  href?: string;
+  items: MenuItem[];
+}
+
+const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Determine if this is the Prometheus menu item or if there are no items
   const isPrometheus = title === "Prometheus";
   const hasItems = items.length > 0;
 
-  const linkPath = `/${title.toLowerCase().replace(/\s+/g, "-")}`;
+  const linkPath = href || `/${title.toLowerCase().replace(/\s+/g, "-")}`;
 
   const trigger = (
     <a
@@ -72,15 +78,15 @@ const MegaMenu = ({ title, items }: MegaMenuProps) => {
             <div className="grid gap-1">
               {items.map((item) => (
                 <a
-                  key={item}
-                  href={`/${title.toLowerCase().replace(/\s+/g, '-')}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  key={item.title}
+                  href={item.href}
                   className={`block px-2 py-1.5 rounded-md transition-all duration-200 text-xs ${
                     isPrometheus 
                       ? 'text-purple-700 hover:text-purple-900 hover:bg-purple-100' 
                       : 'text-text-secondary hover:text-text-primary hover:bg-background-accent'
                   }`}
                 >
-                  {item}
+                  {item.title}
                 </a>
               ))}
             </div>

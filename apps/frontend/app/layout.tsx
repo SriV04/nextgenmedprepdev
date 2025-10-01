@@ -18,15 +18,69 @@ const socialLinks: Record<string, string> = {
   "Facebook": "https://www.facebook.com/people/NextGen-MedPrep/61566778581462/",
 }
 
-const megaMenuItems: Record<string, string[]> = {
-  "About": ["Join the Team"],
-  "Get Started": ["Ultimate Medicine Application Guide", "Ultimate Dentistry Application Guide"],
-  "Interviews": ["Panel Interviews", "MMIs"],
-  "UCAT": ["Free Resources", "Conferences", "Tutoring Packages"],
-  "Personal Statements": ["Free Personal Statement Guide", "Medicine Statements", "Dental Statements", "PS Reviews"],
-  "Events": ["All Conferences", "Upcoming", "Past"],
-  "Prometheus": [],
-};
+interface MenuItem {
+  title: string;
+  href: string;
+}
+
+interface MegaMenuConfig {
+  title: string;
+  href?: string;
+  items: MenuItem[];
+}
+
+const megaMenuItems: MegaMenuConfig[] = [
+  {
+    title: "About",
+    items: [
+      { title: "Join the Team", href: "/about/join-the-team" },
+    ],
+  },
+  {
+    title: "Get Started",
+    items: [
+      { title: "Ultimate Medicine Application Guide", href: "/resources/ultimate-medicine-application-guide" },
+      { title: "Ultimate Dentistry Application Guide", href: "/resources/ultimate-dentistry-application-guide" },
+    ],
+  },
+  {
+    title: "Interviews",
+    items: [
+      { title: "Panel Interviews", href: "/interviews/panel-interviews" },
+      { title: "MMIs", href: "/interviews/mmis" },
+    ],
+  },
+  {
+    title: "UCAT",
+    items: [
+      { title: "Ultimate UCAT Prep Guide", href: "/resources/ultimate-ucat-prep-guide" },
+      { title: "Conferences", href: "/events" },
+      { title: "Tutoring Packages", href: "/ucat#tutoring-packages" },
+    ],
+  },
+  {
+    title: "Personal Statements",
+    items: [
+      { title: "Free Personal Statement Guide", href: "/resources/free-personal-statement-guide" },
+      { title: "Medicine Statements", href: "/personal-statements/medicine" },
+      { title: "Dental Statements", href: "/personal-statements/dental" },
+      { title: "PS Reviews", href: "/personal-statements/reviews" },
+    ],
+  },
+  {
+    title: "Events",
+    items: [
+      { title: "All Conferences", href: "/events" },
+      { title: "Upcoming", href: "/events/upcoming" },
+      { title: "Past", href: "/events/past" },
+    ],
+  },
+  {
+    title: "Prometheus",
+    href: "/prometheus",
+    items: [],
+  },
+];
 
 export const metadata: Metadata = {
   title: "NextGenMedPrep",
@@ -67,11 +121,12 @@ export default function RootLayout({
               <div className="hidden lg:block"></div>
                 <nav className="hidden lg:flex items-center justify-center flex-1 max-w-2xl mx-4">
                   <div className="flex items-center space-x-1">
-                    {Object.entries(megaMenuItems).map(([title, items]) => (
+                    {megaMenuItems.map((menuConfig) => (
                       <MegaMenu
-                        key={title}
-                        title={title}
-                        items={items}
+                        key={menuConfig.title}
+                        title={menuConfig.title}
+                        href={menuConfig.href}
+                        items={menuConfig.items}
                       />
                     ))}
                   </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 
@@ -177,11 +177,210 @@ const medicalSchools: MedicalSchool[] = [
 const geoUrl = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
 export default function UKMedicalSchoolsMap() {
+  const [mounted, setMounted] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState<MedicalSchool>(medicalSchools[0]);
   const [hoveredSchool, setHoveredSchool] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Filter schools based on search term
+  const filteredSchools = medicalSchools.filter(school =>
+    school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleSearchSelect = (school: MedicalSchool) => {
+    setSelectedSchool(school);
+    setSearchTerm('');
+    setShowDropdown(false);
+    setSelectedIndex(-1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setShowDropdown(value.length > 0);
+    setSelectedIndex(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || filteredSchools.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < filteredSchools.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev > 0 ? prev - 1 : filteredSchools.length - 1
+        );
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < filteredSchools.length) {
+          handleSearchSelect(filteredSchools[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowDropdown(false);
+        setSelectedIndex(-1);
+        break;
+    }
+  };
+
+  // Prevent hydration mismatch by only rendering on client
+  if (!mounted) {
+    return (
+      <div className="space-y-8">
+        <div className="relative max-w-md mx-auto px-4 sm:px-0">
+          <div className="relative">
+            <div className="w-full px-4 py-3 pl-12 bg-black/50 border border-indigo-500/30 rounded-lg text-white placeholder-gray-400 animate-pulse">
+              Loading search...
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-12 items-start">
+          <div className="relative">
+            <div className="w-full h-full min-h-[540px] bg-black/20 animate-pulse rounded-lg flex items-center justify-center">
+              <span className="text-gray-400">Loading map...</span>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-8 rounded-lg border border-indigo-500/30 animate-pulse">
+              <div className="h-8 bg-indigo-400/20 rounded mb-4"></div>
+              <div className="h-20 bg-gray-700/20 rounded mb-6"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-12 items-start">
+    <div className="space-y-8">
+      {/* Search Bar */}
+      <div className="relative max-w-md mx-auto px-4 sm:px-0">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search universities..."
+            value={searchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full px-4 py-3 pl-12 bg-black/50 border border-indigo-500/30 rounded-lg text-white placeholder-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-base"
+            onFocus={() => setShowDropdown(searchTerm.length > 0)}
+            onBlur={() => {
+              // Delay hiding dropdown to allow clicks
+              setTimeout(() => setShowDropdown(false), 200);
+            }}
+          />
+          <svg
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          
+          {/* Clear Button */}
+          {searchTerm && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setShowDropdown(false);
+                setSelectedIndex(-1);
+              }}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 hover:text-white transition-colors"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Search Dropdown */}
+        {showDropdown && filteredSchools.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-black/95 border border-indigo-500/30 rounded-lg backdrop-blur-xl z-50 max-h-64 overflow-y-auto"
+          >
+            {filteredSchools.map((school, index) => (
+              <motion.button
+                key={school.id}
+                onClick={() => handleSearchSelect(school)}
+                className={`w-full px-4 py-3 text-left transition-colors border-b border-indigo-500/10 last:border-b-0 focus:outline-none ${
+                  index === selectedIndex 
+                    ? 'bg-indigo-500/30' 
+                    : 'hover:bg-indigo-500/20 focus:bg-indigo-500/20'
+                }`}
+                whileHover={{ x: 4 }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-white">{school.name}</div>
+                    <div className="text-sm text-gray-400">{school.location}</div>
+                  </div>
+                  <div className="text-xs text-indigo-300">{school.establishedYear}</div>
+                </div>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+
+        {/* No Results */}
+        {showDropdown && searchTerm.length > 0 && filteredSchools.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-black/95 border border-indigo-500/30 rounded-lg backdrop-blur-xl z-50 p-4 text-center text-gray-400"
+          >
+            No universities found for "{searchTerm}"
+          </motion.div>
+        )}
+      </div>
+
+      {/* Quick Access Pills */}
+      <div className="flex flex-wrap justify-center gap-2 px-4">
+        <span className="text-sm text-gray-400 mr-2">Popular:</span>
+        {['oxford', 'cambridge', 'imperial', 'ucl', 'edinburgh'].map((schoolId) => {
+          const school = medicalSchools.find(s => s.id === schoolId);
+          if (!school) return null;
+          return (
+            <motion.button
+              key={schoolId}
+              onClick={() => setSelectedSchool(school)}
+              className={`px-3 py-1 text-sm rounded-full transition-all ${
+                selectedSchool.id === schoolId
+                  ? 'bg-indigo-500 text-white'
+                  : 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30'
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {school.location}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-12 items-start">
       <div className="relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.92 }}
@@ -223,8 +422,14 @@ export default function UKMedicalSchoolsMap() {
                 }
               </Geographies>
 
-              {medicalSchools.map(school => (
-                <Marker key={String(school.id)} coordinates={school.coordinates}>
+              {medicalSchools.map(school => {
+                // Round coordinates to prevent hydration mismatch
+                const roundedCoordinates: [number, number] = [
+                  Math.round(school.coordinates[0] * 10000) / 10000,
+                  Math.round(school.coordinates[1] * 10000) / 10000
+                ];
+                return (
+                <Marker key={String(school.id)} coordinates={roundedCoordinates}>
                   <g>
                     {selectedSchool.id === school.id ? (
                       <motion.circle
@@ -270,7 +475,8 @@ export default function UKMedicalSchoolsMap() {
                     ) : null}
                   </g>
                 </Marker>
-              ))}
+                );
+              })}
             </ComposableMap>
           </div>
         </motion.div>
@@ -387,6 +593,7 @@ export default function UKMedicalSchoolsMap() {
           </motion.div>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 }

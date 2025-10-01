@@ -6,7 +6,6 @@ import Link from 'next/link';
 import '@/styles/prometheus.css';
 import Starfield from '@/components/prometheus/Starfield';
 import GlobeIllustration from '@/components/prometheus/GlobeIllustration';
-import UKMedicalSchoolsMap from '@/components/prometheus/UKMedicalSchoolsMap';
 import dynamic from 'next/dynamic'
 
 const DynamicUkMedicalSchoolsMap = dynamic(
@@ -67,7 +66,7 @@ export default function PrometheusPage() {
           transition={{ duration: 1, delay: 2.3 }}
         >
           <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-            <span className="text-indigo-400">PROMETHEUS</span> ATLAS
+            <span className="text-indigo-400">PROMETHEUS</span> 
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-300">
             Navigate the global hub for medical and dental interview mastery, tailored to where you want to study
@@ -113,28 +112,6 @@ export default function PrometheusPage() {
         </motion.div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Practice Questions */}
-            <StatCard icon="❓" label="Practice Questions">
-              <CountUp end={3500} duration={1500} />
-            </StatCard>
-
-            {/* Universities Covered */}
-            <StatCard icon="🏫" label="Universities Covered">
-              <CountUp end={32} duration={1200} />
-            </StatCard>
-
-            {/* Last Updated (date) */}
-            <StatCard icon="📅" label="Last Updated">
-              <span className="text-2xl md:text-3xl font-semibold">{lastUpdated}</span>
-            </StatCard>
-          </div>
-        </div>
-      </section>
-
       {/* UK Medical Schools Explorer */}
       <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-24">
         <div className="container mx-auto px-4">
@@ -159,7 +136,27 @@ export default function PrometheusPage() {
         </div>
       </section>
 
-      
+      {/* Statistics Section */}
+      <section className="bg-gradient-to-b from-black via-indigo-950 to-purple-950 py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Practice Questions */}
+            <StatCard icon="❓" label="Practice Questions">
+              <CountUp end={3500} duration={1500} />
+            </StatCard>
+
+            {/* Universities Covered */}
+            <StatCard icon="🏫" label="Universities Covered">
+              <CountUp end={32} duration={1200} />
+            </StatCard>
+
+            {/* Last Updated (date) */}
+            <StatCard icon="📅" label="Last Updated">
+              <span className="text-2xl md:text-3xl font-semibold">{lastUpdated}</span>
+            </StatCard>
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="py-20 bg-black grid-background">
