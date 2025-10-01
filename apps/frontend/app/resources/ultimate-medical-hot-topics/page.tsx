@@ -1,26 +1,10 @@
-'use client';
-
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import FreeResourceHero from '@/components/free-resources/FreeResourceHero';
-import EmailGateForm from '@/components/free-resources/EmailGateForm';
 import WhyGetThisGuide from '@/components/free-resources/WhyGetThisGuide';
-import SuccessModal from '@/components/free-resources/SuccessModal';
+import ResourcePageWrapper from '@/components/free-resources/ResourcePageWrapper';
+import CTAButton from '@/components/free-resources/CTAButton';
 
 export default function UltimateMedicalHotTopicsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string>('');
-  const [isExistingSubscription, setIsExistingSubscription] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
-
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleFormSuccess = (downloadUrl: string, isExistingSubscription: boolean) => {
-    setDownloadUrl(downloadUrl);
-    setIsExistingSubscription(isExistingSubscription);
-    setIsModalOpen(true);
-  };
 
   const benefits = [
     "Comprehensive coverage of the most current medical hot topics and controversies",
@@ -89,7 +73,11 @@ export default function UltimateMedicalHotTopicsPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <ResourcePageWrapper
+      resourceId="ultimate-medicine-hot-topics-guide"
+      guideName="Ultimate Medical Hot Topics Guide"
+      source="hot_topics_guide_download"
+    >
       {/* Hero Section */}
       <FreeResourceHero
         title="The Ultimate Medical Hot Topics Guide"
@@ -97,7 +85,6 @@ export default function UltimateMedicalHotTopicsPage() {
         imagePath="/guides/UMHT.png"
         imageAlt="Ultimate Medical Hot Topics Guide cover"
         benefits={benefits}
-        onGetResource={scrollToForm}
       />
 
       {/* Why Get This Guide Section */}
@@ -252,16 +239,6 @@ export default function UltimateMedicalHotTopicsPage() {
         </div>
       </section>
 
-      {/* Email Gate Form */}
-      <div ref={formRef}>
-        <EmailGateForm
-          onSuccess={handleFormSuccess}
-          resourceId="ultimate-medicine-hot-topics-guide"
-          guideName="Ultimate Medical Hot Topics Guide"
-          source="hot_topics_guide_download"
-        />
-      </div>
-
       {/* Final CTA Section */}
       <section className="py-16 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -272,26 +249,14 @@ export default function UltimateMedicalHotTopicsPage() {
             Don't get caught off guard by current medical issues. Download our comprehensive guide and demonstrate 
             your awareness of the latest developments shaping modern healthcare.
           </p>
-          <button
-            onClick={scrollToForm}
-            className="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2"
-          >
+          <CTAButton className="bg-white text-indigo-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Get Your Free Hot Topics Guide
-          </button>
+          </CTAButton>
         </div>
       </section>
-
-      {/* Success Modal */}
-      <SuccessModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        downloadUrl={downloadUrl}
-        guideName="Ultimate Medical Hot Topics Guide"
-        isExistingSubscription={isExistingSubscription}
-      />
-    </div>
+    </ResourcePageWrapper>
   );
 }

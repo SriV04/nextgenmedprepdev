@@ -1,26 +1,10 @@
-'use client';
-
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import FreeResourceHero from '@/components/free-resources/FreeResourceHero';
-import EmailGateForm from '@/components/free-resources/EmailGateForm';
 import WhyGetThisGuide from '@/components/free-resources/WhyGetThisGuide';
-import SuccessModal from '@/components/free-resources/SuccessModal';
+import ResourcePageWrapper from '@/components/free-resources/ResourcePageWrapper';
+import CTAButton from '@/components/free-resources/CTAButton';
 
 export default function UltimateEthicsGuidePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string>('');
-  const [isExistingSubscription, setIsExistingSubscription] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
-
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleFormSuccess = (downloadUrl: string, isExistingSubscription: boolean) => {
-    setDownloadUrl(downloadUrl);
-    setIsExistingSubscription(isExistingSubscription);
-    setIsModalOpen(true);
-  };
 
   const benefits = [
     "Complete framework for tackling ethical dilemmas in medical interviews",
@@ -89,7 +73,11 @@ export default function UltimateEthicsGuidePage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <ResourcePageWrapper
+      resourceId="ultimate-medicine-ethics-guide"
+      guideName="Ultimate Medicine Ethics Guide"
+      source="ethics_guide_download"
+    >
       {/* Hero Section */}
       <FreeResourceHero
         title="The Ultimate Medicine Ethics Guide"
@@ -97,7 +85,6 @@ export default function UltimateEthicsGuidePage() {
         imagePath="/guides/UGME.png"
         imageAlt="Ultimate Medicine Ethics Guide cover"
         benefits={benefits}
-        onGetResource={scrollToForm}
       />
 
       {/* Why Get This Guide Section */}
@@ -223,16 +210,6 @@ export default function UltimateEthicsGuidePage() {
         </div>
       </section>
 
-      {/* Email Gate Form */}
-      <div ref={formRef}>
-        <EmailGateForm
-          onSuccess={handleFormSuccess}
-          resourceId="ultimate-medicine-ethics-guide"
-          guideName="Ultimate Medicine Ethics Guide"
-          source="ethics_guide_download"
-        />
-      </div>
-
       {/* Final CTA Section */}
       <section className="py-16 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -243,26 +220,14 @@ export default function UltimateEthicsGuidePage() {
             Don't let ethics questions catch you off guard. Download our comprehensive guide and approach 
             every ethical dilemma with confidence and clarity.
           </p>
-          <button
-            onClick={scrollToForm}
-            className="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2"
-          >
+          <CTAButton className="bg-white text-purple-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Get Your Free Ethics Guide
-          </button>
+          </CTAButton>
         </div>
       </section>
-
-      {/* Success Modal */}
-      <SuccessModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        downloadUrl={downloadUrl}
-        guideName="Ultimate Medicine Ethics Guide"
-        isExistingSubscription={isExistingSubscription}
-      />
-    </div>
+    </ResourcePageWrapper>
   );
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import CTAButton from './CTAButton';
 
 interface FreeResourceHeroProps {
   title: string;
@@ -7,7 +8,6 @@ interface FreeResourceHeroProps {
   imagePath: string;
   imageAlt: string;
   benefits: string[];
-  onGetResource: () => void;
 }
 
 const FreeResourceHero: React.FC<FreeResourceHeroProps> = ({
@@ -16,7 +16,6 @@ const FreeResourceHero: React.FC<FreeResourceHeroProps> = ({
   imagePath,
   imageAlt,
   benefits,
-  onGetResource,
 }) => {
   return (
     <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
@@ -49,15 +48,12 @@ const FreeResourceHero: React.FC<FreeResourceHeroProps> = ({
 
             {/* CTA Button */}
             <div className="pt-6">
-              <button
-                onClick={onGetResource}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
-              >
+              <CTAButton className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Get Your Free Guide Now
-              </button>
+              </CTAButton>
               <p className="text-sm text-gray-500 mt-2">No spam, unsubscribe anytime</p>
             </div>
           </div>

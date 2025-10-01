@@ -1,26 +1,10 @@
-'use client';
-
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import FreeResourceHero from '@/components/free-resources/FreeResourceHero';
-import EmailGateForm from '@/components/free-resources/EmailGateForm';
 import WhyGetThisGuide from '@/components/free-resources/WhyGetThisGuide';
-import SuccessModal from '@/components/free-resources/SuccessModal';
+import ResourcePageWrapper from '@/components/free-resources/ResourcePageWrapper';
+import CTAButton from '@/components/free-resources/CTAButton';
 
 export default function PanelInterviewGuidePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [downloadUrl, setDownloadUrl] = useState<string>('');
-  const [isExistingSubscription, setIsExistingSubscription] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
-
-  const scrollToForm = () => {
-    formRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleFormSuccess = (downloadUrl: string, isExistingSubscription: boolean) => {
-    setDownloadUrl(downloadUrl);
-    setIsExistingSubscription(isExistingSubscription);
-    setIsModalOpen(true);
-  };
 
   const benefits = [
     "Complete panel interview preparation strategy and framework",
@@ -116,7 +100,11 @@ export default function PanelInterviewGuidePage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <ResourcePageWrapper
+      resourceId="panel-interview-guide"
+      guideName="Ultimate Panel Interview Guide"
+      source="panel_interview_guide_download"
+    >
       {/* Hero Section */}
       <FreeResourceHero
         title="The Ultimate Panel Interview Guide"
@@ -124,7 +112,6 @@ export default function PanelInterviewGuidePage() {
         imagePath="/guides/UGPI.png"
         imageAlt="Ultimate Panel Interview Guide cover"
         benefits={benefits}
-        onGetResource={scrollToForm}
       />
 
       {/* Why Get This Guide Section */}
@@ -194,16 +181,6 @@ export default function PanelInterviewGuidePage() {
         </div>
       </section>
 
-      {/* Email Gate Form */}
-      <div ref={formRef}>
-        <EmailGateForm
-          onSuccess={handleFormSuccess}
-          resourceId="ultimate-panel-interview-guide"
-          guideName="Ultimate Panel Interview Guide"
-          source="panel_interview_guide_download"
-        />
-      </div>
-
       {/* Final CTA Section */}
       <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
@@ -214,26 +191,14 @@ export default function PanelInterviewGuidePage() {
             Join hundreds of successful medical students who used our proven panel interview strategies to impress admissions committees. 
             Download your free guide now and walk into your interview with unshakeable confidence.
           </p>
-          <button
-            onClick={scrollToForm}
-            className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2"
-          >
+          <CTAButton className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Get Your Free Panel Interview Guide Now
-          </button>
+          </CTAButton>
         </div>
       </section>
-
-      {/* Success Modal */}
-      <SuccessModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        downloadUrl={downloadUrl}
-        guideName="Ultimate Panel Interview Guide"
-        isExistingSubscription={isExistingSubscription}
-      />
-    </div>
+    </ResourcePageWrapper>
   );
 }
