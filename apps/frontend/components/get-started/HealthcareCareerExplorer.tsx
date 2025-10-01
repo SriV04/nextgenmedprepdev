@@ -15,7 +15,6 @@ import {
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
-// Server-side renderable data
 const careerPaths = [
   {
     id: 'medicine',
@@ -306,11 +305,11 @@ export default function HealthcareCareerExplorer() {
               Still not sure where to start?
             </h3>
             <p className="text-gray-600 mb-6">
-              Book a free consultation with our expert advisors
+              Book a consultation with our expert advisors
             </p>
             <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2">
               <ChatBubbleLeftRightIcon className="w-5 h-5" />
-              Book Free Consultation
+              Book a Consultation
             </button>
           </div>
         </section>
