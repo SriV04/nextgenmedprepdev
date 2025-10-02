@@ -9,6 +9,12 @@
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "devDependencies": {
     "typescript": "^5.3.3"
   },

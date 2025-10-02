@@ -154,7 +154,7 @@ export default function UCATPage() {
             <Link href="/ucat/free-resources" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300">
               Improve My Score!
             </Link>
-            <Link href="#services" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
+            <Link href="#tutoring-packages" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Join our Programs
             </Link>
           </div>
@@ -605,8 +605,7 @@ export default function UCATPage() {
             Join our proven program and unlock your medical school dreams
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {/* TODO: update link  go to courses */}
-            <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
+            <Link href="#tutoring-packages" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
               Join Our Programs
             </Link>
             <CalendlyPopup 

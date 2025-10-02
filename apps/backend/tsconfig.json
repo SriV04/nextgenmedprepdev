@@ -6,8 +6,9 @@
     "lib": ["ES2020"],
     "outDir": "./dist",
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "esModuleInterop": true,  
+    "skipLibCheck": true, 
+    "moduleDetection": "force",
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
@@ -29,6 +30,7 @@
       "@/controllers/*": ["src/controllers/*"],
       "@/middleware/*": ["src/middleware/*"],
       "@/utils/*": ["src/utils/*"],
+      "@/routes/*": ["src/routes/*"],
       "@nextgenmedprep/common-types": ["../../packages/common-types/src"],
       "@nextgenmedprep/common-types/*": ["../../packages/common-types/src/*"]
     }

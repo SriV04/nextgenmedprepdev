@@ -21,7 +21,8 @@ const EmailGateForm: React.FC<EmailGateFormProps> = ({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   
-  const API_VERSION = 'v1';
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+  const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -55,7 +56,7 @@ const EmailGateForm: React.FC<EmailGateFormProps> = ({
     
     try {
       // Step 1: Create subscription with free tier
-      const subscriptionResponse = await fetch(`http://localhost:5001/api/${API_VERSION}/subscriptions`, {
+      const subscriptionResponse = await fetch(`${API_BASE_URL}/api/${API_VERSION}/subscriptions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ const EmailGateForm: React.FC<EmailGateFormProps> = ({
       // Step 2: Get the resource download URL
       // Backend returns an ApiResponse envelope: { success, data: { downloadUrl, expiresIn }, message }
       const resourceResponse = await fetch(
-        `http://localhost:5001/api/${API_VERSION}/resources/${encodeURIComponent(formData.email)}/${encodeURIComponent(resourceId)}/download?source=${encodeURIComponent(source)}`,
+        `${API_BASE_URL}/api/${API_VERSION}/resources/${encodeURIComponent(formData.email)}/${encodeURIComponent(resourceId)}/download?source=${encodeURIComponent(source)}`,
         {
           method: 'GET',
         }
