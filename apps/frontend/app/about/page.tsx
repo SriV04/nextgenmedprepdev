@@ -29,7 +29,7 @@ const teamMembers: TeamMember[] = [
     name: 'Dan Lach',
     role: 'Co-founder',
     bio: 'Dan brings extensive experience in medical education to NextGen Med Prep. His innovative approach to teaching and deep understanding of the medical school application process has helped shape our unique methodology.',
-    image: '/team/placeholder-male.jpg', // Replace with actual image when available
+    image: '/headshots/[NGMP] Dan.png', 
     section: 'founders'
   },
   
@@ -38,14 +38,14 @@ const teamMembers: TeamMember[] = [
     name: 'Matthew Cranfield',
     role: 'Expert Tutor',
     bio: 'Matthew specializes in UCAT preparation and interview coaching. With top percentile scores in all medical admissions tests and multiple medical school offers, he helps students navigate the complexities of the application process.',
-    image: '/team/placeholder-male.jpg', // Replace with actual image when available
+    image: '/headshots/[NGMP] Matthew.png',
     section: 'tutors'
   },
   {
     name: 'Lucinda Slack',
     role: 'Expert Tutor',
     bio: 'Lucinda excels in personal statement development and interview preparation. Her background in medical admissions gives her unique insights into what medical schools are looking for in candidates.',
-    image: '/team/placeholder-female.jpg', // Replace with actual image when available
+    image: '/headshots/[NGMP] Lucinda.png', 
     section: 'tutors'
   },
   

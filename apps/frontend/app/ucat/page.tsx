@@ -1,7 +1,7 @@
-"use client";
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import CalendlyPopup from '../../components/CalendlyPopup';
+import UCATCalculator from '../../components/ucat/UCATCalculator';
 import { 
   PuzzlePieceIcon, 
   ChartBarIcon, 
@@ -14,38 +14,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function UCATPage() {
-  const [currentScore, setCurrentScore] = useState<number>(2000);
-  const [targetScore, setTargetScore] = useState<number>(2500);
-  const [calculatedHours, setCalculatedHours] = useState<number>(0);
-
-  const calculateTutoringHours = () => {
-    const scoreDifference = targetScore - currentScore;
-    
-    // If current score is higher than target, recommend maintenance hours
-    if (scoreDifference <= 0) {
-      setCalculatedHours(2); // Minimum 2 hours for score maintenance
-      return;
-    }
-    
-    let baseHours = Math.max(5, Math.ceil(scoreDifference / 25)); // At least 5 hours minimum
-    
-    // Add extra hours for higher target scores (premium positioning)
-    if (targetScore >= 2500) {
-      baseHours += 3;
-    } else if (targetScore >= 2400) {
-      baseHours += 2;
-    }
-    
-    // Add complexity factor for lower starting scores
-    if (currentScore < 2300) {
-      baseHours += 4;
-    } else if (currentScore < 2500) {
-      baseHours += 2;
-    }
-    
-    // Ensure minimum of 5 hours
-    setCalculatedHours(Math.max(5, baseHours));
-  };
 
   const services = [
     {
@@ -161,123 +129,8 @@ export default function UCATPage() {
         </div>
       </section>
 
-      {/* Tutoring Hours Calculator */}
-      <section className="py-16 px-4 bg-gradient-to-br from-emerald-50 to-blue-50">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">UCAT Tutoring Hours Calculator</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Find out how many tutoring hours you need to reach your target UCAT score
-            </p>
-          </div>
-          
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Current UCAT Score (or Expected Score)
-                </label>
-                <div className="relative">
-                  <input
-                    type="range"
-                    min="1800"
-                    max="3000"
-                    step="10"
-                    value={currentScore}
-                    onChange={(e) => setCurrentScore(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500 mt-1">
-                    <span>1800</span>
-                    <span>3000</span>
-                  </div>
-                </div>
-                <div className="mt-3 text-center">
-                  <span className="text-2xl font-bold text-blue-600">{currentScore}</span>
-                  <p className="text-sm text-gray-500">Current Score</p>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Target UCAT Score
-                </label>
-                <div className="relative">
-                  <input
-                    type="range"
-                    min="2200"
-                    max="3200"
-                    step="10"
-                    value={targetScore}
-                    onChange={(e) => setTargetScore(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500 mt-1">
-                    <span>2200</span>
-                    <span>3200</span>
-                  </div>
-                </div>
-                <div className="mt-3 text-center">
-                  <span className="text-2xl font-bold text-purple-600">{targetScore}</span>
-                  <p className="text-sm text-gray-500">Target Score</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="text-center mb-8">
-              <button
-                onClick={calculateTutoringHours}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all duration-300"
-              >
-                Calculate Required Hours
-              </button>
-            </div>
-            
-            {calculatedHours > 0 && (
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200 text-center">
-                <div className="mb-4">
-                  <span className="text-4xl font-bold text-blue-600">{calculatedHours}</span>
-                  <span className="text-lg text-gray-700 ml-2">hours</span>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {targetScore <= currentScore ? "Recommended Maintenance Hours" : "Recommended Tutoring Hours"}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  {targetScore <= currentScore 
-                    ? `Since you're already at or above your target score, we recommend ${calculatedHours} hours of targeted practice to solidify your performance and build full confidence for test day.`
-                    : `Based on your score gap of ${targetScore - currentScore} points, our algorithm recommends ${calculatedHours} hours of intensive tutoring to achieve your target score.`
-                  }
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
-                  <Link 
-                    href="/get-started" 
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300"
-                  >
-                    Book {calculatedHours} Hour Package
-                  </Link>
-                  <CalendlyPopup 
-                    url="https://calendly.com/nextgenmedprep/consultation"
-                    className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300"
-                    utm={{
-                      utmCampaign: 'ucat-calculator',
-                      utmSource: 'website',
-                      utmMedium: 'calculator-result'
-                    }}
-                  >
-                    Discuss Custom Plan
-                  </CalendlyPopup>
-                </div>
-              </div>
-            )}
-            
-            <div className="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> This calculator provides an estimate based on typical score improvements. Individual results may vary based on starting ability, study habits, and commitment level.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* UCAT Calculator Component */}
+      <UCATCalculator />
 
       {/* Why UCAT Prep Matters */}
       <section className="py-16 px-4 bg-white">
@@ -351,7 +204,7 @@ export default function UCATPage() {
           
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
             {services.map((service, index) => (
-              <div key={index} className={`p-6 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300`}>
+              <div key={index} className={`p-6 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300 flex flex-col h-full`}>
                 <div className="flex items-start gap-4 mb-6">
                   <service.icon className="w-10 h-10 text-current flex-shrink-0" />
                   <div>
@@ -360,7 +213,7 @@ export default function UCATPage() {
                   </div>
                 </div>
                 
-                <div className="mb-6">
+                <div className="mb-6 flex-grow">
                   <h4 className="font-semibold text-gray-900 mb-3">Key features:</h4>
                   <ul className="space-y-2">
                     {service.features.map((feature, idx) => (
@@ -372,48 +225,20 @@ export default function UCATPage() {
                   </ul>
                 </div>
                 
-                <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
+                <Link href="/resources/ultimate-ucat-prep-guide" className="mt-auto">
+                  <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
                   Learn More
-                </button>
+                  </button>
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
-
       
 
-      {/* Score Improvement Stats */}
-      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Proven Results</h2>
-            <p className="text-lg text-gray-600">Our students consistently achieve significant score improvements</p>
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-blue-600 mb-2">+450</div>
-              <div className="text-gray-600">Average Score Increase</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-green-600 mb-2">92%</div>
-              <div className="text-gray-600">Students Improve Score</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-purple-600 mb-2">2100+</div>
-              <div className="text-gray-600">Average Final Score</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-orange-600 mb-2">500+</div>
-              <div className="text-gray-600">Students Helped</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
-      <section className="py-16 px-4 bg-white">
+      {/* <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Student Success Stories</h2>
@@ -442,7 +267,7 @@ export default function UCATPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* UCAT Tutoring Packages */}
       <section id="tutoring-packages" className="py-16 px-4 bg-gray-50">
@@ -592,6 +417,35 @@ export default function UCATPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Score Improvement Stats */}
+      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Proven Results</h2>
+            <p className="text-lg text-gray-600">Our students consistently achieve significant score improvements</p>
+          </div>
+          
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="text-3xl font-bold text-blue-600 mb-2">+450</div>
+              <div className="text-gray-600">Average Score Increase</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="text-3xl font-bold text-green-600 mb-2">92%</div>
+              <div className="text-gray-600">Students Improve Score</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="text-3xl font-bold text-purple-600 mb-2">2100+</div>
+              <div className="text-gray-600">Average Final Score</div>
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm">
+              <div className="text-3xl font-bold text-orange-600 mb-2">500+</div>
+              <div className="text-gray-600">Students Helped</div>
             </div>
           </div>
         </div>

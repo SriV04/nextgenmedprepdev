@@ -3,6 +3,7 @@ import { Karla } from "next/font/google";
 import "@/styles/globals.css";
 import Link from "next/link";
 import MegaMenu from "@/components/home/MegaMenu";
+import MobileMenu from "@/components/home/MobileMenu";
 
 const karla = Karla({
   subsets: ['latin'],
@@ -132,11 +133,7 @@ export default function RootLayout({
                   </div>
               </nav>
               
-              <button className="lg:hidden focus:outline-none flex-shrink-0 p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
+              <MobileMenu megaMenuItems={megaMenuItems} />
             </div>
           </div>
         </header>

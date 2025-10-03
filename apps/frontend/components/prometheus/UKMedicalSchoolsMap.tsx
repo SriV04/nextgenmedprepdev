@@ -43,7 +43,7 @@ const medicalSchools: MedicalSchool[] = [
   {
     id: 'imperial',
     name: 'Imperial College London',
-    location: 'London',
+    location: 'ICL',
     coordinates: [-0.1276, 51.5074],
     description: 'Leading institution in science, technology, and medicine with strong industry connections.',
     establishedYear: 1907,
@@ -54,7 +54,7 @@ const medicalSchools: MedicalSchool[] = [
   {
     id: 'ucl',
     name: 'University College London',
-    location: 'London',
+    location: 'UCL',
     coordinates: [-0.134, 51.5246],
     description: 'Historic medical school with innovative curriculum and diverse student body.',
     establishedYear: 1826,

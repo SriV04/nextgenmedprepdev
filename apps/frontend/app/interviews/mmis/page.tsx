@@ -34,7 +34,7 @@ const MMIPage = () => {
                 utmMedium: 'hero-button'
               }}
             >
-              Book Free MMI Consultation
+              Book Mock MMI Consultation
             </CalendlyPopup>
             <Link href="#station-types" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Learn About Stations

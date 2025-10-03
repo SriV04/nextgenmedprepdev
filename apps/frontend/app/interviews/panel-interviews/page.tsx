@@ -75,7 +75,7 @@ const PanelInterviewPage = () => {
                 utmMedium: 'hero-button'
               }}
             >
-              Book Free Panel Consultation
+              Book Mock Panel Consultation
             </CalendlyPopup>
             <Link href="#comparison" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Panel vs MMI
