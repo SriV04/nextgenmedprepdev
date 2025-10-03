@@ -22,11 +22,11 @@ const teamMembers: TeamMember[] = [
     name: 'Isaac Butler-King',
     role: 'Co-founder',
     bio: 'Isaac co-founded NextGen Med Prep with a vision to revolutionize medical school preparation. With experience in education and a passion for helping students achieve their dreams, he leads our strategic direction.',
-    image: '/team/placeholder-male.jpg', // Replace with actual image when available
+    image: '/headshots/[NGMP] Isaac2.png', // Replace with actual image when available
     section: 'founders'
   },
   {
-    name: 'Dan Lach',
+    name: 'Dan Leach',
     role: 'Co-founder',
     bio: 'Dan brings extensive experience in medical education to NextGen Med Prep. His innovative approach to teaching and deep understanding of the medical school application process has helped shape our unique methodology.',
     image: '/headshots/[NGMP] Dan.png', 
@@ -54,7 +54,7 @@ const teamMembers: TeamMember[] = [
     name: 'Srihasha Vitta',
     role: 'Support Team',
     bio: 'Srihasha ensures our students have the best possible experience with NextGen Med Prep. Managing our operational processes and student support systems, she is dedicated to helping each student succeed.',
-    image: '/team/placeholder-female.jpg', // Replace with actual image when available
+    image: '/headshots/[NGMP] Sriharsha.png', // Replace with actual image when available
     section: 'support'
   }
 ];
