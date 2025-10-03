@@ -53,7 +53,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Srihasha Vitta',
     role: 'Support Team',
-    bio: 'Srihasha ensures our students have the best possible experience with NextGen Med Prep. Managing our operational processes and student support systems, she is dedicated to helping each student succeed.',
+    bio: 'Srihasha ensures our students have the best possible experience with NextGen Med Prep. Managing our operational processes and student support systems, he is dedicated to helping each student succeed.',
     image: '/headshots/[NGMP] Sriharsha.png', // Replace with actual image when available
     section: 'support'
   }
