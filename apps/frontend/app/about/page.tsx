@@ -21,14 +21,14 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Isaac Butler-King',
     role: 'Co-founder',
-    bio: 'Isaac co-founded NextGen Med Prep with a vision to revolutionize medical school preparation. With experience in education and a passion for helping students achieve their dreams, he leads our strategic direction.',
-    image: '/headshots/[NGMP] Isaac2.png', // Replace with actual image when available
+    bio: 'Isaac co-founded NextGen MedPrep with a vision to raise the standard of medical school preparation. As a medical student at the University of Glasgow, he has an outstanding academic record, placing in the top 1% every year. Isaac combines this proven excellence with first-hand insight into the demands of medicine to guide students towards success in their applications.',
+    image: '/headshots/[NGMP] Isaac.png', // Replace with actual image when available
     section: 'founders'
   },
   {
     name: 'Dan Leach',
     role: 'Co-founder',
-    bio: 'Dan brings extensive experience in medical education to NextGen Med Prep. His innovative approach to teaching and deep understanding of the medical school application process has helped shape our unique methodology.',
+    bio: 'Dan Leach is a medical student at the University of Glasgow and co-founder of NextGen MedPrep. Consistently ranking in the top 5% of his cohort and achieving straight A grades across every year of medical school, Dan has established himself as a high-performing student. Through Next Gen Med Prep, Dan brings this strong record of achievement to supporting aspiring medical and dental students .',
     image: '/headshots/[NGMP] Dan.png', 
     section: 'founders'
   },
@@ -44,7 +44,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Lucinda Slack',
     role: 'Expert Tutor',
-    bio: 'Lucinda excels in personal statement development and interview preparation. Her background in medical admissions gives her unique insights into what medical schools are looking for in candidates.',
+    bio: 'Lucinda Slack is a medical student at the University of Exeter, originally from London. She has regularly placed within the top ten percent of students in her cohort and has received awards for outstanding academic performance, including recognition for best overall results in applied medical knowledge. With her consistent record of excellence and clear, supportive teaching style, Lucinda helps students build the skills and confidence needed to succeed.',
     image: '/headshots/[NGMP] Lucinda.png', 
     section: 'tutors'
   },
@@ -54,7 +54,7 @@ const teamMembers: TeamMember[] = [
     name: 'Srihasha Vitta',
     role: 'Support Team',
     bio: 'Srihasha ensures our students have the best possible experience with NextGen Med Prep. Managing our operational processes and student support systems, he is dedicated to helping each student succeed.',
-    image: '/headshots/[NGMP] Sriharsha.png', // Replace with actual image when available
+    image: '/headshots/[NGMP] Sriharsha.png', 
     section: 'support'
   }
 ];

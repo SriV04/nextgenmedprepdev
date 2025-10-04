@@ -128,8 +128,8 @@ export const newJoinerSchema = z.object({
   // Availability
   availability: z.array(availabilitySlotEnum).min(1, 'At least one availability slot must be selected'),
   
-  // Documents
-  cv_url: z.string().url('Invalid CV URL').optional(),
+  // Documents (cv_url will be set after file upload)
+  cv_url: z.string().optional(),
 });
 
 export const updateNewJoinerSchema = z.object({
@@ -147,7 +147,7 @@ export const updateNewJoinerSchema = z.object({
   tutoring_experience: z.string().min(10).optional(),
   why_tutor: z.string().min(20).optional(),
   availability: z.array(availabilitySlotEnum).min(1).optional(),
-  cv_url: z.string().url().optional(),
+  cv_url: z.string().optional(),
 });
 
 export const newJoinerFiltersSchema = z.object({

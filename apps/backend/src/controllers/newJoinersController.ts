@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import supabaseService from '@/services/supabaseService';
 import emailService from '@/services/emailService';
+import fileUploadService from '@/services/fileUploadService';
 import { AppError, ApiResponse, NewJoiner, CreateNewJoinerRequest, UpdateNewJoinerRequest } from '@nextgenmedprep/common-types';
 
 export class NewJoinersController {
   // Create a new joiner application
   async createNewJoiner(req: Request, res: Response): Promise<void> {
     const newJoinerData: CreateNewJoinerRequest = req.body;
+    const cvFile = (req as any).file; // Multer adds file to request
 
     console.log("NewJoinersController: Creating new joiner application for:", newJoinerData.email);
 
@@ -19,7 +21,32 @@ export class NewJoinersController {
     // Validate required fields
     this.validateNewJoinerData(newJoinerData);
 
-    const newJoiner = await supabaseService.createNewJoiner(newJoinerData);
+    let cvUrl: string | undefined;
+
+    // Handle CV upload if file is provided
+    if (cvFile) {
+      try {
+        console.log("Uploading CV file:", {
+          originalname: cvFile.originalname,
+          size: cvFile.size,
+          mimetype: cvFile.mimetype
+        });
+        
+        cvUrl = await fileUploadService.uploadCV(cvFile, newJoinerData.email);
+        console.log("CV uploaded successfully:", cvUrl);
+      } catch (uploadError) {
+        console.error('Failed to upload CV:', uploadError);
+        throw new AppError('Failed to upload CV file', 400);
+      }
+    }
+
+    // Add CV URL to the application data
+    const applicationData = {
+      ...newJoinerData,
+      cv_url: cvUrl
+    };
+
+    const newJoiner = await supabaseService.createNewJoiner(applicationData);
 
     // Send confirmation email to applicant
     try {
@@ -181,6 +208,39 @@ export class NewJoinersController {
     };
 
     res.json(response);
+  }
+
+  // Download CV (admin only)
+  async downloadCV(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+
+    const newJoiner = await supabaseService.getNewJoinerById(id);
+    if (!newJoiner) {
+      throw new AppError('Application not found', 404);
+    }
+
+    if (!newJoiner.cv_url) {
+      throw new AppError('No CV uploaded for this application', 404);
+    }
+
+    try {
+      // Generate a signed URL for CV download
+      const signedUrl = await fileUploadService.getSignedUrl(newJoiner.cv_url, 3600); // 1 hour expiry
+      
+      const response: ApiResponse<{ downloadUrl: string; expiresIn: number }> = {
+        success: true,
+        data: {
+          downloadUrl: signedUrl,
+          expiresIn: 3600
+        },
+        message: 'CV download URL generated successfully',
+      };
+
+      res.json(response);
+    } catch (error) {
+      console.error('Error generating CV download URL:', error);
+      throw new AppError('Failed to generate CV download URL', 500);
+    }
   }
 
   private validateNewJoinerData(data: CreateNewJoinerRequest): void {

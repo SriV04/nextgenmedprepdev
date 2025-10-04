@@ -42,7 +42,6 @@ interface JoinTeamFormData {
   tutoring_experience: string;
   why_tutor: string;
   availability: string[];
-  cv_url?: string;
 }
 
 const tutoringSubjects = [
@@ -95,10 +94,10 @@ export default function JoinTeamForm() {
     exam_boards: '',
     tutoring_experience: '',
     why_tutor: '',
-    availability: [],
-    cv_url: ''
+    availability: []
   });
 
+  const [cvFile, setCvFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -153,6 +152,26 @@ export default function JoinTeamForm() {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please select a PDF, DOC, or DOCX file for your CV.');
+        return;
+      }
+      
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB.');
+        return;
+      }
+      
+      setCvFile(file);
+    }
+  };
+
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
   const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
@@ -173,15 +192,30 @@ export default function JoinTeamForm() {
 
       console.log('Submitting new joiner application:', {
         email: formData.email,
-        full_name: formData.full_name
+        full_name: formData.full_name,
+        hasCV: !!cvFile
       });
+
+      // Use FormData for file upload
+      const formDataToSend = new FormData();
+      
+      // Add all form fields to FormData
+      Object.entries(submitData).forEach(([key, value]) => {
+        if (typeof value === 'object') {
+          formDataToSend.append(key, JSON.stringify(value));
+        } else {
+          formDataToSend.append(key, String(value));
+        }
+      });
+
+      // Add CV file if provided
+      if (cvFile) {
+        formDataToSend.append('cv', cvFile);
+      }
 
       const response = await fetch(`${API_BASE_URL}/api/${API_VERSION}/new-joiners`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
+        body: formDataToSend, // No Content-Type header needed for FormData
       });
 
       const result = await response.json();
@@ -203,9 +237,9 @@ export default function JoinTeamForm() {
           exam_boards: '',
           tutoring_experience: '',
           why_tutor: '',
-          availability: [],
-          cv_url: ''
+          availability: []
         });
+        setCvFile(null);
       } else {
         throw new Error(result.error || 'Failed to submit application');
       }
@@ -580,18 +614,20 @@ export default function JoinTeamForm() {
         {/* CV Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            CV URL (Optional)
+            Upload Your CV (Optional)
           </label>
           <input
-            type="url"
-            name="cv_url"
-            value={formData.cv_url}
-            onChange={handleInputChange}
-            placeholder="Link to your CV (Google Drive, Dropbox, etc.)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            type="file"
+            name="cv"
+            accept=".pdf,.doc,.docx"
+            onChange={handleFileChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
           />
           <p className="text-sm text-gray-500 mt-1">
-            Please upload your CV to Google Drive or similar and share the link here
+            {cvFile 
+              ? `Selected: ${cvFile.name} (${(cvFile.size / 1024 / 1024).toFixed(2)} MB)`
+              : 'Please select a PDF, DOC, or DOCX file (max 10MB)'
+            }
           </p>
         </div>
       </div>
