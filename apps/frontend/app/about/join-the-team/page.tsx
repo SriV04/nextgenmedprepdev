@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { UserGroupIcon, RocketLaunchIcon, HeartIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import JoinTeamForm from '@/components/JoinTeamForm';
 
 export default function JoinTheTeamPage() {
   const fadeInUp = {
@@ -143,19 +144,7 @@ export default function JoinTheTeamPage() {
             </div>
             
             <div className="p-8">
-              <div className="relative overflow-hidden rounded-lg bg-gray-50" style={{ paddingTop: '100%', minHeight: '600px' }}>
-                <iframe
-                  src="https://docs.google.com/forms/d/e/1FAIpQLSfcwlMT_rYV-VEzR8isHjRpecUYrvocu8zxmIr_SE9s3VLFaQ/viewform?embedded=true"
-                  className="absolute top-0 left-0 w-full h-full"
-                  style={{ minHeight: '600px' }}
-                  frameBorder="0"
-                  marginHeight={0}
-                  marginWidth={0}
-                  title="Join the Team Application Form"
-                >
-                  Loading form...
-                </iframe>
-              </div>
+              <JoinTeamForm />
             </div>
           </motion.div>
 

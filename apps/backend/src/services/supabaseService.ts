@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Subscription, User } from '@nextgenmedprep/common-types';
+import { Subscription, User, NewJoiner, CreateNewJoinerRequest, UpdateNewJoinerRequest } from '@nextgenmedprep/common-types';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -302,6 +302,143 @@ class SupabaseService {
       console.error('Failed to log resource download:', error);
       // Don't throw error - logging is optional
     }
+  }
+
+  // New Joiners methods
+  async createNewJoiner(newJoinerData: CreateNewJoinerRequest): Promise<NewJoiner> {
+    const { data, error } = await this.supabase
+      .from('new_joiners')
+      .insert(newJoinerData)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create new joiner: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async getNewJoinerById(id: string): Promise<NewJoiner | null> {
+    const { data, error } = await this.supabase
+      .from('new_joiners')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to get new joiner: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async getNewJoinerByEmail(email: string): Promise<NewJoiner | null> {
+    const { data, error } = await this.supabase
+      .from('new_joiners')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to get new joiner by email: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async updateNewJoiner(id: string, updates: UpdateNewJoinerRequest): Promise<NewJoiner> {
+    const { data, error } = await this.supabase
+      .from('new_joiners')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update new joiner: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async deleteNewJoiner(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('new_joiners')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to delete new joiner: ${error.message}`);
+    }
+  }
+
+  async getAllNewJoiners(
+    filters: { 
+      subjects_can_tutor?: string; 
+      availability?: string;
+      university_year?: string;
+    } = {},
+    pagination: { page?: number; limit?: number } = {}
+  ): Promise<{ newJoiners: NewJoiner[]; total: number }> {
+    let query = this.supabase.from('new_joiners').select('*', { count: 'exact' });
+
+    // Apply filters
+    if (filters.subjects_can_tutor) {
+      query = query.contains('subjects_can_tutor', [filters.subjects_can_tutor]);
+    }
+    if (filters.availability) {
+      query = query.contains('availability', [filters.availability]);
+    }
+    if (filters.university_year) {
+      query = query.eq('university_year', filters.university_year);
+    }
+
+    // Apply pagination
+    const page = pagination.page || 1;
+    const limit = pagination.limit || 50;
+    const offset = (page - 1) * limit;
+
+    query = query.range(offset, offset + limit - 1).order('created_at', { ascending: false });
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      throw new Error(`Failed to get new joiners: ${error.message}`);
+    }
+
+    return {
+      newJoiners: data || [],
+      total: count || 0
+    };
+  }
+
+  async getNewJoinersBySubject(subject: string): Promise<NewJoiner[]> {
+    const { data, error } = await this.supabase
+      .from('new_joiners')
+      .select('*')
+      .contains('subjects_can_tutor', [subject])
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get new joiners by subject: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async getNewJoinersByAvailability(availability: string): Promise<NewJoiner[]> {
+    const { data, error } = await this.supabase
+      .from('new_joiners')
+      .select('*')
+      .contains('availability', [availability])
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get new joiners by availability: ${error.message}`);
+    }
+
+    return data || [];
   }
 
   // Get client for direct queries if needed

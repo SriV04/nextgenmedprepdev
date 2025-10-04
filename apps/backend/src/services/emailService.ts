@@ -84,6 +84,31 @@ class EmailService {
     });
   }
 
+  async sendNewJoinerConfirmationEmail(email: string, fullName: string): Promise<void> {
+    const template = this.getNewJoinerConfirmationTemplate(fullName);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
+  async sendNewJoinerNotificationEmail(newJoiner: any): Promise<void> {
+    const template = this.getNewJoinerNotificationTemplate(newJoiner);
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: adminEmail,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
   private getWelcomeEmailTemplate(subscriptionTier: string): EmailTemplate {
     const tierBenefits = {
       free: 'access to our basic study materials and weekly tips',
@@ -170,6 +195,80 @@ class EmailService {
         </footer>
       </div>
     `;
+  }
+
+  private getNewJoinerConfirmationTemplate(fullName: string): EmailTemplate {
+    return {
+      subject: 'Application Received - NextGen MedPrep Tutor Program',
+      text: `Hi ${fullName},\n\nThank you for your interest in joining the NextGen MedPrep tutoring team!\n\nWe have successfully received your application and our team will review it within the next 5-7 business days.\n\nWhat happens next:\n1. Our team will review your application\n2. If shortlisted, we'll contact you for an interview\n3. Upon successful completion, you'll be onboarded as a tutor\n\nWe appreciate your interest in helping future medical and dental students achieve their dreams.\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #2563eb;">Application Received! 📋</h1>
+          <p>Hi ${fullName},</p>
+          <p>Thank you for your interest in joining the <strong>NextGen MedPrep tutoring team</strong>!</p>
+          <p>We have successfully received your application and our team will review it within the next <strong>5-7 business days</strong>.</p>
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">What happens next:</h3>
+            <ol style="color: #374151;">
+              <li>Our team will review your application</li>
+              <li>If shortlisted, we'll contact you for an interview</li>
+              <li>Upon successful completion, you'll be onboarded as a tutor</li>
+            </ol>
+          </div>
+          <p>We appreciate your interest in helping future medical and dental students achieve their dreams.</p>
+          <p style="margin-top: 30px;">Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      `
+    };
+  }
+
+  private getNewJoinerNotificationTemplate(newJoiner: any): EmailTemplate {
+    const subjectsStr = Array.isArray(newJoiner.subjects_can_tutor) ? newJoiner.subjects_can_tutor.join(', ') : 'N/A';
+    const availabilityStr = Array.isArray(newJoiner.availability) ? newJoiner.availability.join(', ') : 'N/A';
+
+    return {
+      subject: `New Tutor Application: ${newJoiner.full_name}`,
+      text: `New tutor application received!\n\nApplicant Details:\nName: ${newJoiner.full_name}\nEmail: ${newJoiner.email}\nPhone: ${newJoiner.phone_number || 'Not provided'}\nUniversity Year: ${newJoiner.university_year}\nSubjects: ${subjectsStr}\nAvailability: ${availabilityStr}\n\nPlease review the full application in the admin dashboard.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #dc2626;">New Tutor Application Received! 🎓</h1>
+          <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; border-left: 4px solid #dc2626;">
+            <h3 style="margin-top: 0;">Applicant Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Name:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${newJoiner.full_name}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Email:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${newJoiner.email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Phone:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${newJoiner.phone_number || 'Not provided'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">University Year:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${newJoiner.university_year}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Subjects:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${subjectsStr}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Availability:</td>
+                <td style="padding: 8px;">${availabilityStr}</td>
+              </tr>
+            </table>
+          </div>
+          <div style="margin: 20px 0; padding: 15px; background-color: #f3f4f6; border-radius: 8px;">
+            <p style="margin: 0; font-weight: bold;">Action Required:</p>
+            <p style="margin: 5px 0 0 0;">Please review the full application in the admin dashboard and contact the applicant for next steps.</p>
+          </div>
+          <p>Application ID: ${newJoiner.id}</p>
+        </div>
+      `
+    };
   }
 
   // Test email configuration
