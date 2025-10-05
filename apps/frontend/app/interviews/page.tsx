@@ -204,15 +204,18 @@ export default function InterviewsPage() {
                         {feature}
                       </li>
                     ))}
-                    <li className="mt-4 pt-2 border-t border-dashed border-gray-200">
-                      <Link href="/prometheus" className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-all duration-200 group">
-                        <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">NEW</span>
-                        <span className="font-medium">Powered by our innovative <span className="underline decoration-2 decoration-purple-400 group-hover:decoration-purple-600">Prometheus</span> mock generator</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </Link>
-                    </li>
+                    {/* Only show Prometheus link for services other than "Interview Background knowledger" */}
+                    {service.title !== "Interview Background knowledger" && (
+                      <li className="mt-4 pt-2 border-t border-dashed border-gray-200">
+                        <Link href="/prometheus" className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-all duration-200 group">
+                          <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">NEW</span>
+                          <span className="font-medium">Powered by our innovative <span className="underline decoration-2 decoration-purple-400 group-hover:decoration-purple-600">Prometheus</span> mock generator</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </div>
                 

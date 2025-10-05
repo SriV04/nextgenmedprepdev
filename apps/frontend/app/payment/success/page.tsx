@@ -32,7 +32,8 @@ function PaymentSuccessContent() {
 
   const fetchPaymentStatus = async (orderId: string) => {
     try {
-      const response = await fetch(`/api/v1/payments/status/${orderId}`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const response = await fetch(`${apiUrl}/api/v1/payments/status/${orderId}`);
       const data = await response.json();
 
       if (data.success) {

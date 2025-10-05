@@ -88,7 +88,8 @@ export default function PaymentPage() {
     setSuccess(false);
 
     try {
-      const response = await fetch('/api/v1/payments/create', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const response = await fetch(`${apiUrl}/api/v1/payments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,16 +100,28 @@ export default function PaymentPage() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data: PaymentResponse = await response.json();
 
       if (data.success && data.data?.checkout_url) {
-        // Redirect to Fondy checkout page
-        window.location.href = data.data.checkout_url;
+        // Log for debugging
+        console.log('Payment created successfully:', data.data);
+        console.log('Redirecting to checkout URL:', data.data.checkout_url);
+        
+        setSuccess(true);
+        
+        // Small delay to ensure the user sees the success state
+        setTimeout(() => {
+          window.location.href = data.data.checkout_url;
+        }, 1000);
       } else {
         setError(data.error || 'Payment creation failed');
       }
-    } catch (err) {
-      setError('Network error. Please try again.');
+    } catch (err: any) {
+      setError(`Network error: ${err.message || 'Please try again.'}`);
       console.error('Payment error:', err);
     } finally {
       setLoading(false);
@@ -177,7 +190,8 @@ export default function PaymentPage() {
 
           {success && (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-              <div className="text-green-800">Payment created successfully!</div>
+              <div className="text-green-800 font-medium">Payment created successfully!</div>
+              <div className="text-green-700 text-sm mt-1">Redirecting to secure checkout...</div>
             </div>
           )}
 
@@ -269,14 +283,26 @@ export default function PaymentPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || success}
               className={`w-full py-3 px-4 rounded-md text-white font-medium transition-colors ${
-                loading
+                loading || success
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
               }`}
             >
-              {loading ? 'Processing...' : 'Proceed to Payment'}
+              {success ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Redirecting to checkout...
+                </div>
+              ) : loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Processing...
+                </div>
+              ) : (
+                'Proceed to Secure Checkout'
+              )}
             </button>
           </form>
 
