@@ -8,8 +8,8 @@ interface UCATCalculatorProps {
 }
 
 const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
-  const [currentScore, setCurrentScore] = useState<number>(2000);
-  const [targetScore, setTargetScore] = useState<number>(2500);
+  const [currentScore, setCurrentScore] = useState<number>(1900);
+  const [targetScore, setTargetScore] = useState<number>(2400);
   const [calculatedHours, setCalculatedHours] = useState<number>(0);
 
   // Reset calculated hours whenever sliders change
@@ -26,50 +26,50 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
       return;
     }
     
-    // Strategic calculation to better align with package ranges
+    // Shallower gradient calculation to distribute more evenly across packages
     let recommendedHours = 0;
     
-    // Score difference ranges designed to hit package sweet spots
-    if (scoreDifference <= 100) {
-      // Small improvements: 25-100 points → Kickstart (≤4 hours)
-      recommendedHours = currentScore >= 2400 ? 3 : 4;
-    } else if (scoreDifference <= 200) {
-      // Moderate improvements: 100-200 points → Advance (4-8 hours)  
+    // More generous ranges designed to fit most scenarios into the 3 main packages
+    if (scoreDifference <= 150) {
+      // Small to moderate improvements: 1-150 points → Kickstart (≤4 hours)
+      recommendedHours = currentScore >= 2500 ? 3 : 4;
+    } else if (scoreDifference <= 300) {
+      // Moderate improvements: 150-300 points → Advance (5-8 hours)  
       if (currentScore >= 2400) {
-        recommendedHours = 5; // High baseline, moderate gap
+        recommendedHours = 6; // High baseline, moderate gap
       } else if (currentScore >= 2200) {
-        recommendedHours = 6; // Medium baseline, moderate gap
+        recommendedHours = 7; // Medium baseline, moderate gap
       } else {
         recommendedHours = 8; // Lower baseline needs more work
       }
-    } else if (scoreDifference <= 350) {
-      // Significant improvements: 200-350 points → Mastery (8-12 hours)
+    } else if (scoreDifference <= 450) {
+      // Significant improvements: 300-450 points → Mastery (9-12 hours)
       if (currentScore >= 2300) {
-        recommendedHours = 9; // Good baseline, big jump
-      } else if (currentScore >= 2100) {
+        recommendedHours = 10; // Good baseline, big jump
+      } else if (currentScore >= 2000) {
         recommendedHours = 11; // Lower baseline, significant work needed
       } else {
         recommendedHours = 12; // Very low baseline, maximum structured hours
       }
     } else {
-      // Major improvements: >350 points → Custom consultation (>12 hours)
-      recommendedHours = Math.min(18, 13 + Math.floor(scoreDifference / 50));
+      // Major improvements: >450 points → Custom consultation (>12 hours)
+      recommendedHours = Math.min(15, 13 + Math.floor(scoreDifference / 100));
     }
     
-    // Fine-tune based on target score ambition
-    if (targetScore >= 2600 && scoreDifference > 150) {
+    // Gentle adjustment for premium targets (less aggressive than before)
+    if (targetScore >= 2650 && scoreDifference > 200) {
       recommendedHours += 1; // Premium targets need extra refinement
     }
     
-    // Ensure we hit package boundaries more often
-    if (recommendedHours === 5 || recommendedHours === 6) {
-      // Push moderate cases toward either Kickstart or Advance clearly
-      recommendedHours = scoreDifference <= 120 ? 4 : 7;
+    // Ensure better distribution across packages with shallower transitions
+    if (recommendedHours === 5) {
+      // Push borderline cases toward Kickstart more often
+      recommendedHours = scoreDifference <= 180 ? 4 : 6;
     }
     
-    if (recommendedHours === 9 || recommendedHours === 10) {
-      // Push toward clear Mastery territory
-      recommendedHours = currentScore >= 2300 ? 8 : 11;
+    if (recommendedHours === 9) {
+      // Push toward Advance more often
+      recommendedHours = currentScore >= 2400 ? 8 : 10;
     }
     
     setCalculatedHours(Math.max(3, recommendedHours));

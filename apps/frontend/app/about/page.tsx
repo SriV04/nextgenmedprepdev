@@ -37,7 +37,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Matthew Cranfield',
     role: 'Expert Tutor',
-    bio: 'Matthew specializes in UCAT preparation and interview coaching. With top percentile scores in all medical admissions tests and multiple medical school offers, he helps students navigate the complexities of the application process.',
+    bio: 'Matthew is a medical student at the University of Glasgow with a strong commitment to academic excellence and student development. At medical school, Matthew has built a reputation for diligence and academic success. He helps aspiring medical and dental students approach the application process with confidence through his constructive teaching style and structured guidance. Having served as Head Boy at his school, Matthew brings proven communication and leadership skills to his teaching.',
     image: '/headshots/[NGMP] Matthew.png',
     section: 'tutors'
   },

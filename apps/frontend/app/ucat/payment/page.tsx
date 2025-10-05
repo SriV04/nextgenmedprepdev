@@ -81,6 +81,9 @@ function UCATPaymentContent() {
   const handlePaymentSuccess = (data: any) => {
     console.log('Payment successful:', data);
     // Handle successful payment - could redirect to confirmation page
+    if (data?.checkout_url) {
+      window.location.href = data.checkout_url;
+    }
   };
 
   const handlePaymentError = (error: string) => {
@@ -211,6 +214,7 @@ function UCATPaymentContent() {
             </div>
             
             <PaymentForm
+              key={selectedPackage.id} // Force re-render when package changes
               selectedPackage={{
                 id: selectedPackage.id,
                 name: selectedPackage.name,

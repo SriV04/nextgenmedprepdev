@@ -92,7 +92,6 @@ export default function PaymentForm({ selectedPackage, onSuccess, onError }: Pay
 
       if (data.success && data.data?.checkout_url) {
         console.log('Opening checkout URL:', data.data.checkout_url);
-        window.open(data.data.checkout_url, '_blank')
         setRedirecting(true);
         
         if (onSuccess) {

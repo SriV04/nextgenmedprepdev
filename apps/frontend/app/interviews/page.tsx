@@ -204,8 +204,8 @@ export default function InterviewsPage() {
                         {feature}
                       </li>
                     ))}
-                    {/* Only show Prometheus link for services other than "Interview Background knowledger" */}
-                    {service.title !== "Interview Background knowledger" && (
+                    {/* Prometheus link excluded from Interview Background knowledger service */}
+                    {service.title !== "Interview Background knowledger" && !service.title.toLowerCase().includes("background") && (
                       <li className="mt-4 pt-2 border-t border-dashed border-gray-200">
                         <Link href="/prometheus" className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-all duration-200 group">
                           <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">NEW</span>
