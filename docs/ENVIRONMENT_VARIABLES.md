@@ -54,6 +54,11 @@ ENCRYPTION_KEY=your_encryption_key
 RATE_LIMIT_WINDOW_MS=900000       # 15 minutes
 RATE_LIMIT_MAX_REQUESTS=100
 
+# Payment Processing (Fondy)
+FONDY_MERCHANT_ID=1396424         # Your Fondy merchant ID (test: 1396424)
+FONDY_SECRET_KEY=test             # Your Fondy secret key (test: "test")
+BACKEND_URL=http://localhost:5001 # Backend URL for callbacks
+
 # Logging
 LOG_LEVEL=info
 ```

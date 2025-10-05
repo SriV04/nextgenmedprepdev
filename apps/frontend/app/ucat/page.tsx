@@ -342,9 +342,9 @@ export default function UCATPage() {
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-3xl font-bold text-gray-900">£200</span>
                   </div>
-                  <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300">
+                  <Link href="/ucat/payment?package=ucat_kickstart" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 block text-center">
                     Get Started
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -379,9 +379,9 @@ export default function UCATPage() {
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-3xl font-bold text-gray-900">£375</span>
                   </div>
-                  <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300">
+                  <Link href="/ucat/payment?package=ucat_advance" className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 block text-center">
                     Get Started
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -412,9 +412,9 @@ export default function UCATPage() {
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-3xl font-bold text-gray-900">£550</span>
                   </div>
-                  <button className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300">
+                  <Link href="/ucat/payment?package=ucat_mastery" className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 block text-center">
                     Get Started
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

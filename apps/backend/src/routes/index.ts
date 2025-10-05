@@ -2,6 +2,7 @@ import { Router } from 'express';
 import subscriptionRoutes from './subscriptions';
 import resourceRoutes from './resources';
 import newJoinersRoutes from './newJoiners';
+import paymentRoutes from './payments';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.get('/health', (req, res) => {
 router.use('/api/v1', subscriptionRoutes);
 router.use('/api/v1', resourceRoutes);
 router.use('/api/v1', newJoinersRoutes);
+router.use('/api/v1', paymentRoutes);
 
 export default router;
