@@ -1,5 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
+import Link from "next/link";
+import BackButton from "../components/BackButton";
 
 export default function NotFound() {
   return (
@@ -101,12 +101,9 @@ export default function NotFound() {
         {/* Action Buttons */}
                 {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            onClick={() => window.history.back()}
-            className="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 hover:scale-105 transition-all border border-slate-600"
-          >
+          <BackButton className="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 hover:scale-105 transition-all border border-slate-600">
             Go Back
-          </button>
+          </BackButton>
           <Link
             href="/"
             className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
@@ -136,7 +133,7 @@ export default function NotFound() {
           <p className="text-sm text-slate-400">
             Need immediate help? Contact us at{" "}
             <a href="mailto:support@nextgenmedprep.com" className="text-blue-400 hover:text-blue-300 underline">
-              support@nextgenmedprep.com
+              contact@nextgenmedprep.com
             </a>
           </p>
         </div>
