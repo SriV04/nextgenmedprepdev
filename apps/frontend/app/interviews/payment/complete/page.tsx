@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -63,7 +63,24 @@ const packages = [
   }
 ];
 
-export default function CompletePurchasePage() {
+// Loading component for Suspense fallback
+function PageLoading() {
+  return (
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+        />
+        <p className="text-gray-400">Loading payment details...</p>
+      </div>
+    </main>
+  );
+}
+
+// Component that uses useSearchParams
+function CompletePurchaseContent() {
   const searchParams = useSearchParams();
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     university: '',
@@ -531,5 +548,14 @@ export default function CompletePurchasePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function CompletePurchasePage() {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <CompletePurchaseContent />
+    </Suspense>
   );
 }
