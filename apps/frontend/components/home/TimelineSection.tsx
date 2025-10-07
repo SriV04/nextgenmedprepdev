@@ -135,8 +135,8 @@ const TimelineSection: React.FC = () => {
         </motion.p>
       </div>
 
-      {/* Vertical Timeline Path */}
-      <div className="absolute left-8 md:left-16 top-48 bottom-0 w-1 bg-gradient-to-b from-sky-400 via-blue-500 to-purple-600 opacity-30"></div>
+      {/* Vertical Timeline Path - Hidden on mobile */}
+      <div className="absolute left-6 md:left-16 top-48 bottom-0 w-1 bg-gradient-to-b from-sky-400 via-blue-500 to-purple-600 opacity-30 hidden md:block"></div>
 
       {/* Timeline Steps */}
       <div className="relative space-y-16">
@@ -161,9 +161,9 @@ const TimelineSection: React.FC = () => {
                 stiffness: 120
               }}
             >
-              {/* Timeline Node */}
-              <div className={`absolute left-8 md:left-16 transform -translate-x-1/2 z-10 ${
-                isEven ? 'md:relative md:left-0 md:transform-none md:mr-8' : 'md:relative md:left-0 md:transform-none md:ml-8'
+              {/* Timeline Node - Hidden on mobile */}
+              <div className={`absolute left-6 md:left-16 transform -translate-x-1/2 z-10 hidden md:block ${
+                isEven ? 'md:relative md:left-0 md:transform-none md:mr-10' : 'md:relative md:left-0 md:transform-none md:ml-8'
               }`}>
                 <motion.div
                   className="relative"
@@ -229,7 +229,7 @@ const TimelineSection: React.FC = () => {
 
               {/* Content Card */}
               <motion.div
-                className={`flex-1 ml-20 md:ml-0 ${isEven ? 'md:ml-0' : 'md:mr-0'}`}
+                className={`flex-1 ml-0 ${isEven ? 'md:ml-0' : 'md:mr-0'}`}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -268,34 +268,36 @@ const TimelineSection: React.FC = () => {
                     {step.information}
                   </motion.p>
 
-                  {/* More Info Button */}
-                  <motion.div
-                    className="mb-6"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.2, delay: idx * 0.1 + 0.4 }}
-                  >
-                    <a
-                      href={step.moreInfoLink}
-                      className={timelineCardStyles.button}
+                  {/* More Info Button - Only show if moreInfoLink exists */}
+                  {step.moreInfoLink && (
+                    <motion.div
+                      className="mb-6"
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true, amount: 0.3 }}
+                      transition={{ duration: 0.2, delay: idx * 0.1 + 0.4 }}
                     >
-                      Learn More
-                      <svg
-                        className="ml-2 w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      <a
+                        href={step.moreInfoLink}
+                        className={timelineCardStyles.button}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </a>
-                  </motion.div>
+                        Learn More
+                        <svg
+                          className="ml-2 w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </a>
+                    </motion.div>
+                  )}
 
                   {/* TimelineMosaic */}
                   <motion.div

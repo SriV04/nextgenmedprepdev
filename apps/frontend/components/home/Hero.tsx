@@ -2,16 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 
 const Hero: React.FC = () => {
-  const scrollToTimeline = () => {
-    const timelineSection = document.getElementById('timeline-section');
-    if (timelineSection) {
-      timelineSection.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  };
-
   return (
     <div className="w-screen relative h-screen flex flex-col items-center justify-center bg-cover bg-center bg-fixed text-white -mx-4"
          style={{ 
@@ -88,8 +78,8 @@ const Hero: React.FC = () => {
 
       {/* Chevron at bottom of page */}
       <div className="relative z-10 pb-8">
-        <button 
-          onClick={scrollToTimeline}
+        <a 
+          href="#timeline-section"
           className="flex flex-col items-center cursor-pointer hover:opacity-75 transition-opacity duration-300"
           aria-label="Scroll to timeline section"
         >
@@ -105,7 +95,7 @@ const Hero: React.FC = () => {
           >
             <path d="M19 9l-7 7-7-7"></path>
           </svg>
-        </button>
+        </a>
       </div>
     </div>
   );

@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface Story { // Ensure this matches the type used in the page
   id: string;
@@ -13,7 +16,13 @@ interface SuccessStoriesProps {
 
 const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories = [] }) => {
     return (
-        <div className="relative">
+        <motion.div 
+          className="relative"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
           {/* Large Quote Mark (Decorative) */}
           <div className="absolute -top-16 left-0 text-[120px] leading-none text-[var(--color-accent-primary)] opacity-10 font-serif">
             "
@@ -159,7 +168,7 @@ const SuccessStories: React.FC<SuccessStoriesProps> = ({ stories = [] }) => {
               <p className="text-sm mt-2">UK medical schools with our alumni</p>
             </div>
           </div>
-        </div>
+        </motion.div>
     );
 };
 
