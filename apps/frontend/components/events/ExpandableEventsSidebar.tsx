@@ -234,24 +234,6 @@ const ExpandableEventsSidebar: React.FC<ExpandableEventsSidebarProps> = ({
         )}
       </div>
 
-      {!selectedDate && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <CalendlyPopup 
-            url="https://calendly.com/sri-nextgenmedprep/30min"
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 text-center text-sm md:text-base"
-            prefill={{
-              name: "Potential Student"
-            }}
-            utm={{
-              utmCampaign: 'conferences-general',
-              utmSource: 'website',
-              utmMedium: 'events-sidebar'
-            }}
-          >
-            Book a Conference
-          </CalendlyPopup>
-        </div>
-      )}
     </div>
   );
 };

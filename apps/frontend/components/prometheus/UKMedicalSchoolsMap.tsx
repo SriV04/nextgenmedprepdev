@@ -456,19 +456,20 @@ export default function UKMedicalSchoolsMap() {
                       onMouseLeave={() => setHoveredSchool(null)}
                     />
 
+                    {/* School Info Tooltip */}
                     {hoveredSchool === school.id ? (
                       <motion.g initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
                         <rect
-                          x={-44}
-                          y={-30}
-                          width="88"
-                          height="22"
+                          x={-50}
+                          y={-32}
+                          width="100"
+                          height="26"
                           fill="rgba(10, 10, 20, 0.92)"
                           rx="6"
                           stroke="rgba(79, 70, 229, 0.5)"
                           strokeWidth="1"
                         />
-                        <text textAnchor="middle" y={-15} fontSize="11" fill="white" fontWeight="bold">
+                        <text textAnchor="middle" y={-15} fontSize="14" fill="white" fontWeight="bold">
                           {school.location}
                         </text>
                       </motion.g>

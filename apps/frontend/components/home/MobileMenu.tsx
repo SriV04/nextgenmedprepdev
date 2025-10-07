@@ -94,56 +94,86 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ megaMenuItems }) => {
             {/* Mobile Menu Content */}
             <div className="overflow-y-auto h-full pb-20">
               <nav className="p-4">
-                {megaMenuItems.map((menuConfig) => (
-                  <div key={menuConfig.title} className="mb-2">
-                    {menuConfig.href && menuConfig.items.length === 0 ? (
-                      // Direct link without submenu
-                      <Link
-                        href={menuConfig.href}
-                        className="block w-full text-left p-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors duration-200"
-                        onClick={closeMenu}
-                      >
-                        {menuConfig.title}
-                      </Link>
-                    ) : (
-                      // Section with submenu
-                      <div>
-                        <button
-                          onClick={() => toggleSection(menuConfig.title)}
-                          className="flex items-center justify-between w-full p-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors duration-200"
+                {megaMenuItems.map((menuConfig) => {
+                  const isPrometheus = menuConfig.title === "Prometheus";
+                  
+                  return (
+                    <div key={menuConfig.title} className="mb-2">
+                      {menuConfig.href && menuConfig.items.length === 0 ? (
+                        // Direct link without submenu
+                        <Link
+                          href={menuConfig.href}
+                          className={`block w-full text-left p-3 rounded-lg font-medium transition-colors duration-200 ${
+                            isPrometheus
+                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-md"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                          onClick={closeMenu}
                         >
-                          <span>{menuConfig.title}</span>
-                          <svg
-                            className={`h-5 w-5 transform transition-transform duration-200 ${
-                              expandedSection === menuConfig.title ? 'rotate-180' : ''
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-
-                        {/* Submenu Items */}
-                        {expandedSection === menuConfig.title && menuConfig.items.length > 0 && (
-                          <div className="ml-4 mt-2 space-y-1">
-                            {menuConfig.items.map((item) => (
-                              <Link
-                                key={item.title}
-                                href={item.href}
-                                className="block p-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors duration-200"
-                                onClick={closeMenu}
+                          {menuConfig.title}
+                        </Link>
+                      ) : (
+                        // Section with submenu
+                        <div>
+                          <div className={`flex items-center rounded-lg overflow-hidden ${
+                            isPrometheus 
+                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}>
+                            {/* Main title link */}
+                            <Link
+                              href={menuConfig.href || `/${menuConfig.title.toLowerCase().replace(/\s+/g, "-")}`}
+                              className="flex-1 p-3 text-left font-medium transition-colors duration-200 hover:bg-black hover:bg-opacity-10"
+                              onClick={closeMenu}
+                            >
+                              {menuConfig.title}
+                            </Link>
+                            
+                            {/* Chevron button for submenu */}
+                            {menuConfig.items.length > 0 && (
+                              <button
+                                onClick={() => toggleSection(menuConfig.title)}
+                                className="p-3 hover:bg-black hover:bg-opacity-10 transition-colors duration-200"
+                                aria-label={`Toggle ${menuConfig.title} submenu`}
                               >
-                                {item.title}
-                              </Link>
-                            ))}
+                                <svg
+                                  className={`h-5 w-5 transform transition-transform duration-200 ${
+                                    expandedSection === menuConfig.title ? 'rotate-180' : ''
+                                  }`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+
+                          {/* Submenu Items */}
+                          {expandedSection === menuConfig.title && menuConfig.items.length > 0 && (
+                            <div className="ml-4 mt-2 space-y-1">
+                              {menuConfig.items.map((item) => (
+                                <Link
+                                  key={item.title}
+                                  href={item.href}
+                                  className={`block p-3 text-sm rounded-lg transition-colors duration-200 ${
+                                    isPrometheus
+                                      ? "text-purple-700 hover:text-purple-900 hover:bg-purple-50"
+                                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                  }`}
+                                  onClick={closeMenu}
+                                >
+                                  {item.title}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </nav>
 
               {/* Mobile Menu Footer */}

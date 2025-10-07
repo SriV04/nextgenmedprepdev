@@ -70,11 +70,8 @@ const megaMenuItems: MegaMenuConfig[] = [
   },
   {
     title: "Events",
-    items: [
-      { title: "All Conferences", href: "/events" },
-      { title: "Upcoming", href: "/events/upcoming" },
-      { title: "Past", href: "/events/past" },
-    ],
+    href: "/events",
+    items: [],
   },
   {
     title: "Prometheus",

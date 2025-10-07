@@ -77,7 +77,7 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events, onDateSelect, sel
       days.push(
         <div 
           key={`empty-${i}`} 
-          className="h-16 md:h-20 lg:h-24 border border-transparent"
+          className="h-20 md:h-24 lg:h-28 rounded-2xl bg-slate-50/30"
         ></div>
       );
     }
@@ -94,61 +94,63 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events, onDateSelect, sel
       days.push(
         <div 
           key={day} 
-          className={`relative h-16 md:h-20 lg:h-24 flex flex-col items-center justify-center cursor-pointer border-2 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+          className={`relative h-20 md:h-24 lg:h-28 flex flex-col items-center justify-center cursor-pointer rounded-2xl transition-all duration-300 transform backdrop-blur-sm border ${
             isPastDate 
-              ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed hover:scale-100' 
+              ? 'bg-slate-100/50 border-slate-200 text-slate-400 cursor-not-allowed opacity-60' 
               : hasEvents 
-                ? 'hover:bg-blue-50 border-blue-200 hover:border-blue-400 hover:shadow-lg' 
-                : 'hover:bg-gray-50 border-gray-200 hover:border-gray-400 hover:shadow-md'
+                ? 'hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 border-blue-200/50 hover:border-blue-300 hover:shadow-xl hover:scale-105 bg-white/80' 
+                : 'hover:bg-gradient-to-br hover:from-white hover:to-slate-50 border-slate-200/50 hover:border-slate-300 hover:shadow-lg hover:scale-102 bg-white/60'
           } ${
-            isSelected ? 'bg-blue-100 border-blue-500 shadow-lg scale-105 ring-2 ring-blue-300' : 'border-gray-100'
+            isSelected ? 'bg-gradient-to-br from-blue-100 to-purple-100 border-blue-400 shadow-xl scale-105 ring-2 ring-blue-400/30' : 'border-slate-200/50'
           } ${
-            isToday && !isPastDate ? 'ring-2 ring-orange-400 border-orange-300 bg-orange-50' : ''
+            isToday && !isPastDate ? 'ring-2 ring-amber-400/50 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 shadow-lg' : ''
           }`}
           onClick={() => !isPastDate && handleDateClick(day)}
         >
-          <span className={`text-base md:text-lg lg:text-xl font-semibold mb-1 ${
+          <span className={`text-lg md:text-xl lg:text-2xl font-bold mb-1 ${
             isPastDate 
-              ? 'text-gray-400' 
+              ? 'text-slate-400' 
               : hasEvents 
-                ? 'text-blue-600' 
+                ? 'text-blue-600 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent' 
                 : isToday 
-                  ? 'text-orange-600' 
-                  : 'text-gray-700'
+                  ? 'text-amber-600 bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
           } ${
-            isToday ? 'font-bold' : ''
+            isToday ? 'font-extrabold' : ''
           } ${
-            isSelected ? 'text-blue-700' : ''
+            isSelected ? 'bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent' : ''
           }`}>
             {day}
           </span>
           
           {hasEvents && !isPastDate && (
-            <div className="flex flex-wrap gap-1 justify-center max-w-full px-1">
-              {dayEvents.slice(0, 4).map((event, idx) => (
+            <div className="flex flex-wrap gap-1.5 justify-center max-w-full px-2">
+              {dayEvents.slice(0, 3).map((event, idx) => (
                 <div
                   key={idx}
-                  className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ${
-                    event.type === 'pathways' ? 'bg-blue-500' :
-                    event.type === 'ucat' ? 'bg-green-500' :
-                    event.type === 'interview' ? 'bg-purple-500' : 'bg-gray-500'
+                  className={`w-3 h-3 rounded-full shadow-sm ${
+                    event.type === 'pathways' ? 'bg-gradient-to-r from-blue-400 to-blue-600' :
+                    event.type === 'ucat' ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' :
+                    event.type === 'interview' ? 'bg-gradient-to-r from-purple-400 to-purple-600' : 'bg-gradient-to-r from-slate-400 to-slate-600'
                   }`}
                 />
               ))}
-              {dayEvents.length > 4 && (
-                <span className="text-xs font-medium text-gray-600 ml-1">+{dayEvents.length - 4}</span>
+              {dayEvents.length > 3 && (
+                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-slate-400 to-slate-600 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold leading-none">+</span>
+                </div>
               )}
             </div>
           )}
 
           {hasEvents && !isPastDate && (
-            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+            <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg border-2 border-white">
               {dayEvents.length}
             </div>
           )}
 
           {isToday && (
-            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 text-xs font-bold text-orange-600">
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg border border-white">
               Today
             </div>
           )}
@@ -160,45 +162,47 @@ const EventCalendar: React.FC<EventCalendarProps> = ({ events, onDateSelect, sel
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 h-fit">
+    <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 rounded-3xl shadow-2xl border border-slate-200/50 backdrop-blur-sm p-6 md:p-8 h-fit">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Event Calendar</h2>
-          <p className="text-gray-600">Click on any date to view events or select a day</p>
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-3">
+            Event Calendar
+          </h2>
+          <p className="text-slate-600 font-medium">Discover upcoming events and book your sessions</p>
         </div>
-        <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-2">
+        <div className="flex items-center gap-2 bg-white/70 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-white/50">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-3 hover:bg-white hover:shadow-md rounded-lg transition-all duration-200 group"
+            className="p-3 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:text-white rounded-xl transition-all duration-300 group hover:shadow-lg hover:scale-105"
             aria-label="Previous month"
           >
-            <svg className="w-6 h-6 text-gray-600 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div className="text-center">
-            <h3 className="text-lg md:text-xl font-bold text-gray-800 min-w-[160px] md:min-w-[180px]">
+          <div className="text-center px-2">
+            <h3 className="text-lg md:text-xl font-bold text-slate-700 min-w-[160px] md:min-w-[180px] bg-gradient-to-r from-slate-700 to-slate-800 bg-clip-text text-transparent">
               {monthNames[currentMonth]} {currentYear}
             </h3>
           </div>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-3 hover:bg-white hover:shadow-md rounded-lg transition-all duration-200 group"
+            className="p-3 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 hover:text-white rounded-xl transition-all duration-300 group hover:shadow-lg hover:scale-105"
             aria-label="Next month"
           >
-            <svg className="w-6 h-6 text-gray-600 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
       </div>
 
       {/* Day Labels */}
-      <div className="grid grid-cols-7 gap-2 md:gap-3 mb-3">
+      <div className="grid grid-cols-7 gap-2 md:gap-3 mb-4">
         {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, index) => (
-          <div key={day} className="h-10 flex items-center justify-center">
-            <span className="text-sm md:text-base font-bold text-gray-600">
+          <div key={day} className="h-12 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200/50 rounded-xl border border-slate-200/50">
+            <span className="text-sm md:text-base font-bold text-slate-700 tracking-wide">
               <span className="hidden md:inline">{day}</span>
               <span className="md:hidden">{day.slice(0, 3)}</span>
             </span>
