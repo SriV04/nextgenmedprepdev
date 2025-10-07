@@ -22,6 +22,7 @@ export class FondyService {
       throw new AppError('Fondy credentials not configured', 500);
     }
 
+    console.log(`FondyService initialized with Merchant ID: ${this.merchantId}`);
     this.fondy = new CloudIpsp({
       merchantId: this.merchantId,
       secretKey: this.secretKey

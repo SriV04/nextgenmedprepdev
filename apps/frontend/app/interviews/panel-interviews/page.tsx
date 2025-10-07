@@ -63,20 +63,12 @@ const PanelInterviewPage = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <CalendlyPopup 
-              url="https://calendly.com/sri-nextgenmedprep/30min" 
+            <Link 
+              href="/interviews/payment" 
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-              prefill={{
-                  name: "Potential Student"
-              }}
-              utm={{
-                utmCampaign: 'panel-page',
-                utmSource: 'website',
-                utmMedium: 'hero-button'
-              }}
             >
               Book Mock Panel Consultation
-            </CalendlyPopup>
+            </Link>
             <Link href="#comparison" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Panel vs MMI
             </Link>
@@ -285,20 +277,12 @@ const PanelInterviewPage = () => {
           </div>
           
           <div className="text-center">
-            <CalendlyPopup 
-              url="https://calendly.com/sri-nextgenmedprep/30min"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 text-lg"
-              prefill={{
-                name: "Potential Student"
-              }}
-              utm={{
-                utmCampaign: 'panel-page-cta',
-                utmSource: 'website',
-                utmMedium: 'cta-section'
-              }}
+            <Link 
+              href="/interviews/payment"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 text-lg inline-block"
             >
               📅 Book Your Panel Interview Mock
-            </CalendlyPopup>
+            </Link>
           </div>
         </div>
       </section>
@@ -311,7 +295,7 @@ const PanelInterviewPage = () => {
             Build confidence and master the conversational interview format with expert guidance
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
+            <Link href="/interviews/payment" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
               Start Your Panel Preparation
             </Link>
             <Link href="/interviews" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">

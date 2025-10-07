@@ -8,8 +8,8 @@ interface UCATCalculatorProps {
 }
 
 const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
-  const [currentScore, setCurrentScore] = useState<number>(1900);
-  const [targetScore, setTargetScore] = useState<number>(2400);
+  const [currentScore, setCurrentScore] = useState<number>(1600);
+  const [targetScore, setTargetScore] = useState<number>(2200);
   const [calculatedHours, setCalculatedHours] = useState<number>(0);
 
   // Reset calculated hours whenever sliders change
@@ -214,7 +214,7 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
               <div className="relative">
                 <input
                   type="range"
-                  min="1800"
+                  min="1500"
                   max="2700"
                   step="10"
                   value={currentScore}
@@ -222,7 +222,7 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-1">
-                  <span>1800</span>
+                  <span>1500</span>
                   <span>2700</span>
                 </div>
               </div>
@@ -239,7 +239,7 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
               <div className="relative">
                 <input
                   type="range"
-                  min="2200"
+                  min="1900"
                   max="2700"
                   step="10"
                   value={targetScore}
@@ -247,7 +247,7 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-sm text-gray-500 mt-1">
-                  <span>2200</span>
+                  <span>1900</span>
                   <span>2700</span>
                 </div>
               </div>
