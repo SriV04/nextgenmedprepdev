@@ -18,22 +18,24 @@ function PaymentSuccessContent() {
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [sessionId, setSessionId] = useState<string>('');
 
   useEffect(() => {
-    const orderId = searchParams.get('order_id');
+    const checkoutSessionId = searchParams.get('session_id');
     
-    if (orderId) {
-      fetchPaymentStatus(orderId);
+    if (checkoutSessionId) {
+      setSessionId(checkoutSessionId);
+      fetchPaymentStatus(checkoutSessionId);
     } else {
-      setError('No order ID provided');
+      setError('No checkout session ID provided');
       setLoading(false);
     }
   }, [searchParams]);
 
-  const fetchPaymentStatus = async (orderId: string) => {
+  const fetchPaymentStatus = async (checkoutSessionId: string) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
-      const response = await fetch(`${apiUrl}/api/v1/payments/status/${orderId}`);
+      const response = await fetch(`${apiUrl}/api/v1/payments/status/${checkoutSessionId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -51,221 +53,170 @@ function PaymentSuccessContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading payment status...</p>
+          <p className="text-gray-600 font-medium">Verifying your payment...</p>
+          <p className="text-sm text-gray-500 mt-2">Session ID: {sessionId}</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Link 
-            href="/payment" 
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Try Again
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (!paymentStatus) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">No Payment Found</h1>
-          <p className="text-gray-600 mb-6">We couldn't find information about this payment.</p>
-          <Link 
-            href="/payment" 
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Make New Payment
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return (
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        );
-      case 'declined':
-        return (
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-        );
-      case 'processing':
-        return (
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-      default:
-        return (
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
-    }
-  };
-
-  const getStatusMessage = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return {
-          title: 'Payment Successful!',
-          message: 'Your payment has been processed successfully.',
-          color: 'text-green-800'
-        };
-      case 'declined':
-        return {
-          title: 'Payment Declined',
-          message: 'Your payment was declined. Please try a different payment method.',
-          color: 'text-red-800'
-        };
-      case 'processing':
-        return {
-          title: 'Payment Processing',
-          message: 'Your payment is being processed. You will receive an email confirmation shortly.',
-          color: 'text-yellow-800'
-        };
-      case 'expired':
-        return {
-          title: 'Payment Expired',
-          message: 'The payment session has expired. Please try again.',
-          color: 'text-gray-800'
-        };
-      case 'reversed':
-        return {
-          title: 'Payment Reversed',
-          message: 'This payment has been reversed/refunded.',
-          color: 'text-gray-800'
-        };
-      default:
-        return {
-          title: 'Payment Status Unknown',
-          message: 'We are unable to determine the payment status at this time.',
-          color: 'text-gray-800'
-        };
-    }
-  };
-
-  const statusInfo = getStatusMessage(paymentStatus.status);
   const formatAmount = (amount: string, currency: string) => {
-    const numAmount = parseInt(amount) / 100; // Convert from cents
+    const numAmount = parseInt(amount) / 100;
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: currency
     }).format(numAmount);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-8 text-center">
-          {getStatusIcon(paymentStatus.status)}
-          
-          <h1 className={`text-2xl font-bold mb-2 ${statusInfo.color}`}>
-            {statusInfo.title}
-          </h1>
-          
-          <p className="text-gray-600 mb-6">
-            {statusInfo.message}
-          </p>
+  const getStatusIcon = (status: string) => {
+    if (status === 'approved') {
+      return (
+        <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      );
+    }
+    return (
+      <div className="w-20 h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+    );
+  };
 
-          <div className="border-t pt-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Order ID:</span>
-                <span className="font-medium">{paymentStatus.order_id}</span>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center">
+          
+          {error ? (
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01" />
+                </svg>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Amount:</span>
-                <span className="font-medium">{formatAmount(paymentStatus.amount, paymentStatus.currency)}</span>
+              <h1 className="text-3xl font-bold mb-3 text-red-800">Payment Error</h1>
+              <div className="p-4 rounded-lg bg-red-50 border-red-200 border mb-6">
+                <p className="text-red-800 font-medium">{error}</p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Status:</span>
-                <span className={`font-medium capitalize ${
-                  paymentStatus.status === 'approved' ? 'text-green-600' :
-                  paymentStatus.status === 'declined' ? 'text-red-600' :
-                  paymentStatus.status === 'processing' ? 'text-yellow-600' :
-                  'text-gray-600'
+            </div>
+          ) : paymentStatus ? (
+            <div className="text-center">
+              {getStatusIcon(paymentStatus.status)}
+              <h1 className={`text-3xl font-bold mb-3 ${
+                paymentStatus.status === 'approved' ? 'text-green-800' : 'text-red-800'
+              }`}>
+                {paymentStatus.status === 'approved' ? 'Payment Successful!' : 'Payment Failed'}
+              </h1>
+              <div className={`p-4 rounded-lg mb-6 border ${
+                paymentStatus.status === 'approved' 
+                  ? 'bg-green-50 border-green-200' 
+                  : 'bg-red-50 border-red-200'
+              }`}>
+                <p className={`font-medium ${
+                  paymentStatus.status === 'approved' ? 'text-green-800' : 'text-red-800'
                 }`}>
-                  {paymentStatus.status}
+                  {paymentStatus.status === 'approved' 
+                    ? 'Thank you for your payment. Your transaction has been processed successfully.'
+                    : 'Your payment could not be processed. Please try again with a different payment method.'
+                  }
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Checkout Session Details */}
+          <div className="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Transaction Details
+            </h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Checkout Session ID:</span>
+                <span className="font-mono text-xs bg-gray-200 px-2 py-1 rounded max-w-xs truncate">
+                  {sessionId}
                 </span>
               </div>
-              {paymentStatus.payment_system && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Payment Method:</span>
-                  <span className="font-medium">{paymentStatus.payment_system}</span>
-                </div>
-              )}
-              {paymentStatus.masked_card && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Card:</span>
-                  <span className="font-medium">{paymentStatus.masked_card}</span>
-                </div>
+              
+              {paymentStatus && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Amount:</span>
+                    <span className="font-bold text-lg text-gray-900">
+                      {formatAmount(paymentStatus.amount, paymentStatus.currency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Status:</span>
+                    <span className={`font-semibold capitalize px-3 py-1 rounded-full text-xs ${
+                      paymentStatus.status === 'approved' ? 'bg-green-100 text-green-800' :
+                      paymentStatus.status === 'declined' ? 'bg-red-100 text-red-800' :
+                      paymentStatus.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {paymentStatus.status}
+                    </span>
+                  </div>
+                  {paymentStatus.payment_system && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Payment Method:</span>
+                      <span className="font-medium capitalize">{paymentStatus.payment_system}</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="space-y-3">
-            {paymentStatus.status === 'approved' && (
+            {paymentStatus?.status === 'approved' && (
               <Link 
                 href="/" 
-                className="block w-full bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition-colors"
+                className="block w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Continue to Dashboard
               </Link>
             )}
             
-            {(paymentStatus.status === 'declined' || paymentStatus.status === 'expired') && (
+            {(error || paymentStatus?.status === 'declined' || paymentStatus?.status === 'expired') && (
               <Link 
                 href="/payment" 
-                className="block w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition-colors"
+                className="block w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                Try Again
+                Try Payment Again
               </Link>
             )}
             
             <Link 
               href="/" 
-              className="block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-md hover:bg-gray-300 transition-colors"
+              className="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-colors font-medium"
             >
               Return to Home
             </Link>
           </div>
 
-          <div className="mt-8 pt-6 border-t text-xs text-gray-500">
-            <p>If you have any questions about your payment, please contact our support team.</p>
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 mb-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              <span>Secured by Stripe</span>
+            </div>
+            <p className="text-xs text-gray-500">
+              If you have any questions about your payment, please contact our support team.
+            </p>
           </div>
         </div>
       </div>
@@ -276,8 +227,8 @@ function PaymentSuccessContent() {
 export default function PaymentSuccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading payment status...</p>
         </div>

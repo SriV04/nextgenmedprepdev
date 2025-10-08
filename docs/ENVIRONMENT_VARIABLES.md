@@ -54,10 +54,11 @@ ENCRYPTION_KEY=your_encryption_key
 RATE_LIMIT_WINDOW_MS=900000       # 15 minutes
 RATE_LIMIT_MAX_REQUESTS=100
 
-# Payment Processing (Fondy)
-FONDY_MERCHANT_ID=1396424         # Your Fondy merchant ID (test: 1396424)
-FONDY_SECRET_KEY=test             # Your Fondy secret key (test: "test")
-BACKEND_URL=http://localhost:5001 # Backend URL for callbacks
+# Payment Processing (Stripe)
+STRIPE_SECRET_KEY=sk_test_...     # Your Stripe secret key (backend only)
+STRIPE_WEBHOOK_SECRET=whsec_...   # Stripe webhook endpoint secret
+BACKEND_URL=http://localhost:5001 # Backend URL for webhook callbacks
+FRONTEND_URL=http://localhost:3000 # Frontend URL for payment redirects
 
 # Logging
 LOG_LEVEL=info
@@ -75,10 +76,12 @@ NEXT_PUBLIC_API_URL=http://localhost:5001
 NEXT_PUBLIC_API_VERSION=v1
 NEXT_PUBLIC_APP_ENV=development
 
+# Payment Processing (Stripe)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+
 # Optional: Third-party services
 # NEXT_PUBLIC_GA_TRACKING_ID=your_google_analytics_id
 # NEXT_PUBLIC_HOTJAR_ID=your_hotjar_id
-# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
 ```
 
 ## Environment-Specific Files

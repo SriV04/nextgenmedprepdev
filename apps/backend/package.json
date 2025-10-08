@@ -24,7 +24,6 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "@types/multer": "^2.0.0",
-    "cloudipsp-node-js-sdk": "^1.0.8",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -32,7 +31,7 @@
     "module-alias": "^2.2.3",
     "multer": "^2.0.2",
     "nodemailer": "^6.9.7",
-    "stripe": "^14.9.0",
+    "stripe": "^14.25.0",
     "tsconfig-paths": "^3.15.0",
     "zod": "^3.22.4"
   },

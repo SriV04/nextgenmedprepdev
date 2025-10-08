@@ -12,7 +12,7 @@ export const subscriptionSchema = z.object({
 export const updateSubscriptionSchema = z.object({
   subscription_tier: z.enum(['free', 'newsletter_only', 'premium_basic', 'premium_plus']).optional(),
   opt_in_newsletter: z.boolean().optional(),
-  fondy_subscription_status: z.enum(['active', 'canceled', 'past_due', 'trialing', 'incomplete', 'incomplete_expired', 'unpaid']).optional(),
+  stripe_subscription_status: z.enum(['active', 'canceled', 'past_due', 'trialing', 'incomplete', 'incomplete_expired', 'unpaid']).optional(),
 });
 
 export const emailSchema = z.object({

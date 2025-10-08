@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { fondyService } from '../services/fondyService';
-import { CreatePaymentRequest, FondyCallbackData, AppError } from '../types';
+import { stripeService } from '../services/stripeService';
+import { CreatePaymentRequest, AppError, StripeWebhookEvent } from '../types';
 import { z } from 'zod';
+import Stripe from 'stripe';
 
 // Validation schemas
 const createPaymentSchema = z.object({
@@ -21,9 +22,7 @@ const createSubscriptionSchema = createPaymentSchema.extend({
   })
 });
 
-const orderIdSchema = z.object({
-  order_id: z.string().min(1)
-});
+// Removed orderIdSchema as we now use specific validation for each endpoint
 
 export class PaymentController {
   /**
@@ -33,7 +32,7 @@ export class PaymentController {
     try {
       const validatedData = createPaymentSchema.parse(req.body);
       
-      const paymentResponse = await fondyService.createCheckoutPayment(validatedData);
+      const paymentResponse = await stripeService.createCheckoutPayment(validatedData);
       
       res.json({
         success: true,
@@ -73,7 +72,7 @@ export class PaymentController {
     try {
       const validatedData = createSubscriptionSchema.parse(req.body);
       
-      const paymentResponse = await fondyService.createSubscription(validatedData);
+      const paymentResponse = await stripeService.createSubscription(validatedData);
       
       res.json({
         success: true,
@@ -111,9 +110,9 @@ export class PaymentController {
    */
   async getPaymentStatus(req: Request, res: Response): Promise<void> {
     try {
-      const { order_id } = orderIdSchema.parse(req.params);
+      const { session_id } = z.object({ session_id: z.string().min(1) }).parse(req.params);
       
-      const status = await fondyService.getPaymentStatus(order_id);
+      const status = await stripeService.getPaymentStatus(session_id);
       
       res.json({
         success: true,
@@ -150,10 +149,10 @@ export class PaymentController {
    */
   async refundPayment(req: Request, res: Response): Promise<void> {
     try {
-      const { order_id } = orderIdSchema.parse(req.params);
+      const { payment_intent_id } = z.object({ payment_intent_id: z.string().min(1) }).parse(req.params);
       const amount = req.body.amount ? parseFloat(req.body.amount) : undefined;
       
-      const refundResponse = await fondyService.refundPayment(order_id, amount);
+      const refundResponse = await stripeService.refundPayment(payment_intent_id, amount);
       
       res.json({
         success: true,
@@ -178,40 +177,48 @@ export class PaymentController {
   }
 
   /**
-   * Handle Fondy callback
+   * Handle Stripe webhook
    */
-  async handleCallback(req: Request, res: Response): Promise<void> {
+  async handleWebhook(req: Request, res: Response): Promise<void> {
     try {
-      const callbackData: FondyCallbackData = req.body;
+      const signature = req.headers['stripe-signature'] as string;
       
-      const result = await fondyService.processCallback(callbackData);
+      if (!signature) {
+        res.status(400).json({ error: 'Missing stripe-signature header' });
+        return;
+      }
+
+      const event = stripeService.verifyWebhookSignature(req.body, signature);
+      const result = await stripeService.processWebhook(event);
       
-      // Fondy expects a simple \"OK\" response for successful callbacks
-      res.status(200).send('OK');
+      res.status(200).json({ received: true });
     } catch (error: any) {
-      console.error('Handle callback error:', error);
+      console.error('Handle webhook error:', error);
       
-      // Even on error, we should return OK to prevent Fondy from retrying
-      // But log the error for investigation
-      res.status(200).send('OK');
+      if (error instanceof AppError) {
+        res.status(error.statusCode).json({ error: error.message });
+        return;
+      }
+      
+      res.status(400).json({ error: 'Webhook handler failed' });
     }
   }
 
   /**
-   * Get transaction list for an order
+   * Get subscription details
    */
-  async getTransactionList(req: Request, res: Response): Promise<void> {
+  async getSubscription(req: Request, res: Response): Promise<void> {
     try {
-      const { order_id } = orderIdSchema.parse(req.params);
+      const { subscription_id } = z.object({ subscription_id: z.string().min(1) }).parse(req.params);
       
-      const transactions = await fondyService.getTransactionList(order_id);
+      const subscription = await stripeService.getSubscription(subscription_id);
       
       res.json({
         success: true,
-        data: transactions
+        data: subscription
       });
     } catch (error: any) {
-      console.error('Get transaction list error:', error);
+      console.error('Get subscription error:', error);
       
       if (error instanceof AppError) {
         res.status(error.statusCode).json({
@@ -233,10 +240,10 @@ export class PaymentController {
    */
   async capturePayment(req: Request, res: Response): Promise<void> {
     try {
-      const { order_id } = orderIdSchema.parse(req.params);
+      const { payment_intent_id } = z.object({ payment_intent_id: z.string().min(1) }).parse(req.params);
       const amount = req.body.amount ? parseFloat(req.body.amount) : undefined;
       
-      const captureResponse = await fondyService.capturePayment(order_id, amount);
+      const captureResponse = await stripeService.capturePayment(payment_intent_id, amount);
       
       res.json({
         success: true,
@@ -261,39 +268,20 @@ export class PaymentController {
   }
 
   /**
-   * Get payment reports
+   * Cancel subscription
    */
-  async getReports(req: Request, res: Response): Promise<void> {
+  async cancelSubscription(req: Request, res: Response): Promise<void> {
     try {
-      const { date_from, date_to } = req.query;
+      const { subscription_id } = z.object({ subscription_id: z.string().min(1) }).parse(req.params);
       
-      if (!date_from || !date_to) {
-        res.status(400).json({
-          success: false,
-          error: 'date_from and date_to query parameters are required'
-        });
-        return;
-      }
-      
-      const dateFrom = new Date(date_from as string);
-      const dateTo = new Date(date_to as string);
-      
-      if (isNaN(dateFrom.getTime()) || isNaN(dateTo.getTime())) {
-        res.status(400).json({
-          success: false,
-          error: 'Invalid date format'
-        });
-        return;
-      }
-      
-      const reports = await fondyService.getReports(dateFrom, dateTo);
+      const subscription = await stripeService.cancelSubscription(subscription_id);
       
       res.json({
         success: true,
-        data: reports
+        data: subscription
       });
     } catch (error: any) {
-      console.error('Get reports error:', error);
+      console.error('Cancel subscription error:', error);
       
       if (error instanceof AppError) {
         res.status(error.statusCode).json({

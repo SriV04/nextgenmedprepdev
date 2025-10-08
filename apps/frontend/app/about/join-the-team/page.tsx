@@ -131,22 +131,14 @@ export default function JoinTheTeamPage() {
             </motion.div>
           </div>
 
-          <motion.div
-            className="bg-white rounded-2xl shadow-lg overflow-hidden"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={fadeInUp}
-          >
-            <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
-              <h3 className="text-2xl font-bold mb-2">Application Form</h3>
-              <p className="text-blue-100">Tell us about yourself and how you'd like to contribute to our mission.</p>
-            </div>
-            
-            <div className="p-8">
-              <JoinTeamForm />
-            </div>
-          </motion.div>
+          <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+            <h3 className="text-2xl font-bold mb-2">Application Form</h3>
+            <p className="text-blue-100">Tell us about yourself and how you'd like to contribute to our mission.</p>
+          </div>
+          
+          <div className="p-8">
+            <JoinTeamForm />
+          </div>
 
           {/* Additional Information */}
           <motion.div
