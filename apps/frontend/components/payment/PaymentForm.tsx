@@ -8,7 +8,11 @@ interface PaymentFormData {
   currency: string;
   description: string;
   customer_email: string;
+  customer_name?: string;
   return_url?: string;
+  metadata?: {
+    [key: string]: string;
+  };
 }
 
 interface PaymentResponse {
@@ -29,16 +33,25 @@ interface PaymentFormProps {
     currency: string;
     description: string;
   };
+  initialData?: {
+    customer_email?: string;
+    customer_name?: string;
+    metadata?: {
+      [key: string]: string;
+    };
+  };
   onSuccess?: (data: PaymentResponse['data']) => void;
   onError?: (error: string) => void;
 }
 
-export default function PaymentForm({ selectedPackage, onSuccess, onError }: PaymentFormProps) {
+export default function PaymentForm({ selectedPackage, initialData, onSuccess, onError }: PaymentFormProps) {
   const [formData, setFormData] = useState<PaymentFormData>({
     amount: selectedPackage?.price || 0,
     currency: selectedPackage?.currency || 'GBP',
     description: selectedPackage?.description || '',
-    customer_email: ''
+    customer_email: initialData?.customer_email || '',
+    customer_name: initialData?.customer_name || '',
+    metadata: initialData?.metadata || {}
   });
   
   const [loading, setLoading] = useState(false);
@@ -91,15 +104,15 @@ export default function PaymentForm({ selectedPackage, onSuccess, onError }: Pay
       console.log('Payment API response:', data);
 
       if (data.success && data.data?.checkout_url) {
-        console.log('Opening checkout URL:', data.data.checkout_url);
+        console.log('Redirecting to checkout URL:', data.data.checkout_url);
         setRedirecting(true);
         
         if (onSuccess) {
           onSuccess(data.data);
         } else {
-          // Small delay to show redirecting state, then redirect to Fondy checkout page
+          // Small delay to show redirecting state, then redirect to Stripe checkout page
           setTimeout(() => {
-            window.open(data.data.checkout_url, '_blank');
+            window.location.href = data.data.checkout_url;
           }, 1000);
         }
       } else {

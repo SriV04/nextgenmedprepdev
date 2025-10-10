@@ -33,9 +33,9 @@ export default function UCATPage() {
       buttonColor: "bg-green-600 hover:bg-green-700"
     },
     {
-      title: "Personalised Revision Plan",
-      description: "Excel in mathematical problem-solving with our structured QR preparation program.",
-      features: ["Math fundamentals", "Calculator techniques", "Data interpretation", "Formula shortcuts"],
+      title: "Personalised Revision Plan", // payment screen with info email, phone number - 20 quid text every week 
+      description: "Tailored study plan to maximize your strengths and address weaknesses.",
+      features: ["Calculator techniques", "Data interpretation", "Formula shortcuts"],
       icon: CalculatorIcon,
       color: "bg-purple-50 border-purple-200",
       buttonColor: "bg-purple-600 hover:bg-purple-700"
@@ -119,9 +119,7 @@ export default function UCATPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
-            <Link href="/ucat/free-resources" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300">
-              Improve My Score!
-            </Link>
+
             <Link href="#tutoring-packages" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Join our Programs
             </Link>
@@ -269,7 +267,9 @@ export default function UCATPage() {
         </div>
       </section> */}
 
-      {/* UCAT Tutoring Packages */}
+      {/* UCAT Tutoring Packages 
+        make into a table better 
+      */}
       <section id="tutoring-packages" className="py-16 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">

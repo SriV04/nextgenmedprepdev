@@ -66,11 +66,7 @@ const ourStory = {
   sections: [
     {
       heading: 'A Vision for Excellence',
-      content: 'NextGen Med Prep was founded with a simple idea - medical school preparation should be accessible, effective, and tailored to each student\'s unique needs. We\'re more than just tutors; we\'re mentors who have successfully navigated the path you\'re on now.'
-    },
-    {
-      heading: 'The Gillick Approach',
-      content: 'Our approach combines personalized attention, data-driven methods, and a focus on building confidence. We call it the Gillick Approach - a comprehensive system that addresses every aspect of medical school applications.'
+      content: 'NextGen MedPrep was founded with a simple idea - medical school preparation should be accessible, effective, and tailored to each student\'s unique needs. We\'re more than just tutors; we\'re mentors who have successfully navigated the path you\'re on now.'
     },
     {
       heading: 'Affordable Excellence',
@@ -79,6 +75,10 @@ const ourStory = {
     {
       heading: 'A Different Experience',
       content: 'We wanted to be different from other preparation services. Our students don\'t just learn content - they develop skills, confidence, and strategies that will serve them throughout their medical careers.'
+    }, 
+    {
+      heading: 'Built by Students, for Students',
+      content: 'As current medical students, we understand the challenges and pressures you face. We\'ve been in your shoes, and we\'re here to guide you every step of the way.'
     }
   ]
 };
@@ -357,9 +357,6 @@ export default function AboutPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
                 Get Started Today
-              </Link>
-              <Link href="/contact" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
-                Contact Us
               </Link>
             </div>
           </motion.div>

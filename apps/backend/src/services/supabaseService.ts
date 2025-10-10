@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Subscription, User, NewJoiner, CreateNewJoinerRequest, UpdateNewJoinerRequest } from '@nextgenmedprep/common-types';
+import { Subscription, User, NewJoiner, CreateNewJoinerRequest, UpdateNewJoinerRequest, Booking, CreateBookingRequest } from '@nextgenmedprep/common-types';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -436,6 +436,81 @@ class SupabaseService {
 
     if (error) {
       throw new Error(`Failed to get new joiners by availability: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  // Booking methods
+  async createBooking(bookingData: {
+    user_id: string;
+    tutor_id?: string;
+    start_time: string;
+    end_time: string;
+    package?: string;
+    amount?: number;
+    preferred_time?: string;
+    email?: string;
+    payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  }): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .insert({
+        ...bookingData,
+        status: 'confirmed',
+        payment_status: bookingData.payment_status || 'pending',
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create booking: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async getBookingById(id: string): Promise<any | null> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to get booking: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async updateBookingPaymentStatus(id: string, paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .update({ 
+        payment_status: paymentStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update booking payment status: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async getUserBookings(userId: string): Promise<any[]> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get user bookings: ${error.message}`);
     }
 
     return data || [];

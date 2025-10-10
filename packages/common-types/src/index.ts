@@ -228,3 +228,74 @@ export interface UpdateNewJoinerRequest {
   availability?: AvailabilitySlot[];
   cv_url?: string;
 }
+
+// Booking Types
+export interface Booking {
+  id: string;
+  user_id: string;
+  tutor_id?: string;
+  start_time: string;
+  end_time: string;
+  status: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
+  created_at: string;
+  updated_at: string;
+  package?: string;
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  amount?: number;
+  complete?: boolean;
+  preferred_time?: string;
+  reschedule_requested?: boolean;
+  rescheduled_time?: string;
+  feedback?: string;
+  rating?: number;
+  email?: string;
+}
+
+export interface CreateBookingRequest {
+  user_id: string;
+  tutor_id?: string;
+  start_time: string;
+  end_time: string;
+  package?: string;
+  amount?: number;
+  preferred_time?: string;
+  email?: string;
+}
+
+export interface UpdateBookingRequest {
+  tutor_id?: string;
+  start_time?: string;
+  end_time?: string;
+  status?: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
+  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  amount?: number;
+  complete?: boolean;
+  preferred_time?: string;
+  reschedule_requested?: boolean;
+  rescheduled_time?: string;
+  feedback?: string;
+  rating?: number;
+}
+
+// Payment Types
+export interface CreatePaymentRequest {
+  amount: number;
+  currency: string;
+  description: string;
+  customer_email?: string;
+  customer_name?: string;
+  product_id?: string;
+  return_url?: string;
+  metadata?: {
+    [key: string]: string;
+  };
+}
+
+export interface PaymentStatus {
+  order_id: string;
+  status: 'approved' | 'declined' | 'processing' | 'expired' | 'reversed';
+  amount: string;
+  currency: string;
+  payment_system?: string;
+  masked_card?: string;
+}

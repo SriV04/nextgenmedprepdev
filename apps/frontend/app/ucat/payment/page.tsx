@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeftIcon, AcademicCapIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, AcademicCapIcon, CheckIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import PaymentForm from '../../../components/payment/PaymentForm';
 
 interface UCATPackage {
@@ -14,6 +14,13 @@ interface UCATPackage {
   description: string;
   features: string[];
   color: string;
+}
+
+interface CustomerDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
 }
 
 const ucatPackages: { [key: string]: UCATPackage } = {
@@ -67,6 +74,13 @@ const ucatPackages: { [key: string]: UCATPackage } = {
 function UCATPaymentContent() {
   const searchParams = useSearchParams();
   const [selectedPackage, setSelectedPackage] = useState<UCATPackage | null>(null);
+  const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
+  const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
     const packageId = searchParams.get('package');
@@ -78,16 +92,44 @@ function UCATPaymentContent() {
     }
   }, [searchParams]);
 
-  const handlePaymentSuccess = (data: any) => {
-    console.log('Payment successful:', data);
-    // Handle successful payment - could redirect to confirmation page
-    if (data?.checkout_url) {
-      window.location.href = data.checkout_url;
-    }
+  const handlePaymentSuccess = () => {
+    console.log('UCAT payment successful');
+    // Clear stored details
+    sessionStorage.removeItem('ucat_booking_details');
+    // Redirect to success page with UCAT details
+    const successUrl = `/payment/success?service=ucat&package=${selectedPackage?.id}&price=${selectedPackage?.price}`;
+    window.location.href = successUrl;
   };
 
   const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
+    console.error('UCAT payment error:', error);
+  };
+
+  const isCustomerDetailsValid = () => {
+    return customerDetails.firstName.trim() !== '' && 
+           customerDetails.lastName.trim() !== '' && 
+           customerDetails.email.trim() !== '' && 
+           customerDetails.email.includes('@');
+  };
+
+  const handleCustomerDetailsChange = (field: keyof CustomerDetails, value: string) => {
+    setCustomerDetails(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleProceedToPayment = () => {
+    if (isCustomerDetailsValid() && selectedPackage) {
+      // Store booking details in session storage
+      const bookingData = {
+        package: selectedPackage,
+        customerDetails,
+        timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('ucat_booking_details', JSON.stringify(bookingData));
+      setCurrentStep(2);
+    }
   };
 
   if (!selectedPackage) {
@@ -204,27 +246,137 @@ function UCATPaymentContent() {
 
           {/* Payment Form */}
           <div className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Complete Your Purchase
-              </h2>
-              <p className="text-gray-600">
-                Secure checkout powered by Fondy. Start your UCAT preparation today.
-              </p>
-            </div>
-            
-            <PaymentForm
-              key={selectedPackage.id} // Force re-render when package changes
-              selectedPackage={{
-                id: selectedPackage.id,
-                name: selectedPackage.name,
-                price: selectedPackage.price,
-                currency: selectedPackage.currency,
-                description: `${selectedPackage.name} - ${selectedPackage.description}`
-              }}
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-            />
+            {currentStep === 1 ? (
+              <>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Your Details
+                  </h2>
+                  <p className="text-gray-600">
+                    Please provide your contact information to proceed with your UCAT package purchase.
+                  </p>
+                </div>
+
+                {/* Customer Details Form */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <UserIcon className="w-5 h-5" />
+                    Contact Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        First Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={customerDetails.firstName}
+                        onChange={(e) => handleCustomerDetailsChange('firstName', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Last Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={customerDetails.lastName}
+                        onChange={(e) => handleCustomerDetailsChange('lastName', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your last name"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <EnvelopeIcon className="w-4 h-4" />
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        value={customerDetails.email}
+                        onChange={(e) => handleCustomerDetailsChange('email', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number (Optional)
+                      </label>
+                      <input
+                        type="tel"
+                        value={customerDetails.phone}
+                        onChange={(e) => handleCustomerDetailsChange('phone', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleProceedToPayment}
+                    disabled={!isCustomerDetailsValid()}
+                    className={`w-full mt-8 px-8 py-4 rounded-lg font-semibold text-white transition-all duration-200 ${
+                      isCustomerDetailsValid()
+                        ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                        : 'bg-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Proceed to Payment - £{selectedPackage.price}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Complete Your Purchase
+                  </h2>
+                  <p className="text-gray-600">
+                    Secure checkout powered by Stripe. Start your UCAT preparation today.
+                  </p>
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  >
+                    ← Edit Contact Details
+                  </button>
+                </div>
+                
+                <PaymentForm
+                  key={selectedPackage.id} // Force re-render when package changes
+                  selectedPackage={{
+                    id: selectedPackage.id,
+                    name: selectedPackage.name,
+                    price: selectedPackage.price,
+                    currency: selectedPackage.currency,
+                    description: `${selectedPackage.name} - ${selectedPackage.description}`
+                  }}
+                  initialData={{
+                    customer_email: customerDetails.email,
+                    customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`.trim(),
+                    metadata: {
+                      type: 'ucat_tutoring',
+                      package_id: selectedPackage.id,
+                      package_name: selectedPackage.name,
+                      customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`.trim(),
+                      customer_email: customerDetails.email,
+                      customer_phone: customerDetails.phone
+                    }
+                  }}
+                  onError={handlePaymentError}
+                />
+              </>
+            )}
 
             {/* Trust Signals */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

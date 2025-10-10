@@ -45,7 +45,7 @@ const PersonalStatementPage = () => {
           
           <p className="text-xl md:text-2xl text-blue-100 max-w-4xl mx-auto mb-8">
             Your personal statement is your chance to shine. Get expert guidance, understand the differences 
-            between medicine and dentistry applications, and secure professional feedback for just £10.
+            between medicine and dentistry applications, and secure professional feedback for just £20.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -53,7 +53,7 @@ const PersonalStatementPage = () => {
               onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
             >
-              Get Expert Review - £10
+              Get Expert Review - £20
             </button>
             <button 
               onClick={() => document.getElementById('advice-section')?.scrollIntoView({ behavior: 'smooth' })}
@@ -229,7 +229,7 @@ const PersonalStatementPage = () => {
                   ))}
                 </div>
                 <p className="text-blue-100 text-lg leading-relaxed mb-4">
-                  "Best £10 I ever spent! The reviewer caught mistakes I never would have seen and 
+                  "Best £20 I ever spent! The reviewer caught mistakes I never would have seen and 
                   gave me specific suggestions that made my statement so much stronger."
                 </p>
               </div>
@@ -299,7 +299,7 @@ const PersonalStatementPage = () => {
                   <li>• Expert reviewers with admissions experience</li>
                   <li>• 48-hour turnaround guaranteed</li>
                   <li>• Proven track record of success</li>
-                  <li>• Affordable at just £10</li>
+                  <li>• Affordable at just £20</li>
                 </ul>
               </div>
             </div>
@@ -309,7 +309,7 @@ const PersonalStatementPage = () => {
             onClick={() => document.getElementById('review-section')?.scrollIntoView({ behavior: 'smooth' })}
             className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-12 py-4 rounded-2xl font-bold text-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
           >
-            Get Your Review - £10 →
+            Get Your Review - £20 →
           </button>
         </div>
       </section>

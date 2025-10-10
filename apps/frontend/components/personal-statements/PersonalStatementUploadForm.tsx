@@ -109,7 +109,7 @@ const PersonalStatementUploadForm: React.FC<PersonalStatementUploadFormProps> = 
               Professional Personal Statement Review
             </h2>
             <p className="text-xl text-gray-600 mb-2">
-              Get expert feedback on your personal statement for just <span className="text-purple-600 font-bold">£10</span>
+              Get expert feedback on your personal statement for just <span className="text-purple-600 font-bold">£20</span>
             </p>
             <p className="text-gray-500">
               Our experienced reviewers will provide detailed feedback within 48 hours
@@ -317,7 +317,7 @@ const PersonalStatementUploadForm: React.FC<PersonalStatementUploadFormProps> = 
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  Pay £10 & Submit for Review
+                  Pay £20 & Submit for Review
                 </>
               )}
             </button>

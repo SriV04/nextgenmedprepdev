@@ -1,3 +1,5 @@
+'use client'; 
+
 import React from 'react';
 import Link from 'next/link';
 
@@ -50,7 +52,7 @@ const Hero: React.FC = () => {
             Getting into med school can feel impossible — but it doesn't have to be.
           </p>
           <p className="mb-4">
-            At <strong>NextGen Med Prep</strong>, we guide you through every step of the admissions process. From standout personal statements to UCAT and interview mastery, we give you the tools to succeed — and the confidence to stand out.
+            At <strong>NextGen MedPrep</strong>, we guide you through every step of the admissions process. From standout personal statements to UCAT and interview mastery, we give you the tools to succeed — and the confidence to stand out.
           </p>
         </div>
 

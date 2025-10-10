@@ -81,22 +81,22 @@ const services = {
       name: 'Career Guidance Consultation',
       description: 'Explore which healthcare path suits you best',
       path: '/free-consultation',
-      badge: 'Free',
-      color: 'blue' as const
+      badge: 'Peronalised',
+      color: 'green' as const
     },
     {
-      name: 'GCSE Subject Selection Guide',
+      name: 'Ultimate Medical Application Guide',
       description: 'Choose the right subjects for healthcare careers',
-      path: '/resources/subject-guide',
-      badge: 'Guide',
+      path: '/resources/ultimate-medicine-application-guide',
+      badge: 'Free',
       color: 'purple' as const
     },
     {
-      name: 'Work Experience Planning',
-      description: 'Start building relevant healthcare experience early',
-      path: '/resources/work-experience',
-      badge: 'Guide',
-      color: 'green' as const
+      name: 'GCSE Tutoring',
+      description: 'Excel in core subjects with expert tutoring',
+      path: '/gcse-tutoring',
+      badge: 'Core Service',
+      color: 'blue' as const
     }
   ],
   'a-level': [
@@ -115,51 +115,37 @@ const services = {
       color: 'purple' as const
     },
     {
-      name: 'University Application Guide',
-      description: 'Navigate UCAS and university applications',
-      path: '/resources/ultimate-medicine-application-guide',
-      badge: 'Guide',
+      name: 'University Application Consultation',
+      description: 'Find the best-fit medical or dental schools for you',
+      path: '/resources/work-experience', // TODO - change to payment form 
+      badge: 'Personalised',
       color: 'green' as const
-    },
-    {
-      name: 'Work Experience Guidance',
-      description: 'Find and maximize healthcare work experience',
-      path: '/resources/work-experience',
-      badge: 'Guide',
-      color: 'cyan' as const
     }
   ],
   'ucat': [
     {
-      name: 'UCAT Preparation Course',
-      description: 'Comprehensive prep with practice tests & strategies',
+      name: 'UCAT Tutoring',
+      description: '1-on-1 expert coaching for top scores',
       path: '/ucat',
-      badge: 'Popular',
-      color: 'cyan' as const
-    },
-    {
-      name: 'UCAT Practice Tests',
-      description: 'Access hundreds of practice questions and mock exams',
-      path: '/ucat/practice-tests',
-      badge: 'Resource',
+      badge: 'Tutoring',
       color: 'blue' as const
     },
     {
       name: 'UCAT Ultimate Prep Guide',
       description: 'Complete guide to mastering the UCAT',
       path: '/resources/ultimate-ucat-prep-guide',
-      badge: 'Guide',
+      badge: 'Free',
       color: 'purple' as const
+    },
+    {
+      name: 'UCAT Personal Revision Plan',
+      description: 'Tailored study plan to maximize your strengths and address weaknesses.',   
+      path: '/resources/ucat-personal-revision-plan',
+      badge: 'Personalized',
+      color: 'green' as const
     }
   ],
   'interviews': [
-    {
-      name: 'Prometheus - AI Interview Prep',
-      description: 'Practice with our AI-powered interview simulator & question bank',
-      path: '/prometheus',
-      badge: 'AI-Powered',
-      color: 'indigo' as const
-    },
     {
       name: 'MMI Interview Coaching',
       description: '1-on-1 coaching for Multiple Mini Interviews',
@@ -186,7 +172,14 @@ const services = {
       description: 'Stay updated on current healthcare issues',
       path: '/resources/ultimate-medical-hot-topics',
       badge: 'Guide',
-      color: 'cyan' as const
+      color: 'green' as const
+    },
+    { 
+      name: 'Interview Background Knowledge',
+      description: 'Conference to prep you on key medical topics',
+      path: '/events',
+      badge: 'Conference',
+      color: 'purple' as const
     }
   ]
 };
@@ -256,7 +249,7 @@ export default function HealthcareCareerExplorer() {
               Step 3
             </span>
             <h2 className="text-4xl font-bold text-gray-900 mb-3">
-              Your Personalized Resources
+              Your Personalised Resources
             </h2>
             <p className="text-gray-600 text-lg">
               Services tailored to your current stage and goals
@@ -269,7 +262,7 @@ export default function HealthcareCareerExplorer() {
             ))}
           </div>
 
-          {/* Featured: Prometheus */}
+          {/* Featured: Prometheus - TODO Make the nextgen better */}
           {(selectedStage === 'ucat' || selectedStage === 'interviews') && (
             <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.1),transparent_60%)]" />
@@ -280,7 +273,7 @@ export default function HealthcareCareerExplorer() {
                     <span className="text-sm font-bold">Featured Tool</span>
                   </div>
                   <h3 className="text-3xl font-bold mb-3">
-                    Prometheus - AI Interview Simulator
+                    Prometheus - Our NextGen Interview Simulator
                   </h3>
                   <p className="text-white/90 text-lg mb-6">
                     Practice with our AI-powered mock interview generator. Get instant feedback, access hundreds of questions, and build confidence before the real thing.
@@ -300,7 +293,7 @@ export default function HealthcareCareerExplorer() {
           )}
 
           {/* CTA */}
-          <div className="text-center mt-12 p-8 bg-gradient-to-r from-gray-50 to-indigo-50 rounded-2xl border-2 border-indigo-100">
+          {/* <div className="text-center mt-12 p-8 bg-gradient-to-r from-gray-50 to-indigo-50 rounded-2xl border-2 border-indigo-100">
             <h3 className="text-2xl font-bold text-gray-900 mb-3">
               Still not sure where to start?
             </h3>
@@ -311,7 +304,7 @@ export default function HealthcareCareerExplorer() {
               <ChatBubbleLeftRightIcon className="w-5 h-5" />
               Book a Consultation
             </button>
-          </div>
+          </div> */}
         </section>
       )}
 

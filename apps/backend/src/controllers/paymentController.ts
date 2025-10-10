@@ -10,8 +10,10 @@ const createPaymentSchema = z.object({
   currency: z.string().length(3),
   description: z.string().min(1),
   customer_email: z.string().email().optional(),
+  customer_name: z.string().optional(),
   product_id: z.string().optional(),
-  return_url: z.string().url().optional()
+  return_url: z.string().url().optional(),
+  metadata: z.record(z.string()).optional()
 });
 
 const createSubscriptionSchema = createPaymentSchema.extend({
@@ -181,6 +183,7 @@ export class PaymentController {
    */
   async handleWebhook(req: Request, res: Response): Promise<void> {
     try {
+      console.log('Received Stripe webhook');
       const signature = req.headers['stripe-signature'] as string;
       
       if (!signature) {

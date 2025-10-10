@@ -47,7 +47,8 @@ export class StripeService {
         customer_email: paymentData.customer_email,
         metadata: {
           product_id: paymentData.product_id || '',
-          type: 'one_time_payment'
+          type: 'one_time_payment',
+          ...(paymentData as any).metadata // Allow additional metadata to be passed through
         }
       };
 
@@ -273,6 +274,7 @@ export class StripeService {
    */
   async processWebhook(event: Stripe.Event): Promise<{ success: boolean; message: string }> {
     try {
+      console.log(`Processing Stripe webhook event: ${event.type}`);
       switch (event.type) {
         case 'checkout.session.completed':
           await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
@@ -313,15 +315,39 @@ export class StripeService {
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
     console.log(`Checkout session completed: ${session.id}`);
     
-    // TODO: Update database with successful payment/subscription
-    // Example: Update user subscription, send confirmation email, etc.
-    
-    if (session.mode === 'subscription') {
-      console.log(`Subscription created: ${session.subscription}`);
-      // Handle subscription activation
-    } else {
-      console.log(`One-time payment completed: ${session.payment_intent}`);
-      // Handle one-time payment
+    try {
+      if (session.mode === 'subscription') {
+        console.log(`Subscription created: ${session.subscription}`);
+        // Handle subscription activation - this is handled separately in subscription webhooks
+      } else {
+        console.log(`One-time payment completed: ${session.payment_intent}`);
+        
+        // For bookings (interview or UCAT), get the payment intent and handle it
+        if (session.payment_intent && (session.metadata?.type === 'interview_booking' || session.metadata?.type === 'ucat_tutoring')) {
+          const paymentIntent = await this.stripe.paymentIntents.retrieve(session.payment_intent as string);
+          
+          // Ensure metadata is properly set on payment intent
+          if (!paymentIntent.metadata.customer_email && session.customer_details?.email) {
+            await this.stripe.paymentIntents.update(paymentIntent.id, {
+              metadata: {
+                ...paymentIntent.metadata,
+                ...session.metadata, // Include all session metadata
+                customer_email: session.customer_details.email,
+                customer_name: session.customer_details.name || '',
+              }
+            });
+            
+            // Retrieve updated payment intent
+            const updatedPaymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntent.id);
+            await this.handlePaymentSucceeded(updatedPaymentIntent);
+          } else {
+            await this.handlePaymentSucceeded(paymentIntent);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error handling checkout session completion:', error);
+      // Don't throw error to avoid webhook retry loops
     }
   }
 
@@ -331,8 +357,207 @@ export class StripeService {
   private async handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent): Promise<void> {
     console.log(`Payment succeeded: ${paymentIntent.id}`);
     
-    // TODO: Update database with successful payment
-    // Example: Update user subscription, send confirmation email, etc.
+    try {
+      const metadata = paymentIntent.metadata;
+      const bookingType = metadata.type;
+      
+      console.log('Processing payment with type:', bookingType, metadata);
+      
+      // Route to appropriate handler based on booking type
+      switch (bookingType) {
+        case 'interview_booking':
+          await this.handleInterviewBookingPayment(paymentIntent);
+          break;
+        case 'ucat_tutoring':
+          await this.handleUCATTutoringPayment(paymentIntent);
+          break;
+        default:
+          console.log('Unknown booking type, using default interview booking handler');
+          await this.handleInterviewBookingPayment(paymentIntent);
+          break;
+      }
+      
+    } catch (error) {
+      console.error('Error handling payment success:', error);
+      // Don't throw error to avoid webhook retry loops
+    }
+  }
+
+  private async handleInterviewBookingPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    // Import services here to avoid circular dependencies
+    const supabaseService = (await import('./supabaseService')).default;
+    const emailService = (await import('./emailService')).default;
+    
+    // Get payment metadata
+    const metadata = paymentIntent.metadata;
+    const customerEmail = metadata.customer_email;
+    const customerName = metadata.customer_name;
+    const packageType = metadata.package_type || 'single';
+    const serviceType = metadata.service_type || 'generated';
+    const universities = metadata.universities ? metadata.universities.split(',') : [];
+    const preferredDate = metadata.preferred_date;
+    const amount = paymentIntent.amount / 100; // Convert from cents
+    
+    if (!customerEmail) {
+      console.error('No customer email found in payment metadata');
+      return;
+    }
+    
+    console.log('Processing interview booking payment for:', { customerEmail, customerName, packageType, serviceType, universities, amount });
+    
+    // 1. Check if user exists, create if not
+    let user = await supabaseService.getUserByEmail(customerEmail);
+    
+    if (!user) {
+      console.log('Creating new user for email:', customerEmail);
+      user = await supabaseService.createUser({
+        email: customerEmail,
+        full_name: customerName || '',
+        role: 'student',
+        stripe_customer_id: paymentIntent.customer as string || undefined
+      });
+      console.log('Created user:', user.id);
+    } else {
+      console.log('Found existing user:', user.id);
+    }
+    
+    // 2. Check for subscription, create free subscription if not exists
+    let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+    
+    if (!subscription) {
+      console.log('Creating free subscription for email:', customerEmail);
+      subscription = await supabaseService.createSubscription({
+        email: customerEmail,
+        user_id: user.id,
+        subscription_tier: 'free',
+        opt_in_newsletter: true
+      });
+      console.log('Created subscription for user:', user.id);
+    } else {
+      // Link subscription to user if not already linked
+      if (!subscription.user_id) {
+        await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+        console.log('Linked subscription to user:', user.id);
+      }
+    }
+    
+    // 3. Create booking entry
+    const now = new Date();
+    const startTime = preferredDate ? new Date(preferredDate) : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Default to tomorrow
+    const endTime = new Date(startTime.getTime() + 90 * 60 * 1000); // 90 minutes duration
+    
+    const booking = await supabaseService.createBooking({
+      user_id: user.id,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      package: `${packageType}_${serviceType}_${universities.join('_')}`,
+      amount: amount,
+      preferred_time: preferredDate || undefined,
+      email: customerEmail,
+      payment_status: 'paid'
+    });
+    
+    console.log('Created interview booking:', booking.id);
+    
+    // 4. Send confirmation email
+    await emailService.sendBookingConfirmationEmail(customerEmail, {
+      id: booking.id,
+      packageType,
+      serviceType,
+      universities,
+      amount,
+      startTime: startTime.toISOString(),
+      preferredDate,
+      userName: customerName
+    });
+    
+    console.log('Sent interview booking confirmation email to:', customerEmail);
+  }
+
+  private async handleUCATTutoringPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    // Import services here to avoid circular dependencies
+    const supabaseService = (await import('./supabaseService')).default;
+    const emailService = (await import('./emailService')).default;
+    
+    // Get payment metadata
+    const metadata = paymentIntent.metadata;
+    const customerEmail = metadata.customer_email;
+    const customerName = metadata.customer_name;
+    const packageId = metadata.package_id;
+    const packageName = metadata.package_name;
+    const amount = paymentIntent.amount / 100; // Convert from cents
+    
+    if (!customerEmail) {
+      console.error('No customer email found in payment metadata');
+      return;
+    }
+    
+    console.log('Processing UCAT tutoring payment for:', { customerEmail, customerName, packageId, packageName, amount });
+    
+    // 1. Check if user exists, create if not
+    let user = await supabaseService.getUserByEmail(customerEmail);
+    
+    if (!user) {
+      console.log('Creating new user for email:', customerEmail);
+      user = await supabaseService.createUser({
+        email: customerEmail,
+        full_name: customerName || '',
+        role: 'student',
+        stripe_customer_id: paymentIntent.customer as string || undefined
+      });
+      console.log('Created user:', user.id);
+    } else {
+      console.log('Found existing user:', user.id);
+    }
+    
+    // 2. Check for subscription, create free subscription if not exists
+    let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+    
+    if (!subscription) {
+      console.log('Creating free subscription for email:', customerEmail);
+      subscription = await supabaseService.createSubscription({
+        email: customerEmail,
+        user_id: user.id,
+        subscription_tier: 'free',
+        opt_in_newsletter: true
+      });
+      console.log('Created subscription for user:', user.id);
+    } else {
+      // Link subscription to user if not already linked
+      if (!subscription.user_id) {
+        await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+        console.log('Linked subscription to user:', user.id);
+      }
+    }
+    
+    // 3. Create UCAT tutoring booking entry
+    const now = new Date();
+    // UCAT tutoring doesn't have specific timing like interviews, so we set a generic future date
+    const startTime = new Date(now.getTime() + 48 * 60 * 60 * 1000); // 2 days from now
+    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+    
+    const booking = await supabaseService.createBooking({
+      user_id: user.id,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      package: `ucat_${packageId}`,
+      amount: amount,
+      email: customerEmail,
+      payment_status: 'paid'
+    });
+    
+    console.log('Created UCAT tutoring booking:', booking.id);
+    
+    // 4. Send UCAT confirmation email
+    await emailService.sendUCATConfirmationEmail(customerEmail, {
+      id: booking.id,
+      packageId: packageId || '',
+      packageName: packageName || '',
+      amount,
+      userName: customerName
+    });
+    
+    console.log('Sent UCAT tutoring confirmation email to:', customerEmail);
   }
 
   /**

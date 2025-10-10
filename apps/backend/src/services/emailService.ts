@@ -109,6 +109,51 @@ class EmailService {
     });
   }
 
+  async sendBookingConfirmationEmail(
+    email: string, 
+    bookingDetails: {
+      id: string;
+      packageType: string;
+      serviceType: string;
+      universities: string[];
+      amount: number;
+      startTime?: string;
+      preferredDate?: string;
+      userName?: string;
+    }
+  ): Promise<void> {
+    const template = this.getBookingConfirmationTemplate(bookingDetails);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
+  async sendUCATConfirmationEmail(
+    email: string, 
+    ucatDetails: {
+      id: string;
+      packageId: string;
+      packageName: string;
+      amount: number;
+      userName?: string;
+    }
+  ): Promise<void> {
+    const template = this.getUCATConfirmationTemplate(ucatDetails);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
   private getWelcomeEmailTemplate(subscriptionTier: string): EmailTemplate {
     const tierBenefits = {
       free: 'access to our basic study materials and weekly tips',
@@ -266,6 +311,160 @@ class EmailService {
             <p style="margin: 5px 0 0 0;">Please review the full application in the admin dashboard and contact the applicant for next steps.</p>
           </div>
           <p>Application ID: ${newJoiner.id}</p>
+        </div>
+      `
+    };
+  }
+
+  private getBookingConfirmationTemplate(bookingDetails: {
+    id: string;
+    packageType: string;
+    serviceType: string;
+    universities: string[];
+    amount: number;
+    startTime?: string;
+    preferredDate?: string;
+    userName?: string;
+  }): EmailTemplate {
+    const universitiesStr = bookingDetails.universities.join(', ');
+    const serviceTypeLabel = bookingDetails.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
+    const packageTypeLabel = bookingDetails.packageType === 'single' ? 'Single Session' : 'Package Deal';
+    const userName = bookingDetails.userName || 'there';
+    
+    return {
+      subject: 'Interview Preparation Booking Confirmed - NextGen MedPrep',
+      text: `Hi ${userName},\n\nYour interview preparation booking has been confirmed!\n\nBooking Details:\nBooking ID: ${bookingDetails.id}\nPackage: ${packageTypeLabel}\nService: ${serviceTypeLabel}\nUniversities: ${universitiesStr}\nAmount: £${bookingDetails.amount}\n\nWe'll be in touch within 24 hours to schedule your session${bookingDetails.preferredDate ? ` (preferred date: ${bookingDetails.preferredDate})` : ''}.\n\nThank you for choosing NextGen MedPrep!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #2563eb;">Booking Confirmed! 🎉</h1>
+          <p>Hi ${userName},</p>
+          <p>Your <strong>interview preparation booking</strong> has been confirmed!</p>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">Booking Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${bookingDetails.id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Package:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${packageTypeLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Service:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${serviceTypeLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Universities:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${universitiesStr}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${bookingDetails.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>We'll contact you within <strong>24 hours</strong> to schedule your session</li>
+              ${bookingDetails.preferredDate ? `<li>We'll prioritize your preferred date: <strong>${bookingDetails.preferredDate}</strong></li>` : ''}
+              <li>You'll receive session materials and preparation instructions</li>
+              <li>Our team will match you with the perfect tutor (if applicable)</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>📞 Need help?</strong> Contact us at support@nextgenmedprep.com or call our support line.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      `
+    };
+  }
+
+  private getUCATConfirmationTemplate(ucatDetails: {
+    id: string;
+    packageId: string;
+    packageName: string;
+    amount: number;
+    userName?: string;
+  }): EmailTemplate {
+    const userName = ucatDetails.userName || 'there';
+    
+    // Package descriptions for different UCAT packages
+    const packageDescriptions: { [key: string]: string } = {
+      'ucat_kickstart': 'UCAT Kickstart - Build strong foundations with 4 hours of essential background knowledge',
+      'ucat_advance': 'UCAT Advance - Refine and target performance with 8 hours of targeted question-specific sessions',
+      'ucat_mastery': 'UCAT Mastery - Achieve top 10% scores with 12 hours of high-intensity preparation'
+    };
+
+    const packageDescription = packageDescriptions[ucatDetails.packageId] || ucatDetails.packageName;
+
+    return {
+      subject: 'UCAT Tutoring Package Confirmed - NextGen MedPrep',
+      text: `Hi ${userName},\n\nYour UCAT tutoring package has been confirmed!\n\nPackage Details:\nBooking ID: ${ucatDetails.id}\nPackage: ${packageDescription}\nAmount: £${ucatDetails.amount}\n\nYour package includes:\n- Top 1% internationally scoring tutors\n- 24/7 Business Line access for questions\n- Tracked quantitative performance analytics\n- Personalised content plan with weekly guidance\n- Continuous updated question bank with worked examples\n- Free cheat sheets for each UCAT section\n- Personalised 10-week action plan\n\nWe'll contact you within 24 hours to get started with your UCAT preparation journey.\n\nThank you for choosing NextGen MedPrep!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #2563eb;">UCAT Package Confirmed! 🎯</h1>
+          <p>Hi ${userName},</p>
+          <p>Your <strong>UCAT tutoring package</strong> has been confirmed!</p>
+          
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">Package Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${ucatDetails.id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Package:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${packageDescription}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${ucatDetails.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #374151;">Your Package Includes:</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li><strong>Expert Tutors:</strong> All scored in top 1% internationally</li>
+              <li><strong>24/7 Business Line:</strong> Ask questions anytime, get step-by-step video solutions</li>
+              <li><strong>Performance Tracking:</strong> Every question feeds into our analytics system</li>
+              <li><strong>Personalised Plan:</strong> Weekly text messages guide your revision using data</li>
+              <li><strong>Question Bank:</strong> Continuously updated with worked examples</li>
+              <li><strong>Cheat Sheets:</strong> Free for each UCAT section with best approaches</li>
+              <li><strong>10-Week Action Plan:</strong> Tailored to your strengths and weaknesses</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>We'll contact you within <strong>24 hours</strong> to begin your UCAT journey</li>
+              <li>You'll receive your personalised study materials and access details</li>
+              <li>Our team will set up your performance tracking system</li>
+              <li>You'll get matched with your expert UCAT tutor</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>🎯 Ready to excel?</strong> Contact us at support@nextgenmedprep.com for any questions about your UCAT preparation.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
         </div>
       `
     };

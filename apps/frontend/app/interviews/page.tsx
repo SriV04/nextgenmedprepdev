@@ -67,8 +67,8 @@ export default function InterviewsPage() {
       buttonColor: "bg-blue-600 hover:bg-blue-700"
     },
     {
-      title: "Interview Background knowledger",
-      description: "One-on-one personalized coaching to help you shine in any interview format.",
+      title: "Interview Background Knowledge",
+      description: "Interview Conference sessions to cover all the essential background knowledge for medical school interviews.",
       features: ["Individual coaching", "Tailored preparation", "Personal statement alignment", "Body language tips"],
       icon: AcademicCapIcon,
       color: "bg-purple-50 border-purple-200",

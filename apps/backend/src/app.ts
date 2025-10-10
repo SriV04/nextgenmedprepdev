@@ -53,6 +53,17 @@ app.use(cors({
 // Raw body parsing for Stripe webhooks (must be before express.json())
 app.use('/api/v1/payments/stripe/webhook', express.raw({ type: 'application/json' }));
 
+// Debug middleware for webhook endpoint
+app.use('/api/v1/payments/stripe/webhook', (req, res, next) => {
+  console.log('Webhook endpoint hit:', {
+    method: req.method,
+    headers: req.headers,
+    bodyType: typeof req.body,
+    bodyLength: req.body ? req.body.length : 0
+  });
+  next();
+});
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

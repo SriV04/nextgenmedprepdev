@@ -17,6 +17,10 @@ interface BookingDetails {
   price: string;
   preferredDate: string;
   notes: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
 }
 
 const universities = [
@@ -90,7 +94,11 @@ function CompletePurchaseContent() {
     packageId: '',
     price: '',
     preferredDate: '',
-    notes: ''
+    notes: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
@@ -102,7 +110,7 @@ function CompletePurchaseContent() {
     console.log('All sessionStorage keys:', Object.keys(sessionStorage));
     
     // Get booking details from URL params first, then sessionStorage
-    const university = searchParams.get('university') || '';
+    const university = searchParams.get('university') || searchParams.get('universities')?.split(',')[0] || '';
     const interviewType = searchParams.get('interviewType') || '';
     const serviceType = searchParams.get('serviceType') || '';
     const packageType = searchParams.get('packageType') || '';
@@ -110,9 +118,13 @@ function CompletePurchaseContent() {
     const price = searchParams.get('price') || '';
     const preferredDate = searchParams.get('preferredDate') || '';
     const notes = searchParams.get('notes') || '';
+    const firstName = searchParams.get('firstName') || '';
+    const lastName = searchParams.get('lastName') || '';
+    const email = searchParams.get('email') || '';
+    const phone = searchParams.get('phone') || '';
 
     console.log('URL params extracted:', {
-      university, interviewType, serviceType, packageType, packageId, price, preferredDate, notes
+      university, interviewType, serviceType, packageType, packageId, price, preferredDate, notes, firstName, lastName, email, phone
     });
 
     // Try to get from sessionStorage as backup - check multiple possible keys
@@ -140,14 +152,18 @@ function CompletePurchaseContent() {
     }
 
     const finalBookingDetails = {
-      university: university || sessionData?.university || '',
-      interviewType: interviewType || sessionData?.interviewType || '',
-      serviceType: (serviceType || sessionData?.serviceType || '') as 'generated' | 'tutor',
-      packageType: (packageType || sessionData?.packageType || '') as 'individual' | 'package',
+      university: university || sessionData?.universities?.[0] || sessionData?.university || '',
+      interviewType: interviewType || sessionData?.interviewType || 'mmi', // Default to MMI
+      serviceType: (serviceType || sessionData?.serviceType || 'generated') as 'generated' | 'tutor',
+      packageType: (packageType || sessionData?.packageType || 'package') as 'individual' | 'package',
       packageId: packageId || sessionData?.packageId || '',
       price: price || sessionData?.price || '', 
       preferredDate: preferredDate || sessionData?.preferredDate || '',
-      notes: notes || sessionData?.notes || ''
+      notes: notes || sessionData?.additionalNotes || sessionData?.notes || '',
+      firstName: firstName || sessionData?.contactDetails?.firstName || '',
+      lastName: lastName || sessionData?.contactDetails?.lastName || '',
+      email: email || sessionData?.contactDetails?.email || '',
+      phone: phone || sessionData?.contactDetails?.phone || ''
     };
 
     console.log('Final booking details set:', finalBookingDetails);
@@ -517,7 +533,23 @@ function CompletePurchaseContent() {
                                       currency: getSelectedPackage()?.currency,
                                       description: `${getSelectedPackage()?.name} - ${getSelectedPackage()?.description}`
                                   }}
-                onSuccess={handlePaymentSuccess}
+                initialData={{
+                  customer_email: bookingDetails.email,
+                  customer_name: `${bookingDetails.firstName} ${bookingDetails.lastName}`.trim(),
+                  metadata: {
+                    type: 'interview_booking',
+                    university: getUniversityName(),
+                    interview_type: getInterviewTypeDetails()?.name || bookingDetails.interviewType,
+                    service_type: bookingDetails.serviceType,
+                    package_type: bookingDetails.packageType,
+                    package_id: bookingDetails.packageId,
+                    preferred_date: bookingDetails.preferredDate,
+                    notes: bookingDetails.notes,
+                    customer_name: `${bookingDetails.firstName} ${bookingDetails.lastName}`.trim(),
+                    customer_email: bookingDetails.email,
+                    customer_phone: bookingDetails.phone
+                  }
+                }}
                 onError={handlePaymentError}
               />
             </div>

@@ -65,7 +65,6 @@ const megaMenuItems: MegaMenuConfig[] = [
       { title: "Free Personal Statement Guide", href: "/resources/free-personal-statement-guide" },
       { title: "Medicine Statements", href: "/personal-statements/medicine" },
       { title: "Dental Statements", href: "/personal-statements/dental" },
-      { title: "PS Reviews", href: "/personal-statements/reviews" },
     ],
   },
   {
