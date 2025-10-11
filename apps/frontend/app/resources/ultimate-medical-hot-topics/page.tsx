@@ -68,7 +68,7 @@ export default function UltimateMedicalHotTopicsPage() {
         </svg>
       ),
       title: "Future-Ready Knowledge",
-      description: "Prepare for the future of medicine by understanding trends that will shape your medical career, from telemedicine to personalized medicine."
+      description: "Prepare for the future of medicine by understanding trends that will shape your medical career, from telemedicine to personalised medicine."
     }
   ];
 
@@ -123,7 +123,7 @@ export default function UltimateMedicalHotTopicsPage() {
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <span className="text-2xl">💊</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Personalized Medicine</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Personalised Medicine</h3>
               <p className="text-gray-600">How precision medicine is changing healthcare delivery, from pharmacogenomics to targeted therapies and individualized treatment plans.</p>
             </div>
 

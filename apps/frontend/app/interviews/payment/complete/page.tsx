@@ -100,7 +100,7 @@ function CompletePurchaseContent() {
     email: '',
     phone: ''
   });
-  const [isProcessing, setIsProcessing] = useState(false);
+
   const [paymentComplete, setPaymentComplete] = useState(false);
 
   useEffect(() => {
@@ -184,7 +184,6 @@ function CompletePurchaseContent() {
     // Clear booking details from session storage
     sessionStorage.removeItem('interviewBookingDetails');
     // Redirect to success page with booking details
-    const university = getUniversityName();
     const serviceTypeLabel = bookingDetails.serviceType === 'generated' ? 'generated' : 'tutor';
     const successUrl = bookingDetails.packageType === 'package' 
       ? `/payment/success?service=interviews&university=${bookingDetails.university}&type=${bookingDetails.interviewType}&package=${bookingDetails.packageId}&serviceType=${serviceTypeLabel}`

@@ -53,7 +53,7 @@ const personalStatementPackages: PaymentPackage[] = [
       'Everything in Basic Review',
       '30-minute 1-on-1 video consultation',
       'Live feedback discussion',
-      'Personalized improvement strategy',
+      'Personalised improvement strategy',
       'Second review after revisions (optional)',
       'Priority review processing'
     ],

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeftIcon, ChatBubbleLeftRightIcon, VideoCameraIcon, UsersIcon, AcademicCapIcon, ClipboardDocumentListIcon, UserIcon, CalendarIcon, DocumentTextIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ChatBubbleLeftRightIcon, DocumentTextIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import '@/styles/prometheus.css';
 
@@ -16,7 +16,7 @@ interface InterviewFormData {
     email: string;
     phone: string;
   };
-  preferredDate?: string;
+  personalStatement?: File | null;
   additionalNotes?: string;
 }
 
@@ -156,7 +156,7 @@ const packages: Package[] = [
       '+3 Prometheus mocks for self-practice',
       'Strategy Session with background knowledge',
       'Coverage of ethical scenarios and techniques',
-      'Personalized feedback (tutor option)'
+      'Personalised feedback (tutor option)'
     ]
   },
   {
@@ -188,7 +188,7 @@ export default function InterviewsPaymentPage() {
       email: '',
       phone: ''
     },
-    preferredDate: '',
+    personalStatement: null,
     additionalNotes: ''
   });
   const [currentStep, setCurrentStep] = useState(1);
@@ -297,7 +297,7 @@ export default function InterviewsPaymentPage() {
       universities: formData.universities,
       contactDetails: formData.contactDetails,
       price: calculatePrice().toString(),
-      preferredDate: formData.preferredDate || '',
+      personalStatement: formData.personalStatement,
       notes: formData.additionalNotes || '',
       timestamp: new Date().toISOString()
     };
@@ -309,13 +309,14 @@ export default function InterviewsPaymentPage() {
       packageId: formData.packageId,
       universities: formData.universities.join(','),
       price: calculatePrice().toString(),
-      preferredDate: formData.preferredDate || '',
       notes: formData.additionalNotes || '',
       firstName: formData.contactDetails.firstName,
       lastName: formData.contactDetails.lastName,
       email: formData.contactDetails.email,
       phone: formData.contactDetails.phone
     });
+
+    console.log(`hey ${params.toString()}`);
     window.location.href = `/interviews/payment/complete?${params.toString()}`;
   };
 
@@ -448,7 +449,7 @@ export default function InterviewsPaymentPage() {
                   <ul className="space-y-3 text-gray-300 mb-6">
                     <li>• One-on-one with experienced tutors</li>
                     <li>• Real-time feedback and guidance</li>
-                    <li>• Personalized coaching session</li>
+                    <li>• Personalised coaching session</li>
                     <li>• Current medical students as tutors</li>
                     <li>• Interactive interview simulation</li>
                   </ul>
@@ -663,15 +664,16 @@ export default function InterviewsPaymentPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <CalendarIcon className="w-4 h-4 inline mr-1" />
-                    Preferred Date (Optional)
+                    <DocumentTextIcon className="w-4 h-4 inline mr-1" />
+                    Personal Statement (Optional)
                   </label>
                   <input
-                    type="date"
-                    value={formData.preferredDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, preferredDate: e.target.value }))}
-                    className="w-full px-4 py-3 bg-black border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => setFormData(prev => ({ ...prev, personalStatement: e.target.files?.[0] || null }))}
+                    className="w-full px-4 py-3 bg-black border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                   />
+                  <p className="text-xs text-gray-400 mt-1">Upload your personal statement for personalised interview preparation (PDF, DOC, DOCX)</p>
                 </div>
               </div>
               
@@ -715,10 +717,10 @@ export default function InterviewsPaymentPage() {
                       {formData.contactDetails.firstName} {formData.contactDetails.lastName}
                     </span>
                   </div>
-                  {formData.preferredDate && (
+                  {formData.personalStatement && (
                     <div className="flex justify-between">
-                      <span>Preferred Date:</span>
-                      <span className="font-semibold">{formData.preferredDate}</span>
+                      <span>Personal Statement:</span>
+                      <span className="font-semibold">{formData.personalStatement.name}</span>
                     </div>
                   )}
                   <div className="border-t border-gray-600 pt-3 mt-4">

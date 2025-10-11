@@ -392,7 +392,7 @@ function UCATPaymentContent() {
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Personalized approach: Data-driven performance tracking</span>
+                  <span>Personalised approach: Data-driven performance tracking</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-orange-500 rounded-full"></div>

@@ -132,7 +132,7 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
           <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200 mb-6">
             <h4 className="font-bold text-orange-800 mb-2">Custom Program Recommended</h4>
             <p className="text-orange-700 text-sm mb-4">
-              Based on your requirements, we recommend a personalized consultation to create a custom tutoring plan that fits your specific needs and timeline.
+              Based on your requirements, we recommend a personalised consultation to create a custom tutoring plan that fits your specific needs and timeline.
             </p>
           </div>
         ) : (

@@ -60,7 +60,7 @@ export default function InterviewsPage() {
     {
       title: "Mock Panel Interviews",
       description: "Master traditional medical school interviews with our experienced panel of medical professionals.",
-      features: ["Mock interview sessions", "Personalized feedback", "Question bank practice", "Confidence building"],
+      features: ["Mock interview sessions", "Personalised feedback", "Question bank practice", "Confidence building"],
       icon: UserGroupIcon,
       color: "bg-blue-50 border-blue-200",
       buttonColor: "bg-blue-600 hover:bg-blue-700"
@@ -83,27 +83,6 @@ export default function InterviewsPage() {
     }
   ];
 
-  const testimonials = [
-    {
-      name: "Sarah M.",
-      school: "Cambridge Medicine",
-      quote: "The MMI practice sessions were invaluable. I felt so prepared and confident on interview day!",
-      rating: 5
-    },
-    {
-      name: "James L.",
-      school: "Imperial Medicine",
-      quote: "The personalized tutoring helped me identify my weaknesses and turn them into strengths.",
-      rating: 5
-    },
-    {
-      name: "Emily R.",
-      school: "UCL Dentistry",
-      quote: "The interview conference was amazing - so much practical advice and great peer support.",
-      rating: 5
-    }
-  ];
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -122,12 +101,12 @@ export default function InterviewsPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
             <Link 
-              href="/interviews/payment?service=actual&package=core" 
+              href="/interviews/payment" 
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
             >
               Book Mock Interview
             </Link>
-            <Link href="/interviews/payment?service=generated&package=essentials" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
+            <Link href="/interviews/payment" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
               Try Generated Questions (£7)
             </Link>
           </div>

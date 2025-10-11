@@ -46,7 +46,7 @@ export default function FreeConsultationPage() {
               <span className="block text-gradient-primary">Consultation</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-              Get personalized guidance from our medical education experts. Discuss your goals, 
+              Get personalised guidance from our medical education experts. Discuss your goals, 
               create a tailored preparation plan, and take the first step towards your medical career.
             </p>
           </div>
@@ -83,7 +83,7 @@ export default function FreeConsultationPage() {
             <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
               <div className="text-4xl mb-4">🎯</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Goal Assessment</h3>
-              <p className="text-gray-600">We'll discuss your aspirations, current situation, and create a personalized roadmap</p>
+              <p className="text-gray-600">We'll discuss your aspirations, current situation, and create a personalised roadmap</p>
             </div>
             <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
               <div className="text-4xl mb-4">📋</div>
@@ -111,7 +111,7 @@ export default function FreeConsultationPage() {
               <div className="flex items-start gap-4 mb-4">
                 <div className="text-3xl">✅</div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Personalized Guidance</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Personalised Guidance</h3>
                   <p className="text-gray-600">Get advice tailored specifically to your situation, goals, and timeline</p>
                 </div>
               </div>
