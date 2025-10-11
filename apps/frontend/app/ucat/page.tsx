@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import CalendlyPopup from '../../components/CalendlyPopup';
 import UCATCalculator from '../../components/ucat/UCATCalculator';
 import { 
   PuzzlePieceIcon, 
@@ -43,30 +42,6 @@ export default function UCATPage() {
 
   ];
 
-  const testimonials = [
-    {
-      name: "Alex K.",
-      school: "Imperial Medicine",
-      quote: "Improved my UCAT score from 2400 to 2890! The strategies really work.",
-      rating: 5,
-      improvement: "+490 points"
-    },
-    {
-      name: "Maya P.",
-      school: "Cambridge Medicine",
-      quote: "The quantitative reasoning section was my weakness, but now it's my strongest!",
-      rating: 5,
-      improvement: "+380 points"
-    },
-    {
-      name: "Jordan L.",
-      school: "UCL Medicine",
-      quote: "Excellent teaching and mock tests. Felt completely prepared on test day.",
-      rating: 5,
-      improvement: "+420 points"
-    }
-  ];
-
   const ucatSections = [
     {
       name: "Verbal Reasoning",
@@ -101,6 +76,7 @@ export default function UCATPage() {
       color: "border-indigo-500"
     }
   ];
+
 
   return (
     <div className="min-h-screen">
@@ -234,39 +210,6 @@ export default function UCATPage() {
         </div>
       </section>
       
-
-      {/* Testimonials */}
-      {/* <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Student Success Stories</h2>
-            <p className="text-lg text-gray-600">Hear from students who achieved their target UCAT scores</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <span key={i} className="text-yellow-400">⭐</span>
-                    ))}
-                  </div>
-                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-semibold">
-                    {testimonial.improvement}
-                  </span>
-                </div>
-                <p className="text-gray-600 mb-4 italic">"{testimonial.quote}"</p>
-                <div>
-                  <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500">{testimonial.school}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
       {/* UCAT Tutoring Packages 
         make into a table better 
       */}
@@ -356,25 +299,48 @@ export default function UCATPage() {
                 <p className="opacity-90">For those who want to refine and target performance.</p>
               </div>
               <div className="p-6">
-                <p className="mb-4 font-medium text-gray-700">Everything in Kickstart, plus:</p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>8 hours of targeted question-specific perfection sessions</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Deep-dives into the exact areas the data shows you're weakest in based on the data from our tracking system</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Smart drills and focused practice to convert weaknesses into strengths</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Increased data input = sharper, more accurate performance tracking</span>
-                  </li>
-                </ul>
+                <div className="mb-4">
+                  <h4 className="font-semibold text-gray-700 mb-3">Everything in Kickstart:</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">4 hours of essential background knowledge</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">24/7 Business Line access</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">Tracked quantitative performance</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">Personalised content plan</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">15%+ score increase guarantee</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Plus these advanced features:</h4>
+                  <ul className="space-y-3 mb-8">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>8 hours of targeted question-specific perfection sessions</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>Deep-dives into the exact areas the data shows you're weakest in</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>Smart drills and focused practice to convert weaknesses into strengths</span>
+                    </li>
+                  </ul>
+                </div>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-3xl font-bold text-gray-900">£375</span>
@@ -387,27 +353,73 @@ export default function UCATPage() {
             </div>
             
             {/* UCAT Mastery Package */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 relative">
+              <div className="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
+                MOST POPULAR
+              </div>
               <div className="bg-indigo-600 p-6 text-white">
                 <h3 className="text-2xl font-bold mb-2">UCAT Mastery</h3>
                 <p className="opacity-90">For those aiming for top 10% scores.</p>
               </div>
               <div className="p-6">
-                <p className="mb-4 font-medium text-gray-700">Everything in Advance, plus:</p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>12 hours of high-intensity question-perfection sessions based on your data</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Double the time, double the refinement – a laser-focused approach to peak performance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Designed to bring students to test-day readiness with total confidence</span>
-                  </li>
-                </ul>
+                <div className="mb-4">
+                  <h4 className="font-semibold text-gray-700 mb-3">Everything in Kickstart & Advance:</h4>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">4 hours of essential background knowledge</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">Tracked quantitative performance</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">Personalised content plan</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">15%+ score increase guarantee</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">8 hours of targeted perfection sessions</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">Deep-dive weakness analysis</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-0.5">✓</span>
+                      <span className="text-gray-600">Smart drills and focused practice</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Plus these mastery features:</h4>
+                  <ul className="space-y-3 mb-8">
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>12 hours of high-intensity question-perfection sessions based on your data</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>Double the time, double the refinement – a laser-focused approach to peak performance</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>Designed to bring students to test-day readiness with total confidence</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>Priority support and accelerated response times</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>Advanced test-taking strategies for top percentile scores</span>
+                    </li>
+                  </ul>
+                </div>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-3xl font-bold text-gray-900">£550</span>
@@ -462,17 +474,12 @@ export default function UCATPage() {
             <Link href="#tutoring-packages" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
               Join Our Programs
             </Link>
-            <CalendlyPopup 
-              url="https://calendly.com/nextgenmedprep/consultation"
+            <Link 
+              href="#ucat-calculator"
               className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300"
-              utm={{
-                utmCampaign: 'ucat-page',
-                utmSource: 'website',
-                utmMedium: 'cta-section'
-              }}
             >
               Calculate Hours Needed
-            </CalendlyPopup>
+            </Link>
           </div>
         </div>
       </section>

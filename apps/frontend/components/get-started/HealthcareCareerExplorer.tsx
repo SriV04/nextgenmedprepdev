@@ -79,8 +79,8 @@ const services = {
     {
       name: 'Career Guidance Consultation',
       description: 'Explore which healthcare path suits you best',
-      path: '/free-consultation',
-      badge: 'Peronalised',
+      path: '/career-guidance-consultation',
+      badge: 'Personalised',
       color: 'green' as const
     },
     {
@@ -272,15 +272,18 @@ export default function HealthcareCareerExplorer() {
                     <span className="text-sm font-bold">Featured Tool</span>
                   </div>
                   <h3 className="text-3xl font-bold mb-3">
-                    Prometheus - Our NextGen Interview Simulator
+                    <span className="text-gradient-aurora">Prometheus</span> - Our NextGen Interview Simulator
                   </h3>
                   <p className="text-white/90 text-lg mb-6">
                     Practice with our AI-powered mock interview generator. Get instant feedback, access hundreds of questions, and build confidence before the real thing.
                   </p>
-                  <button className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:shadow-xl transition-all inline-flex items-center gap-2">
+                    <a
+                    href="/prometheus"
+                    className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:shadow-xl transition-all inline-flex items-center gap-2"
+                    >
                     Try Prometheus
                     <ArrowRightIcon className="w-5 h-5" />
-                  </button>
+                    </a>
                 </div>
                 <div className="flex-shrink-0">
                   <div className="w-48 h-48 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">

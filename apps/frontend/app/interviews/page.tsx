@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon, BookOpenIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import CalendlyPopup from '../../components/CalendlyPopup';
 
 export default function InterviewsPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -123,13 +122,13 @@ export default function InterviewsPage() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
             <Link 
-              href="/interviews/payment" 
+              href="/interviews/payment?service=actual&package=core" 
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
             >
               Book Mock Interview
             </Link>
-            <Link href="#interview-packages" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
-              View Packages
+            <Link href="/interviews/payment?service=generated&package=essentials" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
+              Try Generated Questions (£7)
             </Link>
           </div>
         </div>
@@ -177,7 +176,7 @@ export default function InterviewsPage() {
           
           <div className="grid md:grid-cols-2 gap-8">
             {services.map((service, index) => (
-              <div key={index} className={`p-8 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300`}>
+              <div key={index} className={`p-8 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300 flex flex-col h-full`}>
                 <div className="flex items-start gap-4 mb-6">
                   {/* <span className="text-4xl">{service.icon}</span> */}
                   <service.icon className="w-10 h-10 text-current" />
@@ -187,7 +186,7 @@ export default function InterviewsPage() {
                   </div>
                 </div>
                 
-                <div className="mb-6">
+                <div className="mb-6 flex-grow">
                   <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
                   <ul className="space-y-2">
                     {service.features.map((feature, idx) => (
@@ -211,8 +210,18 @@ export default function InterviewsPage() {
                   </ul>
                 </div>
                 
-                <Link href="/interviews/payment" className={`block w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300 text-center`}>
-                  Book Now
+                <Link 
+                  href={
+                    service.title.toLowerCase().includes("background") || service.title.toLowerCase().includes("conference") 
+                      ? "/events" 
+                      : "/interviews/payment"
+                  } 
+                  className={`block w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300 text-center mt-auto`}
+                >
+                  {service.title.toLowerCase().includes("background") || service.title.toLowerCase().includes("conference") 
+                    ? "View Events" 
+                    : "Book Now"
+                  }
                 </Link>
               </div>
             ))}
@@ -265,7 +274,7 @@ export default function InterviewsPage() {
                     <span className="text-3xl font-bold text-gray-900">£45</span>
                     <span className="text-sm text-gray-500">per interview</span>
                   </div>
-                  <Link href="/interviews/payment" className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
+                  <Link href="/interviews/payment?service=actual&package=essentials" className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -273,10 +282,10 @@ export default function InterviewsPage() {
             </div>
             
             {/* Core Package */}
-            <div className="relative bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 transform scale-105 z-10">
-              {/* Ribbon */}
-              <div className="absolute -top-2 -right-12 rotate-45 z-20 pointer-events-none">
-                <span className="block w-44 py-1 text-center bg-yellow-400 text-purple-900 text-xs font-extrabold tracking-widest shadow-md">
+            <div className="relative bg-white rounded-xl shadow-md overflow-hidden border-2 border-yellow-400 hover:shadow-lg transition-all duration-300 transform scale-105 z-10 ring-2 ring-yellow-200">
+              {/* Popular Tag */}
+              <div className="absolute -top-2 -right-2 z-20">
+                <span className="bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-full shadow-md">
                   POPULAR
                 </span>
               </div>
@@ -313,7 +322,7 @@ export default function InterviewsPage() {
                     <span className="text-3xl font-bold text-gray-900">£130</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
-                  <Link href="/interviews/payment" className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
+                  <Link href="/interviews/payment?service=actual&package=core" className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -355,7 +364,7 @@ export default function InterviewsPage() {
                     <span className="text-3xl font-bold text-gray-900">£210</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
-                  <Link href="/interviews/payment" className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
+                  <Link href="/interviews/payment?service=actual&package=premium" className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -529,7 +538,7 @@ export default function InterviewsPage() {
             Join hundreds of successful applicants who prepared with NextGenMedPrep
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/interviews/payment" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
+            <Link href="/interviews/payment?service=actual&package=core" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
               Book Mock Interview Now!
             </Link>
             <Link href="/contact" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
