@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Subscription, User, NewJoiner, CreateNewJoinerRequest, UpdateNewJoinerRequest, Booking, CreateBookingRequest } from '@nextgenmedprep/common-types';
+import { Subscription, User, NewJoiner, CreateNewJoinerRequest, UpdateNewJoinerRequest, Booking, CreateBookingRequest, PersonalStatement, CreatePersonalStatementRequest, UpdatePersonalStatementRequest } from '@nextgenmedprep/common-types';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -453,20 +453,34 @@ class SupabaseService {
     email?: string;
     payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
   }): Promise<any> {
+    console.log('=== Creating Booking in Database ===');
+    console.log('Input booking data:', bookingData);
+    
+    const insertData = {
+      ...bookingData,
+      status: 'confirmed',
+      payment_status: bookingData.payment_status || 'pending',
+    };
+    console.log('Data to insert into bookings:', insertData);
+    
     const { data, error } = await this.supabase
       .from('bookings')
-      .insert({
-        ...bookingData,
-        status: 'confirmed',
-        payment_status: bookingData.payment_status || 'pending',
-      })
+      .insert(insertData)
       .select()
       .single();
 
     if (error) {
+      console.error('Database error creating booking:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
       throw new Error(`Failed to create booking: ${error.message}`);
     }
 
+    console.log('Successfully created booking:', data);
     return data;
   }
 
@@ -514,6 +528,126 @@ class SupabaseService {
     }
 
     return data || [];
+  }
+
+  // Personal Statement methods
+  async createPersonalStatement(personalStatement: CreatePersonalStatementRequest): Promise<PersonalStatement> {
+    console.log('=== Creating Personal Statement in Database ===');
+    console.log('Input data:', personalStatement);
+    
+    const insertData = {
+      ...personalStatement,
+      reviewed: false,
+      version: 1,
+      status: 'pending' as const
+    };
+    console.log('Data to insert:', insertData);
+    
+    const { data, error } = await this.supabase
+      .from('personal_statements')
+      .insert(insertData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error creating personal statement:', error);
+      console.error('Error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      throw new Error(`Failed to create personal statement: ${error.message}`);
+    }
+
+    console.log('Successfully created personal statement:', data);
+    return data;
+  }
+
+  async getPersonalStatementById(id: string): Promise<PersonalStatement | null> {
+    const { data, error } = await this.supabase
+      .from('personal_statements')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to get personal statement: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async getPersonalStatementsByEmail(email: string): Promise<PersonalStatement[]> {
+    const { data, error } = await this.supabase
+      .from('personal_statements')
+      .select('*')
+      .eq('email', email)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get personal statements: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async getAllPersonalStatements(): Promise<PersonalStatement[]> {
+    const { data, error } = await this.supabase
+      .from('personal_statements')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get all personal statements: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async getPersonalStatementsByStatus(status: 'pending' | 'in_review' | 'complete'): Promise<PersonalStatement[]> {
+    const { data, error } = await this.supabase
+      .from('personal_statements')
+      .select('*')
+      .eq('status', status)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get personal statements by status: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async updatePersonalStatement(id: string, updates: UpdatePersonalStatementRequest): Promise<PersonalStatement> {
+    const updateData = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await this.supabase
+      .from('personal_statements')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update personal statement: ${error.message}`);
+    }
+
+    return data;
+  }
+
+  async deletePersonalStatement(id: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('personal_statements')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to delete personal statement: ${error.message}`);
+    }
   }
 
   // Get client for direct queries if needed

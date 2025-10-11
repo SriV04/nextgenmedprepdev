@@ -3,6 +3,7 @@ import subscriptionRoutes from './subscriptions';
 import resourceRoutes from './resources';
 import newJoinersRoutes from './newJoiners';
 import paymentRoutes from './payments';
+import personalStatementRoutes from './personalStatements';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/api/v1', subscriptionRoutes);
 router.use('/api/v1', resourceRoutes);
 router.use('/api/v1', newJoinersRoutes);
 router.use('/api/v1', paymentRoutes);
+router.use('/api/v1', personalStatementRoutes);
 
 export default router;

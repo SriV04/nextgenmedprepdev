@@ -1,4 +1,4 @@
-    import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import multer from 'multer';
 import { Request } from 'express';
 import dotenv from 'dotenv';
@@ -89,6 +89,46 @@ class FileUploadService {
     }
   }
 
+  // Upload Personal Statement to Supabase storage
+  async uploadPersonalStatement(file: Express.Multer.File, email: string): Promise<string> {
+    try {
+      // Generate a unique filename
+      const timestamp = Date.now();
+      const sanitizedEmail = email.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileExtension = this.getFileExtension(file.originalname);
+      const fileName = `${sanitizedEmail}_${timestamp}${fileExtension}`;
+      const filePath = `statements/${fileName}`;
+
+      console.log('Uploading Personal Statement to Supabase storage:', {
+        fileName,
+        filePath,
+        size: file.size,
+        mimetype: file.mimetype
+      });
+
+      // Upload file to Supabase storage
+      const { data, error } = await this.supabase.storage
+        .from('Personal Statements')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Supabase storage upload error:', error);
+        throw new Error(`Failed to upload Personal Statement: ${error.message}`);
+      }
+
+      console.log('Personal Statement uploaded successfully:', data);
+
+      // Return the file path (not public URL since these should be private)
+      return filePath;
+    } catch (error) {
+      console.error('Error uploading Personal Statement:', error);
+      throw error;
+    }
+  }
+
   // Delete CV from Supabase storage
   async deleteCV(cvUrl: string): Promise<void> {
     try {
@@ -115,6 +155,25 @@ class FileUploadService {
     }
   }
 
+  // Delete Personal Statement from Supabase storage
+  async deletePersonalStatement(filePath: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.storage
+        .from('Personal Statements')
+        .remove([filePath]);
+
+      if (error) {
+        console.error('Error deleting Personal Statement:', error);
+        throw new Error(`Failed to delete Personal Statement: ${error.message}`);
+      }
+
+      console.log('Personal Statement deleted successfully:', filePath);
+    } catch (error) {
+      console.error('Error deleting Personal Statement:', error);
+      throw error;
+    }
+  }
+
   // Generate a signed URL for CV download (for admin access)
   async getSignedUrl(cvUrl: string, expiresIn: number = 3600): Promise<string> {
     try {
@@ -135,6 +194,64 @@ class FileUploadService {
       return data.signedUrl;
     } catch (error) {
       console.error('Error generating signed URL:', error);
+      throw error;
+    }
+  }
+
+  // Generate a signed URL for Personal Statement download (for reviewer access)
+  async getPersonalStatementSignedUrl(filePath: string, expiresIn: number = 3600): Promise<string> {
+    try {
+      const { data, error } = await this.supabase.storage
+        .from('Personal Statements')
+        .createSignedUrl(filePath, expiresIn);
+
+      if (error) {
+        throw new Error(`Failed to generate Personal Statement signed URL: ${error.message}`);
+      }
+
+      return data.signedUrl;
+    } catch (error) {
+      console.error('Error generating Personal Statement signed URL:', error);
+      throw error;
+    }
+  }
+
+  // Upload feedback file for Personal Statement review
+  async uploadPersonalStatementFeedback(file: Express.Multer.File, personalStatementId: string, reviewerEmail: string): Promise<string> {
+    try {
+      // Generate a unique filename for feedback
+      const timestamp = Date.now();
+      const sanitizedReviewer = reviewerEmail.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileExtension = this.getFileExtension(file.originalname);
+      const fileName = `feedback_${personalStatementId}_${sanitizedReviewer}_${timestamp}${fileExtension}`;
+      const filePath = `feedback/${fileName}`;
+
+      console.log('Uploading Personal Statement Feedback to Supabase storage:', {
+        fileName,
+        filePath,
+        size: file.size,
+        mimetype: file.mimetype
+      });
+
+      // Upload file to Supabase storage
+      const { data, error } = await this.supabase.storage
+        .from('Personal Statements')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Supabase storage upload error:', error);
+        throw new Error(`Failed to upload Personal Statement Feedback: ${error.message}`);
+      }
+
+      console.log('Personal Statement Feedback uploaded successfully:', data);
+
+      // Return the file path
+      return filePath;
+    } catch (error) {
+      console.error('Error uploading Personal Statement Feedback:', error);
       throw error;
     }
   }

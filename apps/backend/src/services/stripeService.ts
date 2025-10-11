@@ -274,37 +274,50 @@ export class StripeService {
    */
   async processWebhook(event: Stripe.Event): Promise<{ success: boolean; message: string }> {
     try {
-      console.log(`Processing Stripe webhook event: ${event.type}`);
+      console.log(`=== Processing Stripe webhook event: ${event.type} ===`);
+      console.log('Event ID:', event.id);
+      console.log('Event data:', JSON.stringify(event.data.object, null, 2));
+      
       switch (event.type) {
         case 'checkout.session.completed':
+          console.log('Handling checkout session completed');
           await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
           break;
         case 'payment_intent.succeeded':
+          console.log('Handling payment intent succeeded');
           await this.handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
           break;
         case 'payment_intent.payment_failed':
+          console.log('Handling payment intent failed');
           await this.handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
           break;
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
+          console.log('Handling subscription change');
           await this.handleSubscriptionChange(event.data.object as Stripe.Subscription);
           break;
         case 'customer.subscription.deleted':
+          console.log('Handling subscription deleted');
           await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
           break;
         case 'invoice.payment_succeeded':
+          console.log('Handling invoice payment succeeded');
           await this.handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
           break;
         case 'invoice.payment_failed':
+          console.log('Handling invoice payment failed');
           await this.handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
           break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
 
+      console.log(`=== Successfully processed webhook event: ${event.type} ===`);
       return { success: true, message: 'Webhook processed successfully' };
     } catch (error: any) {
-      console.error('Webhook processing error:', error);
+      console.error('=== Webhook processing error ===');
+      console.error('Error:', error);
+      console.error('Error stack:', error.stack);
       throw new AppError(error.message || 'Webhook processing failed', 500);
     }
   }
@@ -313,7 +326,11 @@ export class StripeService {
    * Handle successful checkout session
    */
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
-    console.log(`Checkout session completed: ${session.id}`);
+    console.log(`=== Checkout session completed: ${session.id} ===`);
+    console.log('Session mode:', session.mode);
+    console.log('Session metadata:', session.metadata);
+    console.log('Customer details:', session.customer_details);
+    console.log('Payment intent:', session.payment_intent);
     
     try {
       if (session.mode === 'subscription') {
@@ -322,12 +339,21 @@ export class StripeService {
       } else {
         console.log(`One-time payment completed: ${session.payment_intent}`);
         
-        // For bookings (interview or UCAT), get the payment intent and handle it
-        if (session.payment_intent && (session.metadata?.type === 'interview_booking' || session.metadata?.type === 'ucat_tutoring')) {
+        // For bookings (interview, UCAT, or personal statement), get the payment intent and handle it
+        if (session.payment_intent && (
+          session.metadata?.type === 'interview_booking' || 
+          session.metadata?.type === 'ucat_tutoring' ||
+          session.metadata?.type === 'personal_statement_review'
+        )) {
+          console.log('Processing payment for type:', session.metadata?.type);
+          
           const paymentIntent = await this.stripe.paymentIntents.retrieve(session.payment_intent as string);
+          console.log('Retrieved payment intent:', paymentIntent.id);
+          console.log('Payment intent metadata:', paymentIntent.metadata);
           
           // Ensure metadata is properly set on payment intent
           if (!paymentIntent.metadata.customer_email && session.customer_details?.email) {
+            console.log('Updating payment intent metadata with customer details');
             await this.stripe.paymentIntents.update(paymentIntent.id, {
               metadata: {
                 ...paymentIntent.metadata,
@@ -339,14 +365,24 @@ export class StripeService {
             
             // Retrieve updated payment intent
             const updatedPaymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntent.id);
+            console.log('Updated payment intent metadata:', updatedPaymentIntent.metadata);
             await this.handlePaymentSucceeded(updatedPaymentIntent);
           } else {
+            console.log('Payment intent already has customer email, proceeding with existing metadata');
             await this.handlePaymentSucceeded(paymentIntent);
           }
+        } else {
+          console.log('Skipping payment processing - no matching type or payment intent:', {
+            hasPaymentIntent: !!session.payment_intent,
+            type: session.metadata?.type,
+            allMetadata: session.metadata
+          });
         }
       }
     } catch (error) {
-      console.error('Error handling checkout session completion:', error);
+      console.error('=== Error handling checkout session completion ===');
+      console.error('Error:', error);
+      console.error('Error stack:', (error as Error).stack);
       // Don't throw error to avoid webhook retry loops
     }
   }
@@ -370,6 +406,9 @@ export class StripeService {
           break;
         case 'ucat_tutoring':
           await this.handleUCATTutoringPayment(paymentIntent);
+          break;
+        case 'personal_statement_review':
+          await this.handlePersonalStatementPayment(paymentIntent);
           break;
         default:
           console.log('Unknown booking type, using default interview booking handler');
@@ -558,6 +597,170 @@ export class StripeService {
     });
     
     console.log('Sent UCAT tutoring confirmation email to:', customerEmail);
+  }
+
+  private async handlePersonalStatementPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    console.log('=== Personal Statement Payment Handler Started ===');
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Payment Intent Metadata:', paymentIntent.metadata);
+    
+    try {
+      // Import services here to avoid circular dependencies
+      const supabaseService = (await import('./supabaseService')).default;
+      const emailService = (await import('./emailService')).default;
+      const fileUploadService = (await import('./fileUploadService')).default;
+      
+      // Get payment metadata
+      const metadata = paymentIntent.metadata;
+      const customerEmail = metadata.customer_email;
+      const customerName = metadata.customer_name;
+      const firstName = metadata.first_name;
+      const lastName = metadata.last_name;
+      const statementType = metadata.statement_type || 'medicine';
+      const personalStatementFilePath = metadata.personal_statement_file_path;
+      const amount = paymentIntent.amount / 100; // Convert from cents
+      
+      console.log('Extracted metadata:', {
+        customerEmail,
+        customerName,
+        firstName,
+        lastName,
+        statementType,
+        personalStatementFilePath,
+        amount
+      });
+      
+      if (!customerEmail) {
+        console.error('No customer email found in payment metadata');
+        return;
+      }
+
+      if (!personalStatementFilePath) {
+        console.error('No personal statement file path found in payment metadata');
+        return;
+      }
+      
+      console.log('Processing personal statement payment for:', { 
+        customerEmail, 
+        customerName, 
+        firstName, 
+        lastName, 
+        statementType, 
+        personalStatementFilePath,
+        amount 
+      });
+      
+      // 1. Check if user exists, create if not
+      console.log('Step 1: Checking if user exists...');
+      let user = await supabaseService.getUserByEmail(customerEmail);
+      
+      if (!user) {
+        console.log('Creating new user for email:', customerEmail);
+        user = await supabaseService.createUser({
+          email: customerEmail,
+          full_name: customerName || `${firstName} ${lastName}` || '',
+          role: 'student',
+          stripe_customer_id: paymentIntent.customer as string || undefined
+        });
+        console.log('Created user:', user.id);
+      } else {
+        console.log('Found existing user:', user.id);
+      }
+      
+      // 2. Check for subscription, create free subscription if not exists
+      console.log('Step 2: Checking subscription...');
+      let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+      
+      if (!subscription) {
+        console.log('Creating free subscription for email:', customerEmail);
+        subscription = await supabaseService.createSubscription({
+          email: customerEmail,
+          user_id: user.id,
+          subscription_tier: 'free',
+          opt_in_newsletter: true
+        });
+        console.log('Created subscription for user:', user.id);
+      } else {
+        console.log('Found existing subscription:', subscription);
+        // Link subscription to user if not already linked
+        if (!subscription.user_id) {
+          console.log('Linking subscription to user...');
+          await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+          console.log('Linked subscription to user:', user.id);
+        }
+      }
+      
+      // 3. Create personal statement review entry
+      console.log('Step 3: Creating personal statement review entry...');
+      const personalStatementData = {
+        email: customerEmail,
+        personal_statement_file_path: personalStatementFilePath,
+        notes: `${statementType} personal statement - ${firstName} ${lastName}`
+      };
+      console.log('Personal statement data to create:', personalStatementData);
+      
+      const personalStatement = await supabaseService.createPersonalStatement(personalStatementData);
+      
+      console.log('Created personal statement review:', personalStatement);
+      
+      // 4. Create booking entry for tracking
+      console.log('Step 4: Creating booking entry...');
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day from now
+      const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+      
+      const bookingData = {
+        user_id: user.id,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        package: 'personal_statement_review',
+        amount: amount,
+        email: customerEmail,
+        payment_status: 'paid' as const
+      };
+      console.log('Booking data to create:', bookingData);
+      
+      const booking = await supabaseService.createBooking(bookingData);
+      
+      console.log('Created personal statement booking:', booking);
+      
+      // 5. Send confirmation email to customer
+      console.log('Step 5: Sending confirmation email...');
+      try {
+        await emailService.sendPersonalStatementConfirmationEmail(customerEmail, {
+          id: personalStatement.id,
+          bookingId: booking.id,
+          amount,
+          userName: customerName || `${firstName} ${lastName}`,
+          statementType
+        });
+        console.log('Sent personal statement confirmation email to:', customerEmail);
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+      
+      // 6. Send notification email to review team
+      console.log('Step 6: Sending notification email to review team...');
+      try {
+        await emailService.sendPersonalStatementReviewNotificationEmail({
+          personalStatementId: personalStatement.id,
+          customerEmail,
+          customerName: customerName || `${firstName} ${lastName}`,
+          statementType,
+          filePath: personalStatementFilePath
+        });
+        console.log('Sent personal statement review notification to review team');
+      } catch (emailError) {
+        console.error('Failed to send review notification email:', emailError);
+      }
+      
+      console.log('=== Personal Statement Payment Handler Completed Successfully ===');
+    } catch (error) {
+      console.error('=== Personal Statement Payment Handler Error ===');
+      console.error('Error:', error);
+      console.error('Error stack:', (error as Error).stack);
+      throw error; // Re-throw to be handled by caller
+    }
   }
 
   /**

@@ -378,7 +378,7 @@ class EmailService {
 
           <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; font-size: 14px; color: #92400e;">
-              <strong>📞 Need help?</strong> Contact us at support@nextgenmedprep.com or call our support line.
+              <strong>📞 Need help?</strong> Contact us at contact@nextgenmedprep.com or call our support line.
             </p>
           </div>
 
@@ -459,7 +459,7 @@ class EmailService {
 
           <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; font-size: 14px; color: #92400e;">
-              <strong>🎯 Ready to excel?</strong> Contact us at support@nextgenmedprep.com for any questions about your UCAT preparation.
+              <strong>🎯 Ready to excel?</strong> Contact us at contact@nextgenmedprep.com for any questions about your UCAT preparation.
             </p>
           </div>
 
@@ -468,6 +468,203 @@ class EmailService {
         </div>
       `
     };
+  }
+
+  async sendPersonalStatementConfirmationEmail(email: string, data: {
+    id: string;
+    bookingId: string;
+    amount: number;
+    userName: string;
+    statementType: string;
+  }): Promise<void> {
+    console.log('Sending personal statement confirmation email to:', email);
+
+    const template = this.getPersonalStatementConfirmationTemplate(data);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
+  async sendPersonalStatementReviewNotificationEmail(data: {
+    personalStatementId: string;
+    customerEmail: string;
+    customerName: string;
+    statementType: string;
+    filePath: string;
+  }): Promise<void> {
+    const reviewEmail = process.env.REVIEW_TEAM_EMAIL || 'contact@nextgenmedprep.com';
+    console.log('Sending personal statement review notification to:', reviewEmail);
+
+    const template = this.getPersonalStatementReviewNotificationTemplate(data);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: reviewEmail,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
+  private getPersonalStatementConfirmationTemplate(data: {
+    id: string;
+    bookingId: string;
+    amount: number;
+    userName: string;
+    statementType: string;
+  }): EmailTemplate {
+    const subject = `Personal Statement Review Confirmed - £${data.amount}`;
+    
+    const text = `
+Hi ${data.userName},
+
+Thank you for purchasing our Personal Statement Review service!
+
+Your personal statement review has been confirmed and our expert reviewers will begin working on it shortly.
+
+Review Details:
+- Service: ${data.statementType.charAt(0).toUpperCase() + data.statementType.slice(1)} Personal Statement Review
+- Amount: £${data.amount}
+- Review ID: ${data.id}
+- Booking ID: ${data.bookingId}
+
+What happens next:
+• Your personal statement will be reviewed by our expert team within 48 hours
+• You'll receive detailed feedback via email including line-by-line comments
+• The feedback will cover structure, content, grammar, and admissions criteria alignment
+• You can ask follow-up questions about the feedback
+
+Our reviewers are current medical students and admissions tutors who have successfully gained places at top UK medical schools.
+
+If you have any questions, please reply to this email or contact us at contact@nextgenmedprep.com.
+
+Thank you for choosing NextGen MedPrep!
+
+Best regards,
+The NextGen MedPrep Team
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 28px;">Personal Statement Review Confirmed</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your expert review is on the way!</p>
+        </div>
+        
+        <div style="padding: 30px; color: #374151;">
+          <p style="font-size: 16px; margin-bottom: 20px;">Hi <strong>${data.userName}</strong>,</p>
+          
+          <p>Thank you for purchasing our Personal Statement Review service! 🎉</p>
+          
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Review Details</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #374151;">
+              <li><strong>Service:</strong> ${data.statementType.charAt(0).toUpperCase() + data.statementType.slice(1)} Personal Statement Review</li>
+              <li><strong>Amount:</strong> £${data.amount}</li>
+              <li><strong>Review ID:</strong> ${data.id}</li>
+              <li><strong>Booking ID:</strong> ${data.bookingId}</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>Your personal statement will be reviewed by our expert team within <strong>48 hours</strong></li>
+              <li>You'll receive detailed feedback via email including line-by-line comments</li>
+              <li>The feedback will cover structure, content, grammar, and admissions criteria alignment</li>
+              <li>You can ask follow-up questions about the feedback</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>👨‍⚕️ Expert Reviewers:</strong> Our reviewers are current medical students and admissions tutors who have successfully gained places at top UK medical schools.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">If you have any questions, please reply to this email or contact us at contact@nextgenmedprep.com.</p>
+          <p>Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      </div>
+    `;
+
+    return { subject, text, html };
+  }
+
+  private getPersonalStatementReviewNotificationTemplate(data: {
+    personalStatementId: string;
+    customerEmail: string;
+    customerName: string;
+    statementType: string;
+    filePath: string;
+  }): EmailTemplate {
+    const subject = `New Personal Statement Review - ${data.customerName} (${data.statementType})`;
+    
+    const text = `
+  New Personal Statement Review Submitted
+
+  Customer Details:
+  - Name: ${data.customerName}
+  - Email: ${data.customerEmail}
+  - Statement Type: ${data.statementType}
+  - Review ID: ${data.personalStatementId}
+  - File Path: ${data.filePath}
+
+  Action Required:
+  1. Download the personal statement from Supabase: https://supabase.com/
+  2. Assign a reviewer
+  3. Complete the review within 48 hours
+  4. Upload feedback and notify the customer - For now you can email the feedback directly to the customer.
+
+  Admin Dashboard: ${process.env.FRONTEND_URL}/admin/personal-statements/${data.personalStatementId}
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">New Personal Statement Review</h1>
+          <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Action Required - Review Within 48 Hours</p>
+        </div>
+        
+        <div style="padding: 30px; color: #374151;">
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Customer Details</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #374151;">
+              <li><strong>Name:</strong> ${data.customerName}</li>
+              <li><strong>Email:</strong> ${data.customerEmail}</li>
+              <li><strong>Statement Type:</strong> ${data.statementType.charAt(0).toUpperCase() + data.statementType.slice(1)}</li>
+              <li><strong>Review ID:</strong> ${data.personalStatementId}</li>
+              <li><strong>File Path:</strong> ${data.filePath}</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+            <h3 style="margin-top: 0; color: #991b1b;">Action Required</h3>
+            <ol style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>Download the personal statement from the admin dashboard</li>
+              <li>Assign a reviewer</li>
+              <li>Complete the review within <strong>48 hours</strong></li>
+              <li>Upload feedback and notify the customer</li>
+            </ol>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.FRONTEND_URL}/admin/personal-statements/${data.personalStatementId}" 
+               style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+              View in Admin Dashboard - to be created 
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return { subject, text, html };
   }
 
   // Test email configuration
