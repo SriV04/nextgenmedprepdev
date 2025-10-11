@@ -11,8 +11,8 @@ import '@/styles/prometheus.css';
 interface BookingDetails {
   university: string;
   interviewType: string;
-  serviceType: string;
-  packageType: string;
+  serviceType: 'generated' | 'tutor';
+  packageType: 'individual' | 'package';
   packageId: string;
   price: string;
   preferredDate: string;
@@ -89,8 +89,8 @@ function CompletePurchaseContent() {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     university: '',
     interviewType: '',
-    serviceType: '',
-    packageType: '',
+    serviceType: 'generated',
+    packageType: 'individual',
     packageId: '',
     price: '',
     preferredDate: '',
@@ -106,17 +106,15 @@ function CompletePurchaseContent() {
   useEffect(() => {
     console.log('=== DEBUGGING PAYMENT COMPLETE PAGE ===');
     console.log('Current URL:', window.location.href);
-    console.log('SearchParams object:', searchParams);
-    console.log('All sessionStorage keys:', Object.keys(sessionStorage));
     
     // Get booking details from URL params first, then sessionStorage
-    const university = searchParams.get('university') || searchParams.get('universities')?.split(',')[0] || '';
-    const interviewType = searchParams.get('interviewType') || '';
+    const universitiesParam = searchParams.get('universities') || '';
+    const universities = universitiesParam ? universitiesParam.split(',') : [];
+    const primaryUniversity = universities[0] || '';
+    
     const serviceType = searchParams.get('serviceType') || '';
-    const packageType = searchParams.get('packageType') || '';
     const packageId = searchParams.get('packageId') || '';
     const price = searchParams.get('price') || '';
-    const preferredDate = searchParams.get('preferredDate') || '';
     const notes = searchParams.get('notes') || '';
     const firstName = searchParams.get('firstName') || '';
     const lastName = searchParams.get('lastName') || '';
@@ -124,16 +122,12 @@ function CompletePurchaseContent() {
     const phone = searchParams.get('phone') || '';
 
     console.log('URL params extracted:', {
-      university, interviewType, serviceType, packageType, packageId, price, preferredDate, notes, firstName, lastName, email, phone
+      universities, primaryUniversity, serviceType, packageId, price, notes, firstName, lastName, email, phone
     });
 
-    // Try to get from sessionStorage as backup - check multiple possible keys
+    // Try to get from sessionStorage as backup
     const storedData = sessionStorage.getItem('interview_booking');
-    const altStoredData = sessionStorage.getItem('interviewBookingDetails');
     let sessionData = null;
-    
-    console.log('SessionStorage interview_booking:', storedData);
-    console.log('SessionStorage interviewBookingDetails:', altStoredData);
     
     if (storedData) {
       try {
@@ -142,24 +136,23 @@ function CompletePurchaseContent() {
       } catch (e) {
         console.error('Error parsing session data:', e);
       }
-    } else if (altStoredData) {
-      try {
-        sessionData = JSON.parse(altStoredData);
-        console.log('Parsed alt session data:', sessionData);
-      } catch (e) {
-        console.error('Error parsing alt session data:', e);
-      }
     }
 
-    const finalBookingDetails = {
-      university: university || sessionData?.universities?.[0] || sessionData?.university || '',
-      interviewType: interviewType || sessionData?.interviewType || 'mmi', // Default to MMI
-      serviceType: (serviceType || sessionData?.serviceType || 'generated') as 'generated' | 'tutor',
-      packageType: (packageType || sessionData?.packageType || 'package') as 'individual' | 'package',
+    // Determine if this is a package or individual session
+    const isPackage = !!packageId;
+    
+    // Map 'actual' to 'tutor' for consistency
+    const mappedServiceType = serviceType === 'actual' ? 'tutor' : serviceType;
+    
+    const finalBookingDetails: BookingDetails = {
+      university: primaryUniversity || sessionData?.universities?.[0] || '',
+      interviewType: 'mmi', // Default interview type - we can enhance this later
+      serviceType: (mappedServiceType || sessionData?.serviceType || 'generated') as 'generated' | 'tutor',
+      packageType: (isPackage ? 'package' : 'individual') as 'individual' | 'package',
       packageId: packageId || sessionData?.packageId || '',
-      price: price || sessionData?.price || '', 
-      preferredDate: preferredDate || sessionData?.preferredDate || '',
-      notes: notes || sessionData?.additionalNotes || sessionData?.notes || '',
+      price: price || sessionData?.price || '0', 
+      preferredDate: '',
+      notes: notes || sessionData?.notes || sessionData?.additionalNotes || '',
       firstName: firstName || sessionData?.contactDetails?.firstName || '',
       lastName: lastName || sessionData?.contactDetails?.lastName || '',
       email: email || sessionData?.contactDetails?.email || '',
@@ -182,12 +175,12 @@ function CompletePurchaseContent() {
   const handlePaymentSuccess = () => {
     console.log('Payment successful for interview booking');
     // Clear booking details from session storage
-    sessionStorage.removeItem('interviewBookingDetails');
+    sessionStorage.removeItem('interview_booking');
     // Redirect to success page with booking details
     const serviceTypeLabel = bookingDetails.serviceType === 'generated' ? 'generated' : 'tutor';
-    const successUrl = bookingDetails.packageType === 'package' 
-      ? `/payment/success?service=interviews&university=${bookingDetails.university}&type=${bookingDetails.interviewType}&package=${bookingDetails.packageId}&serviceType=${serviceTypeLabel}`
-      : `/payment/success?service=interviews&university=${bookingDetails.university}&type=${bookingDetails.interviewType}&individual=true&serviceType=${serviceTypeLabel}`;
+    const successUrl = bookingDetails.packageId
+      ? `/payment/success?service=interviews&university=${bookingDetails.university}&package=${bookingDetails.packageId}&serviceType=${serviceTypeLabel}`
+      : `/payment/success?service=interviews&university=${bookingDetails.university}&individual=true&serviceType=${serviceTypeLabel}`;
     
     window.location.href = successUrl;
   };
@@ -207,7 +200,6 @@ function CompletePurchaseContent() {
   } | null => {
     const university = getUniversityName();
     const serviceTypeLabel = bookingDetails.serviceType === 'generated' ? 'Generated Questions' : 'Live Tutor Sessions';
-    const interviewTypeDetails = getInterviewTypeDetails();
     
     // Parse price with fallback
     const price = parseFloat(bookingDetails.price) || 0;
@@ -215,26 +207,26 @@ function CompletePurchaseContent() {
     console.log('Getting selected package:', {
       bookingDetails,
       parsedPrice: price,
-      priceString: bookingDetails.price,
-      interviewTypeDetails
+      priceString: bookingDetails.price
     });
 
-    // If no booking details available, return a default package to prevent payment form from breaking
-    if (!bookingDetails.university || !bookingDetails.interviewType || !bookingDetails.serviceType) {
+    // If no booking details available, return a default package
+    if (!bookingDetails.university || !bookingDetails.serviceType) {
       console.log('Missing booking details, returning default package');
       return {
         id: 'default_interview_session',
         name: 'Interview Preparation Session',
-        price: 45,
+        price: price > 0 ? price : 45,
         currency: 'GBP',
-        description: 'Interview preparation session - Please complete the booking form first'
+        description: 'Interview preparation session'
       };
     }
     
+    // Handle package selection
     if (bookingDetails.packageType === 'package' && bookingDetails.packageId) {
       const pkg = packages.find(p => p.id === bookingDetails.packageId);
       if (pkg) {
-        // Calculate correct price based on service type if price is 0
+        // Use the price from URL params, or calculate based on service type
         const correctPrice = price > 0 ? price : (
           bookingDetails.serviceType === 'generated' ? pkg.generatedPrice : pkg.tutorPrice
         );
@@ -244,37 +236,21 @@ function CompletePurchaseContent() {
           name: `${pkg.name} - ${serviceTypeLabel}`,
           price: correctPrice,
           currency: 'GBP',
-          description: `${pkg.name} - ${serviceTypeLabel} for ${university} ${interviewTypeDetails?.name || 'Interview'} preparation. ${pkg.interviews} session${pkg.interviews > 1 ? 's' : ''} included.`
+          description: `${pkg.name} - ${serviceTypeLabel} for ${university} interview preparation. ${pkg.interviews} session${pkg.interviews > 1 ? 's' : ''} included.`
         };
       }
     }
     
-    // Individual session
-    if (interviewTypeDetails) {
-      // Calculate correct price based on service type if price is 0
-      const correctPrice = price > 0 ? price : (
-        bookingDetails.serviceType === 'generated' ? interviewTypeDetails.generatedPrice : interviewTypeDetails.tutorPrice
-      );
-
-      console.log('Individual session selected, returning package:', {
-        id: `interview_${bookingDetails.interviewType}_${bookingDetails.serviceType}_${bookingDetails.university}`,
-        name: `${interviewTypeDetails.name} - ${serviceTypeLabel}`,
-        price: correctPrice,
-        currency: 'GBP',
-        description: `Individual ${interviewTypeDetails.name} preparation session for ${university}. ${serviceTypeLabel} format.`
-      });
-      
-      
-      return {
-        id: `interview_${bookingDetails.interviewType}_${bookingDetails.serviceType}_${bookingDetails.university}`,
-        name: `${interviewTypeDetails.name} - ${serviceTypeLabel}`,
-        price: correctPrice,
-        currency: 'GBP',
-        description: `Individual ${interviewTypeDetails.name} preparation session for ${university}. ${serviceTypeLabel} format.`
-      };
-    }
+    // Fallback to individual session format
+    console.log('Individual session or fallback, returning package');
     
-    return null;
+    return {
+      id: `interview_${bookingDetails.serviceType}_${bookingDetails.university}`,
+      name: `Interview Preparation - ${serviceTypeLabel}`,
+      price: price > 0 ? price : 45,
+      currency: 'GBP',
+      description: `Interview preparation session for ${university}. ${serviceTypeLabel} format.`
+    };
   };
 
   const interviewType = getInterviewTypeDetails();
@@ -406,37 +382,31 @@ function CompletePurchaseContent() {
                 </div>
                 
                 <div className="flex justify-between items-start">
-                  <span className="text-gray-300">Interview Type:</span>
-                  <span className="font-semibold text-right">{interviewType?.name}</span>
-                </div>
-                
-                <div className="flex justify-between items-start">
                   <span className="text-gray-300">Service Type:</span>
                   <span className="font-semibold text-right">
                     {bookingDetails.serviceType === 'generated' ? 'Generated Questions' : 'Live Tutor Session'}
                   </span>
                 </div>
                 
-                <div className="flex justify-between items-start">
-                  <span className="text-gray-300">Package:</span>
-                  <span className="font-semibold text-right">
-                    {bookingDetails.packageType === 'package' ? 'Package Deal' : 'Single Session'}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <span className="text-gray-300">Duration:</span>
-                  <span className="font-semibold">{interviewType?.duration}</span>
-                </div>
-
-                {bookingDetails.preferredDate && (
+                {bookingDetails.packageId && (
                   <div className="flex justify-between items-start">
-                    <span className="text-gray-300">Preferred Date:</span>
-                    <span className="font-semibold">
-                      {new Date(bookingDetails.preferredDate).toLocaleDateString('en-GB')}
+                    <span className="text-gray-300">Package:</span>
+                    <span className="font-semibold text-right">
+                      {packages.find(p => p.id === bookingDetails.packageId)?.name || 'Selected Package'}
                     </span>
                   </div>
                 )}
+                
+                {bookingDetails.packageId && (
+                  <div className="flex justify-between items-start">
+                    <span className="text-gray-300">Sessions Included:</span>
+                    <span className="font-semibold">
+                      {packages.find(p => p.id === bookingDetails.packageId)?.interviews || 1}
+                    </span>
+                  </div>
+                )}
+
+
 
                 {bookingDetails.notes && (
                   <div className="pt-4 border-t border-gray-600">
@@ -525,24 +495,16 @@ function CompletePurchaseContent() {
             
             <div className="payment-form-container [&_.bg-white]:bg-black/60 [&_.bg-white]:border-purple-500/30 [&_.text-gray-900]:text-white [&_.text-gray-700]:text-gray-300 [&_.text-gray-600]:text-gray-400 [&_.border-gray-300]:border-gray-600 [&_.bg-blue-50]:bg-purple-500/10 [&_.border-blue-200]:border-purple-500/30 [&_input]:bg-black [&_input]:text-white [&_textarea]:bg-black [&_textarea]:text-white [&_select]:bg-black [&_select]:text-white">
               <PaymentForm
-                selectedPackage={{
-                                      id: getSelectedPackage()?.id,
-                                      name: getSelectedPackage()?.name,
-                                      price: getSelectedPackage()?.price,
-                                      currency: getSelectedPackage()?.currency,
-                                      description: `${getSelectedPackage()?.name} - ${getSelectedPackage()?.description}`
-                                  }}
+                selectedPackage={getSelectedPackage()}
                 initialData={{
                   customer_email: bookingDetails.email,
                   customer_name: `${bookingDetails.firstName} ${bookingDetails.lastName}`.trim(),
                   metadata: {
                     type: 'interview_booking',
                     university: getUniversityName(),
-                    interview_type: getInterviewTypeDetails()?.name || bookingDetails.interviewType,
                     service_type: bookingDetails.serviceType,
                     package_type: bookingDetails.packageType,
                     package_id: bookingDetails.packageId,
-                    preferred_date: bookingDetails.preferredDate,
                     notes: bookingDetails.notes,
                     customer_name: `${bookingDetails.firstName} ${bookingDetails.lastName}`.trim(),
                     customer_email: bookingDetails.email,
