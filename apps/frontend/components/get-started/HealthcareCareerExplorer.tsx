@@ -12,7 +12,6 @@ import {
   HeartIcon, 
   SparklesIcon,
   ArrowRightIcon,
-  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 const careerPaths = [
@@ -141,7 +140,7 @@ const services = {
       name: 'UCAT Personal Revision Plan',
       description: 'Tailored study plan to maximize your strengths and address weaknesses.',   
       path: '/resources/ucat-personal-revision-plan',
-      badge: 'Personalized',
+      badge: 'Personalised',
       color: 'green' as const
     }
   ],
@@ -263,7 +262,7 @@ export default function HealthcareCareerExplorer() {
           </div>
 
           {/* Featured: Prometheus - TODO Make the nextgen better */}
-          {(selectedStage === 'ucat' || selectedStage === 'interviews') && (
+          {selectedStage === 'interviews' && (
             <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.1),transparent_60%)]" />
               <div className="relative flex flex-col md:flex-row items-center gap-8">
@@ -291,20 +290,6 @@ export default function HealthcareCareerExplorer() {
               </div>
             </div>
           )}
-
-          {/* CTA */}
-          {/* <div className="text-center mt-12 p-8 bg-gradient-to-r from-gray-50 to-indigo-50 rounded-2xl border-2 border-indigo-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Still not sure where to start?
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Book a consultation with our expert advisors
-            </p>
-            <button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all inline-flex items-center gap-2">
-              <ChatBubbleLeftRightIcon className="w-5 h-5" />
-              Book a Consultation
-            </button>
-          </div> */}
         </section>
       )}
 

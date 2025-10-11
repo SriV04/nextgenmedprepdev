@@ -132,7 +132,7 @@ export default function NotFound() {
         <div className="mt-8">
           <p className="text-sm text-slate-400">
             Need immediate help? Contact us at{" "}
-            <a href="mailto:support@nextgenmedprep.com" className="text-blue-400 hover:text-blue-300 underline">
+            <a href="mailto:contact@nextgenmedprep.com" className="text-blue-400 hover:text-blue-300 underline">
               contact@nextgenmedprep.com
             </a>
           </p>

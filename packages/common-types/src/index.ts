@@ -277,6 +277,39 @@ export interface UpdateBookingRequest {
   rating?: number;
 }
 
+// Personal Statement Types
+export interface PersonalStatement {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  email: string;
+  personal_statement_file_path: string;
+  notes?: string;
+  reviewed: boolean;
+  reviewed_at?: string;
+  reviewer_email?: string;
+  version: number;
+  status: 'pending' | 'in_review' | 'complete';
+  feedback_url?: string;
+  feedback_file_path?: string;
+}
+
+export interface CreatePersonalStatementRequest {
+  email: string;
+  personal_statement_file_path: string;
+  notes?: string;
+}
+
+export interface UpdatePersonalStatementRequest {
+  notes?: string;
+  reviewed?: boolean;
+  reviewed_at?: string;
+  reviewer_email?: string;
+  status?: 'pending' | 'in_review' | 'complete';
+  feedback_url?: string;
+  feedback_file_path?: string;
+}
+
 // Payment Types
 export interface CreatePaymentRequest {
   amount: number;

@@ -85,7 +85,7 @@ const ReviewSuccessModal: React.FC<ReviewSuccessModalProps> = ({ isOpen, onClose
               </div>
               <p className="text-sm text-amber-700">
                 If you have any questions about your review or need support, 
-                email us at <a href="mailto:support@nextgenmedprep.com" className="underline">support@nextgenmedprep.com</a>
+                email us at <a href="mailto:contact@nextgenmedprep.com" className="underline">contact@nextgenmedprep.com</a>
               </p>
             </div>
           </div>

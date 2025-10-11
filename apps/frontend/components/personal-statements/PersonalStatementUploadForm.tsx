@@ -73,14 +73,29 @@ const PersonalStatementUploadForm: React.FC<PersonalStatementUploadFormProps> = 
         formDataToSend.append('personalStatement', file);
       }
 
-      // This would be the actual API call to submit the review request
-      // For now, we'll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Submit to backend API
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const response = await fetch(`${apiUrl}/api/v1/personal-statements/submit`, {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit personal statement');
+      }
+
+      const data = await response.json();
       
-      onSuccess();
-    } catch (error) {
+      if (data.success && data.data?.checkout_url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.data.checkout_url;
+      } else {
+        throw new Error('Failed to create payment session');
+      }
+    } catch (error: any) {
       console.error('Error submitting review request:', error);
-      alert('Something went wrong. Please try again.');
+      alert(error.message || 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
