@@ -667,6 +667,214 @@ The NextGen MedPrep Team
     return { subject, text, html };
   }
 
+  // Add specialized methods for career consultations and event bookings
+  
+  async sendCareerConsultationConfirmationEmail(email: string, data: {
+    id: string;
+    amount: number;
+    userName: string;
+    preferredDate?: string;
+    startTime?: string;
+  }): Promise<void> {
+    console.log('Sending career consultation confirmation email to:', email);
+
+    const template = this.getCareerConsultationConfirmationTemplate(data);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+  
+  async sendEventBookingConfirmationEmail(email: string, data: {
+    id: string;
+    amount: number;
+    userName: string;
+    eventName: string;
+    numberOfTickets?: number;
+  }): Promise<void> {
+    console.log('Sending event booking confirmation email to:', email);
+
+    const template = this.getEventBookingConfirmationTemplate(data);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+  
+  private getCareerConsultationConfirmationTemplate(data: {
+    id: string;
+    amount: number;
+    userName: string;
+    preferredDate?: string;
+    startTime?: string;
+  }): EmailTemplate {
+    const subject = 'Career Consultation Booking Confirmed - NextGen MedPrep';
+    
+    const text = `
+Hi ${data.userName},
+
+Thank you for booking a 30-minute Career Consultation with NextGen MedPrep!
+
+Booking Details:
+- Service: 30-minute Career Consultation
+- Amount: £${data.amount}
+- Booking ID: ${data.id}
+${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
+
+What happens next:
+• Our team will reach out within 24 hours to confirm your consultation time
+• If you provided a preferred date, we'll do our best to accommodate it
+• You'll receive a calendar invite with a meeting link once confirmed
+• Please prepare any specific questions or topics you'd like to discuss
+
+Our career advisors are medical professionals with extensive experience in medical school admissions and career pathways.
+
+If you have any questions before your consultation, please contact us at contact@nextgenmedprep.com.
+
+Thank you for choosing NextGen MedPrep!
+
+Best regards,
+The NextGen MedPrep Team
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 28px;">Career Consultation Confirmed!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your expert consultation is booked</p>
+        </div>
+        
+        <div style="padding: 30px; color: #374151;">
+          <p style="font-size: 16px; margin-bottom: 20px;">Hi <strong>${data.userName}</strong>,</p>
+          
+          <p>Thank you for booking a 30-minute Career Consultation with NextGen MedPrep! 🎉</p>
+          
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Booking Details</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #374151;">
+              <li><strong>Service:</strong> 30-minute Career Consultation</li>
+              <li><strong>Amount:</strong> £${data.amount}</li>
+              <li><strong>Booking ID:</strong> ${data.id}</li>
+              ${data.preferredDate ? `<li><strong>Preferred Date:</strong> ${data.preferredDate}</li>` : ''}
+            </ul>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>Our team will reach out within <strong>24 hours</strong> to confirm your consultation time</li>
+              ${data.preferredDate ? `<li>We'll do our best to accommodate your preferred date: <strong>${data.preferredDate}</strong></li>` : ''}
+              <li>You'll receive a calendar invite with a meeting link once confirmed</li>
+              <li>Please prepare any specific questions or topics you'd like to discuss</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>👨‍⚕️ Expert Advisors:</strong> Our career advisors are medical professionals with extensive experience in medical school admissions and career pathways.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">If you have any questions before your consultation, please contact us at contact@nextgenmedprep.com.</p>
+          <p>Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      </div>
+    `;
+
+    return { subject, text, html };
+  }
+  
+  private getEventBookingConfirmationTemplate(data: {
+    id: string;
+    amount: number;
+    userName: string;
+    eventName: string;
+    numberOfTickets?: number;
+  }): EmailTemplate {
+    const ticketCount = data.numberOfTickets || 1;
+    const subject = `Event Booking Confirmed: ${data.eventName} - NextGen MedPrep`;
+    
+    const text = `
+Hi ${data.userName},
+
+Thank you for booking ${ticketCount > 1 ? ticketCount + ' tickets' : 'a ticket'} for ${data.eventName}!
+
+Booking Details:
+- Event: ${data.eventName}
+- Number of Tickets: ${ticketCount}
+- Amount: £${data.amount}
+- Booking ID: ${data.id}
+
+What happens next:
+• You'll receive a confirmation email with event details within 48 hours
+• Your ticket(s) will be emailed to you 1 week before the event
+• Please arrive 15 minutes before the event starts for registration
+• Bring your ticket (digital or printed) for entry
+
+If you have any questions about the event, please contact us at contact@nextgenmedprep.com.
+
+Thank you for choosing NextGen MedPrep!
+
+Best regards,
+The NextGen MedPrep Team
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 28px;">Event Booking Confirmed!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">${data.eventName}</p>
+        </div>
+        
+        <div style="padding: 30px; color: #374151;">
+          <p style="font-size: 16px; margin-bottom: 20px;">Hi <strong>${data.userName}</strong>,</p>
+          
+          <p>Thank you for booking ${ticketCount > 1 ? ticketCount + ' tickets' : 'a ticket'} for <strong>${data.eventName}</strong>! 🎉</p>
+          
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Booking Details</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #374151;">
+              <li><strong>Event:</strong> ${data.eventName}</li>
+              <li><strong>Number of Tickets:</strong> ${ticketCount}</li>
+              <li><strong>Amount:</strong> £${data.amount}</li>
+              <li><strong>Booking ID:</strong> ${data.id}</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>You'll receive a confirmation email with event details within <strong>48 hours</strong></li>
+              <li>Your ticket(s) will be emailed to you <strong>1 week</strong> before the event</li>
+              <li>Please arrive <strong>15 minutes</strong> before the event starts for registration</li>
+              <li>Bring your ticket (digital or printed) for entry</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>📝 Have questions?</strong> Contact us at contact@nextgenmedprep.com for any event-related inquiries.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      </div>
+    `;
+
+    return { subject, text, html };
+  }
+
   // Test email configuration
   async verifyConnection(): Promise<boolean> {
     try {

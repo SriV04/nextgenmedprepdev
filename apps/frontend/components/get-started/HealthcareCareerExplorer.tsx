@@ -79,7 +79,7 @@ const services = {
     {
       name: 'Career Guidance Consultation',
       description: 'Explore which healthcare path suits you best',
-      path: '/career-guidance-consultation',
+      path: '/career-consultation-pay',
       badge: 'Personalised',
       color: 'green' as const
     },

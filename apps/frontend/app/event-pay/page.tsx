@@ -1,0 +1,209 @@
+'use client'
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeftIcon, CalendarIcon, UserGroupIcon, TicketIcon } from '@heroicons/react/24/outline';
+import PaymentForm from '../../components/payment/PaymentForm';
+
+export default function EventPaymentPage() {
+  const [numberOfTickets, setNumberOfTickets] = useState(1);
+
+  const eventPackage = {
+    id: 'event_booking',
+    name: 'Medical Event Ticket',
+    price: 20 * numberOfTickets,
+    currency: 'GBP',
+    description: `Entry ticket${numberOfTickets > 1 ? 's' : ''} for upcoming medical education event. Access to all sessions and materials.`
+  };
+
+  const handlePaymentSuccess = (data: any) => {
+    // Handle successful payment
+    console.log('Payment successful:', data);
+    if (data?.checkout_url) {
+      // Redirect to Stripe checkout
+      window.location.href = data.checkout_url;
+    } else {
+      // Fallback to success page
+      window.location.href = '/payment/success';
+    }
+  };
+
+  const handlePaymentError = (error: string) => {
+    // Handle payment error
+    console.error('Payment error:', error);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-4">
+            <Link href="/events" className="text-gray-500 hover:text-gray-700 transition-colors">
+              <ArrowLeftIcon className="w-6 h-6" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <CalendarIcon className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Medical Event</h1>
+                <p className="text-gray-600">Secure your place at our upcoming event</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto">
+          {/* Event Overview */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Medical Education Event
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Join us for an informative event designed to help medical students succeed in their education and career journey.
+            </p>
+          </div>
+
+          {/* Features Overview */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <UserGroupIcon className="w-12 h-12 mx-auto text-blue-600 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Networking</h3>
+              <p className="text-gray-600 text-sm">
+                Connect with fellow students and medical professionals
+              </p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <TicketIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Full Access</h3>
+              <p className="text-gray-600 text-sm">
+                Entry to all sessions, workshops, and materials
+              </p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <CalendarIcon className="w-12 h-12 mx-auto text-purple-600 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Expert Speakers</h3>
+              <p className="text-gray-600 text-sm">
+                Learn from experienced medical professionals
+              </p>
+            </div>
+          </div>
+
+          {/* Event Details Card */}
+          <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 mb-10">
+            <div className="flex justify-between items-start mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Event Ticket</h3>
+              <div className="text-3xl font-bold text-blue-600">£20</div>
+            </div>
+            
+            <p className="text-gray-700 mb-6">
+              Secure your place at our upcoming medical education event featuring expert speakers, 
+              interactive workshops, and valuable networking opportunities.
+            </p>
+            
+            <div className="border-t border-gray-100 pt-6">
+              <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span className="text-gray-700">Full event access</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span className="text-gray-700">All workshops and sessions</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span className="text-gray-700">Event materials and resources</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span className="text-gray-700">Networking opportunities</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span className="text-gray-700">Certificate of attendance</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Payment Form */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Secure Your Ticket</h3>
+            
+            {/* Number of tickets selector */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Number of Tickets
+              </label>
+              <div className="flex items-center gap-4">
+                <button 
+                  type="button"
+                  onClick={() => setNumberOfTickets(Math.max(1, numberOfTickets - 1))}
+                  className="w-10 h-10 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100"
+                >
+                  -
+                </button>
+                <span className="text-xl font-semibold w-8 text-center">{numberOfTickets}</span>
+                <button 
+                  type="button"
+                  onClick={() => setNumberOfTickets(numberOfTickets + 1)}
+                  className="w-10 h-10 rounded-full bg-white border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100"
+                >
+                  +
+                </button>
+                <span className="text-gray-600 ml-2">
+                  (Total: £{20 * numberOfTickets})
+                </span>
+              </div>
+            </div>
+            
+            <PaymentForm
+              selectedPackage={eventPackage}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              initialData={{
+                metadata: {
+                  type: 'event_booking',
+                  event_name: 'Medical Education Event',
+                  number_of_tickets: numberOfTickets.toString()
+                }
+              }}
+            />
+          </div>
+
+          {/* Process Information */}
+          <div className="mt-16 bg-white rounded-xl p-8 shadow-sm border border-gray-100">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">How It Works</h3>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">1</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Purchase Ticket</h4>
+                <p className="text-gray-600 text-sm">Complete your payment to secure your place</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">2</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Receive Confirmation</h4>
+                <p className="text-gray-600 text-sm">Get your e-ticket and event details via email</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">3</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Event Reminders</h4>
+                <p className="text-gray-600 text-sm">Receive updates and preparation information</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">4</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Attend Event</h4>
+                <p className="text-gray-600 text-sm">Join us and enjoy all event activities</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

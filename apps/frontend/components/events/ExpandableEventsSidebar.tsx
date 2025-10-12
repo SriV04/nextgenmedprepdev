@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import CalendlyPopup from '../CalendlyPopup';
 
 interface Event {
   id: number;
@@ -207,20 +206,12 @@ const ExpandableEventsSidebar: React.FC<ExpandableEventsSidebarProps> = ({
 
                       {/* Book Conference Button */}
                       <div className="pt-4 border-t border-gray-100">
-                        <CalendlyPopup 
-                          url="https://calendly.com/sri-nextgenmedprep/30min"
+                        <button
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 text-center text-sm md:text-base"
-                          prefill={{
-                            name: "Potential Student"
-                          }}
-                          utm={{
-                            utmCampaign: `conference-${event.type}`,
-                            utmSource: 'website',
-                            utmMedium: 'event-sidebar'
-                          }}
+                          onClick={() => window.location.href = `/event-pay`}
                         >
                           Book This Conference
-                        </CalendlyPopup>
+                        </button>
                         <p className="text-xs text-gray-500 text-center mt-2">
                           Secure your spot • {event.spots} places remaining
                         </p>

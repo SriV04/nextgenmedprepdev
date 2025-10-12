@@ -515,6 +515,38 @@ class SupabaseService {
 
     return data;
   }
+  
+  async updateBooking(id: string, updates: {
+    start_time?: string;
+    end_time?: string;
+    status?: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
+    payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+    tutor_id?: string;
+    preferred_time?: string;
+    reschedule_requested?: boolean;
+    rescheduled_time?: string;
+    feedback?: string;
+    rating?: number;
+    complete?: boolean;
+  }): Promise<any> {
+    const updateData = {
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
+
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update booking: ${error.message}`);
+    }
+
+    return data;
+  }
 
   async getUserBookings(userId: string): Promise<any[]> {
     const { data, error } = await this.supabase

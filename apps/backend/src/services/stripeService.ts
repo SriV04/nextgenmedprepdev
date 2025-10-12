@@ -410,6 +410,12 @@ export class StripeService {
         case 'personal_statement_review':
           await this.handlePersonalStatementPayment(paymentIntent);
           break;
+        case 'career_consultation':
+          await this.handleCareerConsultationPayment(paymentIntent);
+          break;
+        case 'event_booking':
+          await this.handleEventBookingPayment(paymentIntent);
+          break;
         default:
           console.log('Unknown booking type, using default interview booking handler');
           await this.handleInterviewBookingPayment(paymentIntent);
@@ -761,6 +767,404 @@ export class StripeService {
       console.error('Error stack:', (error as Error).stack);
       throw error; // Re-throw to be handled by caller
     }
+  }
+  
+  private async handleCareerConsultationPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    console.log('=== Career Consultation Payment Handler Started ===');
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Payment Intent Metadata:', paymentIntent.metadata);
+    
+    try {
+      // Import services here to avoid circular dependencies
+      const supabaseService = (await import('./supabaseService')).default;
+      const emailService = (await import('./emailService')).default;
+      
+      // Get payment metadata
+      const metadata = paymentIntent.metadata;
+      const customerEmail = metadata.customer_email;
+      const customerName = metadata.customer_name;
+      const preferredDate = metadata.preferred_date;
+      const message = metadata.message;
+      const amount = paymentIntent.amount / 100; // Convert from cents
+      
+      console.log('Extracted metadata:', {
+        customerEmail,
+        customerName,
+        preferredDate,
+        message,
+        amount
+      });
+      
+      if (!customerEmail) {
+        console.error('No customer email found in payment metadata');
+        return;
+      }
+      
+      console.log('Processing career consultation payment for:', {
+        customerEmail,
+        customerName,
+        preferredDate,
+        amount
+      });
+      
+      // 1. Check if user exists, create if not
+      console.log('Step 1: Checking if user exists...');
+      let user = await supabaseService.getUserByEmail(customerEmail);
+      
+      if (!user) {
+        console.log('Creating new user for email:', customerEmail);
+        user = await supabaseService.createUser({
+          email: customerEmail,
+          full_name: customerName || '',
+          role: 'student',
+          stripe_customer_id: paymentIntent.customer as string || undefined
+        });
+        console.log('Created user:', user.id);
+      } else {
+        console.log('Found existing user:', user.id);
+      }
+      
+      // 2. Check for subscription, create free subscription if not exists
+      console.log('Step 2: Checking subscription...');
+      let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+      
+      if (!subscription) {
+        console.log('Creating free subscription for email:', customerEmail);
+        subscription = await supabaseService.createSubscription({
+          email: customerEmail,
+          user_id: user.id,
+          subscription_tier: 'free',
+          opt_in_newsletter: true
+        });
+        console.log('Created subscription for user:', user.id);
+      } else {
+        console.log('Found existing subscription:', subscription);
+        // Link subscription to user if not already linked
+        if (!subscription.user_id) {
+          console.log('Linking subscription to user...');
+          await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+          console.log('Linked subscription to user:', user.id);
+        }
+      }
+      
+      // 3. Create booking entry
+      console.log('Step 3: Creating booking entry...');
+      const now = new Date();
+      // If preferred date is provided, use it; otherwise set to 3 days from now
+      let startTime;
+      if (preferredDate) {
+        startTime = new Date(preferredDate);
+      } else {
+        startTime = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
+      }
+      const endTime = new Date(startTime.getTime() + 30 * 60 * 1000); // 30 minutes duration
+      
+      const bookingData = {
+        user_id: user.id,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        package: 'career_consultation_30min',
+        amount: amount,
+        email: customerEmail,
+        preferred_time: preferredDate,
+        payment_status: 'paid' as const
+      };
+      console.log('Booking data to create:', bookingData);
+      
+      const booking = await supabaseService.createBooking(bookingData);
+      
+      console.log('Created career consultation booking:', booking);
+      
+      // 4. Send confirmation email to customer
+      console.log('Step 4: Sending confirmation email...');
+      try {
+        // You need to create this method in emailService
+        await emailService.sendBookingConfirmationEmail(customerEmail, {
+          id: booking.id,
+          packageType: 'career_consultation',
+          serviceType: '30min',
+          universities: [], // Not applicable for career consultations
+          amount,
+          startTime: startTime.toISOString(),
+          preferredDate: preferredDate || undefined,
+          userName: customerName
+        });
+        console.log('Sent career consultation confirmation email to:', customerEmail);
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+      
+      // 5. Send notification email to admin team
+      console.log('Step 5: Sending notification email to admin team...');
+      try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'contact@nextgenmedprep.com';
+        await this.sendAdminNotificationEmail(adminEmail, {
+          id: booking.id,
+          customerEmail,
+          customerName,
+          bookingType: 'Career Consultation (30 min)',
+          amount,
+          preferredDate: preferredDate || 'Not specified',
+          message: message || 'No additional message'
+        });
+        console.log('Sent career consultation notification to admin team');
+      } catch (emailError) {
+        console.error('Failed to send admin notification email:', emailError);
+      }
+      
+      console.log('=== Career Consultation Payment Handler Completed Successfully ===');
+    } catch (error) {
+      console.error('=== Career Consultation Payment Handler Error ===');
+      console.error('Error:', error);
+      console.error('Error stack:', (error as Error).stack);
+      // Don't throw error to avoid webhook retry loops
+    }
+  }
+  
+  private async handleEventBookingPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    console.log('=== Event Booking Payment Handler Started ===');
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Payment Intent Metadata:', paymentIntent.metadata);
+    
+    try {
+      // Import services here to avoid circular dependencies
+      const supabaseService = (await import('./supabaseService')).default;
+      const emailService = (await import('./emailService')).default;
+      
+      // Get payment metadata
+      const metadata = paymentIntent.metadata;
+      const customerEmail = metadata.customer_email;
+      const customerName = metadata.customer_name;
+      const eventId = metadata.event_id;
+      const eventName = metadata.event_name || 'Medical Conference';
+      const numberOfTickets = parseInt(metadata.number_of_tickets || '1', 10);
+      const amount = paymentIntent.amount / 100; // Convert from cents
+      
+      console.log('Extracted metadata:', {
+        customerEmail,
+        customerName,
+        eventId,
+        eventName,
+        numberOfTickets,
+        amount
+      });
+      
+      if (!customerEmail) {
+        console.error('No customer email found in payment metadata');
+        return;
+      }
+      
+      console.log('Processing event booking payment for:', {
+        customerEmail,
+        customerName,
+        eventName,
+        numberOfTickets,
+        amount
+      });
+      
+      // 1. Check if user exists, create if not
+      console.log('Step 1: Checking if user exists...');
+      let user = await supabaseService.getUserByEmail(customerEmail);
+      
+      if (!user) {
+        console.log('Creating new user for email:', customerEmail);
+        user = await supabaseService.createUser({
+          email: customerEmail,
+          full_name: customerName || '',
+          role: 'student',
+          stripe_customer_id: paymentIntent.customer as string || undefined
+        });
+        console.log('Created user:', user.id);
+      } else {
+        console.log('Found existing user:', user.id);
+      }
+      
+      // 2. Check for subscription, create free subscription if not exists
+      console.log('Step 2: Checking subscription...');
+      let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+      
+      if (!subscription) {
+        console.log('Creating free subscription for email:', customerEmail);
+        subscription = await supabaseService.createSubscription({
+          email: customerEmail,
+          user_id: user.id,
+          subscription_tier: 'free',
+          opt_in_newsletter: true
+        });
+        console.log('Created subscription for user:', user.id);
+      } else {
+        console.log('Found existing subscription:', subscription);
+        // Link subscription to user if not already linked
+        if (!subscription.user_id) {
+          console.log('Linking subscription to user...');
+          await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+          console.log('Linked subscription to user:', user.id);
+        }
+      }
+      
+      // 3. Create booking entry
+      console.log('Step 3: Creating booking entry...');
+      const now = new Date();
+      // Event bookings typically don't have a specific time slot assignment at booking time
+      // We'll use a future date as a placeholder
+      const eventDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days from now
+      const eventEndDate = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000); // 3 hours duration
+      
+      const bookingData = {
+        user_id: user.id,
+        start_time: eventDate.toISOString(),
+        end_time: eventEndDate.toISOString(),
+        package: `event_${eventId || 'conference'}`,
+        amount: amount,
+        email: customerEmail,
+        payment_status: 'paid' as const
+      };
+      console.log('Booking data to create:', bookingData);
+      
+      const booking = await supabaseService.createBooking(bookingData);
+      
+      console.log('Created event booking:', booking);
+      
+      // 4. Send confirmation email to customer
+      console.log('Step 4: Sending confirmation email...');
+      try {
+        // We can reuse the booking confirmation email with some tweaks
+        await emailService.sendBookingConfirmationEmail(customerEmail, {
+          id: booking.id,
+          packageType: 'event',
+          serviceType: eventName,
+          universities: [], // Not applicable for events
+          amount,
+          userName: customerName
+        });
+        console.log('Sent event booking confirmation email to:', customerEmail);
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+      
+      // 5. Send notification email to admin team
+      console.log('Step 5: Sending notification email to admin team...');
+      try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'contact@nextgenmedprep.com';
+        await this.sendAdminNotificationEmail(adminEmail, {
+          id: booking.id,
+          customerEmail,
+          customerName,
+          bookingType: `Event: ${eventName}`,
+          numberOfTickets,
+          amount,
+          message: `Number of tickets: ${numberOfTickets}`
+        });
+        console.log('Sent event booking notification to admin team');
+      } catch (emailError) {
+        console.error('Failed to send admin notification email:', emailError);
+      }
+      
+      console.log('=== Event Booking Payment Handler Completed Successfully ===');
+    } catch (error) {
+      console.error('=== Event Booking Payment Handler Error ===');
+      console.error('Error:', error);
+      console.error('Error stack:', (error as Error).stack);
+      // Don't throw error to avoid webhook retry loops
+    }
+  }
+  
+  // Helper method to send admin notifications
+  private async sendAdminNotificationEmail(adminEmail: string, data: {
+    id: string;
+    customerEmail: string;
+    customerName: string;
+    bookingType: string;
+    amount: number;
+    preferredDate?: string;
+    numberOfTickets?: number;
+    message?: string;
+  }): Promise<void> {
+    const subject = `New ${data.bookingType} Booking - £${data.amount}`;
+    
+    const text = `
+New ${data.bookingType} Booking
+
+Booking Details:
+- Booking ID: ${data.id}
+- Customer: ${data.customerName} (${data.customerEmail})
+- Amount: £${data.amount}
+${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
+${data.numberOfTickets ? `- Number of Tickets: ${data.numberOfTickets}` : ''}
+${data.message ? `- Message: ${data.message}` : ''}
+
+Please check the admin dashboard for more details.
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #2563eb;">New ${data.bookingType} Booking</h1>
+        
+        <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+          <h3 style="margin-top: 0; color: #1e40af;">Booking Details:</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${data.id}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Customer:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.customerName} (${data.customerEmail})</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Amount:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 16px; font-weight: bold; color: #059669;">£${data.amount}</td>
+            </tr>
+            ${data.preferredDate ? `
+            <tr>
+              <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Preferred Date:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.preferredDate}</td>
+            </tr>
+            ` : ''}
+            ${data.numberOfTickets ? `
+            <tr>
+              <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Number of Tickets:</td>
+              <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.numberOfTickets}</td>
+            </tr>
+            ` : ''}
+            ${data.message ? `
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Message:</td>
+              <td style="padding: 8px;">${data.message}</td>
+            </tr>
+            ` : ''}
+          </table>
+        </div>
+
+        <div style="margin: 20px 0; padding: 15px; background-color: #f3f4f6; border-radius: 8px;">
+          <p style="margin: 0; font-weight: bold;">Action Required:</p>
+          <p style="margin: 5px 0 0 0;">Please check the admin dashboard for more details and to process this booking.</p>
+        </div>
+      </div>
+    `;
+
+    // Using nodemailer directly here to avoid circular imports
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT || '587'),
+      secure: parseInt(process.env.EMAIL_PORT || '587') === 465,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+    
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: adminEmail,
+      subject: subject,
+      text: text,
+      html: html,
+    });
   }
 
   /**

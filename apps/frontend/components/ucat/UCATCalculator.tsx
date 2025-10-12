@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import CalendlyPopup from '../CalendlyPopup';
 
 interface UCATCalculatorProps {
   className?: string;
@@ -151,17 +150,6 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
           {showConsultation ? (
             <>
-              <CalendlyPopup 
-                url="https://calendly.com/sri-nextgenmedprep/30min"
-                className="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 transition-all duration-300"
-                utm={{
-                  utmCampaign: 'ucat-calculator-custom',
-                  utmSource: 'website',
-                  utmMedium: 'calculator-result'
-                }}
-              >
-                Book Free Consultation
-              </CalendlyPopup>
               <a 
                 href="#tutoring-packages"
                 className="border-2 border-orange-600 text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 hover:text-white transition-all duration-300"
@@ -177,17 +165,6 @@ const UCATCalculator: React.FC<UCATCalculatorProps> = ({ className = "" }) => {
               >
                 Get {packageName} Package
               </a>
-              <CalendlyPopup 
-                url="https://calendly.com/sri-nextgenmedprep/30min"
-                className="border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 hover:text-white transition-all duration-300"
-                utm={{
-                  utmCampaign: 'ucat-calculator',
-                  utmSource: 'website',
-                  utmMedium: 'calculator-result'
-                }}
-              >
-                Discuss Your Needs
-              </CalendlyPopup>
             </>
           )}
         </div>
