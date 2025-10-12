@@ -245,7 +245,7 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
             <span className="font-medium">Secure Payment</span>
           </div>
           <ul className="text-xs text-gray-500 space-y-1">
-            <li>• Payments processed securely by Fondy</li>
+            <li>• Payments processed securely by Stripe</li>
             <li>• Your payment information is encrypted and protected</li>
             <li>• You'll receive confirmation via email once payment is complete</li>
           </ul>

@@ -30,7 +30,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   'http://localhost:3000',
   'http://localhost:3001',
-  // Add production URLs when deploying
+  'https://www.nextgenmedprep.com'
 ];
 
 app.use(cors({
