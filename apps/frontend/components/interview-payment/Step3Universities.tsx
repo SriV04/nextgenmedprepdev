@@ -229,7 +229,7 @@ export default function Step3Universities({
                   whileTap={{ scale: 0.95 }}
                 >
                   <span className="flex items-center gap-1">
-                    {university.name.split(' ').slice(-1)[0]} {/* Show last word (e.g., "Oxford", "Cambridge") */}
+                    {university.displayName ? university.displayName : university.name.split(' ').slice(-1)[0]} {/* Show last word (e.g., "Oxford", "Cambridge") */}
                     {selectedUniversities.includes(universityId) && (
                       <span className="text-xs">✓</span>
                     )}

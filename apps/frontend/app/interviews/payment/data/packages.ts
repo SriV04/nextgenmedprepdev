@@ -3,6 +3,7 @@ export interface University {
   name: string;
   country: string;
   interviewTypes: string[];
+  displayName?: string;
 }
 
 export interface InterviewType {
@@ -31,49 +32,57 @@ export const universities: University[] = [
     id: 'oxford',
     name: 'University of Oxford',
     country: 'UK',
-    interviewTypes: ['mmi', 'traditional', 'panel']
+    interviewTypes: ['mmi', 'traditional', 'panel'],
+    displayName: 'Oxford'
   },
   {
     id: 'cambridge',
     name: 'University of Cambridge',
     country: 'UK',
-    interviewTypes: ['traditional', 'panel']
+    interviewTypes: ['traditional', 'panel'],
+    displayName: 'Cambridge'
   },
   {
     id: 'imperial',
     name: 'Imperial College London',
     country: 'UK',
-    interviewTypes: ['mmi', 'traditional']
+    interviewTypes: ['mmi', 'traditional'], 
+    displayName: 'ICL'
   },
   {
     id: 'ucl',
     name: 'University College London',
     country: 'UK',
-    interviewTypes: ['mmi', 'traditional']
+    interviewTypes: ['mmi', 'traditional'],
+    displayName: 'UCL'
   },
   {
     id: 'kings',
     name: "King's College London",
     country: 'UK',
-    interviewTypes: ['mmi', 'traditional', 'panel']
+    interviewTypes: ['mmi', 'traditional', 'panel'],
+    displayName: "KCL"
   },
   {
     id: 'edinburgh',
     name: 'University of Edinburgh',
     country: 'UK',
-    interviewTypes: ['mmi', 'traditional']
+    interviewTypes: ['mmi', 'traditional'],
+    displayName: 'Edinburgh'
   },
   {
     id: 'glasgow',
     name: 'University of Glasgow',
     country: 'UK',
-    interviewTypes: ['mmi', 'traditional']
+    interviewTypes: ['mmi', 'traditional'],
+    displayName: 'Glasgow'
   },
   {
     id: 'manchester',
     name: 'University of Manchester',
     country: 'UK',
-    interviewTypes: ['mmi']
+    interviewTypes: ['mmi'],
+    displayName: 'Manchester'
   }
 ];
 
