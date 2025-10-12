@@ -28,8 +28,7 @@ export const interviewPackages: ExtendedPackage[] = [
     features: [
       'A mock interview with Prometheus-powered university-specific questions',
       'Ensuring that your mock interview is as realistic as possible',
-      'All of our tutors are current medical students with at least 3+ offers',
-      'We will aim to match you with a tutor who has sat the interview you are sitting'
+      'All of our tutors are current medical students',
     ],
     generatedMocks: {
       description: 'AI-powered university-specific mock questions',
@@ -53,14 +52,14 @@ export const interviewPackages: ExtendedPackage[] = [
     description: 'Comprehensive interview training',
     interviews: 3,
     generatedPrice: 10,
-    tutorPrice: 130,
+    tutorPrice: 125,
     originalPrice: 150,
     popular: true,
     features: [
       '3 sets of Prometheus-powered university-specific mock questions',
       'Mock interviews tailored to the universities you are applying to',
-      'Strategy Session – all the background knowledge for success at the interview',
-      'Coverage of ethical scenarios, common trick questions, and general interview technique'
+      'Coverage of ethical scenarios, common trick questions, and general interview technique',
+      'We will aim to match you with a tutor who has sat the interview you are sitting'
     ],
     generatedMocks: {
       description: 'Complete AI-powered interview preparation package',
@@ -69,7 +68,7 @@ export const interviewPackages: ExtendedPackage[] = [
         'Additional practice questions for each university',
         'Covers all common interview formats (MMI, panel, traditional)',
         'Ethical scenarios with detailed analysis',
-        'Regularly updated question bank'
+        'Up to date question bank'
       ],
       benefits: [
         'Comprehensive preparation at a fraction of tutor cost',
@@ -86,13 +85,14 @@ export const interviewPackages: ExtendedPackage[] = [
     description: 'The ultimate interview preparation',
     interviews: 5,
     generatedPrice: 12,
-    tutorPrice: 210,
-    originalPrice: 270,
+    tutorPrice: 250,
+    originalPrice: 275,
     features: [
-      '5 sets of Prometheus-powered university-specific mock questions',
-      'Access to 24/7 business phone for medicine related questions',
-      'Premium booking and support',
-      'Strategy Session with coverage of ethical scenarios, common trick questions, and interview techniques'
+      '3 sets of Prometheus-powered university-specific mock questions',
+      '2 Background knowledge session for success at the interview',
+      'Mock interviews tailored to the universities you are applying to',
+      'Coverage of ethical scenarios, common trick questions, and general interview technique',
+      'Access to 24/7 business phone for medicine related questions'
     ],
     generatedMocks: {
       description: 'Ultimate AI-powered interview preparation system',

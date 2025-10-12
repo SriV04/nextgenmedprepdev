@@ -20,8 +20,8 @@ export default function HomePage() {
       
 
       {/* Services Overview Section */}
-      <section className="snap-start flex justify-center items-center ">
-        <div id="services-overview" className="max-w-6xl mx-auto w-full">
+      <section id="services-overview" className="snap-start flex justify-center items-center ">
+        <div className="max-w-6xl mx-auto w-full">
           <ComprehensiveServices />
         </div>
       </section>
