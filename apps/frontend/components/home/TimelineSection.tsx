@@ -112,7 +112,7 @@ const TimelineSection: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative max-w-4xl mx-auto px-4 py-16">
+    <div className="relative max-w-5xl mx-auto px-4 py-16">
       {/* Header */}
       <div className="text-center mb-16">
         <motion.h2
@@ -136,10 +136,10 @@ const TimelineSection: React.FC = () => {
       </div>
 
       {/* Vertical Timeline Path - Hidden on mobile */}
-      <div className="absolute left-6 md:left-16 top-48 bottom-0 w-1 bg-gradient-to-b from-sky-400 via-blue-500 to-purple-600 opacity-30 hidden md:block"></div>
+      <div className="absolute left-0 md:left-4 top-48 bottom-0 w-1 bg-gradient-to-b from-sky-400 via-blue-500 to-purple-600 opacity-30 hidden md:block"></div>
 
       {/* Timeline Steps */}
-      <div className="relative space-y-16">
+      <div className="relative space-y-24">
         {medicineAppSteps.map((step, idx) => {
           const isEven = idx % 2 === 0;
           
@@ -162,8 +162,8 @@ const TimelineSection: React.FC = () => {
               }}
             >
               {/* Timeline Node - Hidden on mobile */}
-              <div className={`absolute left-6 md:left-16 transform -translate-x-1/2 z-10 hidden md:block ${
-                isEven ? 'md:relative md:left-0 md:transform-none md:mr-10' : 'md:relative md:left-0 md:transform-none md:ml-8'
+              <div className={`absolute left-0 md:left-4 transform -translate-x-1/2 z-10 hidden md:block ${
+                isEven ? 'md:relative md:left-0 md:transform-none md:mr-8' : 'md:relative md:left-0 md:transform-none md:ml-8'
               }`}>
                 <motion.div
                   className="relative"
@@ -176,6 +176,7 @@ const TimelineSection: React.FC = () => {
                     type: 'spring',
                     stiffness: 150
                   }}
+                  whileHover={{ scale: 1.1 }}
                 >
                   {/* Outer Ring */}
                   <div className={timelineNodeStyles.outer}>
@@ -235,7 +236,7 @@ const TimelineSection: React.FC = () => {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.3, delay: idx * 0.1 + 0.1 }}
               >
-                <div className={`${timelineCardStyles.base} max-w-2xl ${
+                <div className={`${timelineCardStyles.base} max-w-3xl ${
                   idx === medicineAppSteps.length - 1 ? timelineCardStyles.final : ''
                 } ${isEven ? 'md:mr-auto' : 'md:ml-auto'}`}>
                   
