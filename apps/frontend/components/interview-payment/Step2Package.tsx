@@ -1,7 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion';
-import { packages, Package } from '../../app/interviews/payment/data/packages';
+import { ExtendedPackage, interviewPackages } from '../../app/interviews/data/interviewPackages';
+import GeneratedMockInfo from './GeneratedMockInfo';
+import { useState } from 'react';
 
 interface Step2PackageProps {
   serviceType: 'generated' | 'actual' | '';
@@ -10,6 +12,8 @@ interface Step2PackageProps {
 }
 
 export default function Step2Package({ serviceType, packageId, onPackageSelect }: Step2PackageProps) {
+  const [selectedInfoPackage, setSelectedInfoPackage] = useState<ExtendedPackage | null>(null);
+  
   if (!serviceType) return null;
 
   return (
@@ -31,13 +35,23 @@ export default function Step2Package({ serviceType, packageId, onPackageSelect }
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {packages.map((pkg) => (
+        {interviewPackages.map((pkg) => (
           <motion.button
             key={pkg.id}
-            onClick={() => onPackageSelect(pkg.id)}
+            onClick={() => {
+              onPackageSelect(pkg.id);
+              // Show package details if it's a generated mock
+              if (serviceType === 'generated') {
+                setSelectedInfoPackage(pkg as ExtendedPackage);
+              } else {
+                setSelectedInfoPackage(null);
+              }
+            }}
             className={`p-6 rounded-lg border-2 text-left transition-all feature-card relative ${
               packageId === pkg.id
-                ? 'border-indigo-500 bg-indigo-500/20 shadow-lg shadow-indigo-500/25'
+                ? serviceType === 'generated' 
+                  ? 'border-green-500 bg-green-500/20 shadow-lg shadow-green-500/25'
+                  : 'border-indigo-500 bg-indigo-500/20 shadow-lg shadow-indigo-500/25'
                 : 'border-gray-600 bg-black/40 hover:border-indigo-400 hover:bg-indigo-500/10'
             }`}
             whileHover={{ y: -4 }}
@@ -76,6 +90,11 @@ export default function Step2Package({ serviceType, packageId, onPackageSelect }
           </motion.button>
         ))}
       </div>
+      
+      {/* Show generated mock info only when a package is selected and service type is generated */}
+      {serviceType === 'generated' && packageId && selectedInfoPackage && (
+        <GeneratedMockInfo selectedPackage={selectedInfoPackage} />
+      )}
     </motion.div>
   );
 }

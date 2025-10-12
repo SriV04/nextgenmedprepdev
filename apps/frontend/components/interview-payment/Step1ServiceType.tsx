@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion';
+import { interviewPackages } from '../../app/interviews/data/interviewPackages';
 
 interface Step1ServiceTypeProps {
   serviceType: 'generated' | 'actual' | '';
@@ -39,13 +40,13 @@ export default function Step1ServiceType({ serviceType, onServiceTypeChange }: S
         >
           <h4 className="text-2xl font-semibold mb-4 text-green-400">🤖 Generated Mock Questions</h4>
           <ul className="space-y-3 text-gray-300 mb-6">
-            <li>• AI-powered question generation</li>
+            <li>• AI-powered Prometheus question generation</li>
             <li>• Instant access to practice materials</li>
             <li>• University-specific questions</li>
             <li>• Self-paced preparation</li>
-            <li>• Prometheus question bank access</li>
+            <li>• Detailed model answers included</li>
           </ul>
-          <div className="text-2xl font-bold text-green-400">From £7</div>
+          <div className="text-2xl font-bold text-green-400">From £{interviewPackages[0].generatedPrice}</div>
         </motion.button>
         
         <motion.button
@@ -66,7 +67,7 @@ export default function Step1ServiceType({ serviceType, onServiceTypeChange }: S
             <li>• Current medical students as tutors</li>
             <li>• Interactive interview simulation</li>
           </ul>
-          <div className="text-2xl font-bold text-indigo-400">From £45</div>
+          <div className="text-2xl font-bold text-indigo-400">From £{interviewPackages[0].tutorPrice}</div>
         </motion.button>
       </div>
     </motion.div>

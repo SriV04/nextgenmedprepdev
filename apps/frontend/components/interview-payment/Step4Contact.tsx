@@ -2,14 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
-import { ContactDetails, Package } from '../../app/interviews/payment/hooks/usePaymentForm';
+import { ContactDetails } from '../../app/interviews/payment/hooks/usePaymentForm';
+import { ExtendedPackage } from '../../app/interviews/data/interviewPackages';
 import { universities } from '../../app/interviews/payment/data/packages';
 
 interface Step4ContactProps {
   contact: ContactDetails;
   personalStatement: File | null;
   additionalNotes: string;
-  selectedPackage: Package | null;
+  selectedPackage: ExtendedPackage | null;
   serviceType: 'generated' | 'actual' | '';
   selectedUniversities: string[];
   calculatePrice: () => number;

@@ -65,7 +65,7 @@ const Hero: React.FC = () => {
             Start Your Journey Today
           </Link>
           <Link 
-            href="#services-section"
+            href="#services-overview"
             className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300"
           >
             Already on your journey?

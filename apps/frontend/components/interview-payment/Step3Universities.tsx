@@ -3,11 +3,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { universities } from '../../app/interviews/payment/data/packages';
-import { Package } from '../../app/interviews/payment/hooks/usePaymentForm';
+import { ExtendedPackage } from '../../app/interviews/data/interviewPackages';
 
 interface Step3UniversitiesProps {
   selectedUniversities: string[];
-  selectedPackage: Package | null;
+  selectedPackage: ExtendedPackage | null;
   onUniversityToggle: (universityId: string) => void;
   onProceedToNext: () => void;
 }

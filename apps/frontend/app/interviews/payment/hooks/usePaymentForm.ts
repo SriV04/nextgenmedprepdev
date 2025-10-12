@@ -1,25 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { packages } from '../data/packages';
+import { ExtendedPackage, interviewPackages } from '../../data/interviewPackages';
 
 export interface ContactDetails {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-}
-
-export interface Package {
-  id: string;
-  name: string;
-  description: string;
-  interviews: number;
-  generatedPrice: number;
-  tutorPrice: number;
-  originalPrice?: number;
-  popular?: boolean;
-  features: string[];
 }
 
 export function usePaymentForm() {
@@ -35,7 +23,7 @@ export function usePaymentForm() {
   });
   const [personalStatement, setPersonalStatement] = useState<File | null>(null);
   const [additionalNotes, setAdditionalNotes] = useState('');
-  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<ExtendedPackage | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
 
   // Initialize from URL parameters safely (idempotent)
@@ -45,7 +33,7 @@ export function usePaymentForm() {
     const service = urlParams.get('service') as 'generated' | 'actual' | null;
 
     if (pkgId && service) {
-      const pkg = packages.find(p => p.id === pkgId);
+      const pkg = interviewPackages.find(p => p.id === pkgId);
       if (pkg) {
         // Only set if not already set (prevents overwrites)
         setServiceType(prev => prev || service);
@@ -79,7 +67,7 @@ export function usePaymentForm() {
   };
 
   const handlePackageSelection = (newPackageId: string) => {
-    const pkg = packages.find(p => p.id === newPackageId);
+    const pkg = interviewPackages.find(p => p.id === newPackageId);
     setPackageId(newPackageId);
     setSelectedPackage(pkg || null);
     setCurrentStep(3);

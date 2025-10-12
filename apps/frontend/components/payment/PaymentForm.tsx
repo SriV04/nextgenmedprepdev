@@ -132,122 +132,100 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-8 border border-gray-100">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 backdrop-blur-sm dark:backdrop-blur-lg transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
-        <CreditCardIcon className="w-6 h-6 text-blue-600" />
-        <h2 className="text-2xl font-bold text-gray-900">
-          Payment Details
-        </h2>
+        <div className="p-2 rounded-full bg-blue-100 dark:bg-indigo-500/20">
+          <CreditCardIcon className="w-6 h-6 text-blue-600 dark:text-indigo-400" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Payment Details</h2>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="text-red-800 font-medium">Payment Error</div>
-          <div className="text-red-700 text-sm mt-1">{error}</div>
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30 rounded-lg shadow-sm">
+          <div className="text-red-800 dark:text-red-200 font-medium">Payment Error</div>
+          <div className="text-red-700 dark:text-red-300 text-sm mt-1">{error}</div>
         </div>
       )}
 
       {selectedPackage && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-indigo-900/20 border border-blue-200 dark:border-indigo-500/30 rounded-lg shadow-sm">
           <div className="flex justify-between items-center">
             <div>
-              <div className="font-semibold text-gray-900">{selectedPackage.name}</div>
-              <div className="text-sm text-gray-600">{selectedPackage.description}</div>
+              <div className="font-semibold text-gray-900 dark:text-white">{selectedPackage.name}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{selectedPackage.description}</div>
             </div>
-            <div className="text-2xl font-bold text-blue-600">
-              £{selectedPackage.price}
-            </div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-indigo-400">£{selectedPackage.price}</div>
           </div>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="customer_email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="customer_email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Email Address *
           </label>
-          <input
-            type="email"
-            id="customer_email"
-            name="customer_email"
-            value={formData.customer_email}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder="your@email.com"
-            required
-          />
-          <p className="text-xs text-gray-500 mt-1">
+          <div className="relative">
+            <input
+              type="email"
+              id="customer_email"
+              name="customer_email"
+              value={formData.customer_email}
+              onChange={handleInputChange}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-500 focus:border-transparent shadow-sm transition-all duration-200"
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 ml-1">
             You'll receive payment confirmation and service details at this email
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-              Amount *
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">£</span>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                step="0.01"
-                min="0"
-                value={formData.amount || ''}
-                onChange={handleInputChange}
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                required
-                readOnly={!!selectedPackage}
-              />
+        <div className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
+                Amount
+              </label>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                £{formData.amount}
+              </div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {formData.currency} - British Pound
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
+                Service Description
+              </label>
+              <div className="text-gray-900 dark:text-gray-300 font-medium">
+                {formData.description}
+              </div>
             </div>
           </div>
-
-          <div>
-            <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
-              Currency *
-            </label>
-            <select
-              id="currency"
-              name="currency"
-              value={formData.currency}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              required
-            >
-              <option value="GBP">GBP - British Pound</option>
-              <option value="USD">USD - US Dollar</option>
-              <option value="EUR">EUR - Euro</option>
-            </select>
-          </div>
         </div>
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-            Service Description *
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={3}
-            value={formData.description}
-            onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder="Brief description of the service you're purchasing"
-            required
-            readOnly={!!selectedPackage}
-          />
-        </div>
-
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-            <ShieldCheckIcon className="w-5 h-5 text-green-500" />
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-lg border border-blue-100 dark:border-blue-800/30 shadow-sm">
+          <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-blue-200 mb-3">
+            <div className="p-1.5 bg-green-100 dark:bg-green-500/20 rounded-full">
+              <ShieldCheckIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
+            </div>
             <span className="font-medium">Secure Payment</span>
           </div>
-          <ul className="text-xs text-gray-500 space-y-1">
-            <li>• Payments processed securely by Stripe</li>
-            <li>• Your payment information is encrypted and protected</li>
-            <li>• You'll receive confirmation via email once payment is complete</li>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 ml-1">
+            <li className="flex items-center gap-2">
+              <span className="text-green-500 dark:text-green-400 text-xs">✓</span>
+              <span>Payments processed securely by Stripe</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500 dark:text-green-400 text-xs">✓</span>
+              <span>Your payment information is encrypted and protected</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-green-500 dark:text-green-400 text-xs">✓</span>
+              <span>You'll receive confirmation via email once payment is complete</span>
+            </li>
           </ul>
         </div>
 
@@ -256,8 +234,8 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
           disabled={loading || !formData.customer_email || formData.amount <= 0}
           className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 ${
             loading || !formData.customer_email || formData.amount <= 0
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
+              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-600 dark:to-purple-600 text-white hover:from-blue-700 hover:to-indigo-700 dark:hover:from-indigo-700 dark:hover:to-purple-700 shadow-lg hover:shadow-xl shadow-blue-500/20 dark:shadow-indigo-500/20 hover:shadow-blue-500/30 dark:hover:shadow-indigo-500/30 transform hover:-translate-y-1'
           }`}
         >
           {loading ? (
@@ -266,13 +244,21 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
               <span>Processing Payment...</span>
             </div>
           ) : (
-            <>
-              <span>Pay £{formData.amount}</span>
+            <div className="flex flex-col items-center">
+              <span className="flex items-center gap-2">
+                <span>Pay £{formData.amount}</span>
+                {/* Add a small credit card icon */}
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 12.5V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16V15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
               <span className="block text-sm opacity-90 mt-1">Proceed to Secure Checkout</span>
-            </>
+            </div>
           )}
         </button>
       </form>
     </div>
+
   );
 }

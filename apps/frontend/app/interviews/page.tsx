@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon, BookOpenIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
+import { interviewPackages } from './data/interviewPackages';
+
 export default function InterviewsPage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -222,38 +224,30 @@ export default function InterviewsPage() {
             {/* Essentials Package */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
               <div className="bg-blue-500 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Tailored Mock Interview – Essentials</h3>
-                <p className="opacity-90">Perfect for individual interview practice</p>
+                <h3 className="text-2xl font-bold mb-2">{interviewPackages[0].name}</h3>
+                <p className="opacity-90">{interviewPackages[0].description}</p>
               </div>
               <div className="p-6">
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>A mock interview tailored to the university you are applying to</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Using our <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link> Question bank which is updated daily with the current interview questions and answers</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Ensuring that your mock interview is as realistic as possible</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>All of our tutors are current medical students with at least 3+ offers</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>We will aim to match you with a tutor who has sat the interview you are sitting</span>
-                  </li>
+                  {interviewPackages[0].features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>{feature.includes('Prometheus') ? (
+                        <>
+                          {feature.split('Prometheus')[0]}
+                          <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
+                          {feature.split('Prometheus')[1]}
+                        </>
+                      ) : feature}</span>
+                    </li>
+                  ))}
                 </ul>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£45</span>
+                    <span className="text-3xl font-bold text-gray-900">£{interviewPackages[0].tutorPrice}</span>
                     <span className="text-sm text-gray-500">per interview</span>
                   </div>
-                  <Link href="/interviews/payment?service=actual&package=essentials" className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
+                  <Link href={`/interviews/payment?service=actual&package=${interviewPackages[0].id}`} className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -270,38 +264,31 @@ export default function InterviewsPage() {
               </div>
 
               <div className="bg-purple-600 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Core Interview Preparation</h3>
-                <p className="opacity-90">Comprehensive interview training</p>
+                <h3 className="text-2xl font-bold mb-2">{interviewPackages[1].name}</h3>
+                <p className="opacity-90">{interviewPackages[1].description}</p>
               </div>
               <div className="p-6">
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>3 University-specific mock interviews generated with our <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link> Question bank</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>+3 new <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link> mocks to do in your own time <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium">FREE</span></span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Mock interviews tailored to the universities you are applying to</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Strategy Session – all the background knowledge for success at the interview</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Coverage of ethical scenarios, common trick questions, and general interview technique</span>
-                  </li>
+                  {interviewPackages[1].features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>{feature.includes('Prometheus') ? (
+                        <>
+                          {feature.split('Prometheus')[0]}
+                          <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
+                          {feature.split('Prometheus')[1]}
+                        </>
+                      ) : feature}</span>
+                      {idx === 1 && <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium ml-2">FREE</span>}
+                    </li>
+                  ))}
                 </ul>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£130</span>
+                    <span className="text-3xl font-bold text-gray-900">£{interviewPackages[1].tutorPrice}</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
-                  <Link href="/interviews/payment?service=actual&package=core" className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
+                  <Link href={`/interviews/payment?service=actual&package=${interviewPackages[1].id}`} className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -312,38 +299,31 @@ export default function InterviewsPage() {
             {/* Premium Package */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
               <div className="bg-indigo-600 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">Premium Interview Intensive</h3>
-                <p className="opacity-90">The ultimate interview preparation</p>
+                <h3 className="text-2xl font-bold mb-2">{interviewPackages[2].name}</h3>
+                <p className="opacity-90">{interviewPackages[2].description}</p>
               </div>
               <div className="p-6">
                 <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>5 University-specific mock interviews generated with our Prometheus Question bank</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>+5 Prometheus mocks to do in your own time (FREE)</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Access to 24/7 business phone for medicine related questions</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Premium booking and support</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-500 mr-2 mt-1">✓</span>
-                    <span>Strategy Session with coverage of ethical scenarios, common trick questions, and interview techniques</span>
-                  </li>
+                  {interviewPackages[2].features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <span className="text-green-500 mr-2 mt-1">✓</span>
+                      <span>{feature.includes('Prometheus') ? (
+                        <>
+                          {feature.split('Prometheus')[0]}
+                          <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
+                          {feature.split('Prometheus')[1]}
+                        </>
+                      ) : feature}</span>
+                      {idx === 1 && <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium ml-2">FREE</span>}
+                    </li>
+                  ))}
                 </ul>
                 <div className="border-t pt-6 mt-4">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£210</span>
+                    <span className="text-3xl font-bold text-gray-900">£{interviewPackages[2].tutorPrice}</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
-                  <Link href="/interviews/payment?service=actual&package=premium" className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
+                  <Link href={`/interviews/payment?service=actual&package=${interviewPackages[2].id}`} className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
