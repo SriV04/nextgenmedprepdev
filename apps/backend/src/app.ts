@@ -30,7 +30,8 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || 'http://localhost:3000',
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://www.nextgenmedprep.com'
+  'https://www.nextgenmedprep.com',
+  'https://nextgenmedprep.com'
 ];
 
 app.use(cors({
@@ -39,9 +40,11 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
+      console.log(`CORS allowed request from origin: ${origin}`);
       callback(null, true);
     } else {
       console.warn(`CORS blocked request from origin: ${origin}`);
+      console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
