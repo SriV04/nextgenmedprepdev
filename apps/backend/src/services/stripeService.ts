@@ -339,11 +339,13 @@ export class StripeService {
       } else {
         console.log(`One-time payment completed: ${session.payment_intent}`);
         
-        // For bookings (interview, UCAT, or personal statement), get the payment intent and handle it
+        // For bookings (interview, UCAT, personal statement, career consultation, or event), get the payment intent and handle it
         if (session.payment_intent && (
           session.metadata?.type === 'interview_booking' || 
           session.metadata?.type === 'ucat_tutoring' ||
-          session.metadata?.type === 'personal_statement_review'
+          session.metadata?.type === 'personal_statement_review' ||
+          session.metadata?.type === 'career_consultation' ||
+          session.metadata?.type === 'event_booking'
         )) {
           console.log('Processing payment for type:', session.metadata?.type);
           
@@ -878,16 +880,13 @@ export class StripeService {
       // 4. Send confirmation email to customer
       console.log('Step 4: Sending confirmation email...');
       try {
-        // You need to create this method in emailService
-        await emailService.sendBookingConfirmationEmail(customerEmail, {
+        // Use specialized career consultation email template
+        await emailService.sendCareerConsultationConfirmationEmail(customerEmail, {
           id: booking.id,
-          packageType: 'career_consultation',
-          serviceType: '30min',
-          universities: [], // Not applicable for career consultations
           amount,
-          startTime: startTime.toISOString(),
+          userName: customerName || 'there',
           preferredDate: preferredDate || undefined,
-          userName: customerName
+          startTime: startTime.toISOString()
         });
         console.log('Sent career consultation confirmation email to:', customerEmail);
       } catch (emailError) {
@@ -1028,14 +1027,13 @@ export class StripeService {
       // 4. Send confirmation email to customer
       console.log('Step 4: Sending confirmation email...');
       try {
-        // We can reuse the booking confirmation email with some tweaks
-        await emailService.sendBookingConfirmationEmail(customerEmail, {
+        // Use specialized event booking confirmation email
+        await emailService.sendEventBookingConfirmationEmail(customerEmail, {
           id: booking.id,
-          packageType: 'event',
-          serviceType: eventName,
-          universities: [], // Not applicable for events
           amount,
-          userName: customerName
+          userName: customerName || 'there',
+          eventName: eventName,
+          numberOfTickets
         });
         console.log('Sent event booking confirmation email to:', customerEmail);
       } catch (emailError) {
