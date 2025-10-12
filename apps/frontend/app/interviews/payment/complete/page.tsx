@@ -198,21 +198,35 @@ function CompletePurchaseContent() {
     currency: string;
     description: string;
   } | null => {
-    const university = getUniversityName();
-    const serviceTypeLabel = bookingDetails.serviceType === 'generated' ? 'Generated Questions' : 'Live Tutor Sessions';
+    // Get fresh values directly from URL params instead of stale state
+    const universitiesParam = searchParams.get('universities') || '';
+    const selectedUniversityIds = universitiesParam ? universitiesParam.split(',') : [];
+    const primaryUniversity = selectedUniversityIds[0] || '';
     
-    // Parse price with fallback
-    const price = parseFloat(bookingDetails.price) || 0;
+    const serviceTypeParam = searchParams.get('serviceType') || 'generated';
+    const mappedServiceType = serviceTypeParam === 'actual' ? 'tutor' : serviceTypeParam;
+    const packageIdParam = searchParams.get('packageId') || '';
+    const priceParam = searchParams.get('price') || '0';
+    const price = parseFloat(priceParam) || 0;
     
-    console.log('Getting selected package:', {
-      bookingDetails,
-      parsedPrice: price,
-      priceString: bookingDetails.price
+    const universityNames = universitiesParam ? universitiesParam.split(',').map(id => {
+      const uni = universities.find(uni => uni.id === id);
+      return uni?.name || id;
+    }).join(', ') : 'Selected University';
+    
+    const serviceTypeLabel = mappedServiceType === 'generated' ? 'Generated Questions' : 'Live Tutor Sessions';
+    
+    console.log('Getting selected package (from URL):', {
+      primaryUniversity,
+      mappedServiceType,
+      packageIdParam,
+      price,
+      priceParam
     });
 
-    // If no booking details available, return a default package
-    if (!bookingDetails.university || !bookingDetails.serviceType) {
-      console.log('Missing booking details, returning default package');
+    // If no parameters available, return a default package
+    if (!packageIdParam) {
+      console.log('Missing packageId, returning default package');
       return {
         id: 'default_interview_session',
         name: 'Interview Preparation Session',
@@ -223,33 +237,31 @@ function CompletePurchaseContent() {
     }
     
     // Handle package selection
-    if (bookingDetails.packageType === 'package' && bookingDetails.packageId) {
-      const pkg = packages.find(p => p.id === bookingDetails.packageId);
-      if (pkg) {
-        // Use the price from URL params, or calculate based on service type
-        const correctPrice = price > 0 ? price : (
-          bookingDetails.serviceType === 'generated' ? pkg.generatedPrice : pkg.tutorPrice
-        );
-        
-        return {
-          id: `interview_${pkg.id}_${bookingDetails.serviceType}_${bookingDetails.university}`,
-          name: `${pkg.name} - ${serviceTypeLabel}`,
-          price: correctPrice,
-          currency: 'GBP',
-          description: `${pkg.name} - ${serviceTypeLabel} for ${university} interview preparation. ${pkg.interviews} session${pkg.interviews > 1 ? 's' : ''} included.`
-        };
-      }
+    const pkg = packages.find(p => p.id === packageIdParam);
+    if (pkg) {
+      // Use the price from URL params, or calculate based on service type
+      const correctPrice = price > 0 ? price : (
+        mappedServiceType === 'generated' ? pkg.generatedPrice : pkg.tutorPrice
+      );
+      
+      return {
+        id: `interview_${pkg.id}_${mappedServiceType}_${primaryUniversity}`,
+        name: `${pkg.name} - ${serviceTypeLabel}`,
+        price: correctPrice,
+        currency: 'GBP',
+        description: `${pkg.name} - ${serviceTypeLabel} for ${universityNames} interview preparation. ${pkg.interviews} session${pkg.interviews > 1 ? 's' : ''} included.`
+      };
     }
     
     // Fallback to individual session format
-    console.log('Individual session or fallback, returning package');
+    console.log('Package not found, returning fallback');
     
     return {
-      id: `interview_${bookingDetails.serviceType}_${bookingDetails.university}`,
+      id: `interview_${mappedServiceType}_${primaryUniversity}`,
       name: `Interview Preparation - ${serviceTypeLabel}`,
       price: price > 0 ? price : 45,
       currency: 'GBP',
-      description: `Interview preparation session for ${university}. ${serviceTypeLabel} format.`
+      description: `Interview preparation session for ${universityNames}. ${serviceTypeLabel} format.`
     };
   };
 
