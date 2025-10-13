@@ -16,7 +16,7 @@ type Star = {
 };
 
 export default function Starfield({
-  count = 140,
+  count = 60,
   className = '',
 }: {
   count?: number;

@@ -26,54 +26,30 @@
   background-position: center center;
 }
 
-/* Vault door spinner animation */
-.vault-spinner {
-  animation: spin 10s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Number counter animation */
-@keyframes countup {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-countup {
-  animation: countup 0.5s ease-out forwards;
-}
-
 /* Gradient text for special emphasis (indigo/purple/cyan) */
 .text-gradient-aurora {
-  background: linear-gradient(90deg, #67e8f9, #6366f1, #a78bfa);
+  background: linear-gradient(90deg, #67e8f9, #6366f1, #a78bfa, #ec4899);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
+  animation: gradient-shift 3s ease-in-out infinite;
 }
 
-/* Card hover effects */
-.feature-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
 }
 
-.feature-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.25), 
-              0 8px 10px -6px rgba(168, 85, 247, 0.15);
+/* Animated gradient background */
+.animate-gradient-shift {
+  animation: gradient-shift-bg 8s ease-in-out infinite;
+}
+
+@keyframes gradient-shift-bg {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
 }
 
 /* --- Starfield in hero --- */
@@ -153,20 +129,40 @@
 /* Neon glow text */
 .text-neon {
   text-shadow: 
-    0 0 5px currentColor,
     0 0 10px currentColor,
-    0 0 15px currentColor,
-    0 0 20px currentColor;
+    0 0 20px currentColor,
+    0 0 30px currentColor,
+    0 0 40px currentColor;
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+  0%, 100% { 
+    filter: brightness(1);
+    text-shadow: 
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      0 0 30px currentColor,
+      0 0 40px currentColor;
+  }
+  50% { 
+    filter: brightness(1.3);
+    text-shadow: 
+      0 0 15px currentColor,
+      0 0 30px currentColor,
+      0 0 45px currentColor,
+      0 0 60px currentColor;
+  }
 }
 
 /* Floating animation */
 @keyframes float-up-down {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-20px); }
 }
 
 .animate-float {
-  animation: float-up-down 3s ease-in-out infinite;
+  animation: float-up-down 6s ease-in-out infinite;
 }
 
 /* Pulse glow effect */
@@ -198,42 +194,30 @@
   animation: morph 8s ease-in-out infinite;
 }
 
-/* Data stream effect */
-@keyframes data-stream {
-  0% { transform: translateY(100vh); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(-100vh); opacity: 0; }
-}
-
-.animate-data-stream {
-  animation: data-stream 3s linear infinite;
-}
-
-/* Matrix-like background effect */
+/* Matrix-like background effect - OPTIMIZED */
 .matrix-bg {
   background-image: 
     linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px),
     linear-gradient(rgba(168, 85, 247, 0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-size: 30px 30px;
   animation: matrix-scroll 20s linear infinite;
 }
 
 @keyframes matrix-scroll {
   0% { background-position: 0 0; }
-  100% { background-position: 20px 20px; }
+  100% { background-position: 30px 30px; }
 }
 
-/* Cyber grid effect */
+/* Cyber grid effect - OPTIMIZED */
 .cyber-grid {
   background-image: 
-    radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.2) 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.2) 2px, transparent 2px);
-  background-size: 50px 50px;
-  background-position: 0 0, 25px 25px;
+    radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.15) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.15) 2px, transparent 2px);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
 }
 
-/* Neural network lines */
+/* Neural network lines - OPTIMIZED */
 .neural-lines::before {
   content: '';
   position: absolute;
@@ -242,13 +226,46 @@
   right: 0;
   bottom: 0;
   background-image: 
-    linear-gradient(90deg, transparent 49%, rgba(99, 102, 241, 0.1) 50%, transparent 51%),
-    linear-gradient(0deg, transparent 49%, rgba(168, 85, 247, 0.1) 50%, transparent 51%);
-  background-size: 60px 60px;
+    linear-gradient(90deg, transparent 49%, rgba(99, 102, 241, 0.08) 50%, transparent 51%),
+    linear-gradient(0deg, transparent 49%, rgba(168, 85, 247, 0.08) 50%, transparent 51%);
+  background-size: 80px 80px;
   animation: neural-pulse 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes neural-pulse {
   0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.8; }
+  50% { opacity: 0.7; }
+}
+
+/* Performance optimization: Reduce animations on slow devices */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* GPU acceleration for smooth animations */
+.animate-float,
+.animate-morph,
+.glow-aurora,
+.text-neon,
+.holographic {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide overflow during animations */
+body {
+  overflow-x: hidden;
 }
