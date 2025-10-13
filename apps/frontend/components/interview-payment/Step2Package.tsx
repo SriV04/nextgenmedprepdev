@@ -80,7 +80,10 @@ export default function Step2Package({ serviceType, packageId, onPackageSelect }
               )}
             </div>
             <ul className="space-y-2 text-gray-300 text-sm">
-              {pkg.features.map((feature, idx) => (
+              {(serviceType === 'generated' && pkg.generatedMocks 
+                ? pkg.generatedMocks.features 
+                : pkg.features
+              ).map((feature, idx) => (
                 <li key={idx} className="flex items-start">
                   <span className="text-green-400 mr-2">✓</span>
                   <span>{feature}</span>

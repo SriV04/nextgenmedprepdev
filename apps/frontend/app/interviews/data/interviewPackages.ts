@@ -64,8 +64,7 @@ export const interviewPackages: ExtendedPackage[] = [
     generatedMocks: {
       description: 'Complete AI-powered interview preparation package',
       features: [
-        '3 university-specific mock interview sets',
-        'Additional practice questions for each university',
+        '3 sets of Prometheus-powered university-specific mock questions',
         'Covers all common interview formats (MMI, panel, traditional)',
         'Ethical scenarios with detailed analysis',
         'Up to date question bank'
@@ -83,7 +82,7 @@ export const interviewPackages: ExtendedPackage[] = [
     id: 'premium',
     name: 'Premium Interview Intensive',
     description: 'The ultimate interview preparation',
-    interviews: 5,
+    interviews: 3,
     generatedPrice: 12,
     tutorPrice: 250,
     originalPrice: 275,
