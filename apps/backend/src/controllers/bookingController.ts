@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { stripeService } from '../services/stripeService';
 import supabaseService from '../services/supabaseService';
-import emailService from '../services/emailService';
 import { AppError, ApiResponse } from '@nextgenmedprep/common-types';
 import { z } from 'zod';
 
@@ -17,6 +16,7 @@ const eventBookingSchema = z.object({
   email: z.string().email('Valid email is required'),
   name: z.string().min(1, 'Name is required'),
   numberOfTickets: z.number().int().positive().default(1),
+  ticketPrice: z.number().positive('Ticket price must be positive'),
   eventId: z.string().optional(),
   eventName: z.string().optional(),
 });
@@ -107,9 +107,8 @@ export class BookingController {
       const validatedData = eventBookingSchema.parse(req.body);
       console.log('Validated data:', validatedData);
 
-      // Calculate total amount based on number of tickets
-      const ticketPrice = 20; // £20 per ticket
-      const totalAmount = ticketPrice * validatedData.numberOfTickets;
+      // Calculate total amount based on number of tickets and price from request
+      const totalAmount = validatedData.ticketPrice * validatedData.numberOfTickets;
 
       // Create Stripe payment session
       console.log('Creating Stripe payment session...');
@@ -124,7 +123,8 @@ export class BookingController {
           type: 'event_booking',
           event_id: validatedData.eventId || '',
           event_name: eventName,
-          number_of_tickets: validatedData.numberOfTickets.toString()
+          number_of_tickets: validatedData.numberOfTickets.toString(),
+          price_per_ticket: validatedData.ticketPrice.toString()
         }
       });
       console.log('Stripe payment session created:', {

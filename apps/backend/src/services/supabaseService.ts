@@ -480,7 +480,7 @@ class SupabaseService {
       throw new Error(`Failed to create booking: ${error.message}`);
     }
 
-    console.log('Successfully created booking:', data);
+    console.log('Successfully created booking:');
     return data;
   }
 

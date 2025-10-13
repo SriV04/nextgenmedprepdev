@@ -21,14 +21,14 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Isaac Butler-King',
     role: 'Co-founder',
-    bio: 'Isaac co-founded NextGen MedPrep with a vision to raise the standard of medical school preparation. As a medical student at the University of Glasgow, he has an outstanding academic record, placing in the top 1% every year. Isaac combines this proven excellence with first-hand insight into the demands of medicine to guide students towards success in their applications.',
+    bio: 'Isaac co-founded NextGen MedPrep with a vision to raise the standard of medical school preparation. As a 3rd year medical student, he has an outstanding academic record, placing in the top 1% every year. Isaac combines this proven excellence with first-hand insight into the demands of medicine to guide students towards success in their applications.',
     image: '/headshots/[NGMP] Isaac.png', // Replace with actual image when available
     section: 'founders'
   },
   {
     name: 'Dan Leach',
     role: 'Co-founder',
-    bio: 'Dan Leach is a medical student at the University of Glasgow and co-founder of NextGen MedPrep. Consistently ranking in the top 5% of his cohort and achieving straight A grades across every year of medical school, Dan has established himself as a high-performing student. Through Next Gen Med Prep, Dan brings this strong record of achievement to supporting aspiring medical and dental students .',
+    bio: 'Dan Leach is a 3rd year medical student and co-founder of NextGen MedPrep. Consistently ranking in the top 5% of his cohort and achieving straight A grades across every year of medical school, Dan has established himself as a high-performing student. Through Next Gen Med Prep, Dan brings this strong record of achievement to supporting aspiring medical and dental students .',
     image: '/headshots/[NGMP] Dan.png', 
     section: 'founders'
   },

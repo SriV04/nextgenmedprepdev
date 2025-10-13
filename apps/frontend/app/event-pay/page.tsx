@@ -1,19 +1,42 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon, CalendarIcon, UserGroupIcon, TicketIcon } from '@heroicons/react/24/outline';
 import PaymentForm from '../../components/payment/PaymentForm';
 
 export default function EventPaymentPage() {
+  const searchParams = useSearchParams();
   const [numberOfTickets, setNumberOfTickets] = useState(1);
+  const [eventDetails, setEventDetails] = useState({
+    id: '',
+    name: 'Medical Event Ticket',
+    date: '',
+    price: 20
+  });
+
+  useEffect(() => {
+    // Get event details from URL parameters
+    const eventId = searchParams.get('eventId') || '';
+    const eventName = searchParams.get('event') || 'Medical Event Ticket';
+    const eventDate = searchParams.get('date') || '';
+    const eventPrice = parseInt(searchParams.get('price') || '15');
+    
+    setEventDetails({
+      id: eventId,
+      name: eventName,
+      date: eventDate,
+      price: eventPrice
+    });
+  }, [searchParams]);
 
   const eventPackage = {
     id: 'event_booking',
-    name: 'Medical Event Ticket',
-    price: 20 * numberOfTickets,
+    name: eventDetails.name,
+    price: eventDetails.price * numberOfTickets,
     currency: 'GBP',
-    description: `Entry ticket${numberOfTickets > 1 ? 's' : ''} for upcoming medical education event. Access to all sessions and materials.`
+    description: `Entry ticket${numberOfTickets > 1 ? 's' : ''} for ${eventDetails.name}. Access to all sessions and materials.`
   };
 
   const handlePaymentSuccess = (data: any) => {
@@ -33,6 +56,17 @@ export default function EventPaymentPage() {
     console.error('Payment error:', error);
   };
 
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -47,8 +81,10 @@ export default function EventPaymentPage() {
                 <CalendarIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Medical Event</h1>
-                <p className="text-gray-600">Secure your place at our upcoming event</p>
+                <h1 className="text-2xl font-bold text-gray-900">{eventDetails.name}</h1>
+                <p className="text-gray-600">
+                  {eventDetails.date ? formatDate(eventDetails.date) : 'Secure your place at our upcoming event'}
+                </p>
               </div>
             </div>
           </div>
@@ -60,7 +96,7 @@ export default function EventPaymentPage() {
           {/* Event Overview */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Medical Education Event
+              {eventDetails.name}
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Join us for an informative event designed to help medical students succeed in their education and career journey.
@@ -96,11 +132,11 @@ export default function EventPaymentPage() {
           <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 mb-10">
             <div className="flex justify-between items-start mb-6">
               <h3 className="text-xl font-bold text-gray-900">Event Ticket</h3>
-              <div className="text-3xl font-bold text-blue-600">£20</div>
+              <div className="text-3xl font-bold text-blue-600">£{eventDetails.price}</div>
             </div>
             
             <p className="text-gray-700 mb-6">
-              Secure your place at our upcoming medical education event featuring expert speakers, 
+              Secure your place at {eventDetails.name} featuring expert speakers, 
               interactive workshops, and valuable networking opportunities.
             </p>
             
@@ -157,7 +193,7 @@ export default function EventPaymentPage() {
                   +
                 </button>
                 <span className="text-gray-600 ml-2">
-                  (Total: £{20 * numberOfTickets})
+                  (Total: £{eventDetails.price * numberOfTickets})
                 </span>
               </div>
             </div>
@@ -169,8 +205,11 @@ export default function EventPaymentPage() {
               initialData={{
                 metadata: {
                   type: 'event_booking',
-                  event_name: 'Medical Education Event',
-                  number_of_tickets: numberOfTickets.toString()
+                  event_id: eventDetails.id,
+                  event_name: eventDetails.name,
+                  event_date: eventDetails.date,
+                  number_of_tickets: numberOfTickets.toString(),
+                  price_per_ticket: eventDetails.price.toString()
                 }
               }}
             />

@@ -15,7 +15,7 @@ const Hero: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-screen relative min-h-screen flex flex-col items-center justify-between text-white overflow-hidden -mx-4 py-12">
+    <div className="w-screen relative min-h-screen flex flex-col items-center justify-between text-white overflow-hidden -mx-4 py-6">
       {/* Animated gradient background */}
        <div className="absolute inset-0 bg-gradient-to-b from-[#050814] via-[#0a0e27] to-[#050814]"></div>
 
@@ -26,7 +26,7 @@ const Hero: React.FC = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.4)_100%)]"></div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-12 w-full max-w-7xl mx-auto">
+      <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-6 w-full max-w-7xl mx-auto">
         {/* Trust indicator */}
         <div className="mb-10 flex items-center gap-2 bg-white/95 rounded-full px-5 py-2.5 shadow-2xl border border-yellow-200/50 backdrop-blur-sm z-20">
           <div className="flex">
@@ -115,15 +115,20 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Final CTA */}
-        <p className="text-base font-semibold text-yellow-400 tracking-wide">
-          Take the first step toward earning your glubs.
+        <p className="text-base font-semibold text-blue-400 tracking-wide">
+          Take the first step toward earning your scrubs.
         </p>
       </div>
 
       {/* ⬇️ Chevron */}
       <div className="relative z-10 pb-8">
-        <a
-          href="#timeline-section"
+        <button
+          onClick={() => {
+            const timelineSection = document.getElementById('timeline-section');
+            if (timelineSection) {
+              timelineSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
           className="flex flex-col items-center cursor-pointer hover:opacity-75 transition-opacity duration-300"
           aria-label="Scroll to timeline section"
         >
@@ -139,7 +144,7 @@ const Hero: React.FC = () => {
           >
             <path d="M19 9l-7 7-7-7"></path>
           </svg>
-        </a>
+        </button>
       </div>
     </div>
   );

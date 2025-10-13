@@ -3,18 +3,6 @@
 import { useState } from 'react';
 import { ShieldCheckIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 
-interface PaymentFormData {
-  amount: number;
-  currency: string;
-  description: string;
-  customer_email: string;
-  customer_name?: string;
-  return_url?: string;
-  metadata?: {
-    [key: string]: string;
-  };
-}
-
 interface PaymentResponse {
   success: boolean;
   data?: {
@@ -45,13 +33,10 @@ interface PaymentFormProps {
 }
 
 export default function PaymentForm({ selectedPackage, initialData, onSuccess, onError }: PaymentFormProps) {
-  const [formData, setFormData] = useState<PaymentFormData>({
-    amount: selectedPackage?.price || 0,
-    currency: selectedPackage?.currency || 'GBP',
-    description: selectedPackage?.description || '',
-    customer_email: initialData?.customer_email || '',
-    customer_name: initialData?.customer_name || '',
-    metadata: initialData?.metadata || {}
+  // Only track user-entered data
+  const [customerData, setCustomerData] = useState({
+    email: initialData?.customer_email || '',
+    name: initialData?.customer_name || '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -60,9 +45,9 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setCustomerData(prev => ({
       ...prev,
-      [name]: name === 'amount' ? parseFloat(value) || 0 : value
+      [name]: value
     }));
   };
 
@@ -70,13 +55,13 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
     e.preventDefault();
     
     // Validate required fields
-    if (!formData.customer_email) {
+    if (!customerData.email) {
       setError('Please enter a valid email address');
       return;
     }
     
-    if (formData.amount <= 0) {
-      setError('Please enter a valid amount');
+    if (!selectedPackage || selectedPackage.price <= 0) {
+      setError('Invalid package selected');
       return;
     }
     
@@ -91,8 +76,20 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          return_url: formData.return_url || `${window.location.origin}/payment/success`
+          // From selectedPackage
+          amount: selectedPackage.price,
+          currency: selectedPackage.currency,
+          description: selectedPackage.description,
+          // From user input
+          customer_email: customerData.email,
+          customer_name: customerData.name,
+          // Config
+          return_url: `${window.location.origin}/payment/success`,
+          metadata: {
+            package_id: selectedPackage.id,
+            package_name: selectedPackage.name,
+            ...initialData?.metadata
+          }
         }),
       });
 
@@ -168,8 +165,8 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
             <input
               type="email"
               id="customer_email"
-              name="customer_email"
-              value={formData.customer_email}
+              name="email"
+              value={customerData.email}
               onChange={handleInputChange}
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-500 focus:border-transparent shadow-sm transition-all duration-200"
               placeholder="your@email.com"
@@ -188,10 +185,10 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
                 Amount
               </label>
               <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                £{formData.amount}
+                £{selectedPackage.price}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {formData.currency} - British Pound
+                {selectedPackage.currency} - British Pound
               </div>
             </div>
 
@@ -200,7 +197,7 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
                 Service Description
               </label>
               <div className="text-gray-900 dark:text-gray-300 font-medium">
-                {formData.description}
+                {selectedPackage.description}
               </div>
             </div>
           </div>
@@ -231,9 +228,9 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
 
         <button
           type="submit"
-          disabled={loading || !formData.customer_email || formData.amount <= 0}
+          disabled={loading || !customerData.email || !selectedPackage || selectedPackage.price <= 0}
           className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 ${
-            loading || !formData.customer_email || formData.amount <= 0
+            loading || !customerData.email || !selectedPackage || selectedPackage.price <= 0
               ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               : 'bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-indigo-600 dark:to-purple-600 text-white hover:from-blue-700 hover:to-indigo-700 dark:hover:from-indigo-700 dark:hover:to-purple-700 shadow-lg hover:shadow-xl shadow-blue-500/20 dark:shadow-indigo-500/20 hover:shadow-blue-500/30 dark:hover:shadow-indigo-500/30 transform hover:-translate-y-1'
           }`}
@@ -246,7 +243,7 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
           ) : (
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-2">
-                <span>Pay £{formData.amount}</span>
+                <span>Pay £{selectedPackage.price}</span>
                 {/* Add a small credit card icon */}
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 12.5V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16V15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

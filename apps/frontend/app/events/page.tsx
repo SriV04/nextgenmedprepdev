@@ -4,10 +4,37 @@ import EventsClientWrapper from '../../components/events/EventsClientWrapper';
 import '@/styles/globals.css';
 
 const ConferencesPage = () => {
-  // Sample upcoming events data - This would typically come from an API or database
-  const upcomingEvents = [
+  // Upcoming event
+  const upcomingEvent = {
+    id: "Interview_Background_Knowledge_Conference_2025_11_02",
+    title: "Interview Background Knowledge Conference",
+    date: "2025-11-02",
+    time: "10:00 AM - 11:00 AM",
+    type: "interview",
+    description: "Master the background knowledge needed for medical school interviews",
+    spots: 30,
+    price: 15,
+    details: "This comprehensive conference will equip you with all the essential background knowledge required to excel in your medical school interviews. From ethical frameworks to healthcare systems, we'll cover everything you need to know.",
+    benefits: [
+      "Master the Four Pillars of Medical Ethics",
+      "Understand NHS structure and current healthcare issues",
+      "Practice applying knowledge to real interview scenarios",
+      "Get live feedback from experienced interviewers", 
+      "£10 Voucher towards a mock interview!"
+    ],
+    whatToExpect: [
+      "Interactive session with real interview questions",
+      "Comprehensive background knowledge materials",
+      "Small group discussions and practice",
+      "Q&A with medical students and doctors",
+      "Downloadable resource pack"
+    ]
+  };
+
+  // Previous events data
+  const previousEvents = [
     {
-      id: 1,
+      id: 2,
       title: "Pathways to Medicine Conference",
       date: "2025-02-15",
       time: "10:00 AM - 2:00 PM",
@@ -16,7 +43,7 @@ const ConferencesPage = () => {
       spots: 25
     },
     {
-      id: 2,
+      id: 3,
       title: "UCAT Crash Course",
       date: "2025-02-22",
       time: "9:00 AM - 4:00 PM",
@@ -25,7 +52,7 @@ const ConferencesPage = () => {
       spots: 30
     },
     {
-      id: 3,
+      id: 4,
       title: "Ace the Interview Conference",
       date: "2025-03-08",
       time: "11:00 AM - 3:00 PM",
@@ -34,7 +61,7 @@ const ConferencesPage = () => {
       spots: 20
     },
     {
-      id: 4,
+      id: 5,
       title: "Pathways to Medicine Conference",
       date: "2025-03-22",
       time: "10:00 AM - 2:00 PM",
@@ -122,11 +149,121 @@ const ConferencesPage = () => {
         </div>
       </section>
 
-      {/* Main Content Section - Calendar and Events */}
-      <section id="events-main" className="py-16 px-4 bg-gray-50">
+      {/* Upcoming Event - Featured Section */}
+      <section className="py-16 px-4 bg-gradient-to-br from-purple-600 to-blue-600">
         <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-block bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              🎉 Upcoming Event
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              {upcomingEvent.title}
+            </h2>
+            <p className="text-xl text-white/90 mb-2">
+              📅 November 2nd, 2025 | ⏰ {upcomingEvent.time}
+            </p>
+            <p className="text-lg text-white/80">
+              {upcomingEvent.description}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Event Details */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">What You'll Learn</h3>
+              <p className="text-gray-600 mb-6">{upcomingEvent.details}</p>
+              
+              <h4 className="font-semibold text-gray-900 mb-3">Key Topics Covered:</h4>
+              <ul className="space-y-3 mb-6">
+                {upcomingEvent.benefits.map((benefit, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="text-purple-600 font-bold text-xl">✓</span>
+                    <span className="text-gray-700">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <h4 className="font-semibold text-purple-900 mb-2">What to Expect:</h4>
+                <ul className="space-y-2">
+                  {upcomingEvent.whatToExpect.map((item, index) => (
+                    <li key={index} className="text-purple-800 text-sm flex items-start gap-2">
+                      <span>•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Booking Card */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl flex flex-col">
+              <div className="flex-grow">
+                <div className="text-center mb-6">
+                  <div className="text-5xl font-bold text-purple-600 mb-2">£{upcomingEvent.price}</div>
+                  <p className="text-gray-600">per ticket</p>
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                  <p className="text-green-800 font-semibold text-center">
+                    ⚡ Only {upcomingEvent.spots} spots available!
+                  </p>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <span className="text-2xl">📅</span>
+                    <div>
+                      <p className="font-semibold">Date</p>
+                      <p className="text-sm text-gray-600">November 2nd, 2025</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <span className="text-2xl">⏰</span>
+                    <div>
+                      <p className="font-semibold">Time</p>
+                      <p className="text-sm text-gray-600">{upcomingEvent.time}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <span className="text-2xl">👥</span>
+                    <div>
+                      <p className="font-semibold">Format</p>
+                      <p className="text-sm text-gray-600">Interactive Workshop</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Link 
+                href={`/event-pay?eventId=${upcomingEvent.id}&event=${encodeURIComponent(upcomingEvent.title)}&date=${upcomingEvent.date}&price=${upcomingEvent.price}`}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:-translate-y-1 text-center"
+              >
+                Book Your Spot Now →
+              </Link>
+
+              <p className="text-center text-gray-500 text-sm mt-4">
+                Secure payment powered by Stripe
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Previous Events Section */}
+      <section id="previous-events" className="py-16 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Previous Events
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Explore our past conferences and workshops that have helped hundreds of students succeed in their medical school journey.
+            </p>
+          </div>
+
           <EventsClientWrapper 
-            events={upcomingEvents} 
+            events={previousEvents} 
             conferences={conferences} 
           />
         </div>
@@ -137,11 +274,14 @@ const ConferencesPage = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Accelerate Your Journey?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join our interactive conferences and get the guidance you need to succeed in medical school admissions
+            Don't miss out on the Interview Background Knowledge Conference - your key to interview success!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/get-started" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
-              Book Now
+            <Link 
+              href={`/event-pay?event=${encodeURIComponent(upcomingEvent.title)}&date=${upcomingEvent.date}&price=${upcomingEvent.price}`}
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
+            >
+              Book November 2nd Event
             </Link>
           </div>
         </div>

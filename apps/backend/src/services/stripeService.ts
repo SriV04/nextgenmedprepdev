@@ -327,10 +327,10 @@ export class StripeService {
    */
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
     console.log(`=== Checkout session completed: ${session.id} ===`);
-    console.log('Session mode:', session.mode);
-    console.log('Session metadata:', session.metadata);
-    console.log('Customer details:', session.customer_details);
-    console.log('Payment intent:', session.payment_intent);
+    // console.log('Session mode:', session.mode);
+    // console.log('Session metadata:', session.metadata);
+    // console.log('Customer details:', session.customer_details);
+    // console.log('Payment intent:', session.payment_intent);
     
     try {
       if (session.mode === 'subscription') {

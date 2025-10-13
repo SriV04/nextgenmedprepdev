@@ -815,10 +815,9 @@ Booking Details:
 - Booking ID: ${data.id}
 
 What happens next:
-• You'll receive a confirmation email with event details within 48 hours
-• Your ticket(s) will be emailed to you 1 week before the event
-• Please arrive 15 minutes before the event starts for registration
-• Bring your ticket (digital or printed) for entry
+• You'll receive a confirmation email with event details closer to the Event within 48 hours
+• Your will be able to join the event via zoom 
+• Bring your questions and energy!
 
 If you have any questions about the event, please contact us at contact@nextgenmedprep.com.
 
