@@ -69,7 +69,7 @@ export default function PrometheusPage() {
             <span className="text-indigo-400">PROMETHEUS</span> 
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-gray-300">
-            Navigate the global hub for medical and dental interview mastery, tailored to where you want to study
+            Your Ultimate Medical & Dental School Interview Question Bank
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <motion.button

@@ -137,7 +137,7 @@ export default function UCATPage() {
       </section>
 
       {/* UCAT Sections Overview */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">UCAT Test Sections</h2>
@@ -146,19 +146,45 @@ export default function UCATPage() {
             </p>
           </div>
           
-          <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {ucatSections.map((section, index) => (
-              <div key={index} className={`bg-white p-6 rounded-xl border-l-4 ${section.color} shadow-sm hover:shadow-md transition-all duration-300`}>
-                <div className="flex items-start gap-4 mb-4">
-                  <section.icon className="w-8 h-8 text-current flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{section.name}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{section.description}</p>
+              <div 
+                key={index} 
+                className={`bg-white p-8 rounded-2xl border-2 ${section.color} shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group`}
+              >
+                <div className="flex items-start gap-5 mb-6">
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${
+                    section.color.includes('blue') ? 'from-blue-50 to-blue-100' :
+                    section.color.includes('green') ? 'from-green-50 to-green-100' :
+                    section.color.includes('orange') ? 'from-orange-50 to-orange-100' :
+                    'from-indigo-50 to-indigo-100'
+                  } group-hover:scale-110 transition-transform duration-300`}>
+                    <section.icon className={`w-8 h-8 ${
+                      section.color.includes('blue') ? 'text-blue-600' :
+                      section.color.includes('green') ? 'text-green-600' :
+                      section.color.includes('orange') ? 'text-orange-600' :
+                      'text-indigo-600'
+                    } flex-shrink-0`} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {section.name}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {section.description}
+                    </p>
                   </div>
                 </div>
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>{section.duration}</span>
-                  <span>{section.questions}</span>
+                
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <ClockIcon className="w-5 h-5 text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-700">{section.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PuzzlePieceIcon className="w-5 h-5 text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-700">{section.questions}</span>
+                  </div>
                 </div>
               </div>
             ))}
