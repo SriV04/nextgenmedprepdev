@@ -61,7 +61,7 @@ const ExpandableEventsSidebar: React.FC<ExpandableEventsSidebarProps> = ({
   const filteredEvents = getEventsForSelectedDate();
   const displayTitle = selectedDate ? 
     `Events on ${formatDate(selectedDate)}` : 
-    'Upcoming Events';
+    'Past Events';
 
   const toggleExpand = (eventId: number) => {
     setExpandedEvent(expandedEvent === eventId ? null : eventId);
