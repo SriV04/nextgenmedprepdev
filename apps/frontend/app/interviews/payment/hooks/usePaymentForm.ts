@@ -31,6 +31,7 @@ export function usePaymentForm() {
     const urlParams = new URLSearchParams(window.location.search);
     const pkgId = urlParams.get('package');
     const service = urlParams.get('service') as 'generated' | 'actual' | null;
+    const university = urlParams.get('university');
 
     if (pkgId && service) {
       const pkg = interviewPackages.find(p => p.id === pkgId);
@@ -39,7 +40,14 @@ export function usePaymentForm() {
         setServiceType(prev => prev || service);
         setPackageId(prev => prev || pkgId);
         setSelectedPackage(pkg);
-        setCurrentStep(3);
+        
+        // If university is provided, pre-select it and go directly to step 4 (contact details)
+        if (university) {
+          setUniversities(prev => prev.length === 0 ? [university] : prev);
+          setCurrentStep(4); // Go directly to contact details
+        } else {
+          setCurrentStep(3); // Go to university selection
+        }
       }
     }
   }, []);

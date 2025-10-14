@@ -239,7 +239,7 @@ export default function UKMedicalSchoolsMap() {
   // Prevent hydration mismatch by only rendering on client
   if (!mounted) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4">
         <div className="relative max-w-md mx-auto px-4 sm:px-0">
           <div className="relative">
             <div className="w-full px-4 py-3 pl-12 bg-black/50 border border-indigo-500/30 rounded-lg text-white placeholder-gray-400 animate-pulse">
@@ -247,14 +247,14 @@ export default function UKMedicalSchoolsMap() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-8 items-start">
           <div className="relative">
-            <div className="w-full h-full min-h-[540px] bg-black/20 animate-pulse rounded-lg flex items-center justify-center">
+            <div className="w-full h-full min-h-[440px] bg-black/20 animate-pulse rounded-lg flex items-center justify-center">
               <span className="text-gray-400">Loading map...</span>
             </div>
           </div>
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-8 rounded-lg border border-indigo-500/30 animate-pulse">
+          <div className="space-y-4">
+            <div className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-6 rounded-lg border border-indigo-500/30 animate-pulse">
               <div className="h-8 bg-indigo-400/20 rounded mb-4"></div>
               <div className="h-20 bg-gray-700/20 rounded mb-6"></div>
             </div>
@@ -265,7 +265,7 @@ export default function UKMedicalSchoolsMap() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Search Bar */}
       <div className="relative max-w-md mx-auto px-4 sm:px-0">
         <div className="relative">
@@ -380,7 +380,7 @@ export default function UKMedicalSchoolsMap() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-12 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-8 items-start">
       <div className="relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.92 }}
@@ -390,7 +390,7 @@ export default function UKMedicalSchoolsMap() {
           className="relative h-full"
           style={{ filter: 'drop-shadow(0 10px 20px rgba(79, 70, 229, 0.3))' }}
         >
-          <div className="w-full h-full min-h-[540px]">
+          <div className="w-full h-full min-h-[440px]">
             <ComposableMap
               projection="geoMercator"
               projectionConfig={{
@@ -488,11 +488,11 @@ export default function UKMedicalSchoolsMap() {
         initial={{ opacity: 0, x: 60 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
-        className="space-y-6"
+        className="space-y-4"
       >
-        <div className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-8 rounded-lg border border-indigo-500/30">
+        <div className="bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-6 rounded-lg border border-indigo-500/30">
           <motion.h3
-            className="text-3xl font-bold mb-2 text-indigo-400"
+            className="text-2xl font-bold mb-2 text-indigo-400"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -501,7 +501,7 @@ export default function UKMedicalSchoolsMap() {
           </motion.h3>
 
           <motion.p
-            className="text-gray-300 mb-6 text-lg leading-relaxed"
+            className="text-gray-300 mb-4 text-base leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
@@ -509,14 +509,14 @@ export default function UKMedicalSchoolsMap() {
             {selectedSchool.description}
           </motion.p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-              <h4 className="text-lg font-semibold text-purple-300 mb-2">Established</h4>
+              <h4 className="text-base font-semibold text-purple-300 mb-1">Established</h4>
               <p className="text-gray-300">{selectedSchool.establishedYear}</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-              <h4 className="text-lg font-semibold text-purple-300 mb-2">Specialties</h4>
+              <h4 className="text-base font-semibold text-purple-300 mb-1">Specialties</h4>
               <div className="flex flex-wrap gap-2">
                 {selectedSchool.specialties.map(specialty => (
                   <span
@@ -531,61 +531,113 @@ export default function UKMedicalSchoolsMap() {
           </div>
 
           <motion.div
-            className="mt-6"
+            className="mt-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-            <h4 className="text-lg font-semibold text-purple-300 mb-2">Entry Requirements</h4>
-            <p className="text-gray-300 mb-4">{selectedSchool.admissionRequirements}</p>
+            <h4 className="text-base font-semibold text-purple-300 mb-1">Entry Requirements</h4>
+            <p className="text-gray-300 text-sm mb-3">{selectedSchool.admissionRequirements}</p>
 
-            <h4 className="text-lg font-semibold text-purple-300 mb-2">Interview Format</h4>
-            <p className="text-gray-300">{selectedSchool.interviewFormat}</p>
+            <h4 className="text-base font-semibold text-purple-300 mb-1">Interview Format</h4>
+            <p className="text-gray-300 text-sm">{selectedSchool.interviewFormat}</p>
           </motion.div>
 
           <motion.div
-            className="mt-6 pt-6 border-t border-indigo-500/30"
+            className="mt-4 pt-4 border-t border-indigo-500/30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 p-6 rounded-lg border border-purple-500/20 mb-6">
-              <div className="flex items-center mb-4">
-                <div className="w-3 h-3 bg-purple-400 rounded-full mr-3 animate-pulse" />
-                <h4 className="text-xl font-bold text-purple-300">Generate Mock Interview</h4>
-              </div>
+            <div className="bg-gradient-to-br from-purple-900/40 via-indigo-900/30 to-black p-5 rounded-xl border border-purple-500/30 mb-4 relative overflow-hidden">
+              {/* Animated background glow */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-indigo-500/10"
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
 
-              <p className="text-gray-300 mb-4 text-sm leading-relaxed">
-                Practice with AI-powered mock interviews specifically tailored for {String(selectedSchool.name)}'s interview
-                format and style.
-              </p>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center text-sm text-gray-400">
-                  <svg className="w-4 h-4 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="font-medium text-purple-300">Prometheus</span>&nbsp;is fuelling
+              <div className="relative z-10">
+                <div className="flex items-center mb-3">
+                  <motion.div 
+                    className="w-3 h-3 bg-purple-400 rounded-full mr-3"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  <h4 className="text-lg font-bold bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent">
+                    Generate Mock Interview
+                  </h4>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs text-gray-500 uppercase tracking-wide">Expected Launch</div>
-                  <div className="text-sm font-bold text-orange-400">October 2025</div>
-                </div>
-              </div>
 
-              <motion.button
-                className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-purple-600/50 to-indigo-600/50 border border-purple-500/30 text-purple-200 rounded-lg transition-all font-semibold relative overflow-hidden"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-indigo-600/20 opacity-0 hover:opacity-100 transition-opacity" />
-                <span className="relative">Coming Soon - Mock Interview Generator</span>
-              </motion.button>
+                <p className="text-gray-300 mb-3 text-sm leading-relaxed">
+                  Practice with AI-powered mock interviews specifically tailored for {String(selectedSchool.name)}'s interview
+                  format and style.
+                </p>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center text-sm text-gray-400">
+                    <svg className="w-4 h-4 mr-2 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="font-medium text-purple-300">Prometheus</span>&nbsp;powered
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                    <span className="text-xs font-semibold text-green-300">Available Now</span>
+                  </div>
+                </div>
+
+                <motion.a
+                  href={`/interviews/payment?service=generated&package=essentials&university=${selectedSchool.id}`}
+                  className="group w-full px-5 py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white rounded-xl font-bold text-center relative overflow-hidden block shadow-lg shadow-purple-500/50"
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {/* Animated shimmer effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    animate={{
+                      x: ['-200%', '200%'],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                      ease: "easeInOut"
+                    }}
+                  />
+                  
+                  {/* Button content */}
+                  <div className="relative flex items-center justify-center gap-3">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Generate Mock Interview</span>
+                    <svg 
+                      className="w-5 h-5 transition-transform group-hover:translate-x-1" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                  
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-400/0 via-pink-400/30 to-indigo-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </motion.a>
+              </div>
             </div>
 
             <button className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors font-semibold">

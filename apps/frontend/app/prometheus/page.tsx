@@ -93,7 +93,7 @@ export default function PrometheusPage() {
               whileTap={{ scale: 0.98 }}
             >
               <span className="flex items-center gap-2">
-                GENERATE QUESTIONS
+                WHAT IS PROMETHEUS?
               </span>
             </motion.a>
             <motion.a
@@ -227,8 +227,8 @@ export default function PrometheusPage() {
               <span className="text-gradient-aurora">Forge</span> Your Interview Success
             </motion.h2>
             <p className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto">
-              Prometheus Vault provides comprehensive interview preparation tools designed
-              specifically for medical and dental school applicants.
+              Prometheus is a cutting-edge, maintained question bank designed to elevate your medical and dental school interview preparation. 
+              Prometheus empowers you to build confidence and excel in your interviews.
             </p>
           </motion.div>
 
@@ -416,14 +416,14 @@ export default function PrometheusPage() {
             <h2 className="text-5xl md:text-6xl font-bold mb-6">
               Frequently Asked <span className="text-gradient-aurora">Questions</span>
             </h2>
-            <p className="text-xl text-gray-300">Everything you need to know about Prometheus Vault</p>
+            <p className="text-xl text-gray-300">Everything you need to know about Prometheus</p>
           </motion.div>
 
           <div className="max-w-4xl mx-auto space-y-6">
             {[
               {
-                question: "What is Prometheus Vault?",
-                answer: "Prometheus Vault is a comprehensive question bank designed specifically for medical and dental school interview preparation, covering MMIs, panel interviews, ethical scenarios, and more."
+                question: "What is Prometheus?",
+                answer: "Prometheus is a comprehensive question bank designed specifically for medical and dental school interview preparation, covering MMIs, panel interviews, ethical scenarios, and more."
               },
               {
                 question: "How will it help with my interview preparation?",
@@ -431,7 +431,7 @@ export default function PrometheusPage() {
               },
               {
                 question: "Is it suitable for both medicine and dentistry?",
-                answer: "Yes, Prometheus Vault includes specialized content for both medical and dental school applications, with questions tailored to the specific requirements of each field."
+                answer: "Yes, Prometheus includes specialized content for both medical and dental school applications, with questions tailored to the specific requirements of each field."
               },
               {
                 question: "How often is the content updated?",
@@ -490,7 +490,7 @@ export default function PrometheusPage() {
                 whileHover={{ scale: 1.05, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Link href="/get-started" className="group relative px-12 py-6 text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/50 inline-flex items-center gap-4">
+                <Link href="#schools" className="group relative px-12 py-6 text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl overflow-hidden shadow-2xl shadow-purple-500/50 inline-flex items-center gap-4">
                   <span className="relative z-10">ACCESS NOW</span>
                   <svg 
                     className="relative z-10 w-8 h-8 group-hover:translate-x-2 transition-transform" 
