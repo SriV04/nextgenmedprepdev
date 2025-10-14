@@ -78,7 +78,7 @@ export default function PrometheusPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            Your Ultimate Medical & Dental School Interview Question Bank
+            Our NextGen Medical & Dental School Interview Question Bank
           </motion.p>
           <motion.div 
             className="flex flex-wrap gap-4 justify-center"
@@ -93,7 +93,7 @@ export default function PrometheusPage() {
               whileTap={{ scale: 0.98 }}
             >
               <span className="flex items-center gap-2">
-                EXPLORE THE ATLAS
+                GENERATE QUESTIONS
               </span>
             </motion.a>
             <motion.a
