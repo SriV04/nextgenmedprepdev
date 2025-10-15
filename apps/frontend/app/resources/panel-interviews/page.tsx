@@ -101,7 +101,7 @@ export default function PanelInterviewGuidePage() {
 
   return (
     <ResourcePageWrapper
-      resourceId="panel-interview-guide"
+      resourceId="ultimate-panel-interview-guide"
       guideName="Ultimate Panel Interview Guide"
       source="panel_interview_guide_download"
     >

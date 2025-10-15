@@ -101,7 +101,7 @@ export default function MMIGuidePage() {
 
   return (
     <ResourcePageWrapper
-      resourceId="mmi-guide"
+      resourceId="ultimate-mmi-guide"
       guideName="Ultimate Guide to MMI Success"
       source="mmi_guide_download"
     >
