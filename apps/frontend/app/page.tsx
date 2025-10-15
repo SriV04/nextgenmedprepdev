@@ -1,5 +1,6 @@
 import Hero from '@/components/home/Hero';
 import ComprehensiveServices from '@/components/home/ComprehensiveServices'; // Assuming this is the correct import
+import NewsletterSignup from '@/components/home/NewsletterSignup';
 import SuccessStories from '@/components/home/SuccessStories';
 import TimelineSection from '@/components/home/TimelineSection';
 import React from 'react';
@@ -20,9 +21,16 @@ export default function HomePage() {
       
 
       {/* Services Overview Section */}
-      <section id="services-overview" className="snap-start flex justify-center items-center ">
+      <section id="services-overview" className="snap-start flex justify-center items-center pb-16 md:pb-24">
         <div className="max-w-6xl mx-auto w-full">
           <ComprehensiveServices />
+        </div>
+      </section>
+
+      {/* Newsletter Signup */}
+      <section className="snap-start flex justify-center items-center">
+        <div className="w-full">
+          <NewsletterSignup />
         </div>
       </section>
 
