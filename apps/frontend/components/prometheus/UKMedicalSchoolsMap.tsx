@@ -599,7 +599,7 @@ export default function UKMedicalSchoolsMap() {
                 </div>
 
                 <motion.a
-                  href={`/interviews/payment?service=generated&package=essentials&university=${selectedSchool.id}`}
+                  href={`/interviews/payment?service=actual&package=essentials&university=${selectedSchool.id}`}
                   className="group w-full px-5 py-3 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white rounded-xl font-bold text-center relative overflow-hidden block shadow-lg shadow-purple-500/50"
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
