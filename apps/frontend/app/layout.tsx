@@ -47,6 +47,7 @@ const megaMenuItems: MegaMenuConfig[] = [
   {
     title: "Interviews",
     items: [
+      { title: "Free Interview Resources", href: "/interviews/free-resources" },
       { title: "Panel Interviews", href: "/interviews/panel-interviews" },
       { title: "MMIs", href: "/interviews/mmis" },
     ],
