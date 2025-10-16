@@ -15,7 +15,7 @@ const Hero: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-screen relative min-h-screen flex flex-col items-center justify-between text-white overflow-hidden -mx-4 py-6">
+    <div className="w-full relative min-h-screen flex flex-col items-center justify-between text-white overflow-hidden py-6">
       {/* Animated gradient background */}
        <div className="absolute inset-0 bg-gradient-to-b from-[#050814] via-[#0a0e27] to-[#050814]"></div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface GlobeIllustrationProps {
   className?: string;
@@ -14,10 +14,24 @@ const pulseTransition = {
   ease: 'easeInOut',
 };
 
+// Generate star positions once
+const generateStars = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    opacity: Math.random() * 0.4 + 0.3,
+    duration: Math.random() * 3 + 2,
+    delay: Math.random() * 2,
+  }));
+};
+
 export default function GlobeIllustration({ className }: GlobeIllustrationProps) {
   const containerClassName = ['relative flex items-center justify-center', className]
     .filter(Boolean)
     .join(' ');
+
+  const stars = useMemo(() => generateStars(20), []); // Reduced from 50 to 20
 
   return (
     <motion.div
@@ -26,25 +40,18 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 1, ease: 'easeOut' }}
     >
-      {/* Starfield background */}
+      {/* Starfield background - optimized with CSS */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full"
+        {stars.map((star) => (
+          <div
+            key={star.id}
+            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              opacity: Math.random() * 0.5 + 0.2,
-            }}
-            animate={{
-              opacity: [Math.random() * 0.3 + 0.2, Math.random() * 0.7 + 0.3, Math.random() * 0.3 + 0.2],
-              scale: [1, 1.5, 1],
-            }}
-            transition={{
-              duration: Math.random() * 3 + 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              opacity: star.opacity,
+              animationDuration: `${star.duration}s`,
+              animationDelay: `${star.delay}s`,
             }}
           />
         ))}
@@ -58,6 +65,7 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
           height: '85%',
           border: '3px solid rgba(6, 182, 212, 0.6)',
           boxShadow: '0 0 40px rgba(6, 182, 212, 0.4), inset 0 0 40px rgba(6, 182, 212, 0.2)',
+          willChange: 'transform, opacity',
         }}
         animate={{
           scale: [1, 1.02, 1],
@@ -69,6 +77,7 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
       {/* Inner glow */}
       <motion.div
         className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500/30 via-purple-600/20 to-blue-700/30 blur-2xl"
+        style={{ willChange: 'opacity' }}
         animate={{ opacity: [0.4, 0.6, 0.4] }}
         transition={pulseTransition}
       />
@@ -78,6 +87,7 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
         className="relative z-10 w-full h-full"
         role="img"
         aria-label="Animated globe"
+        style={{ willChange: 'transform' }}
         initial={{ rotate: 0 }}
         animate={{ rotate: 360 }}
         transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
@@ -102,21 +112,12 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
           <mask id="sphereMask">
             <circle cx="256" cy="256" r="200" fill="white" />
           </mask>
-
-          {/* Glow filter */}
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
         </defs>
 
         {/* Main globe sphere */}
         <circle cx="256" cy="256" r="200" fill="url(#globeGradient)" />
 
-        {/* Latitude lines */}
+        {/* Latitude lines - simplified animation */}
         {[-60, -40, -20, 0, 20, 40, 60].map((latitude, index) => (
           <motion.path
             key={`lat-${latitude}`}
@@ -125,17 +126,16 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
             strokeWidth={1.5}
             fill="none"
             mask="url(#sphereMask)"
-            filter="url(#glow)"
             initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: [0.4, 0.7, 0.4] }}
+            animate={{ pathLength: 1, opacity: 0.6 }}
             transition={{ 
               pathLength: { duration: 2, delay: index * 0.1 },
-              opacity: { duration: 3, repeat: Infinity, delay: index * 0.2 }
+              opacity: { duration: 1, delay: index * 0.1 }
             }}
           />
         ))}
 
-        {/* Longitude lines (meridians) */}
+        {/* Longitude lines (meridians) - simplified animation */}
         {[0, 30, 60, 90, 120, 150].map((longitude, index) => (
           <motion.path
             key={`lon-${longitude}`}
@@ -144,66 +144,59 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
             strokeWidth={1.5}
             fill="none"
             mask="url(#sphereMask)"
-            filter="url(#glow)"
             initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: [0.4, 0.7, 0.4] }}
+            animate={{ pathLength: 1, opacity: 0.6 }}
             transition={{ 
               pathLength: { duration: 2, delay: index * 0.15 },
-              opacity: { duration: 3, repeat: Infinity, delay: index * 0.25 }
+              opacity: { duration: 1, delay: index * 0.15 }
             }}
           />
         ))}
 
-        {/* Equator highlight */}
+        {/* Equator highlight - simplified */}
         <motion.path
           d={describeLatitude(256, 256, 200, 0)}
           stroke="rgba(6, 182, 212, 0.9)"
           strokeWidth={2}
           fill="none"
           mask="url(#sphereMask)"
-          filter="url(#glow)"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1, opacity: [0.6, 0.9, 0.6] }}
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.8 }}
           transition={{ 
             pathLength: { duration: 2, delay: 0.5 },
-            opacity: { duration: 3, repeat: Infinity }
+            opacity: { duration: 1, delay: 0.5 }
           }}
         />
 
-        {/* Prime meridian highlight */}
+        {/* Prime meridian highlight - simplified */}
         <motion.path
           d={describeMeridian(256, 256, 200, 90)}
           stroke="rgba(6, 182, 212, 0.8)"
           strokeWidth={2}
           fill="none"
           mask="url(#sphereMask)"
-          filter="url(#glow)"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1, opacity: [0.5, 0.8, 0.5] }}
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 0.7 }}
           transition={{ 
             pathLength: { duration: 2, delay: 0.7 },
-            opacity: { duration: 3, repeat: Infinity, delay: 0.5 }
+            opacity: { duration: 1, delay: 0.7 }
           }}
         />
 
-        {/* Subtle inner glow spots for depth */}
-        <motion.circle
+        {/* Subtle inner glow spots for depth - static for performance */}
+        <circle
           cx="200"
           cy="220"
           r="40"
           fill="rgba(59, 130, 246, 0.3)"
           mask="url(#sphereMask)"
-          animate={{ opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
         />
-        <motion.circle
+        <circle
           cx="320"
           cy="300"
           r="35"
           fill="rgba(139, 92, 246, 0.3)"
           mask="url(#sphereMask)"
-          animate={{ opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 4, repeat: Infinity, delay: 1 }}
         />
 
         {/* Outer sphere border */}
@@ -214,7 +207,6 @@ export default function GlobeIllustration({ className }: GlobeIllustrationProps)
           fill="none" 
           stroke="rgba(6, 182, 212, 0.4)" 
           strokeWidth={2}
-          filter="url(#glow)"
         />
       </motion.svg>
     </motion.div>

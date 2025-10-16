@@ -7,7 +7,7 @@ import React from 'react';
 
 export default function HomePage() {
   return (
-    <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla scroll-smooth w-screen">
+    <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla scroll-smooth w-full overflow-x-hidden">
       {/* Hero Section */}
       <div className='snap-start flex justify-center items-center'> {/* No negative margins needed */}
         <Hero />
@@ -21,7 +21,7 @@ export default function HomePage() {
       
 
       {/* Services Overview Section */}
-      <section id="services-overview" className="snap-start flex justify-center items-center pb-16 md:pb-24">
+      <section id="services-overview" className="snap-start flex justify-center items-center pb-16 md:pb-24 px-4 sm:px-8">
         <div className="max-w-6xl mx-auto w-full">
           <ComprehensiveServices />
         </div>

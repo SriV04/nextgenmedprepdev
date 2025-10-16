@@ -47,12 +47,12 @@ export default function PrometheusPage() {
 
         {/* Globe Illustration - lazy loaded with optimized size */}
         <motion.div
-          className="absolute inset-0 flex items-center justify-center"
+          className="absolute inset-0 flex items-center justify-center px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <div className="relative w-[80vw] max-w-3xl aspect-square">
+          <div className="relative w-full max-w-3xl aspect-square">
             <DynamicGlobeIllustration className="absolute inset-0" />
           </div>
         </motion.div>
@@ -78,7 +78,7 @@ export default function PrometheusPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            Our NextGen Medical & Dental School Interview Question Bank
+            Our <span className="text-sm sm:text-lg font-bold text-gradient-primary">NextGenMedPrep </span> Medical & Dental School Interview Question Bank
           </motion.p>
           <motion.div 
             className="flex flex-wrap gap-4 justify-center"
@@ -87,23 +87,23 @@ export default function PrometheusPage() {
             transition={{ delay: 0.9 }}
           >
             <motion.a
-              href="#features"
+              href="#schools"
               className="px-10 py-5 text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all shadow-2xl shadow-indigo-500/50 glow-aurora"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
               <span className="flex items-center gap-2">
-                WHAT IS PROMETHEUS?
+                VIEW UNIVERSITIES
               </span>
             </motion.a>
             <motion.a
-              href="#schools"
+              href="#features"
               className="px-10 py-5 text-lg font-bold border-2 border-purple-400 text-purple-300 rounded-xl hover:bg-purple-500/20 transition-all backdrop-blur-sm"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
               <span className="flex items-center gap-2">
-                VIEW UNIVERSITIES
+                WHAT IS PROMETHEUS?
               </span>
             </motion.a>
           </motion.div>

@@ -100,10 +100,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${karla.variable} font-sans`}>
       {/* Apply custom background and text colors, and font family */}
-      <body className="bg-background-primary text-text-primary font-sans">
+      <body className="bg-background-primary text-text-primary font-sans overflow-x-hidden">
         <header className="w-full bg-background-secondary border-b border-border-accent fixed top-0 z-50">
-          <div className="w-full px-3 sm:px-4 py-3 mx-auto max-w-[100vw]">
-            <div className="flex items-center justify-between min-w-0">
+          <div className="w-full px-3 sm:px-4 py-3 mx-auto">
+            <div className="flex items-center justify-between min-w-0 max-w-full">
               <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
                 <Link href="/" className="flex items-center space-x-2">
                   <img

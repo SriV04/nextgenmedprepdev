@@ -12,25 +12,25 @@ const ComprehensiveServices = () => {
       transition={{ duration: 0.6 }}
       viewport={{ once: true, amount: 0.3 }}
     >
-      <h2 className="text-3xl font-bold text-center mb-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-6">
         Our Comprehensive Services
       </h2>
-      <p className="text-lg text-center mb-10 max-w-2xl mx-auto text-gray-600">
+      <p className="text-base md:text-lg text-center mb-6 md:mb-10 max-w-2xl mx-auto text-gray-600 px-4">
         We provide a focused set of services to support you through every stage
         of your medical school application.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
         {/* Mock Interviews */}
         <Link href="/interviews" className="group">
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
-            <div className="mb-4 text-white">
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+            <div className="mb-2 md:mb-4 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                className="w-10 h-10"
+                className="w-8 h-8 md:w-10 md:h-10"
               >
                 <path
                   strokeLinecap="round"
@@ -40,10 +40,10 @@ const ComprehensiveServices = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">
               Mock Interviews
             </h3>
-            <p className="text-white/90">
+            <p className="text-sm md:text-base text-white/90">
               Realistic interview simulations with detailed feedback to help you
               perform at your best.
             </p>
@@ -52,14 +52,14 @@ const ComprehensiveServices = () => {
 
         {/* UCAT Services */}
         <Link href="/ucat" className="group">
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
-            <div className="mb-4 text-white">
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+            <div className="mb-2 md:mb-4 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                className="w-10 h-10"
+                className="w-8 h-8 md:w-10 md:h-10"
               >
                 <path
                   strokeLinecap="round"
@@ -69,8 +69,8 @@ const ComprehensiveServices = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">UCAT Services</h3>
-            <p className="text-white/90">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">UCAT Services</h3>
+            <p className="text-sm md:text-base text-white/90">
               Targeted strategies and practice resources to boost your UCAT
               performance.
             </p>
@@ -79,14 +79,14 @@ const ComprehensiveServices = () => {
 
         {/* Personal Statement */}
         <Link href="/personal-statements" className="group">
-          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
-            <div className="mb-4 text-white">
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+            <div className="mb-2 md:mb-4 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                className="w-10 h-10"
+                className="w-8 h-8 md:w-10 md:h-10"
               >
                 <path
                   strokeLinecap="round"
@@ -96,10 +96,10 @@ const ComprehensiveServices = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">
               Personal Statement
             </h3>
-            <p className="text-white/90">
+            <p className="text-sm md:text-base text-white/90">
               Expert guidance to craft a compelling personal statement that
               stands out.
             </p>
@@ -108,14 +108,14 @@ const ComprehensiveServices = () => {
 
         {/* Conferences & Webinars */}
         <Link href="/events" className="group">
-          <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
-            <div className="mb-4 text-white">
+          <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl md:rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+            <div className="mb-2 md:mb-4 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                className="w-10 h-10"
+                className="w-8 h-8 md:w-10 md:h-10"
               >
                 <path
                   strokeLinecap="round"
@@ -125,10 +125,10 @@ const ComprehensiveServices = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">
               Conferences & Webinars
             </h3>
-            <p className="text-white/90">
+            <p className="text-sm md:text-base text-white/90">
               Interactive events and webinars with experts to keep you informed
               and prepared.
             </p>
