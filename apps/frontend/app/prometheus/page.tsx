@@ -78,7 +78,7 @@ export default function PrometheusPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            Our <span className="text-sm sm:text-lg font-bold text-gradient-primary">NextGenMedPrep </span> Medical & Dental School Interview Question Bank
+            Our NextGen Medical & Dental School Interview Question Bank
           </motion.p>
           <motion.div 
             className="flex flex-wrap gap-4 justify-center"

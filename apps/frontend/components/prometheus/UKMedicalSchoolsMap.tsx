@@ -13,6 +13,7 @@ interface MedicalSchool {
   establishedYear: number;
   specialties: string[];
   admissionRequirements: string;
+  ucatRequirement: string;
   interviewFormat: string;
 }
 
@@ -27,6 +28,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1096,
     specialties: ['Clinical Medicine', 'Biomedical Sciences', 'Medical Research'],
     admissionRequirements: 'A*AA including Chemistry and Biology/Physics/Mathematics',
+    ucatRequirement: 'Minimum overall score: 2950 (typically 3000+)',
     interviewFormat: 'Multiple Mini Interviews (MMI) and traditional panel interviews',
   },
   {
@@ -38,6 +40,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1209,
     specialties: ['Clinical Medicine', 'Veterinary Medicine', 'Medical Sciences'],
     admissionRequirements: 'A*A*A including Chemistry and Biology',
+    ucatRequirement: 'Not required - uses BMAT instead',
     interviewFormat: 'Traditional panel interviews with academic focus',
   },
   {
@@ -49,6 +52,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1907,
     specialties: ['Medicine', 'Bioengineering', 'Public Health'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2800 (typically 2900+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -60,6 +64,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1826,
     specialties: ['Medicine', 'Medical Sciences', 'Global Health'],
     admissionRequirements: 'A*AA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2750 (typically 2850+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -71,6 +76,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1583,
     specialties: ['Medicine', 'Veterinary Medicine', 'Biomedical Sciences'],
     admissionRequirements: 'AAA including Chemistry and Biology/Physics/Mathematics',
+    ucatRequirement: 'Minimum overall score: 2800 (typically 2950+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -82,6 +88,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1451,
     specialties: ['Medicine', 'Dentistry', 'Veterinary Medicine'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2700 (typically 2850+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -93,6 +100,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1824,
     specialties: ['Medicine', 'Dentistry', 'Pharmacy'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2800 (typically 2920+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -104,6 +112,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1900,
     specialties: ['Medicine', 'Dentistry', 'Medical Sciences'],
     admissionRequirements: 'AAA including Chemistry and Biology/Physics/Mathematics',
+    ucatRequirement: 'Minimum overall score: 2750 (typically 2900+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -115,6 +124,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1876,
     specialties: ['Medicine', 'Dentistry', 'Veterinary Sciences'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2750 (typically 2880+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -126,6 +136,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1904,
     specialties: ['Medicine', 'Dentistry', 'Healthcare Sciences'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2700 (typically 2850+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -137,6 +148,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1893,
     specialties: ['Medicine', 'Dentistry', 'Pharmacy'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2650 (typically 2800+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -148,6 +160,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1881,
     specialties: ['Medicine', 'Dentistry', 'Tropical Medicine'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2700 (typically 2830+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -159,6 +172,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1834,
     specialties: ['Medicine', 'Dentistry', 'Biomedical Sciences'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2700 (typically 2850+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
   {
@@ -170,6 +184,7 @@ const medicalSchools: MedicalSchool[] = [
     establishedYear: 1967,
     specialties: ['Medicine', 'Dentistry', 'Life Sciences'],
     admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'Minimum overall score: 2650 (typically 2800+)',
     interviewFormat: 'Multiple Mini Interviews (MMI)',
   },
 ];
@@ -380,7 +395,7 @@ export default function UKMedicalSchoolsMap() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] gap-2 lg:gap-8 items-start">
       <div className="relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.92 }}
@@ -428,32 +443,63 @@ export default function UKMedicalSchoolsMap() {
                   Math.round(school.coordinates[0] * 10000) / 10000,
                   Math.round(school.coordinates[1] * 10000) / 10000
                 ];
+                // Bigger circles on mobile
+                const isSelected = selectedSchool.id === school.id;
+                const mobileRadius = isSelected ? 14 : 11;
+                const desktopRadius = isSelected ? 9 : 7;
+                
                 return (
                 <Marker key={String(school.id)} coordinates={roundedCoordinates}>
                   <g>
-                    {selectedSchool.id === school.id ? (
+                    {isSelected ? (
                       <motion.circle
-                        r="16"
+                        r="24"
                         fill="none"
                         stroke="rgba(79, 70, 229, 0.6)"
                         strokeWidth="2"
                         initial={{ scale: 0, opacity: 1 }}
                         animate={{ scale: 1.6, opacity: 0 }}
                         transition={{ duration: 2, repeat: Infinity }}
+                        className="hidden md:block"
+                      />
+                    ) : null}
+                    
+                    {isSelected ? (
+                      <motion.circle
+                        r="20"
+                        fill="none"
+                        stroke="rgba(79, 70, 229, 0.6)"
+                        strokeWidth="2"
+                        initial={{ scale: 0, opacity: 1 }}
+                        animate={{ scale: 1.5, opacity: 0 }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="md:hidden"
                       />
                     ) : null}
 
+                    {/* Desktop circles */}
                     <motion.circle
-                      r={selectedSchool.id === school.id ? 9 : 7}
-                      fill={selectedSchool.id === school.id ? '#4F46E5' : '#6366F1'}
+                      r={desktopRadius}
+                      fill={isSelected ? '#4F46E5' : '#6366F1'}
                       stroke="white"
                       strokeWidth="2"
-                      className="cursor-pointer"
+                      className="cursor-pointer hidden md:block"
                       whileHover={{ scale: 1.3 }}
                       whileTap={{ scale: 0.85 }}
                       onClick={() => setSelectedSchool(school)}
                       onMouseEnter={() => setHoveredSchool(school.id)}
                       onMouseLeave={() => setHoveredSchool(null)}
+                    />
+                    
+                    {/* Mobile circles - bigger and easier to tap */}
+                    <motion.circle
+                      r={mobileRadius}
+                      fill={isSelected ? '#4F46E5' : '#6366F1'}
+                      stroke="white"
+                      strokeWidth="2.5"
+                      className="cursor-pointer md:hidden"
+                      whileTap={{ scale: 0.85 }}
+                      onClick={() => setSelectedSchool(school)}
                     />
 
                     {/* School Info Tooltip */}
@@ -531,23 +577,10 @@ export default function UKMedicalSchoolsMap() {
           </div>
 
           <motion.div
-            className="mt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            <h4 className="text-base font-semibold text-purple-300 mb-1">Entry Requirements</h4>
-            <p className="text-gray-300 text-sm mb-3">{selectedSchool.admissionRequirements}</p>
-
-            <h4 className="text-base font-semibold text-purple-300 mb-1">Interview Format</h4>
-            <p className="text-gray-300 text-sm">{selectedSchool.interviewFormat}</p>
-          </motion.div>
-
-          <motion.div
             className="mt-4 pt-4 border-t border-indigo-500/30"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
+            transition={{ delay: 0.6 }}
           >
             <div className="bg-gradient-to-br from-purple-900/40 via-indigo-900/30 to-black p-5 rounded-xl border border-purple-500/30 mb-4 relative overflow-hidden">
               {/* Animated background glow */}
@@ -592,7 +625,8 @@ export default function UKMedicalSchoolsMap() {
                     </svg>
                     <span className="font-medium text-purple-300">Prometheus</span>&nbsp;powered
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
+                  {/* Hide "Available Now" badge on mobile */}
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                     <span className="text-xs font-semibold text-green-300">Available Now</span>
                   </div>
@@ -647,6 +681,113 @@ export default function UKMedicalSchoolsMap() {
         </div>
       </motion.div>
       </div>
+
+      {/* Entry Requirements Section - Below Map */}
+      <motion.div
+        key={`requirements-${selectedSchool.id}`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="mt-8 bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-black p-6 md:p-8 rounded-xl border border-indigo-500/30"
+      >
+        <div className="flex items-center mb-6">
+          <svg className="w-6 h-6 text-purple-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="text-2xl font-bold text-indigo-400">
+            Entry Requirements for {selectedSchool.name}
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* A-Level Requirements */}
+          <motion.div 
+            className="bg-black/30 p-5 rounded-lg border border-indigo-500/20"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="flex items-start mb-3">
+              <div className="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-purple-300 mb-2">A-Level Requirements</h4>
+                <p className="text-gray-300 text-sm leading-relaxed">{selectedSchool.admissionRequirements}</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* UCAT Requirements */}
+          <motion.div 
+            className="bg-black/30 p-5 rounded-lg border border-purple-500/20"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="flex items-start mb-3">
+              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-purple-300 mb-2">UCAT Requirement</h4>
+                <p className="text-gray-300 text-sm leading-relaxed">{selectedSchool.ucatRequirement}</p>
+                {selectedSchool.ucatRequirement !== 'Not required - uses BMAT instead' && (
+                  <div className="mt-3 flex items-center gap-2 text-xs text-cyan-400">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <span>Competitive scores are typically higher</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Interview Format */}
+          <motion.div 
+            className="bg-black/30 p-5 rounded-lg border border-pink-500/20 md:col-span-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <div className="flex items-start mb-3">
+              <div className="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                <svg className="w-5 h-5 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-semibold text-pink-300 mb-2">Interview Format</h4>
+                <p className="text-gray-300 text-sm leading-relaxed">{selectedSchool.interviewFormat}</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Additional Info Box */}
+        <motion.div 
+          className="mt-6 p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-indigo-400 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="text-sm text-gray-300">
+                <span className="font-semibold text-indigo-300">Please Note:</span> These requirements are typical for entry but may vary by year and specific circumstances. Always check the official university website for the most up-to-date information.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
