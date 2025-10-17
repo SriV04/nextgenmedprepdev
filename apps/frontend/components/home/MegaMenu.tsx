@@ -53,12 +53,12 @@ const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
   );
 
   if (!hasItems) {
-    return <div className="relative group">{trigger}</div>;
+    return <div className="relative inline-block">{trigger}</div>;
   }
-  
+
   return (
-    <div 
-      className="relative group"
+    <div
+      className="relative inline-block"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -67,13 +67,17 @@ const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
       
       {/* Mega Menu Panel - Only render if there are items */}
       {hasItems && (
-        <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 ${
-          isPrometheus ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-background-secondary'
-        } border ${
-          isPrometheus ? 'border-purple-200' : 'border-border-accent'
-        } rounded-lg shadow-lg z-50 transition-all duration-300 ${
-          isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
-        }`}>
+        <div
+          role="menu"
+          aria-hidden={!isOpen}
+          className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 min-w-[220px] max-w-[90vw] w-auto ${
+            isPrometheus ? 'bg-gradient-to-br from-blue-50 to-purple-50' : 'bg-background-secondary'
+          } border ${
+            isPrometheus ? 'border-purple-200' : 'border-border-accent'
+          } rounded-lg shadow-lg z-50 transition-all duration-200 ${
+            isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'
+          }`}
+        >
           <div className="p-3">
             <div className="grid gap-1">
               {items.map((item) => (
