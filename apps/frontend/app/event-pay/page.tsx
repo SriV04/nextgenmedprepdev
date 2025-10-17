@@ -117,14 +117,14 @@ function EventPaymentContent() {
               <TicketIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Full Access</h3>
               <p className="text-gray-600 text-sm">
-                Entry to all sessions, workshops, and materials
+                Entry to yearly conference with 2 admissions experts
               </p>
             </div>
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
               <CalendarIcon className="w-12 h-12 mx-auto text-purple-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Expert Speakers</h3>
               <p className="text-gray-600 text-sm">
-                Learn from experienced medical professionals
+                Learn from experienced medical students
               </p>
             </div>
           </div>
@@ -228,12 +228,12 @@ function EventPaymentContent() {
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">2</div>
                 <h4 className="font-semibold text-gray-900 mb-2">Receive Confirmation</h4>
-                <p className="text-gray-600 text-sm">Get your e-ticket and event details via email</p>
+                <p className="text-gray-600 text-sm">Receive confirmation email with you purchase details</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">3</div>
                 <h4 className="font-semibold text-gray-900 mb-2">Event Reminders</h4>
-                <p className="text-gray-600 text-sm">Receive updates and preparation information</p>
+                <p className="text-gray-600 text-sm">Receive zoom link to attend the event</p>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-4">4</div>

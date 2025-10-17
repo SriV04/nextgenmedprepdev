@@ -19,8 +19,8 @@ const ConferencesPage = () => {
       "Master the Four Pillars of Medical Ethics",
       "Understand NHS structure and current healthcare issues",
       "Practice applying knowledge to real interview scenarios",
-      "Get live feedback from experienced interviewers", 
-      "£10 Voucher towards a mock interview!"
+      "Interactive Session with expert tutors",
+      "Q&A with Admissions Experts", 
     ],
     whatToExpect: [
       "Interactive session with real interview questions",
@@ -28,6 +28,9 @@ const ConferencesPage = () => {
       "Small group discussions and practice",
       "Q&A with medical students and doctors",
       "Downloadable resource pack"
+    ], 
+    auxiliaryInfo: [
+      "£10 Voucher towards a mock interview!"
     ]
   };
 
@@ -206,7 +209,7 @@ const ConferencesPage = () => {
 
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                   <p className="text-green-800 font-semibold text-center">
-                    ⚡ Only {upcomingEvent.spots} spots available!
+                    ⚡︎ Selling fast - Get them while you can 🔥
                   </p>
                 </div>
 

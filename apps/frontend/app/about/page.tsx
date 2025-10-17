@@ -292,7 +292,7 @@ export default function AboutPage() {
               variants={fadeInUp}
             >
               <ChatBubbleLeftRightIcon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Support Team</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Operations Team</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Meet the people who ensure your journey with us is smooth and successful
               </p>

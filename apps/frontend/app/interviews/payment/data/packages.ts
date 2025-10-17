@@ -1,10 +1,8 @@
-export interface University {
-  id: string;
-  name: string;
-  country: string;
-  interviewTypes: string[];
-  displayName?: string;
-}
+import { universities as importedUniversities, type University as ImportedUniversity } from '@/data/universities';
+
+// Re-export for backwards compatibility
+export const universities = importedUniversities;
+export type University = ImportedUniversity;
 
 export interface InterviewType {
   id: string;
@@ -14,65 +12,6 @@ export interface InterviewType {
   generatedPrice: number;
   tutorPrice: number;
 }
-
-export const universities: University[] = [
-  {
-    id: 'oxford',
-    name: 'University of Oxford',
-    country: 'UK',
-    interviewTypes: ['mmi', 'traditional', 'panel'],
-    displayName: 'Oxford'
-  },
-  {
-    id: 'cambridge',
-    name: 'University of Cambridge',
-    country: 'UK',
-    interviewTypes: ['traditional', 'panel'],
-    displayName: 'Cambridge'
-  },
-  {
-    id: 'imperial',
-    name: 'Imperial College London',
-    country: 'UK',
-    interviewTypes: ['mmi', 'traditional'], 
-    displayName: 'ICL'
-  },
-  {
-    id: 'ucl',
-    name: 'University College London',
-    country: 'UK',
-    interviewTypes: ['mmi', 'traditional'],
-    displayName: 'UCL'
-  },
-  {
-    id: 'kings',
-    name: "King's College London",
-    country: 'UK',
-    interviewTypes: ['mmi', 'traditional', 'panel'],
-    displayName: "KCL"
-  },
-  {
-    id: 'edinburgh',
-    name: 'University of Edinburgh',
-    country: 'UK',
-    interviewTypes: ['mmi', 'traditional'],
-    displayName: 'Edinburgh'
-  },
-  {
-    id: 'glasgow',
-    name: 'University of Glasgow',
-    country: 'UK',
-    interviewTypes: ['mmi', 'traditional'],
-    displayName: 'Glasgow'
-  },
-  {
-    id: 'manchester',
-    name: 'University of Manchester',
-    country: 'UK',
-    interviewTypes: ['mmi'],
-    displayName: 'Manchester'
-  }
-];
 
 export const interviewTypes: InterviewType[] = [
   {

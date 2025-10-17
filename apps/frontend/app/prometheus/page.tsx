@@ -78,7 +78,7 @@ export default function PrometheusPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            Our NextGen Medical & Dental School Interview Question Bank
+            Our <span className="font-bold">NextGen</span> Medical & Dental School Interview <span className="font-bold">Question Bank</span>
           </motion.p>
           <motion.div 
             className="flex flex-wrap gap-4 justify-center"
@@ -297,14 +297,6 @@ export default function PrometheusPage() {
                     <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
                       {feature.description}
                     </p>
-                    
-                    {/* Hover arrow indicator */}
-                    <div className="mt-4 flex items-center text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-sm font-semibold">Explore</span>
-                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
                   </div>
                 </motion.div>
               );

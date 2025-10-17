@@ -21,7 +21,9 @@ export default function UCATPage() {
       features: ["All section coverage", "Practice tests", "Expert tutoring", "Score improvement guarantee"],
       icon: AcademicCapIcon,
       color: "bg-blue-50 border-blue-200",
-      buttonColor: "bg-blue-600 hover:bg-blue-700"
+      buttonColor: "bg-blue-600 hover:bg-blue-700",
+      link: "resources/ultimate-ucat-prep-guide", 
+      buttonText: "Get the Guide"
     },
     {
       title: "Tutoring",
@@ -29,15 +31,19 @@ export default function UCATPage() {
       features: ["Speed reading techniques", "Question analysis", "Inference strategies", "Time management"],
       icon: BookOpenIcon,
       color: "bg-green-50 border-green-200",
-      buttonColor: "bg-green-600 hover:bg-green-700"
+      buttonColor: "bg-green-600 hover:bg-green-700",
+      link: "#tutoring-packages",
+      buttonText: "Book Now"
     },
     {
-      title: "Personalised Revision Plan", // payment screen with info email, phone number - 20 quid text every week 
+      title: "Personalised Revision Plan", // payment screen with info email, phone number - 20 quid text every week hours a day target score and intensity. 
       description: "Tailored study plan to maximize your strengths and address weaknesses.",
-      features: ["Calculator techniques", "Data interpretation", "Formula shortcuts"],
+      features: ["Personalised Reminders", "Weekly Check-ins", "Progress Tracking"],
       icon: CalculatorIcon,
       color: "bg-purple-50 border-purple-200",
-      buttonColor: "bg-purple-600 hover:bg-purple-700"
+      buttonColor: "bg-purple-600 hover:bg-purple-700",
+      link: "/personalised-revision-plan",
+      buttonText: "Get Started"
     },
 
   ];
@@ -224,10 +230,10 @@ export default function UCATPage() {
                     ))}
                   </ul>
                 </div>
-                
-                <Link href="/resources/ultimate-ucat-prep-guide" className="mt-auto">
+
+                <Link href={service.link} className="mt-auto">
                   <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
-                  Learn More
+                  {service.buttonText}
                   </button>
                 </Link>
               </div>

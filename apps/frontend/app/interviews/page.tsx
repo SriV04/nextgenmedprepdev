@@ -45,15 +45,15 @@ export default function InterviewsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
+      <section className="relative bg-gradient-to-br from-teal-600 via-blue-700 to-pink-500 text-white py-20 px-6 overflow-hidden">
         <div className="max-w-6xl mx-auto text-center">
           <div className="mb-8">
             <span className="text-6xl mb-4 block">🎤</span>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Master Your Medical School
-              <span className="block text-gradient-primary">Interviews</span>
+              <span className="block text-gradient-accent">Interviews</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-white-600 max-w-3xl mx-auto leading-relaxed">
               Build confidence, refine your responses, and showcase your passion for medicine with our comprehensive interview preparation services.
             </p>
           </div>
@@ -65,7 +65,7 @@ export default function InterviewsPage() {
             >
               Book Mock Interview
             </Link>
-            <Link href="/interviews/free-resources" className="border-2 border-blue-600 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300">
+            <Link href="/interviews/free-resources" className="border-2 border-white-600 text-white-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300">
               Free Resources
             </Link>
           </div>

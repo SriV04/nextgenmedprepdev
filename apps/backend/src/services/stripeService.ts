@@ -49,7 +49,8 @@ export class StripeService {
           product_id: paymentData.product_id || '',
           type: 'one_time_payment',
           ...(paymentData as any).metadata // Allow additional metadata to be passed through
-        }
+        }, 
+        allow_promotion_codes: true
       };
 
       const session = await this.stripe.checkout.sessions.create(sessionData);

@@ -27,6 +27,11 @@ const AdviceSection: React.FC = () => {
       mistake: "Poor time management leading to rushed writing",
       solution: "Start early and allow time for multiple drafts and feedback",
       icon: "⏰"
+    },
+    {
+      mistake: "Ignoring the character limit",
+      solution: "Be concise and make every word count",
+      icon: "✂️"
     }
   ];
 
