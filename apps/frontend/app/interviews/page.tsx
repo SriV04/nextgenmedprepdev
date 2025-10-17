@@ -346,9 +346,9 @@ export default function InterviewsPage() {
             <Link href="/interviews/payment?service=actual&package=core" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
               Book Mock Interview Now!
             </Link>
-            <Link href="/contact" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
+            <a href="mailto:contact@nextgenmedprep.com" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
               Ask Questions
-            </Link>
+            </a>
           </div>
         </div>
       </section>
