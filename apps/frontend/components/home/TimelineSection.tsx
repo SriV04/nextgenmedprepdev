@@ -120,7 +120,7 @@ const TimelineSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.2 }}
         >
           Your Journey to Medical School
         </motion.h2>
@@ -129,7 +129,7 @@ const TimelineSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.2, delay: 0.05 }}
         >
           Follow the proven path that thousands of students have taken to achieve their dreams
         </motion.p>
@@ -155,10 +155,10 @@ const TimelineSection: React.FC = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ 
-                duration: 0.4, 
-                delay: idx * 0.1,
+                duration: 0.25, 
+                delay: idx * 0.05,
                 type: 'spring',
-                stiffness: 120
+                stiffness: 150
               }}
             >
               {/* Timeline Node - Hidden on mobile */}
@@ -171,10 +171,10 @@ const TimelineSection: React.FC = () => {
                   whileInView={{ scale: 1, rotate: 0 }}
                   viewport={{ once: true, amount: 0.5 }}
                   transition={{ 
-                    duration: 0.4, 
-                    delay: idx * 0.1,
+                    duration: 0.3, 
+                    delay: idx * 0.05,
                     type: 'spring',
-                    stiffness: 150
+                    stiffness: 200
                   }}
                   whileHover={{ scale: 1.1 }}
                 >
@@ -203,7 +203,7 @@ const TimelineSection: React.FC = () => {
                           initial={{ pathLength: 0 }}
                           whileInView={{ pathLength: (idx + 1) / medicineAppSteps.length }}
                           viewport={{ once: true, amount: 0.5 }}
-                          transition={{ duration: 0.8, delay: idx * 0.15 }}
+                          transition={{ duration: 0.5, delay: idx * 0.08 }}
                         />
                         <defs>
                           <linearGradient id="stepGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -219,7 +219,7 @@ const TimelineSection: React.FC = () => {
                         initial={{ scale: 0 }}
                         whileInView={{ scale: 1 }}
                         viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.3, delay: idx * 0.1 + 0.2 }}
+                        transition={{ duration: 0.2, delay: idx * 0.05 + 0.1 }}
                       >
                         {idx + 1}
                       </motion.div>
@@ -234,7 +234,7 @@ const TimelineSection: React.FC = () => {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.3, delay: idx * 0.1 + 0.1 }}
+                transition={{ duration: 0.2, delay: idx * 0.05 + 0.05 }}
               >
                 <div className={`${timelineCardStyles.base} max-w-3xl ${
                   idx === medicineAppSteps.length - 1 ? timelineCardStyles.final : ''
@@ -253,7 +253,7 @@ const TimelineSection: React.FC = () => {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.2, delay: idx * 0.1 + 0.2 }}
+                    transition={{ duration: 0.15, delay: idx * 0.05 + 0.1 }}
                   >
                     {step.title}
                   </motion.h3>
@@ -264,7 +264,7 @@ const TimelineSection: React.FC = () => {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.2, delay: idx * 0.1 + 0.3 }}
+                    transition={{ duration: 0.15, delay: idx * 0.05 + 0.15 }}
                   >
                     {step.information}
                   </motion.p>
@@ -276,7 +276,7 @@ const TimelineSection: React.FC = () => {
                       initial={{ opacity: 0 }}
                       whileInView={{ opacity: 1 }}
                       viewport={{ once: true, amount: 0.3 }}
-                      transition={{ duration: 0.2, delay: idx * 0.1 + 0.4 }}
+                      transition={{ duration: 0.15, delay: idx * 0.05 + 0.2 }}
                     >
                       <a
                         href={step.moreInfoLink}
@@ -305,7 +305,7 @@ const TimelineSection: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, amount: 0.1 }}
-                    transition={{ duration: 0.2, delay: idx * 0.1 + 0.5 }}
+                    transition={{ duration: 0.15, delay: idx * 0.05 + 0.25 }}
                   >
                     <TimelineMosaic milestoneIdToShow={step.id} />
                   </motion.div>
