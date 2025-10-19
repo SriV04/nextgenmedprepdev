@@ -205,7 +205,7 @@ export default function UKMedicalSchoolsMap() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {school.location}
+              {school.displayName}
             </motion.button>
           );
         })}
@@ -332,7 +332,7 @@ export default function UKMedicalSchoolsMap() {
                           strokeWidth="1"
                         />
                         <text textAnchor="middle" y={-15} fontSize="14" fill="white" fontWeight="bold">
-                          {school.location}
+                          {school.displayName}
                         </text>
                       </motion.g>
                     ) : null}

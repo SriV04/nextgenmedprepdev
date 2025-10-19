@@ -549,6 +549,29 @@ export const UK_MEDICAL_SCHOOLS: UKMedicalSchool[] = [
     admissionRequirements: 'AAA including Chemistry and Biology',
     ucatRequirement: 'Minimum overall score: 2600 (typically 2750+)',
   },
+  {
+    id: "exeter",
+    name: "University of Exeter Medical School",
+    displayName: "Exeter",
+    location: "Exeter, Devon, England, UK",
+    country: "UK",
+    coordinates: [-3.5260, 50.7220], // approximate for Exeter
+
+    // Interview Information
+    interviewTypes: ["mmi"],
+    interviewFormat: "Multiple Mini Interviews (MMI)",
+    interviewDetails: "7 stations, each 3 minutes with 3 minutes between stations.",
+    interviewDate: "December – March",  // from 6med guide 
+    decisionDate: "March onwards / mid-May",  // decision deadline mid-May per Exeter site 
+    uniqueAspects: "Focus on non-academic qualities including communication, empathy, role-play and realistic insight into the course and career.",
+
+    // Academic Information
+    description: "A five-year BMBS programme delivered across Exeter, Devon & Cornwall, with early clinical exposure, small-group learning and strong regional NHS partnership.",
+    establishedYear: 2013,  // University of Exeter Medical School formed in 2013 as successor to Peninsula College of Medicine & Dentistry. :contentReference[oaicite:6]{index=6}
+    specialties: ["Primary Care", "Hospital Medicine", "Community Medicine", "Clinical Science", "Rural & Regional Health"],  // inferred from placements across Devon & Cornwall
+    admissionRequirements: "Applicants need to apply via UCAS by 15 October; academic profile + admissions test used to determine interview invite. Typical A-Level offer A*AA (contextual AAB) for 2026 entry.",
+    ucatRequirement: "UCAT required for school-leaver applicants; application sorted by academic profile + UCAT overall score."
+    }
 ];
 
 // Legacy compatibility exports

@@ -202,6 +202,19 @@ const ConferencesPage = () => {
             {/* Booking Card */}
             <div className="bg-white rounded-2xl p-8 shadow-xl flex flex-col">
               <div className="flex-grow">
+                {/* £10 Coupon Banner */}
+                <div className="bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg p-4 mb-6 text-center shadow-lg transform hover:scale-105 transition-transform">
+                  <p className="text-white font-bold text-lg mb-1">
+                    🎁 BONUS OFFER 🎁
+                  </p>
+                  <p className="text-white text-2xl font-extrabold mb-1">
+                    £10 Voucher Included!
+                  </p>
+                  <p className="text-white text-sm font-medium">
+                    Towards any mock interview
+                  </p>
+                </div>
+
                 <div className="text-center mb-6">
                   <div className="text-5xl font-bold text-purple-600 mb-2">£{upcomingEvent.price}</div>
                   <p className="text-gray-600">per ticket</p>

@@ -4,7 +4,12 @@ import React, { useState } from 'react';
 import { EnvelopeIcon, SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function NewsletterSignup() {
-  const [email, setEmail] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -12,30 +17,77 @@ export default function NewsletterSignup() {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
   const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
     try {
-     const subscriptionResponse = await fetch(`${API_BASE_URL}/api/${API_VERSION}/subscriptions`, {
+      // Create subscription with user information
+      const subscriptionResponse = await fetch(`${API_BASE_URL}/api/${API_VERSION}/subscriptions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           subscriptionTier: 'hot-topics',
+          source: 'newsletter_signup',
         }),
       });
 
-      if (!subscriptionResponse.ok) {
+      // Check if user already exists (409 Conflict) or if subscription was created successfully
+      const isExisting = subscriptionResponse.status === 409;
+
+      if (!subscriptionResponse.ok && subscriptionResponse.status !== 409) {
         const errorData = await subscriptionResponse.json();
         throw new Error(errorData.message || 'Failed to subscribe');
       }
       
       setIsSuccess(true);
-      setEmail('');
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+      });
       
       // Reset success message after 5 seconds
       setTimeout(() => {
@@ -104,35 +156,81 @@ export default function NewsletterSignup() {
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-              <div className="flex-1 relative">
-                <EnvelopeIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  required
-                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all text-gray-900 placeholder-gray-400"
-                />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="First Name"
+                    disabled={isSubmitting}
+                    className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-200 outline-none transition-all text-gray-900 placeholder-gray-400 ${
+                      errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-purple-500'
+                    }`}
+                  />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Last Name"
+                    disabled={isSubmitting}
+                    className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-200 outline-none transition-all text-gray-900 placeholder-gray-400 ${
+                      errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-purple-500'
+                    }`}
+                  />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+                  )}
+                </div>
               </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Subscribing...
-                  </span>
-                ) : (
-                  'Subscribe Free'
-                )}
-              </button>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative">
+                  <EnvelopeIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email address"
+                    disabled={isSubmitting}
+                    className={`w-full pl-12 pr-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-200 outline-none transition-all text-gray-900 placeholder-gray-400 ${
+                      errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-purple-500'
+                    }`}
+                  />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1 pl-12">{errors.email}</p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Subscribing...
+                    </span>
+                  ) : (
+                    'Subscribe Free'
+                  )}
+                </button>
+              </div>
             </form>
           )}
 
@@ -151,7 +249,7 @@ export default function NewsletterSignup() {
         <div className="mt-8 text-center">
           <div className="flex items-center justify-center gap-2 text-white/90">
             <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 5, 18, 8].map((i) => (
                 <div
                   key={i}
                   className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 border-2 border-white flex items-center justify-center text-white text-xs font-bold"
