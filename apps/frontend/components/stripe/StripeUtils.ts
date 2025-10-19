@@ -136,7 +136,7 @@ export const createCheckoutAndRedirect = async (
   }
 };
 
-export default {
+const StripeUtils = {
   getStripe,
   redirectToCheckout,
   formatCurrency,
@@ -144,3 +144,5 @@ export default {
   getCurrencySymbol,
   createCheckoutAndRedirect,
 };
+
+export default StripeUtils;

@@ -29,6 +29,11 @@ export default function Step3Universities({
     setMounted(true);
   }, []);
 
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   if (!selectedPackage) return null;
 
   // Filter universities based on search term
@@ -42,11 +47,6 @@ export default function Step3Universities({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedUniversities = filteredUniversities.slice(startIndex, endIndex);
-
-  // Reset to page 1 when search term changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
 
   const handleSearchSelect = (university: typeof universities[0]) => {
     onUniversityToggle(university.id);
