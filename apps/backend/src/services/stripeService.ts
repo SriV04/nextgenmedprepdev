@@ -432,18 +432,13 @@ export class StripeService {
   }
 
   private async handleInterviewBookingPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
-    // Import services here to avoid circular dependencies
-    const supabaseService = (await import('./supabaseService')).default;
-    const emailService = (await import('./emailService')).default;
+    // Import controllers here to avoid circular dependencies
+    const { interviewBookingController } = await import('../controllers/interviewBookingController');
     
     // Get payment metadata
     const metadata = paymentIntent.metadata;
     const customerEmail = metadata.customer_email;
     const customerName = metadata.customer_name;
-    const packageType = metadata.package_type || 'single';
-    const serviceType = metadata.service_type || 'generated';
-    const universities = metadata.universities ? metadata.universities.split(',') : [];
-    const preferredDate = metadata.preferred_date;
     const amount = paymentIntent.amount / 100; // Convert from cents
     
     if (!customerEmail) {
@@ -451,75 +446,26 @@ export class StripeService {
       return;
     }
     
-    console.log('Processing interview booking payment for:', { customerEmail, customerName, packageType, serviceType, universities, amount });
+    console.log('Processing interview booking payment for:', { customerEmail, customerName, amount });
     
-    // 1. Check if user exists, create if not
-    let user = await supabaseService.getUserByEmail(customerEmail);
+    // Use the controller method to confirm the booking
+    await interviewBookingController.confirmInterviewBooking(
+      paymentIntent.id,
+      {
+        type: metadata.type || 'interview_booking',
+        package_type: metadata.package_type || 'single',
+        service_type: metadata.service_type || 'generated',
+        universities: metadata.universities || '',
+        file_path: metadata.file_path || '',
+        notes: metadata.notes,
+        preferred_date: metadata.preferred_date,
+      },
+      customerEmail,
+      customerName,
+      amount
+    );
     
-    if (!user) {
-      console.log('Creating new user for email:', customerEmail);
-      user = await supabaseService.createUser({
-        email: customerEmail,
-        full_name: customerName || '',
-        role: 'student',
-        stripe_customer_id: paymentIntent.customer as string || undefined
-      });
-      console.log('Created user:', user.id);
-    } else {
-      console.log('Found existing user:', user.id);
-    }
-    
-    // 2. Check for subscription, create free subscription if not exists
-    let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
-    
-    if (!subscription) {
-      console.log('Creating free subscription for email:', customerEmail);
-      subscription = await supabaseService.createSubscription({
-        email: customerEmail,
-        user_id: user.id,
-        subscription_tier: 'free',
-        opt_in_newsletter: true
-      });
-      console.log('Created subscription for user:', user.id);
-    } else {
-      // Link subscription to user if not already linked
-      if (!subscription.user_id) {
-        await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
-        console.log('Linked subscription to user:', user.id);
-      }
-    }
-    
-    // 3. Create booking entry
-    const now = new Date();
-    const startTime = preferredDate ? new Date(preferredDate) : new Date(now.getTime() + 24 * 60 * 60 * 1000); // Default to tomorrow
-    const endTime = new Date(startTime.getTime() + 90 * 60 * 1000); // 90 minutes duration
-    
-    const booking = await supabaseService.createBooking({
-      user_id: user.id,
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      package: `${packageType}_${serviceType}_${universities.join('_')}`,
-      amount: amount,
-      preferred_time: preferredDate || undefined,
-      email: customerEmail,
-      payment_status: 'paid'
-    });
-    
-    console.log('Created interview booking:', booking.id);
-    
-    // 4. Send confirmation email
-    await emailService.sendBookingConfirmationEmail(customerEmail, {
-      id: booking.id,
-      packageType,
-      serviceType,
-      universities,
-      amount,
-      startTime: startTime.toISOString(),
-      preferredDate,
-      userName: customerName
-    });
-    
-    console.log('Sent interview booking confirmation email to:', customerEmail);
+    console.log('Interview booking confirmed for:', customerEmail);
   }
 
   private async handleUCATTutoringPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
@@ -586,8 +532,6 @@ export class StripeService {
     
     const booking = await supabaseService.createBooking({
       user_id: user.id,
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
       package: `ucat_${packageId}`,
       amount: amount,
       email: customerEmail,

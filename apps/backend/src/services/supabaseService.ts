@@ -445,13 +445,14 @@ class SupabaseService {
   async createBooking(bookingData: {
     user_id: string;
     tutor_id?: string;
-    start_time: string;
-    end_time: string;
     package?: string;
     amount?: number;
     preferred_time?: string;
     email?: string;
     payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+    file_path?: string;
+    notes?: string;
+    universities?: string;
   }): Promise<any> {
     console.log('=== Creating Booking in Database ===');
     console.log('Input booking data:', bookingData);
@@ -680,6 +681,23 @@ class SupabaseService {
     if (error) {
       throw new Error(`Failed to delete personal statement: ${error.message}`);
     }
+  }
+
+  // Get signed URL for personal statement download
+  async getPersonalStatementSignedUrl(filePath: string): Promise<string> {
+    console.log("SupabaseService: Generating signed URL for personal statement:", filePath);
+    
+    const { data, error } = await this.supabase.storage
+      .from('Personal Statements')
+      .createSignedUrl(filePath, 604800); // 7 days expiry (in seconds)
+    
+    console.log("SupabaseService: Signed URL generation result:", { data, error });
+
+    if (error) {
+      throw new Error(`Failed to generate signed URL: ${error.message}`);
+    }
+
+    return data.signedUrl;
   }
 
   // Get client for direct queries if needed

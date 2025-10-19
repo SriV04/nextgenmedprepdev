@@ -114,35 +114,66 @@ export function usePaymentForm() {
     }
   };
 
-  const handleProceedToPayment = () => {
-    if (!selectedPackage || !canProceedToPayment()) return;
+  const handleProceedToPayment = async () => {
+    if (!selectedPackage || !canProceedToPayment() || !personalStatement) {
+      alert('Please upload your personal statement before proceeding to payment.');
+      return;
+    }
 
-    const bookingData = {
-      serviceType,
-      packageId,
-      universities,
-      contactDetails: contact,
-      price: calculatePrice().toString(),
-      personalStatement,
-      notes: additionalNotes,
-      timestamp: new Date().toISOString()
-    };
-    
-    sessionStorage.setItem('interview_booking', JSON.stringify(bookingData));
-    
-    const params = new URLSearchParams({
-      serviceType,
-      packageId,
-      universities: universities.join(','),
-      price: calculatePrice().toString(),
-      notes: additionalNotes,
-      firstName: contact.firstName,
-      lastName: contact.lastName,
-      email: contact.email,
-      phone: contact.phone
-    });
+    try {
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      
+      // Add personal statement file
+      formData.append('personalStatement', personalStatement);
+      
+      // Add contact details
+      formData.append('email', contact.email);
+      formData.append('name', `${contact.firstName} ${contact.lastName}`);
+      
+      // Add booking details
+      formData.append('packageType', packageId.includes('essential') ? 'single' : 'package');
+      formData.append('serviceType', serviceType === 'generated' ? 'generated' : 'live');
+      formData.append('universities', JSON.stringify(universities));
+      formData.append('amount', calculatePrice().toString());
+      
+      // Add optional fields
+      if (additionalNotes) {
+        formData.append('notes', additionalNotes);
+      }
+      
+      // Submit to backend API
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiUrl}/api/v1/interview-bookings`, {
+        method: 'POST',
+        body: formData,
+      });
 
-    window.location.href = `/interviews/payment/complete?${params.toString()}`;
+      const data = await response.json();
+
+      if (data.success && data.data.checkout_url) {
+        // Save booking data to session storage for reference
+        const bookingData = {
+          serviceType,
+          packageId,
+          universities,
+          contactDetails: contact,
+          price: calculatePrice().toString(),
+          notes: additionalNotes,
+          timestamp: new Date().toISOString(),
+          session_id: data.data.session_id
+        };
+        sessionStorage.setItem('interview_booking', JSON.stringify(bookingData));
+        
+        // Redirect to Stripe checkout
+        window.location.href = data.data.checkout_url;
+      } else {
+        throw new Error(data.error || 'Failed to create booking');
+      }
+    } catch (error: any) {
+      console.error('Error creating interview booking:', error);
+      alert(`Failed to create booking: ${error.message}. Please try again or contact support.`);
+    }
   };
 
   const goBack = () => {

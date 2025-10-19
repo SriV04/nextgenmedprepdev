@@ -112,18 +112,55 @@ export default function Step4Contact({
             placeholder="Enter your phone number"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            <DocumentTextIcon className="w-4 h-4 inline mr-1" />
-            Personal Statement (Optional)
-          </label>
+      </div>
+      
+      <div className="col-span-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          <DocumentTextIcon className="w-4 h-4 inline mr-1" />
+          Personal Statement *
+        </label>
+        <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
           <input
             type="file"
             accept=".pdf,.doc,.docx"
             onChange={(e) => onPersonalStatementChange(e.target.files?.[0] || null)}
-            className="w-full px-4 py-3 bg-black border border-gray-600 rounded-lg text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            className="hidden"
+            id="personal-statement-upload"
+            required
           />
-          <p className="text-xs text-gray-400 mt-1">Upload your personal statement for personalised interview preparation (PDF, DOC, DOCX)</p>
+          <label 
+            htmlFor="personal-statement-upload" 
+            className="cursor-pointer block"
+          >
+            {personalStatement ? (
+              <div className="space-y-2">
+                <div className="text-green-400 text-4xl">✓</div>
+                <p className="text-gray-300 font-medium">{personalStatement.name}</p>
+                <p className="text-xs text-gray-400">
+                  {(personalStatement.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+                <button
+                  type="button"
+                  className="text-indigo-400 hover:text-indigo-300 text-sm underline"
+                >
+                  Change file
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-gray-400 text-4xl">📄</div>
+                <p className="text-gray-300 font-medium">
+                  Click to upload your personal statement
+                </p>
+                <p className="text-xs text-gray-400">
+                  PDF, DOC, or DOCX (Max 10MB)
+                </p>
+                <p className="text-xs text-indigo-400 mt-2">
+                  Required for personalized interview preparation
+                </p>
+              </div>
+            )}
+          </label>
         </div>
       </div>
       

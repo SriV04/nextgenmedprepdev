@@ -874,6 +874,321 @@ The NextGen MedPrep Team
     return { subject, text, html };
   }
 
+  // Interview Booking Email Methods
+  
+  async sendInterviewBookingConfirmationEmail(email: string, data: {
+    bookingId: string;
+    userName: string;
+    packageType: string;
+    serviceType: string;
+    universities: string[];
+    amount: number;
+    preferredDate?: string;
+    notes?: string;
+  }): Promise<void> {
+    console.log('Sending interview booking confirmation email to:', email);
+
+    const template = this.getInterviewBookingConfirmationTemplate(data);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
+  async sendInterviewBookingNotificationEmail(data: {
+    bookingId: string;
+    customerEmail: string;
+    customerName: string;
+    packageType: string;
+    serviceType: string;
+    universities: string[];
+    amount: number;
+    filePath: string;
+    downloadUrl?: string;
+    notes?: string;
+    preferredDate?: string;
+  }): Promise<void> {
+    const adminEmail = process.env.REVIEW_TEAM_EMAIL || 'contact@nextgenmedprep.com';
+    console.log('Sending interview booking notification to:', adminEmail);
+
+    const template = this.getInterviewBookingNotificationTemplate(data);
+    
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: adminEmail,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    });
+  }
+
+  private getInterviewBookingConfirmationTemplate(data: {
+    bookingId: string;
+    userName: string;
+    packageType: string;
+    serviceType: string;
+    universities: string[];
+    amount: number;
+    preferredDate?: string;
+    notes?: string;
+  }): EmailTemplate {
+    const packageLabel = data.packageType === 'single' ? 'Single Session' : 'Package Deal';
+    const serviceLabel = data.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
+    const universitiesStr = data.universities.join(', ');
+    
+    const subject = 'Interview Preparation Booking Confirmed - NextGen MedPrep';
+    
+    const text = `
+Hi ${data.userName},
+
+Thank you for booking Interview Preparation with NextGen MedPrep!
+
+Your interview preparation booking has been confirmed and our team will contact you shortly.
+
+Booking Details:
+- Booking ID: ${data.bookingId}
+- Package: ${packageLabel}
+- Service: ${serviceLabel}
+- Universities: ${universitiesStr}
+- Amount: £${data.amount}
+${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
+${data.notes ? `- Notes: ${data.notes}` : ''}
+
+What happens next:
+• Our team will review your personal statement and university choices
+• We'll contact you within 24 hours to schedule your session
+• You'll receive preparation materials tailored to your universities
+• Our expert tutors will help you excel in your interviews
+
+Our interview tutors are current medical students who have successfully gained places at top UK medical schools.
+
+If you have any questions, please contact us at contact@nextgenmedprep.com.
+
+Thank you for choosing NextGen MedPrep!
+
+Best regards,
+The NextGen MedPrep Team
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 28px;">Interview Booking Confirmed!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your expert interview preparation is booked</p>
+        </div>
+        
+        <div style="padding: 30px; color: #374151;">
+          <p style="font-size: 16px; margin-bottom: 20px;">Hi <strong>${data.userName}</strong>,</p>
+          
+          <p>Thank you for booking Interview Preparation with NextGen MedPrep! 🎉</p>
+          
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Booking Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${data.bookingId}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Package:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${packageLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Service:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${serviceLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Universities:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${universitiesStr}</td>
+              </tr>
+              ${data.preferredDate ? `
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Preferred Date:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.preferredDate}</td>
+              </tr>
+              ` : ''}
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${data.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          ${data.notes ? `
+          <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h4 style="margin-top: 0; color: #92400e;">Your Notes:</h4>
+            <p style="margin: 0; color: #78350f;">${data.notes}</p>
+          </div>
+          ` : ''}
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>Our team will review your personal statement and university choices</li>
+              <li>We'll contact you within <strong>24 hours</strong> to schedule your session</li>
+              <li>You'll receive preparation materials tailored to your universities</li>
+              <li>Our expert tutors will help you excel in your interviews</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>👨‍⚕️ Expert Tutors:</strong> Our interview tutors are current medical students who have successfully gained places at top UK medical schools.
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">If you have any questions, please contact us at contact@nextgenmedprep.com.</p>
+          <p>Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      </div>
+    `;
+
+    return { subject, text, html };
+  }
+
+  private getInterviewBookingNotificationTemplate(data: {
+    bookingId: string;
+    customerEmail: string;
+    customerName: string;
+    packageType: string;
+    serviceType: string;
+    universities: string[];
+    amount: number;
+    filePath: string;
+    downloadUrl?: string;
+    notes?: string;
+    preferredDate?: string;
+  }): EmailTemplate {
+    const packageLabel = data.packageType === 'single' ? 'Single Session' : 'Package Deal';
+    const serviceLabel = data.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
+    const universitiesStr = data.universities.join(', ');
+    
+    const subject = `New Interview Booking: ${data.customerName} - ${packageLabel}`;
+    
+    const text = `
+New Interview Preparation Booking Received!
+
+Customer Details:
+- Name: ${data.customerName}
+- Email: ${data.customerEmail}
+- Booking ID: ${data.bookingId}
+
+Booking Details:
+- Package: ${packageLabel}
+- Service: ${serviceLabel}
+- Universities: ${universitiesStr}
+- Amount: £${data.amount}
+${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
+${data.notes ? `- Notes: ${data.notes}` : ''}
+
+Personal Statement:
+- File Path: ${data.filePath}
+${data.downloadUrl ? `- Download Link: ${data.downloadUrl} (valid for 7 days)` : ''}
+
+Action Required:
+1. Download the personal statement using the link above or from Supabase storage
+2. Review the universities and student preferences
+3. Assign a suitable tutor (if live session)
+4. Contact the student within 24 hours to schedule the session
+5. Send preparation materials tailored to their universities
+
+Booking ID: ${data.bookingId}
+    `;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 30px; text-align: center; color: white;">
+          <h1 style="margin: 0; font-size: 24px;">New Interview Booking!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Action Required - Contact Within 24 Hours</p>
+        </div>
+        
+        <div style="padding: 30px; color: #374151;">
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1f2937;">Customer Details</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #374151;">
+              <li><strong>Name:</strong> ${data.customerName}</li>
+              <li><strong>Email:</strong> ${data.customerEmail}</li>
+              <li><strong>Booking ID:</strong> ${data.bookingId}</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">Booking Details</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Package:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${packageLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Service:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${serviceLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Universities:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${universitiesStr}</td>
+              </tr>
+              ${data.preferredDate ? `
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Preferred Date:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.preferredDate}</td>
+              </tr>
+              ` : ''}
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${data.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          ${data.notes ? `
+          <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h4 style="margin-top: 0; color: #92400e;">Student Notes:</h4>
+            <p style="margin: 0; color: #78350f;">${data.notes}</p>
+          </div>
+          ` : ''}
+
+          <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+            <h3 style="margin-top: 0; color: #991b1b;">Personal Statement</h3>
+            <p style="margin: 0; color: #374151;"><strong>File Path:</strong> <code style="background-color: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${data.filePath}</code></p>
+            ${data.downloadUrl ? `
+            <div style="text-align: center; margin: 20px 0;">
+              <a href="${data.downloadUrl}" 
+                 style="background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+                📄 Download Personal Statement
+              </a>
+              <p style="margin: 10px 0 0 0; font-size: 12px; color: #6b7280;">Link expires in 7 days</p>
+            </div>
+            ` : `
+            <p style="margin: 10px 0 0 0; font-size: 14px; color: #6b7280;">Download from Supabase "Personal Statements" bucket</p>
+            `}
+          </div>
+
+          <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
+            <h3 style="margin-top: 0; color: #991b1b;">Action Required</h3>
+            <ol style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>Download the personal statement from Supabase storage</li>
+              <li>Review the universities and student preferences</li>
+              <li>Assign a suitable tutor (if live session)</li>
+              <li>Contact the student within <strong>24 hours</strong> to schedule the session</li>
+              <li>Send preparation materials tailored to their universities</li>
+            </ol>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+            <p style="margin: 0; font-size: 14px; color: #6b7280;">Booking ID: <strong>${data.bookingId}</strong></p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return { subject, text, html };
+  }
+
   // Test email configuration
   async verifyConnection(): Promise<boolean> {
     try {

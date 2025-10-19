@@ -22,6 +22,8 @@ export default function Step3Universities({
   const [searchTerm, setSearchTerm] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Show 10 universities per page
 
   useEffect(() => {
     setMounted(true);
@@ -34,6 +36,17 @@ export default function Step3Universities({
     university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     university.country.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUniversities = filteredUniversities.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleSearchSelect = (university: typeof universities[0]) => {
     onUniversityToggle(university.id);
@@ -274,8 +287,94 @@ export default function Step3Universities({
         </motion.div>
       )}
 
+      {/* Top Continue Button */}
+      <AnimatePresence>
+        {selectedUniversities.length > 0 && (
+          <motion.div 
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <motion.button
+              onClick={onProceedToNext}
+              className="relative px-10 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-600 transition-all shadow-xl shadow-indigo-500/25 overflow-hidden group"
+              whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(99, 102, 241, 0.4)" }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {/* Animated background overlay */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-white/10 to-purple-600/0"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "100%" }}
+                transition={{ duration: 0.6 }}
+              />
+              
+              <span className="relative z-10 flex items-center gap-2">
+                Continue to Contact Details
+                <motion.svg 
+                  className="w-5 h-5"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  whileHover={{ x: 3 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </motion.svg>
+              </span>
+            </motion.button>
+            
+            <motion.p 
+              className="text-sm text-gray-400 mt-3"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {selectedUniversities.length === 1 
+                ? `1 university selected` 
+                : `${selectedUniversities.length} universities selected`}
+            </motion.p>
+
+            {/* Selected Universities Summary */}
+            <motion.div 
+              className="mt-4 flex flex-wrap justify-center gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              {selectedUniversities.map((universityId) => {
+                const university = universities.find(u => u.id === universityId);
+                if (!university) return null;
+                return (
+                  <motion.div
+                    key={universityId}
+                    className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-sm border border-indigo-500/30"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <span>{university.name}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUniversityToggle(universityId);
+                      }}
+                      className="text-indigo-400 hover:text-red-400 transition-colors"
+                    >
+                      ×
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {universities.map((university, index) => (
+        {paginatedUniversities.map((university, index) => (
           <motion.button
             key={university.id}
             onClick={() => onUniversityToggle(university.id)}
@@ -346,6 +445,102 @@ export default function Step3Universities({
           </motion.button>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <motion.div 
+          className="flex items-center justify-center gap-2 mt-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          {/* Previous Button */}
+          <motion.button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg transition-all ${
+              currentPage === 1
+                ? 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
+                : 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30'
+            }`}
+            whileHover={currentPage !== 1 ? { scale: 1.05 } : {}}
+            whileTap={currentPage !== 1 ? { scale: 0.95 } : {}}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </motion.button>
+
+          {/* Page Numbers */}
+          <div className="flex gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+              // Show first page, last page, current page, and pages around current
+              const showPage = pageNum === 1 || 
+                               pageNum === totalPages || 
+                               Math.abs(pageNum - currentPage) <= 1;
+              
+              // Show ellipsis
+              const showEllipsis = (pageNum === currentPage - 2 && currentPage > 3) ||
+                                  (pageNum === currentPage + 2 && currentPage < totalPages - 2);
+
+              if (showEllipsis) {
+                return (
+                  <span key={pageNum} className="px-3 py-2 text-gray-500">
+                    ...
+                  </span>
+                );
+              }
+
+              if (!showPage && pageNum !== currentPage - 2 && pageNum !== currentPage + 2) {
+                return null;
+              }
+
+              return (
+                <motion.button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-4 py-2 rounded-lg transition-all ${
+                    currentPage === pageNum
+                      ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30'
+                      : 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {pageNum}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Next Button */}
+          <motion.button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg transition-all ${
+              currentPage === totalPages
+                ? 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
+                : 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30'
+            }`}
+            whileHover={currentPage !== totalPages ? { scale: 1.05 } : {}}
+            whileTap={currentPage !== totalPages ? { scale: 0.95 } : {}}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </motion.button>
+        </motion.div>
+      )}
+
+      {/* Page Info */}
+      {totalPages > 1 && (
+        <motion.p 
+          className="text-center text-sm text-gray-400 mt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredUniversities.length)} of {filteredUniversities.length} universities
+        </motion.p>
+      )}
 
       {/* Continue Button */}
       <AnimatePresence>

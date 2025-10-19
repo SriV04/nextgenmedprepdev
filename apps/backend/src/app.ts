@@ -89,6 +89,8 @@ app.listen(PORT, () => {
   console.log(`NextGen MedPrep Backend API running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+  console.log(`Backend URL: http://localhost:${PORT}`);
+  console.log(`API Version: ${process.env.API_VERSION || 'v1'}`);
 });
 
 // Graceful shutdown

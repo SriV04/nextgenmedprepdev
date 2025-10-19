@@ -323,8 +323,6 @@ export class BookingController {
       const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
       
       const updateSchema = z.object({
-        start_time: z.string().datetime().optional(),
-        end_time: z.string().datetime().optional(),
         status: z.enum(['confirmed', 'cancelled', 'completed', 'no_show']).optional(),
         payment_status: z.enum(['pending', 'paid', 'failed', 'refunded']).optional(),
         tutor_id: z.string().uuid().optional(),

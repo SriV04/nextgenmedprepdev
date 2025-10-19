@@ -12,11 +12,11 @@ export const parseFormData = (req: Request, res: Response, next: NextFunction) =
       for (const [key, value] of Object.entries(req.body)) {
         if (typeof value === 'string') {
           try {
-            // Try to parse JSON strings
+            // Try to parse JSON strings for specific fields
             if ((key === 'med_dent_grades' || key === 'ucat' || key === 'bmat') && value) {
               parsedBody[key] = JSON.parse(value as string);
-            } else if (key === 'subjects_can_tutor' || key === 'availability') {
-              // Handle arrays
+            } else if (key === 'subjects_can_tutor' || key === 'availability' || key === 'universities') {
+              // Handle arrays - parse JSON string to array
               const arrayValue = JSON.parse(value as string);
               parsedBody[key] = Array.isArray(arrayValue) ? arrayValue : [arrayValue];
             } else {

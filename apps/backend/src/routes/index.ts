@@ -4,6 +4,8 @@ import resourceRoutes from './resources';
 import newJoinersRoutes from './newJoiners';
 import paymentRoutes from './payments';
 import personalStatementRoutes from './personalStatements';
+import bookingRoutes from './bookings';
+import interviewBookingRoutes from './interviewBookings';
 
 const router = Router();
 
@@ -23,5 +25,7 @@ router.use('/api/v1', resourceRoutes);
 router.use('/api/v1', newJoinersRoutes);
 router.use('/api/v1', paymentRoutes);
 router.use('/api/v1', personalStatementRoutes);
+router.use('/api/v1', bookingRoutes);
+router.use('/api/v1', interviewBookingRoutes);
 
 export default router;
