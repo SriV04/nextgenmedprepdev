@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion';
-import { ExtendedPackage } from '../../app/interviews/data/interviewPackages';
+import { ExtendedPackage } from '../../data/packages';
 
 interface GeneratedMockInfoProps {
   selectedPackage: ExtendedPackage | null;

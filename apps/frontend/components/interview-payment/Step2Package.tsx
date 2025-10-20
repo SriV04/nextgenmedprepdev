@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion';
-import { ExtendedPackage, interviewPackages } from '../../app/interviews/data/interviewPackages';
+import { ExtendedPackage, interviewPackages } from '../../data/packages';
 import GeneratedMockInfo from './GeneratedMockInfo';
 import { useState } from 'react';
 

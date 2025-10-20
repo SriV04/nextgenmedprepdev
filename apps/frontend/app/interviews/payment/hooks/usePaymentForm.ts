@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { ExtendedPackage, interviewPackages } from '../../data/interviewPackages';
+import { ExtendedPackage, interviewPackages } from '../../../../data/packages';
 
 export interface ContactDetails {
   firstName: string;

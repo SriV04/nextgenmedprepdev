@@ -857,6 +857,25 @@ export const UK_MEDICAL_SCHOOLS: UKMedicalSchool[] = [
     admissionRequirements: 'AAA including Chemistry and Biology',
     ucatRequirement: '70+ in last year shared – combinations include e.g. ~1950+ B1 & 8 grade 8s',
   },
+  {
+    id: 'surrey',
+    name: 'University of Surrey',
+    displayName: 'Surrey',
+    location: 'Guildford',
+    country: 'UK',
+    coordinates: [-0.5897, 51.2432],
+    interviewTypes: ['mmi'],
+    interviewFormat: 'Multiple Mini Interviews (MMI)',
+    interviewDetails: 'MMI format with multiple stations assessing communication, ethical reasoning, and problem-solving skills.',
+    interviewDate: 'December - March',
+    decisionDate: 'March onwards',
+    uniqueAspects: 'New medical school with focus on innovative teaching methods and technology in healthcare.',
+    description: 'New medical school with emphasis on modern healthcare practice and technology.',
+    establishedYear: 2024,
+    specialties: ['Medicine', 'Healthcare Technology', 'Clinical Practice'],
+    admissionRequirements: 'AAA including Chemistry and Biology',
+    ucatRequirement: 'UCAT required - No UCAT cut off score published yet',
+  },
 ];
 
 // Legacy compatibility exports

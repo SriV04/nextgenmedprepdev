@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion';
-import { interviewPackages } from '../../app/interviews/data/interviewPackages';
+import { interviewPackages } from '../../data/packages';
 
 interface Step1ServiceTypeProps {
   serviceType: 'generated' | 'actual' | '';

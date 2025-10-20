@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import { ContactDetails } from '../../app/interviews/payment/hooks/usePaymentForm';
-import { ExtendedPackage } from '../../app/interviews/data/interviewPackages';
-import { universities } from '../../app/interviews/payment/data/packages';
+import { ExtendedPackage } from '../../data/packages';
+import { universities } from '@/data/universities';
 
 interface Step4ContactProps {
   contact: ContactDetails;

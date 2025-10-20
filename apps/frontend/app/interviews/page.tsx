@@ -3,7 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon } from '@heroicons/react/24/outline';
 
-import { interviewPackages } from './data/interviewPackages';
+import { interviewPackages } from '../../data/packages';
 import FreeResourcesCarousel from '@/components/interviews/FreeResourcesCarousel';
 
 export default function InterviewsPage() {

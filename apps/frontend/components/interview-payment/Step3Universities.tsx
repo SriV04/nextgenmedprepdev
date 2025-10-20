@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { universities } from '../../app/interviews/payment/data/packages';
-import { ExtendedPackage } from '../../app/interviews/data/interviewPackages';
+import { universities } from '@/data/universities';
+import { ExtendedPackage } from '../../data/packages';
 
 interface Step3UniversitiesProps {
   selectedUniversities: string[];
