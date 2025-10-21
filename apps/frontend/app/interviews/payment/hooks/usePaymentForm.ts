@@ -12,7 +12,7 @@ export interface ContactDetails {
 
 export function usePaymentForm() {
   // Flattened state for better predictability
-  const [serviceType, setServiceType] = useState<'generated' | 'actual' | ''>('');
+  const [serviceType, setServiceType] = useState<'generated' | 'live' | ''>('');
   const [packageId, setPackageId] = useState('');
   const [universities, setUniversities] = useState<string[]>([]);
   const [contact, setContact] = useState<ContactDetails>({
@@ -30,7 +30,7 @@ export function usePaymentForm() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const pkgId = urlParams.get('package');
-    const service = urlParams.get('service') as 'generated' | 'actual' | null;
+    const service = urlParams.get('service') as 'generated' | 'live' | null;
     const university = urlParams.get('university');
 
     if (pkgId && service) {
@@ -69,7 +69,7 @@ export function usePaymentForm() {
       : selectedPackage.tutorPrice;
   };
 
-  const handleServiceTypeChange = (newServiceType: 'generated' | 'actual') => {
+  const handleServiceTypeChange = (newServiceType: 'generated' | 'live') => {
     setServiceType(newServiceType);
     setCurrentStep(2);
   };
@@ -78,6 +78,8 @@ export function usePaymentForm() {
     const pkg = interviewPackages.find(p => p.id === newPackageId);
     setPackageId(newPackageId);
     setSelectedPackage(pkg || null);
+    console.log('Selected package:', pkg);
+    console.log('Package ID set to:', newPackageId);
     setCurrentStep(3);
   };
 
@@ -132,8 +134,8 @@ export function usePaymentForm() {
       formData.append('name', `${contact.firstName} ${contact.lastName}`);
       
       // Add booking details
-      formData.append('packageType', packageId.includes('essential') ? 'single' : 'package');
-      formData.append('serviceType', serviceType === 'generated' ? 'generated' : 'live');
+      formData.append('packageType', packageId);
+      formData.append('serviceType', serviceType);
       formData.append('universities', JSON.stringify(universities));
       formData.append('amount', calculatePrice().toString());
       

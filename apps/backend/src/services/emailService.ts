@@ -328,7 +328,7 @@ class EmailService {
   }): EmailTemplate {
     const universitiesStr = bookingDetails.universities.join(', ');
     const serviceTypeLabel = bookingDetails.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
-    const packageTypeLabel = bookingDetails.packageType === 'single' ? 'Single Session' : 'Package Deal';
+    const packageTypeLabel = bookingDetails.packageType;
     const userName = bookingDetails.userName || 'there';
     
     return {

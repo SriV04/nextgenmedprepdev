@@ -22,7 +22,7 @@ const teamMembers: TeamMember[] = [
     name: 'Isaac Butler-King',
     role: 'Co-founder',
     bio: 'Isaac co-founded NextGen MedPrep with a vision to raise the standard of medical school preparation. As a 3rd year medical student, he has an outstanding academic record, placing in the top 1% every year. Isaac combines this proven excellence with first-hand insight into the demands of medicine to guide students towards success in their applications.',
-    image: '/headshots/[NGMP] Isaac.png', // Replace with actual image when available
+    image: '/headshots/[NGMP] Isaac.png', 
     section: 'founders'
   },
   {

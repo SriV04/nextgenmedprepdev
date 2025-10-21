@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { interviewPackages } from '../../data/packages';
 
 interface Step1ServiceTypeProps {
-  serviceType: 'generated' | 'actual' | '';
-  onServiceTypeChange: (serviceType: 'generated' | 'actual') => void;
+  serviceType: 'generated' | 'live' | '';
+  onServiceTypeChange: (serviceType: 'generated' | 'live') => void;
 }
 
 export default function Step1ServiceType({ serviceType, onServiceTypeChange }: Step1ServiceTypeProps) {
@@ -50,9 +50,9 @@ export default function Step1ServiceType({ serviceType, onServiceTypeChange }: S
         </motion.button>
         
         <motion.button
-          onClick={() => onServiceTypeChange('actual')}
+          onClick={() => onServiceTypeChange('live')}
           className={`p-8 rounded-lg border-2 text-left transition-all feature-card ${
-            serviceType === 'actual'
+            serviceType === 'live'
               ? 'border-indigo-500 bg-indigo-500/20 shadow-lg shadow-indigo-500/25'
               : 'border-gray-600 bg-black/40 hover:border-indigo-400 hover:bg-indigo-500/10'
           }`}

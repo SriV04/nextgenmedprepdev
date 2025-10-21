@@ -6,7 +6,7 @@ import GeneratedMockInfo from './GeneratedMockInfo';
 import { useState } from 'react';
 
 interface Step2PackageProps {
-  serviceType: 'generated' | 'actual' | '';
+  serviceType: 'generated' | 'live' | '';
   packageId: string;
   onPackageSelect: (packageId: string) => void;
 }

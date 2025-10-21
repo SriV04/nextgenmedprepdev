@@ -453,7 +453,7 @@ export class StripeService {
       paymentIntent.id,
       {
         type: metadata.type || 'interview_booking',
-        package_type: metadata.package_type || 'single',
+        package_type: metadata.package_type || 'essentials',
         service_type: metadata.service_type || 'generated',
         universities: metadata.universities || '',
         file_path: metadata.file_path || '',

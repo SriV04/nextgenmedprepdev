@@ -10,7 +10,7 @@ import { z } from 'zod';
 const interviewBookingSchema = z.object({
   email: z.string().email('Valid email is required'),
   name: z.string().min(1, 'Name is required'),
-  packageType: z.enum(['single', 'package'], {
+  packageType: z.enum(['essentials', 'core', 'premium'], {
     required_error: 'Package type is required'
   }),
   serviceType: z.enum(['generated', 'live'], {
@@ -64,8 +64,13 @@ export class InterviewBookingController {
 
       // Create Stripe payment session
       console.log('Creating Stripe payment session...');
-      const packageLabel = validatedData.packageType === 'single' ? 'Single Session' : 'Package Deal';
+      const packageLabel = validatedData.packageType === 'essentials' ? 'Essentials (Single Session)' : 
+                          validatedData.packageType === 'core' ? 'Core Interview Preparation' : 
+                          'Premium Interview Intensive';
       const serviceLabel = validatedData.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
+      
+      // Create package identifier for Supabase: packageType_serviceType
+      const packageIdentifier = `${validatedData.packageType}_${validatedData.serviceType}`;
       
       const paymentResponse = await stripeService.createCheckoutPayment({
         amount: validatedData.amount,
@@ -77,6 +82,7 @@ export class InterviewBookingController {
           type: 'interview_booking',
           package_type: validatedData.packageType,
           service_type: validatedData.serviceType,
+          package_identifier: packageIdentifier,
           universities: universitiesArray.join(','),
           file_path: filePath,
           notes: validatedData.notes || '',

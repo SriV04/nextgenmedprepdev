@@ -204,7 +204,7 @@ export default function InterviewsPage() {
                     <span className="text-3xl font-bold text-gray-900">£{interviewPackages[0].tutorPrice}</span>
                     <span className="text-sm text-gray-500">per interview</span>
                   </div>
-                  <Link href={`/interviews/payment?service=actual&package=${interviewPackages[0].id}`} className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
+                  <Link href={`/interviews/payment?service=live&package=${interviewPackages[0].id}`} className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -245,7 +245,7 @@ export default function InterviewsPage() {
                     <span className="text-3xl font-bold text-gray-900">£{interviewPackages[1].tutorPrice}</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
-                  <Link href={`/interviews/payment?service=actual&package=${interviewPackages[1].id}`} className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
+                  <Link href={`/interviews/payment?service=live&package=${interviewPackages[1].id}`} className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -280,7 +280,7 @@ export default function InterviewsPage() {
                     <span className="text-3xl font-bold text-gray-900">£{interviewPackages[2].tutorPrice}</span>
                     <span className="text-sm text-gray-500">complete package</span>
                   </div>
-                  <Link href={`/interviews/payment?service=actual&package=${interviewPackages[2].id}`} className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
+                  <Link href={`/interviews/payment?service=live&package=${interviewPackages[2].id}`} className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
                     Book Now
                   </Link>
                 </div>
@@ -343,7 +343,7 @@ export default function InterviewsPage() {
             Join hundreds of successful applicants who prepared with NextGenMedPrep
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/interviews/payment?service=actual&package=core" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
+            <Link href="/interviews/payment?service=live&package=core" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
               Book Mock Interview Now!
             </Link>
             <a href="mailto:contact@nextgenmedprep.com" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">

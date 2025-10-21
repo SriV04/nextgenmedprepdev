@@ -11,7 +11,7 @@ interface Step4ContactProps {
   personalStatement: File | null;
   additionalNotes: string;
   selectedPackage: ExtendedPackage | null;
-  serviceType: 'generated' | 'actual' | '';
+  serviceType: 'generated' | 'live' | '';
   selectedUniversities: string[];
   calculatePrice: () => number;
   canProceedToPayment: () => boolean;
