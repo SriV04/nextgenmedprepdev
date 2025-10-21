@@ -525,11 +525,7 @@ export class StripeService {
     }
     
     // 3. Create UCAT tutoring booking entry
-    const now = new Date();
-    // UCAT tutoring doesn't have specific timing like interviews, so we set a generic future date
-    const startTime = new Date(now.getTime() + 48 * 60 * 60 * 1000); // 2 days from now
-    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
-    
+
     const booking = await supabaseService.createBooking({
       user_id: user.id,
       package: `ucat_${packageId}`,
@@ -949,15 +945,9 @@ export class StripeService {
       // 3. Create booking entry
       console.log('Step 3: Creating booking entry...');
       const now = new Date();
-      // Event bookings typically don't have a specific time slot assignment at booking time
-      // We'll use a future date as a placeholder
-      const eventDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days from now
-      const eventEndDate = new Date(eventDate.getTime() + 3 * 60 * 60 * 1000); // 3 hours duration
       
       const bookingData = {
         user_id: user.id,
-        start_time: eventDate.toISOString(),
-        end_time: eventEndDate.toISOString(),
         package: `event_${eventId || 'conference'}`,
         amount: amount,
         email: customerEmail,
@@ -988,7 +978,7 @@ export class StripeService {
       // 5. Send notification email to admin team
       console.log('Step 5: Sending notification email to admin team...');
       try {
-        const adminEmail = process.env.ADMIN_EMAIL || 'contact@nextgenmedprep.com';
+        const adminEmail = process.env.REVIEW_TEAM_EMAIL || 'contact@nextgenmedprep.com';
         await this.sendAdminNotificationEmail(adminEmail, {
           id: booking.id,
           customerEmail,
