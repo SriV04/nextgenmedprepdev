@@ -170,6 +170,60 @@ export class EmailController {
     res.json(response);
   }
 
+  // Send custom email to users who booked a specific package
+  async sendEmailByPackage(req: Request, res: Response): Promise<void> {
+    const { package_type, subject, content } = req.body;
+
+    if (!package_type || !subject || !content) {
+      throw new AppError('package_type, subject, and content are required', 400);
+    }
+
+    // Get all bookings for the specified package
+    const bookings = await supabaseService.getBookingsByPackage(package_type);
+
+    if (bookings.length === 0) {
+      throw new AppError(`No bookings found for package: ${package_type}`, 404);
+    }
+
+    // Extract unique emails from bookings
+    const uniqueEmails = [...new Set(bookings.map(booking => booking.email).filter(Boolean))];
+
+    if (uniqueEmails.length === 0) {
+      throw new AppError('No email addresses found in bookings', 400);
+    }
+
+    console.log(`Found ${uniqueEmails.length} unique emails for package: ${package_type}`);
+
+    // Send emails in batches
+    const batchSize = 50;
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < uniqueEmails.length; i += batchSize) {
+      const batch = uniqueEmails.slice(i, i + batchSize);
+      try {
+        await emailService.sendNewsletterEmail(batch, subject, content);
+        successCount += batch.length;
+      } catch (error) {
+        console.error('Failed to send email batch:', error);
+        errorCount += batch.length;
+      }
+    }
+
+    const response: ApiResponse<{ sent: number; failed: number; total: number; package_type: string }> = {
+      success: true,
+      data: {
+        sent: successCount,
+        failed: errorCount,
+        total: uniqueEmails.length,
+        package_type: package_type,
+      },
+      message: `Email sent to ${successCount} recipients who booked ${package_type}`,
+    };
+
+    res.json(response);
+  }
+
   // Get email statistics
   async getEmailStats(req: Request, res: Response): Promise<void> {
     const { subscriptions, total } = await supabaseService.getSubscriptions({}, { limit: 10000 });

@@ -93,4 +93,9 @@ router.get(
   asyncHandler(emailController.getEmailStats.bind(emailController))
 );
 
+router.post(
+  '/emails/event-update',
+  asyncHandler(emailController.sendEmailByPackage.bind(emailController))
+);
+
 export default router;

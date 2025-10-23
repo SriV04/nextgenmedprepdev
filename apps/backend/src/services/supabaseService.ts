@@ -563,6 +563,20 @@ class SupabaseService {
     return data || [];
   }
 
+  async getBookingsByPackage(packageIdentifier: string): Promise<any[]> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .select('*')
+      .eq('package', packageIdentifier)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get bookings by package: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
   // Personal Statement methods
   async createPersonalStatement(personalStatement: CreatePersonalStatementRequest): Promise<PersonalStatement> {
     console.log('=== Creating Personal Statement in Database ===');
