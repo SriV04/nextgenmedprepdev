@@ -113,6 +113,41 @@ export default function Step4Contact({
           />
         </div>
       </div>
+
+      {/* Field Selection: Medicine vs Dentistry */}
+      <div className="mb-8">
+        <label className="block text-sm font-medium text-gray-300 mb-4">
+          Field of Study *
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => onContactChange('field', 'medicine')}
+            className={`p-6 rounded-lg border-2 transition-all ${
+              contact.field === 'medicine'
+                ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20'
+                : 'border-gray-600 bg-black/60 hover:border-indigo-400'
+            }`}
+          >
+            <div className="text-4xl mb-2">🏥</div>
+            <div className="text-xl font-bold text-white mb-1">Medicine</div>
+            <div className="text-sm text-gray-400">Medical school interviews</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => onContactChange('field', 'dentistry')}
+            className={`p-6 rounded-lg border-2 transition-all ${
+              contact.field === 'dentistry'
+                ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20'
+                : 'border-gray-600 bg-black/60 hover:border-indigo-400'
+            }`}
+          >
+            <div className="text-4xl mb-2">🦷</div>
+            <div className="text-xl font-bold text-white mb-1">Dentistry</div>
+            <div className="text-sm text-gray-400">Dental school interviews</div>
+          </button>
+        </div>
+      </div>
       
       <div className="col-span-2">
         <label className="block text-sm font-medium text-gray-300 mb-2">

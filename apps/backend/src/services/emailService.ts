@@ -226,20 +226,7 @@ class EmailService {
   }
 
   private getNewsletterTemplate(content: string): string {
-    return `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <header style="background-color: #2563eb; color: white; padding: 20px; text-align: center;">
-          <h1>NextGen MedPrep Newsletter</h1>
-        </header>
-        <main style="padding: 20px;">
-          ${content}
-        </main>
-        <footer style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
-          <p>You're receiving this because you subscribed to NextGen MedPrep newsletters.</p>
-          <p><a href="${process.env.FRONTEND_URL}/unsubscribe" style="color: #2563eb;">Unsubscribe</a></p>
-        </footer>
-      </div>
-    `;
+    return `${content}`;
   }
 
   private getNewJoinerConfirmationTemplate(fullName: string): EmailTemplate {

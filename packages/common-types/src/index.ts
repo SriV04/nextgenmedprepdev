@@ -9,6 +9,7 @@ export interface User {
   stripe_customer_id?: string;
   created_at: string;
   updated_at: string;
+  phone_number?: string;
 }
 
 export interface Subscription {
@@ -249,17 +250,28 @@ export interface Booking {
   feedback?: string;
   rating?: number;
   email?: string;
+  file_path?: string;
+  notes?: string;
+  universities?: string;
+  field?: 'medicine' | 'dentistry';
+  phone?: string;
 }
 
 export interface CreateBookingRequest {
   user_id: string;
   tutor_id?: string;
-  start_time: string;
-  end_time: string;
+  start_time?: string;
+  end_time?: string;
   package?: string;
   amount?: number;
   preferred_time?: string;
   email?: string;
+  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  file_path?: string;
+  notes?: string;
+  universities?: string;
+  field?: 'medicine' | 'dentistry';
+  phone?: string;
 }
 
 export interface UpdateBookingRequest {

@@ -438,7 +438,9 @@ export class StripeService {
     // Get payment metadata
     const metadata = paymentIntent.metadata;
     const customerEmail = metadata.customer_email;
-    const customerName = metadata.customer_name;
+    const firstName = metadata.first_name;
+    const lastName = metadata.last_name;
+    const field = metadata.field;
     const amount = paymentIntent.amount / 100; // Convert from cents
     
     if (!customerEmail) {
@@ -446,7 +448,18 @@ export class StripeService {
       return;
     }
     
-    console.log('Processing interview booking payment for:', { customerEmail, customerName, amount });
+    if (!firstName || !lastName) {
+      console.error('Missing first name or last name in payment metadata');
+      return;
+    }
+    
+    console.log('Processing interview booking payment for:', { 
+      customerEmail, 
+      firstName, 
+      lastName, 
+      field,
+      amount 
+    });
     
     // Use the controller method to confirm the booking
     await interviewBookingController.confirmInterviewBooking(
@@ -457,11 +470,14 @@ export class StripeService {
         service_type: metadata.service_type || 'generated',
         universities: metadata.universities || '',
         file_path: metadata.file_path || '',
+        first_name: firstName,
+        last_name: lastName,
+        field: field,
         notes: metadata.notes,
         preferred_date: metadata.preferred_date,
       },
       customerEmail,
-      customerName,
+      `${firstName} ${lastName}`,
       amount
     );
     

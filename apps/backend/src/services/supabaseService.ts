@@ -444,7 +444,6 @@ class SupabaseService {
   // Booking methods
   async createBooking(bookingData: {
     user_id: string;
-    tutor_id?: string;
     package?: string;
     amount?: number;
     preferred_time?: string;
@@ -453,6 +452,8 @@ class SupabaseService {
     file_path?: string;
     notes?: string;
     universities?: string;
+    field?: 'medicine' | 'dentistry';
+    phone?: string;
   }): Promise<any> {
     console.log('=== Creating Booking in Database ===');
     console.log('Input booking data:', bookingData);

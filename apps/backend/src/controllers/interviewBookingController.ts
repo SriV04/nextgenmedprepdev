@@ -9,7 +9,12 @@ import { z } from 'zod';
 // Validation schema for interview booking
 const interviewBookingSchema = z.object({
   email: z.string().email('Valid email is required'),
-  name: z.string().min(1, 'Name is required'),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  field: z.enum(['medicine', 'dentistry'], {
+    required_error: 'Field (medicine or dentistry) is required'
+  }),
+  phone: z.string().optional(),
   packageType: z.enum(['essentials', 'core', 'premium'], {
     required_error: 'Package type is required'
   }),
@@ -62,6 +67,9 @@ export class InterviewBookingController {
         ? validatedData.universities 
         : [validatedData.universities];
 
+      // Create full name from first and last name
+      const fullName = `${validatedData.firstName} ${validatedData.lastName}`;
+
       // Create Stripe payment session
       console.log('Creating Stripe payment session...');
       const packageLabel = validatedData.packageType === 'essentials' ? 'Essentials (Single Session)' : 
@@ -77,7 +85,7 @@ export class InterviewBookingController {
         currency: 'GBP',
         description: `Interview Preparation - ${packageLabel} (${serviceLabel})`,
         customer_email: validatedData.email,
-        customer_name: validatedData.name,
+        customer_name: fullName,
         metadata: {
           type: 'interview_booking',
           package_type: validatedData.packageType,
@@ -85,6 +93,10 @@ export class InterviewBookingController {
           package_identifier: packageIdentifier,
           universities: universitiesArray.join(','),
           file_path: filePath,
+          first_name: validatedData.firstName,
+          last_name: validatedData.lastName,
+          field: validatedData.field,
+          phone: validatedData.phone || '',
           notes: validatedData.notes || '',
           preferred_date: validatedData.preferredDate || ''
         }
@@ -149,6 +161,10 @@ export class InterviewBookingController {
       service_type: string;
       universities: string;
       file_path: string;
+      first_name: string;
+      last_name: string;
+      field: string;
+      phone?: string;
       notes?: string;
       preferred_date?: string;
     },
@@ -163,14 +179,16 @@ export class InterviewBookingController {
       console.log('Customer:', customerEmail, customerName);
       console.log('Amount:', amount);
 
-      // Get or create user
+      // Get or create user using first and last name from metadata
+      const fullName = `${metadata.first_name} ${metadata.last_name}`;
       let user = await supabaseService.getUserByEmail(customerEmail);
       if (!user) {
         console.log('Creating new user...');
         user = await supabaseService.createUser({
           email: customerEmail,
-          full_name: customerName,
-          role: 'student'
+          full_name: fullName,
+          role: 'student',
+          phone_number: metadata.phone || undefined
         });
       }
 
@@ -188,6 +206,8 @@ export class InterviewBookingController {
         file_path: metadata.file_path,
         notes: metadata.notes || '',
         universities: universitiesArray.join(', '),
+        field: metadata.field as 'medicine' | 'dentistry',
+        phone: metadata.phone || undefined,
       });
 
       console.log('Booking created:', booking);
@@ -198,7 +218,7 @@ export class InterviewBookingController {
         customerEmail,
         {
           bookingId: booking.id,
-          userName: customerName,
+          userName: fullName,
           packageType: metadata.package_type,
           serviceType: metadata.service_type,
           universities: universitiesArray,
@@ -224,7 +244,7 @@ export class InterviewBookingController {
       await emailService.sendInterviewBookingNotificationEmail({
         bookingId: booking.id,
         customerEmail: customerEmail,
-        customerName: customerName,
+        customerName: fullName,
         packageType: metadata.package_type,
         serviceType: metadata.service_type,
         universities: universitiesArray,

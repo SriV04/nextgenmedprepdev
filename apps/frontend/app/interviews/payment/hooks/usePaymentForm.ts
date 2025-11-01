@@ -8,6 +8,7 @@ export interface ContactDetails {
   lastName: string;
   email: string;
   phone: string;
+  field: 'medicine' | 'dentistry' | '';
 }
 
 export function usePaymentForm() {
@@ -19,7 +20,8 @@ export function usePaymentForm() {
     firstName: '',
     lastName: '',
     email: '',
-    phone: ''
+    phone: '',
+    field: ''
   });
   const [personalStatement, setPersonalStatement] = useState<File | null>(null);
   const [additionalNotes, setAdditionalNotes] = useState('');
@@ -56,7 +58,7 @@ export function usePaymentForm() {
   const isStep1Complete = !!serviceType;
   const isStep2Complete = !!packageId && !!selectedPackage;
   const isStep3Complete = universities.length > 0;
-  const isStep4Complete = !!(contact.firstName && contact.lastName && contact.email);
+  const isStep4Complete = !!(contact.firstName && contact.lastName && contact.email && contact.field);
 
   const canProceedToUniversities = (): boolean => isStep1Complete && isStep2Complete;
   const canProceedToDetails = (): boolean => canProceedToUniversities() && isStep3Complete;
@@ -131,7 +133,10 @@ export function usePaymentForm() {
       
       // Add contact details
       formData.append('email', contact.email);
-      formData.append('name', `${contact.firstName} ${contact.lastName}`);
+      formData.append('firstName', contact.firstName);
+      formData.append('lastName', contact.lastName);
+      formData.append('field', contact.field);
+      formData.append('phone', contact.phone);
       
       // Add booking details
       formData.append('packageType', packageId);
