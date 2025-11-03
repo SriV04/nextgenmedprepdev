@@ -49,13 +49,22 @@ class EmailService {
     });
   }
 
-  async sendNewsletterEmail(emails: string[], subject: string, content: string): Promise<void> {
-    const mailOptions = {
+  async sendNewsletterEmail(
+    emails: string[], 
+    subject: string, 
+    content: string, 
+    attachments?: Array<{ filename: string; path?: string; content?: Buffer | string; contentType?: string }>
+  ): Promise<void> {
+    const mailOptions: any = {
       from: process.env.EMAIL_FROM,
       bcc: emails, // Use BCC to hide other recipients
       subject: subject,
       html: this.getNewsletterTemplate(content),
     };
+
+    if (attachments && attachments.length > 0) {
+      mailOptions.attachments = attachments;
+    }
 
     await this.transporter.sendMail(mailOptions);
   }

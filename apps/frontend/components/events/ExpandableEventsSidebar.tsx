@@ -118,7 +118,7 @@ const ExpandableEventsSidebar: React.FC<ExpandableEventsSidebarProps> = ({
                       <p className="text-xs md:text-sm text-gray-600 mb-2">{event.description}</p>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs md:text-sm gap-2">
                         <span className="text-gray-500">{formatDate(event.date)} • {event.time}</span>
-                        <span className="text-green-600 font-medium">{event.spots} spots left</span>
+                        <span className="text-green-600 font-medium">{event.spots} spots</span>
                       </div>
                     </div>
                     <button className="ml-2 p-1 hover:bg-gray-100 rounded">

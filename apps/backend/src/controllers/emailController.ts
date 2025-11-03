@@ -187,6 +187,10 @@ export class EmailController {
 
     // Extract unique emails from bookings
     const uniqueEmails = [...new Set(bookings.map(booking => booking.email).filter(Boolean))];
+    
+    // Add contact@nextgenmedprep.com for visibility
+    uniqueEmails.push('contact@nextgenmedprep.com');
+    uniqueEmails.push('sri@nextgenmedprep.com');
 
     if (uniqueEmails.length === 0) {
       throw new AppError('No email addresses found in bookings', 400);

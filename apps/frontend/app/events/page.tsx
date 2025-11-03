@@ -6,25 +6,29 @@ import '@/styles/globals.css';
 const ConferencesPage = () => {
   // Upcoming event
   const upcomingEvent = {
-    id: "Interview_Background_Knowledge_Conference_2025_11_02",
-    title: "Interview Background Knowledge Conference",
-    date: "2025-11-02",
-    time: "10:00 AM - 11:00 AM",
+    id: "Interview_Question_Approaches_Conference_TBC",
+    title: "Interview Question Approaches",
+    date: "TBC",
+    time: "TBC",
     type: "interview",
-    description: "Master the background knowledge needed for medical school interviews",
+    description: "Change how to approach the questions?",
     spots: 30,
     price: 15,
-    details: "This comprehensive conference will equip you with all the essential background knowledge required to excel in your medical school interviews. From ethical frameworks to healthcare systems, we'll cover everything you need to know.",
+    details: "This comprehensive conference will transform how you approach medical school interview questions. Learn the frameworks, strategies, and techniques that will help you deliver clear, structured, and compelling answers.",
     benefits: [
-      "Master the Four Pillars of Medical Ethics",
-      "Understand NHS structure and current healthcare issues",
-      "Practice applying knowledge to real interview scenarios",
-      "Interactive Session with expert tutors",
-      "Q&A with Admissions Experts", 
+      "Using background and NHS knowledge",
+      "Clear, structured answers (STAR, SPIES, ethics)",
+      '"Why Medicine" and motivation',
+      "Work experience reflection",
+      "Ethical reasoning and judgement",
+      "Breaking bad news (SPIKES)",
+      "Communication and empathy",
+      "Data and scenario analysis",
+      "Insight into the patient perspective"
     ],
     whatToExpect: [
       "Interactive session with real interview questions",
-      "Comprehensive background knowledge materials",
+      "Comprehensive question approach frameworks",
       "Small group discussions and practice",
       "Q&A with medical students and doctors",
       "Downloadable resource pack"
@@ -36,6 +40,15 @@ const ConferencesPage = () => {
 
   // Previous events data
   const previousEvents = [
+    {
+      id: 1,
+      title: "Interview Background Knowledge Conference",
+      date: "2025-11-02",
+      time: "10:00 AM - 11:00 AM",
+      type: "interview",
+      description: "Master the background knowledge needed for medical school interviews",
+      spots: 30
+    },
     {
       id: 2,
       title: "Pathways to Medicine Conference",
@@ -163,7 +176,7 @@ const ConferencesPage = () => {
               {upcomingEvent.title}
             </h2>
             <p className="text-xl text-white/90 mb-2">
-              📅 November 2nd, 2025 | ⏰ {upcomingEvent.time}
+              📅 Date TBC | ⏰ Time TBC
             </p>
             <p className="text-lg text-white/80">
               {upcomingEvent.description}
@@ -231,14 +244,14 @@ const ConferencesPage = () => {
                     <span className="text-2xl">📅</span>
                     <div>
                       <p className="font-semibold">Date</p>
-                      <p className="text-sm text-gray-600">November 2nd, 2025</p>
+                      <p className="text-sm text-gray-600">TBC</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
                     <span className="text-2xl">⏰</span>
                     <div>
                       <p className="font-semibold">Time</p>
-                      <p className="text-sm text-gray-600">{upcomingEvent.time}</p>
+                      <p className="text-sm text-gray-600">TBC</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
@@ -290,14 +303,14 @@ const ConferencesPage = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Accelerate Your Journey?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Don't miss out on the Interview Background Knowledge Conference - your key to interview success!
+            Don't miss out on the Interview Question Approaches Conference - your key to interview success!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
               href={`/event-pay?event=${encodeURIComponent(upcomingEvent.title)}&date=${upcomingEvent.date}&price=${upcomingEvent.price}`}
               className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
             >
-              Book November 2nd Event
+              Book Your Spot (Date TBC)
             </Link>
           </div>
         </div>
