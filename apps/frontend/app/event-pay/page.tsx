@@ -160,10 +160,6 @@ function EventPaymentContent() {
                   <span className="text-green-500 font-bold">✓</span>
                   <span className="text-gray-700">Networking opportunities</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 font-bold">✓</span>
-                  <span className="text-gray-700">Certificate of attendance</span>
-                </li>
               </ul>
             </div>
           </div>
