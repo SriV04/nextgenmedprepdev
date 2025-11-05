@@ -6,10 +6,10 @@ import '@/styles/globals.css';
 const ConferencesPage = () => {
   // Upcoming event
   const upcomingEvent = {
-    id: "Interview_Question_Approaches_Conference_TBC",
+    id: "Interview_Question_Approaches_Conference_2025_11_29",
     title: "Interview Question Approaches",
-    date: "TBC",
-    time: "TBC",
+    date: "2025-11-29",
+    time: "10:00 AM - 11:00 AM",
     type: "interview",
     description: "Change how to approach the questions?",
     spots: 30,
@@ -176,7 +176,7 @@ const ConferencesPage = () => {
               {upcomingEvent.title}
             </h2>
             <p className="text-xl text-white/90 mb-2">
-              📅 Date TBC | ⏰ Time TBC
+              📅 Date {upcomingEvent.date} | ⏰ Time {upcomingEvent.time}
             </p>
             <p className="text-lg text-white/80">
               {upcomingEvent.description}
@@ -244,14 +244,14 @@ const ConferencesPage = () => {
                     <span className="text-2xl">📅</span>
                     <div>
                       <p className="font-semibold">Date</p>
-                      <p className="text-sm text-gray-600">TBC</p>
+                      <p className="text-sm text-gray-600">{upcomingEvent.date}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
                     <span className="text-2xl">⏰</span>
                     <div>
                       <p className="font-semibold">Time</p>
-                      <p className="text-sm text-gray-600">TBC</p>
+                      <p className="text-sm text-gray-600">{upcomingEvent.time}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 text-gray-700">
