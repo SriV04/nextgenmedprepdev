@@ -316,6 +316,68 @@ export class BookingController {
   }
 
   /**
+   * Get all bookings (admin only)
+   */
+  async getAllBookings(req: Request, res: Response): Promise<void> {
+    try {
+      const bookings = await supabaseService.getAllBookings();
+
+      const response: ApiResponse = {
+        success: true,
+        data: bookings
+      };
+
+      res.json(response);
+    } catch (error: any) {
+      console.error('Get all bookings error:', error);
+      
+      if (error instanceof AppError) {
+        res.status(error.statusCode).json({
+          success: false,
+          error: error.message
+        });
+        return;
+      }
+      
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+
+  /**
+   * Get booking statistics (admin only)
+   */
+  async getBookingStats(req: Request, res: Response): Promise<void> {
+    try {
+      const stats = await supabaseService.getBookingStats();
+
+      const response: ApiResponse = {
+        success: true,
+        data: stats
+      };
+
+      res.json(response);
+    } catch (error: any) {
+      console.error('Get booking stats error:', error);
+      
+      if (error instanceof AppError) {
+        res.status(error.statusCode).json({
+          success: false,
+          error: error.message
+        });
+        return;
+      }
+      
+      res.status(500).json({
+        success: false,
+        error: 'Internal server error'
+      });
+    }
+  }
+
+  /**
    * Update booking
    */
   async updateBooking(req: Request, res: Response): Promise<void> {

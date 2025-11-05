@@ -117,7 +117,7 @@ function EventPaymentContent() {
               <TicketIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Full Access</h3>
               <p className="text-gray-600 text-sm">
-                Entry to yearly conference with 2 admissions experts
+                Entry to conference with 2 admissions experts
               </p>
             </div>
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">

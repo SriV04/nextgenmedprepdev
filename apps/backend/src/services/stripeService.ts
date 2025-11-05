@@ -1042,7 +1042,7 @@ ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
 ${data.numberOfTickets ? `- Number of Tickets: ${data.numberOfTickets}` : ''}
 ${data.message ? `- Message: ${data.message}` : ''}
 
-Please check the admin dashboard for more details.
+Please check the Tutor Dashboard for more details.
     `;
 
     const html = `
@@ -1087,7 +1087,7 @@ Please check the admin dashboard for more details.
 
         <div style="margin: 20px 0; padding: 15px; background-color: #f3f4f6; border-radius: 8px;">
           <p style="margin: 0; font-weight: bold;">Action Required:</p>
-          <p style="margin: 5px 0 0 0;">Please check the admin dashboard for more details and to process this booking.</p>
+          <p style="margin: 5px 0 0 0;">Please check the Tutor Dashboard for more details and to process this booking.</p>
         </div>
       </div>
     `;

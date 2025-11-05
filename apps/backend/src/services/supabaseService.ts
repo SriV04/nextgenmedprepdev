@@ -564,6 +564,64 @@ class SupabaseService {
     return data || [];
   }
 
+  async getAllBookings(): Promise<any[]> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(`Failed to get all bookings: ${error.message}`);
+    }
+
+    return data || [];
+  }
+
+  async getBookingStats(): Promise<{
+    total: number;
+    recent: number;
+    byStatus: Record<string, number>;
+    byPackage: Record<string, number>;
+    totalRevenue: number;
+  }> {
+    const { data, error } = await this.supabase
+      .from('bookings')
+      .select('*');
+
+    if (error) {
+      throw new Error(`Failed to get booking stats: ${error.message}`);
+    }
+
+    const bookings = data || [];
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const stats = {
+      total: bookings.length,
+      recent: bookings.filter((b: any) => new Date(b.created_at) >= sevenDaysAgo).length,
+      byStatus: {} as Record<string, number>,
+      byPackage: {} as Record<string, number>,
+      totalRevenue: 0,
+    };
+
+    bookings.forEach((booking: any) => {
+      // Count by status
+      const status = booking.status || 'pending';
+      stats.byStatus[status] = (stats.byStatus[status] || 0) + 1;
+
+      // Count by package
+      const pkg = booking.package || 'other';
+      stats.byPackage[pkg] = (stats.byPackage[pkg] || 0) + 1;
+
+      // Sum revenue (only paid bookings)
+      if (booking.payment_status === 'paid') {
+        stats.totalRevenue += booking.amount || 0;
+      }
+    });
+
+    return stats;
+  }
+
   async getBookingsByPackage(packageIdentifier: string): Promise<any[]> {
     const { data, error } = await this.supabase
       .from('bookings')

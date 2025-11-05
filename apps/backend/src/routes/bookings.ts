@@ -4,6 +4,15 @@ import { asyncHandler } from '../middleware/errorHandler';
 
 const router = Router();
 
+// Admin routes - get all bookings and stats
+router.get('/bookings/all',
+  asyncHandler(bookingController.getAllBookings.bind(bookingController))
+);
+
+router.get('/bookings/stats',
+  asyncHandler(bookingController.getBookingStats.bind(bookingController))
+);
+
 // Career consultation booking routes
 router.post('/bookings/career-consultation', 
   asyncHandler(bookingController.createCareerConsultation.bind(bookingController))

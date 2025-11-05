@@ -1,0 +1,640 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Download, RefreshCw } from 'lucide-react';
+
+interface Booking {
+  id: string;
+  email: string;
+  package: string;
+  amount: number;
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  status?: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
+  created_at: string;
+  preferred_time?: string;
+  universities?: string;
+  field?: 'medicine' | 'dentistry';
+  phone?: string;
+  notes?: string;
+  file_path?: string;
+  tutor_id?: string;
+  start_time?: string;
+  end_time?: string;
+  complete?: boolean;
+}
+
+interface BookingStats {
+  total: number;
+  recent: number;
+  byStatus: Record<string, number>;
+  byPackage: Record<string, number>;
+  totalRevenue: number;
+}
+
+export default function AdminDashboard() {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [stats, setStats] = useState<BookingStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [packageFilter, setPackageFilter] = useState<string>('all');
+  const [paymentFilter, setPaymentFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch bookings and stats in parallel
+      const [bookingsRes, statsRes] = await Promise.all([
+        fetch(`${backendUrl}/api/v1/bookings/all`),
+        fetch(`${backendUrl}/api/v1/bookings/stats`),
+      ]);
+
+      if (!bookingsRes.ok || !statsRes.ok) {
+        throw new Error('Failed to fetch data');
+      }
+
+      const bookingsData = await bookingsRes.json();
+      const statsData = await statsRes.json();
+
+      if (bookingsData.success) {
+        setBookings(bookingsData.data);
+      }
+
+      if (statsData.success) {
+        setStats(statsData.data);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while fetching data');
+      console.error('Fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const updateBookingStatus = async (bookingId: string, status: string) => {
+    try {
+      setUpdatingStatus(bookingId);
+      const response = await fetch(`${backendUrl}/api/v1/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update booking');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Update local state
+        setBookings((prev) =>
+          prev.map((b) => (b.id === bookingId ? { ...b, status: status as any } : b))
+        );
+        // Refresh stats
+        fetchData();
+      }
+    } catch (err: any) {
+      alert('Failed to update booking: ' + err.message);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const downloadPersonalStatement = async (bookingId: string) => {
+    try {
+      const response = await fetch(
+        `${backendUrl}/api/v1/interview-bookings/${bookingId}/personal-statement`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to get download URL');
+      }
+
+      const result = await response.json();
+      if (result.success && result.data.download_url) {
+        window.open(result.data.download_url, '_blank');
+      }
+    } catch (err: any) {
+      alert('Failed to download personal statement: ' + err.message);
+    }
+  };
+
+  const filteredBookings = bookings.filter((booking) => {
+    // Search filter - search in email and user name if available
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const emailMatch = booking.email?.toLowerCase().includes(query);
+      // Search in notes for customer name if it exists
+      const notesMatch = booking.notes?.toLowerCase().includes(query);
+      if (!emailMatch && !notesMatch) return false;
+    }
+
+    // Customer filter - show all bookings by selected customer
+    if (selectedCustomer && booking.email !== selectedCustomer) return false;
+
+    // Status filter
+    if (statusFilter !== 'all' && booking.status !== statusFilter) return false;
+    
+    // Payment filter
+    if (paymentFilter !== 'all' && booking.payment_status !== paymentFilter) return false;
+    
+    // Package filter
+    if (packageFilter !== 'all') {
+      // Check if package starts with the filter
+      if (!booking.package?.toLowerCase().includes(packageFilter.toLowerCase())) return false;
+    }
+    return true;
+  });
+
+  // Get unique customers for quick filter
+  const uniqueCustomers = Array.from(new Set(bookings.map(b => b.email)))
+    .sort()
+    .map(email => ({
+      email,
+      count: bookings.filter(b => b.email === email).length
+    }));
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'no_show':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      case 'refunded':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+          <h2 className="text-red-800 font-semibold text-lg mb-2">Error Loading Dashboard</h2>
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={fetchData}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Tutor Dashboard</h1>
+            <p className="text-gray-600 mt-1">Manage bookings and view statistics</p>
+          </div>
+          <button
+            onClick={fetchData}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+
+        {/* Statistics Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-sm font-medium text-gray-500">Total Bookings</h3>
+              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-sm font-medium text-gray-500">Recent (7 days)</h3>
+              <p className="text-3xl font-bold text-blue-600 mt-2">{stats.recent}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-sm font-medium text-gray-500">Total Revenue</h3>
+              <p className="text-3xl font-bold text-green-600 mt-2">
+                {formatCurrency(stats.totalRevenue)}
+              </p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-sm font-medium text-gray-500">Completed</h3>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {stats.byStatus.completed || 0}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filters</h3>
+          
+          {/* Search Bar */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search by Customer Email or Name
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSelectedCustomer(null); // Clear customer filter when searching
+                }}
+                placeholder="Enter email or name..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Customer Filter */}
+          {selectedCustomer && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+              <div>
+                <span className="text-sm font-medium text-blue-900">
+                  Viewing all bookings for: {selectedCustomer}
+                </span>
+                <span className="ml-2 text-sm text-blue-700">
+                  ({filteredBookings.length} {filteredBookings.length === 1 ? 'booking' : 'bookings'})
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedCustomer(null)}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="no_show">No Show</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Payment Status
+              </label>
+              <select
+                value={paymentFilter}
+                onChange={(e) => setPaymentFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Payment Statuses</option>
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+                <option value="failed">Failed</option>
+                <option value="refunded">Refunded</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Package Type</label>
+              <select
+                value={packageFilter}
+                onChange={(e) => setPackageFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Packages</option>
+                <option value="essentials">Essentials</option>
+                <option value="core">Core</option>
+                <option value="premium">Premium</option>
+                <option value="career">Career Consultation</option>
+                <option value="event">Event</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Showing {filteredBookings.length} of {bookings.length} bookings
+            </div>
+            {(searchQuery || selectedCustomer || statusFilter !== 'all' || paymentFilter !== 'all' || packageFilter !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCustomer(null);
+                  setStatusFilter('all');
+                  setPaymentFilter('all');
+                  setPackageFilter('all');
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Customer Access */}
+        {!selectedCustomer && !searchQuery && uniqueCustomers.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Customer Access</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
+              {uniqueCustomers.slice(0, 12).map((customer) => (
+                <button
+                  key={customer.email}
+                  onClick={() => setSelectedCustomer(customer.email)}
+                  className="text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                >
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {customer.email}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {customer.count} {customer.count === 1 ? 'booking' : 'bookings'}
+                  </div>
+                </button>
+              ))}
+            </div>
+            {uniqueCustomers.length > 12 && (
+              <div className="mt-3 text-center text-sm text-gray-500">
+                Showing 12 of {uniqueCustomers.length} customers. Use search to find more.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bookings Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Package
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Payment
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredBookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                      No bookings found matching the selected filters.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBookings.map((booking) => (
+                    <>
+                      <tr key={booking.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{booking.email}</div>
+                          {!selectedCustomer && (
+                            <button
+                              onClick={() => setSelectedCustomer(booking.email)}
+                              className="text-xs text-blue-600 hover:text-blue-800 mt-1"
+                            >
+                              View all bookings →
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{booking.package}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {formatCurrency(booking.amount)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getPaymentStatusColor(
+                              booking.payment_status
+                            )}`}
+                          >
+                            {booking.payment_status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
+                              booking.status
+                            )}`}
+                          >
+                            {booking.status || 'pending'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(booking.created_at)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() =>
+                              setExpandedBooking(
+                                expandedBooking === booking.id ? null : booking.id
+                              )
+                            }
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            {expandedBooking === booking.id ? (
+                              <ChevronUp className="w-5 h-5" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5" />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                      {expandedBooking === booking.id && (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-4 bg-gray-50">
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Booking Details
+                                  </h4>
+                                  <dl className="space-y-1">
+                                    <div>
+                                      <dt className="text-xs text-gray-500">Booking ID:</dt>
+                                      <dd className="text-sm text-gray-900 font-mono">
+                                        {booking.id}
+                                      </dd>
+                                    </div>
+                                    {booking.field && (
+                                      <div>
+                                        <dt className="text-xs text-gray-500">Field:</dt>
+                                        <dd className="text-sm text-gray-900 capitalize">
+                                          {booking.field}
+                                        </dd>
+                                      </div>
+                                    )}
+                                    {booking.universities && (
+                                      <div>
+                                        <dt className="text-xs text-gray-500">Universities:</dt>
+                                        <dd className="text-sm text-gray-900">
+                                          {booking.universities}
+                                        </dd>
+                                      </div>
+                                    )}
+                                    {booking.phone && (
+                                      <div>
+                                        <dt className="text-xs text-gray-500">Phone:</dt>
+                                        <dd className="text-sm text-gray-900">{booking.phone}</dd>
+                                      </div>
+                                    )}
+                                    {booking.preferred_time && (
+                                      <div>
+                                        <dt className="text-xs text-gray-500">Preferred Time:</dt>
+                                        <dd className="text-sm text-gray-900">
+                                          {booking.preferred_time}
+                                        </dd>
+                                      </div>
+                                    )}
+                                    {booking.notes && (
+                                      <div>
+                                        <dt className="text-xs text-gray-500">Notes:</dt>
+                                        <dd className="text-sm text-gray-900">{booking.notes}</dd>
+                                      </div>
+                                    )}
+                                  </dl>
+                                </div>
+                                <div>
+                                  <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                    Actions
+                                  </h4>
+                                  <div className="space-y-2">
+                                    <div>
+                                      <label className="block text-xs text-gray-500 mb-1">
+                                        Update Status:
+                                      </label>
+                                      <select
+                                        value={booking.status || ''}
+                                        onChange={(e) =>
+                                          updateBookingStatus(booking.id, e.target.value)
+                                        }
+                                        disabled={updatingStatus === booking.id}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                                      >
+                                        <option value="">Select status</option>
+                                        <option value="confirmed">Confirmed</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                        <option value="no_show">No Show</option>
+                                      </select>
+                                    </div>
+                                    {booking.file_path && (
+                                      <button
+                                        onClick={() => downloadPersonalStatement(booking.id)}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                      >
+                                        <Download className="w-4 h-4" />
+                                        Download Personal Statement
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

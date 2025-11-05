@@ -269,7 +269,7 @@ class EmailService {
 
     return {
       subject: `New Tutor Application: ${newJoiner.full_name}`,
-      text: `New tutor application received!\n\nApplicant Details:\nName: ${newJoiner.full_name}\nEmail: ${newJoiner.email}\nPhone: ${newJoiner.phone_number || 'Not provided'}\nUniversity Year: ${newJoiner.university_year}\nSubjects: ${subjectsStr}\nAvailability: ${availabilityStr}\n\nPlease review the full application in the admin dashboard.`,
+      text: `New tutor application received!\n\nApplicant Details:\nName: ${newJoiner.full_name}\nEmail: ${newJoiner.email}\nPhone: ${newJoiner.phone_number || 'Not provided'}\nUniversity Year: ${newJoiner.university_year}\nSubjects: ${subjectsStr}\nAvailability: ${availabilityStr}\n\nPlease review the full application in the tutor dashboard.`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #dc2626;">New Tutor Application Received! 🎓</h1>
@@ -304,7 +304,7 @@ class EmailService {
           </div>
           <div style="margin: 20px 0; padding: 15px; background-color: #f3f4f6; border-radius: 8px;">
             <p style="margin: 0; font-weight: bold;">Action Required:</p>
-            <p style="margin: 5px 0 0 0;">Please review the full application in the admin dashboard and contact the applicant for next steps.</p>
+            <p style="margin: 5px 0 0 0;">Please review the full application in the tutor dashboard and contact the applicant for next steps.</p>
           </div>
           <p>Application ID: ${newJoiner.id}</p>
         </div>
@@ -618,7 +618,7 @@ The NextGen MedPrep Team
   3. Complete the review within 48 hours
   4. Upload feedback and notify the customer - For now you can email the feedback directly to the customer.
 
-  Admin Dashboard: ${process.env.FRONTEND_URL}/admin/personal-statements/${data.personalStatementId}
+  Tutor Dashboard: ${process.env.FRONTEND_URL}/admin/personal-statements/${data.personalStatementId}
     `;
 
     const html = `
@@ -643,7 +643,7 @@ The NextGen MedPrep Team
           <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
             <h3 style="margin-top: 0; color: #991b1b;">Action Required</h3>
             <ol style="color: #374151; margin: 0; padding-left: 20px;">
-              <li>Download the personal statement from the admin dashboard</li>
+              <li>Download the personal statement from the Tutor Dashboard</li>
               <li>Assign a reviewer</li>
               <li>Complete the review within <strong>48 hours</strong></li>
               <li>Upload feedback and notify the customer</li>
