@@ -73,9 +73,12 @@ export default function Step2Package({ serviceType, packageId, onPackageSelect }
               <div className="text-3xl font-bold text-indigo-400">
                 £{serviceType === 'generated' ? pkg.generatedPrice : pkg.tutorPrice}
               </div>
-              {pkg.originalPrice && (
+              {((pkg.originalPrice && serviceType === 'live') || pkg.originalGeneratedPrice) && (
                 <div className="text-sm text-gray-500 line-through">
-                  £{pkg.originalPrice}
+                  £{serviceType === 'generated' && pkg.originalGeneratedPrice
+                    ? pkg.originalGeneratedPrice
+                    : pkg.originalPrice
+                  }
                 </div>
               )}
             </div>
