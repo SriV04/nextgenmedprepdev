@@ -29,6 +29,18 @@ const interviewBookingSchema = z.object({
       return [val];
     }
   })),
+  interviewDates: z.array(z.object({
+    universityId: z.string(),
+    date: z.string(),
+    timeSlot: z.string()
+  })).optional().or(z.string().transform((val) => {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })),
   notes: z.string().optional(),
   amount: z.number().positive('Amount must be positive').or(z.string().transform((val) => parseFloat(val))),
   preferredDate: z.string().optional(),
@@ -92,6 +104,7 @@ export class InterviewBookingController {
           service_type: validatedData.serviceType,
           package_identifier: packageIdentifier,
           universities: universitiesArray.join(','),
+          interview_dates: validatedData.interviewDates ? JSON.stringify(validatedData.interviewDates) : '',
           file_path: filePath,
           first_name: validatedData.firstName,
           last_name: validatedData.lastName,
@@ -160,6 +173,7 @@ export class InterviewBookingController {
       package_type: string;
       service_type: string;
       universities: string;
+      interview_dates?: string;
       file_path: string;
       first_name: string;
       last_name: string;

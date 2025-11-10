@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Download, RefreshCw } from 'lucide-react';
+import InterviewBookingModal from '../../components/InterviewBookingModal';
 
 interface Booking {
   id: string;
@@ -38,6 +39,8 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -113,6 +116,72 @@ export default function AdminDashboard() {
       alert('Failed to update booking: ' + err.message);
     } finally {
       setUpdatingStatus(null);
+    }
+  };
+
+  const handleRowClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  const handleScheduleInterview = async (bookingId: string, interviewId: number, date: string, time: string, comments: string) => {
+    try {
+      // Combine date and time into start_time
+      const startTime = `${date}T${time}:00`;
+      
+      // For core packages, we need to handle multiple interviews
+      // For now, we'll store the interview info in the notes field
+      const isCore = bookings.find(b => b.id === bookingId)?.package?.toLowerCase().includes('core');
+      let noteText = comments;
+      
+      if (isCore) {
+        noteText = `Interview ${interviewId} scheduled for ${date} at ${time}. ${comments || ''}`.trim();
+      } else {
+        noteText = comments ? `${comments} (Scheduled on ${new Date().toISOString()})` : `Scheduled on ${new Date().toISOString()}`;
+      }
+      
+      const response = await fetch(`${backendUrl}/api/v1/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          start_time: startTime,
+          notes: noteText,
+          status: 'confirmed'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to schedule interview');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Update local state
+        setBookings((prev) =>
+          prev.map((b) => 
+            b.id === bookingId 
+              ? { 
+                  ...b, 
+                  start_time: startTime, 
+                  status: 'confirmed' as any,
+                  notes: noteText
+                } 
+              : b
+          )
+        );
+        // Refresh stats
+        fetchData();
+        
+        if (isCore) {
+          alert(`Interview ${interviewId} scheduled successfully!`);
+        } else {
+          alert('Interview scheduled successfully!');
+        }
+      }
+    } catch (err: any) {
+      alert('Failed to schedule interview: ' + err.message);
     }
   };
 
@@ -438,6 +507,14 @@ export default function AdminDashboard() {
 
         {/* Bookings Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Bookings</h3>
+              <p className="text-sm text-gray-500">
+                💡 Click on any row to view details, schedule interviews, or manage core package interviews
+              </p>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -475,12 +552,19 @@ export default function AdminDashboard() {
                 ) : (
                   filteredBookings.map((booking) => (
                     <>
-                      <tr key={booking.id} className="hover:bg-gray-50">
+                      <tr 
+                        key={booking.id} 
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleRowClick(booking)}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{booking.email}</div>
                           {!selectedCustomer && (
                             <button
-                              onClick={() => setSelectedCustomer(booking.email)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent row click
+                                setSelectedCustomer(booking.email);
+                              }}
                               className="text-xs text-blue-600 hover:text-blue-800 mt-1"
                             >
                               View all bookings →
@@ -488,7 +572,22 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{booking.package}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-gray-900">{booking.package}</div>
+                            {(booking.package?.toLowerCase().includes('live') || 
+                              booking.package?.toLowerCase().includes('_live') ||
+                              booking.package?.toLowerCase().includes('interview') ||
+                              booking.package?.toLowerCase().includes('core')) && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                {booking.package?.toLowerCase().includes('core') ? 'Core' : 'Live'}
+                              </span>
+                            )}
+                            {booking.package?.toLowerCase().includes('core') && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                3 Interviews
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
@@ -518,11 +617,12 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
-                            onClick={() =>
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent row click
                               setExpandedBooking(
                                 expandedBooking === booking.id ? null : booking.id
-                              )
-                            }
+                              );
+                            }}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             {expandedBooking === booking.id ? (
@@ -634,6 +734,17 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
+
+        {/* Interview Booking Modal */}
+        <InterviewBookingModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          booking={selectedBooking}
+          onSchedule={handleScheduleInterview}
+        />
       </div>
     </div>
   );

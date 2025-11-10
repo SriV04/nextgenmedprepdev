@@ -27,6 +27,9 @@ export interface UKMedicalSchool {
   decisionDate?: string;
   uniqueAspects?: string;
   
+  // Available interview time slots (for live sessions)
+  availableTimeSlots?: string[];
+  
   // Academic Information
   description: string;
   establishedYear: number;
