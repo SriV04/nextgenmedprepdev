@@ -1,8 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Download, RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, UserPlus, LogOut, User } from 'lucide-react';
 import InterviewBookingModal from '../../components/InterviewBookingModal';
+import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
+import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
+import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
+import { TutorCalendarProvider, useTutorCalendar } from '../../contexts/TutorCalendarContext';
+import { createClient } from '../../utils/supabase/client';
+import { useRouter } from 'next/navigation';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface Booking {
   id: string;
@@ -32,7 +39,7 @@ interface BookingStats {
   totalRevenue: number;
 }
 
-export default function AdminDashboard() {
+function DashboardContent() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [stats, setStats] = useState<BookingStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +48,16 @@ export default function AdminDashboard() {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  // Tab management
+  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar'>('bookings');
+
+  // Use calendar context - only need tutors for display purposes
+  const { tutors } = useTutorCalendar();
+  
+  const router = useRouter();
+  const supabase = createClient();
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -50,6 +67,24 @@ export default function AdminDashboard() {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/auth/login?redirectTo=/tutor-dashboard');
+      } else {
+        setUser(user);
+      }
+    };
+    checkAuth();
+  }, [router, supabase]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
 
   const fetchData = async () => {
     try {
@@ -204,6 +239,25 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSlotClick = (slot: any, tutor: any) => {
+    if (slot.type === 'interview' && slot.bookingId) {
+      // Find the booking and open modal
+      const booking = bookings.find(b => b.id === slot.bookingId);
+      if (booking) {
+        setSelectedBooking(booking);
+        setIsModalOpen(true);
+      } else {
+        alert(`Interview: ${slot.title}\nStudent: ${slot.student}\nPackage: ${slot.package}`);
+      }
+    } else if (slot.type === 'available') {
+      alert(`Available slot for ${tutor.tutorName}\nTime: ${slot.startTime} - ${slot.endTime}`);
+    }
+  };
+
+  const handleUnassignedInterviewClick = (interview: any) => {
+    alert(`Interview Details:\nStudent: ${interview.studentName}\nPackage: ${interview.package}\nUniversities: ${interview.universities}`);
+  };
+
   const filteredBookings = bookings.filter((booking) => {
     // Search filter - search in email and user name if available
     if (searchQuery.trim()) {
@@ -316,24 +370,65 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Tutor Dashboard</h1>
             <p className="text-gray-600 mt-1">Manage bookings and view statistics</p>
+            {user && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{user.email}</span>
+              </div>
+            )}
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchData}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-gray-200 mb-6">
           <button
-            onClick={fetchData}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => setActiveTab('bookings')}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+              activeTab === 'bookings'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
           >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
+            <List className="w-5 h-5" />
+            Bookings
+          </button>
+          <button
+            onClick={() => setActiveTab('calendar')}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+              activeTab === 'calendar'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <CalendarIcon className="w-5 h-5" />
+            Calendar
           </button>
         </div>
 
         {/* Statistics Cards */}
-        {stats && (
+        {activeTab === 'bookings' && stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-sm font-medium text-gray-500">Total Bookings</h3>
@@ -358,7 +453,10 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Search and Filters */}
+        {/* Bookings Tab Content */}
+        {activeTab === 'bookings' && (
+          <>
+            {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filters</h3>
           
@@ -735,17 +833,45 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Interview Booking Modal */}
-        <InterviewBookingModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedBooking(null);
-          }}
-          booking={selectedBooking}
-          onSchedule={handleScheduleInterview}
-        />
+            {/* Interview Booking Modal */}
+            <InterviewBookingModal
+              isOpen={isModalOpen}
+              onClose={() => {
+                setIsModalOpen(false);
+                setSelectedBooking(null);
+              }}
+              booking={selectedBooking}
+              onSchedule={handleScheduleInterview}
+            />
+          </>
+        )}
+
+        {/* Calendar Tab Content */}
+        {activeTab === 'calendar' && (
+          <div className="flex flex-col gap-6">
+            {/* Unassigned Interviews - Horizontal Scrollable */}
+            <UnassignedInterviews
+              onInterviewClick={handleUnassignedInterviewClick}
+            />
+
+            {/* Calendar Grid - Full Width */}
+            <TutorCalendar
+              onSlotClick={handleSlotClick}
+            />
+          </div>
+        )}
+
+        {/* Availability Modal */}
+        <AvailabilityModal />
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <TutorCalendarProvider>
+      <DashboardContent />
+    </TutorCalendarProvider>
   );
 }
