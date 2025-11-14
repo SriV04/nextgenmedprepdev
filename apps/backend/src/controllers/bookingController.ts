@@ -387,7 +387,6 @@ export class BookingController {
       const updateSchema = z.object({
         status: z.enum(['confirmed', 'cancelled', 'completed', 'no_show']).optional(),
         payment_status: z.enum(['pending', 'paid', 'failed', 'refunded']).optional(),
-        tutor_id: z.string().uuid().optional(),
         preferred_time: z.string().optional(),
         reschedule_requested: z.boolean().optional(),
         rescheduled_time: z.string().datetime().optional(),

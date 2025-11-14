@@ -6,6 +6,8 @@ import paymentRoutes from './payments';
 import personalStatementRoutes from './personalStatements';
 import bookingRoutes from './bookings';
 import interviewBookingRoutes from './interviewBookings';
+import tutorRoutes from './tutors';
+import interviewRoutes from './interviews';
 
 const router = Router();
 
@@ -27,5 +29,7 @@ router.use('/api/v1', paymentRoutes);
 router.use('/api/v1', personalStatementRoutes);
 router.use('/api/v1', bookingRoutes);
 router.use('/api/v1', interviewBookingRoutes);
+router.use('/api/v1', tutorRoutes);
+router.use('/api/v1', interviewRoutes);
 
 export default router;

@@ -150,8 +150,9 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
 
     const dateStr = formatDate(selectedDate);
     const slotsToMark = Array.from(selectedSlots).map(slotKey => {
-      const [tutorId, ...timeParts] = slotKey.split('-');
-      const time = timeParts.join('-'); // Handle time formats like "09:00"
+      const lastDash = slotKey.lastIndexOf("-");
+      const tutorId = slotKey.slice(0, lastDash);
+      const time = slotKey.slice(lastDash + 1);
       return { tutorId, date: dateStr, time };
     });
 

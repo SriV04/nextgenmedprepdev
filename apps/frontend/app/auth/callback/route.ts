@@ -8,9 +8,38 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
-    if (!error) {
+    if (!error && data.user) {
+      // Create tutor account in backend
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+        
+        const response = await fetch(`${backendUrl}/api/v1/tutors`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: data.user.id,
+            name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Tutor',
+            email: data.user.email,
+            subjects: ['Interviews', 'UCAT', 'Personal Statement'], // Default subject, can be updated later
+          }),
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('Tutor account created/verified:', result.data);
+        } else {
+          console.error('Failed to create tutor account:', result);
+        }
+      } catch (backendError) {
+        console.error('Error calling backend to create tutor:', backendError);
+        // Continue anyway - user is authenticated
+      }
+      
       return NextResponse.redirect(`${origin}${redirectTo}`);
     }
   }
