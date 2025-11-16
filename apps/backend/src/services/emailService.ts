@@ -811,7 +811,7 @@ Booking Details:
 - Booking ID: ${data.id}
 
 What happens next:
-• You'll receive a confirmation email with event details closer to the Event within 48 hours
+• You'll receive a confirmation email with event details closer to the Event 
 • Your will be able to join the event via zoom 
 • Bring your questions and energy!
 
