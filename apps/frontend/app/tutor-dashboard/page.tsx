@@ -6,6 +6,7 @@ import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
 import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
 import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
+import CommitChangesBar from '../../components/tutor-calendar/CommitChangesBar';
 import { TutorCalendarProvider, useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import { createClient } from '../../utils/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -849,6 +850,9 @@ function DashboardContent() {
         {/* Calendar Tab Content */}
         {activeTab === 'calendar' && (
           <div className="flex flex-col gap-6">
+            {/* Commit Changes Bar */}
+            <CommitChangesBar />
+
             {/* Unassigned Interviews - Horizontal Scrollable */}
             <UnassignedInterviews
               onInterviewClick={handleUnassignedInterviewClick}

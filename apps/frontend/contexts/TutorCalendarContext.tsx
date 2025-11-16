@@ -42,6 +42,18 @@ interface AvailabilitySlot {
   endTime: string;
 }
 
+interface PendingChange {
+  id: string;
+  type: 'assignment';
+  interviewId: string;
+  tutorId: string;
+  tutorName: string;
+  date: string;
+  time: string;
+  studentName: string;
+  studentEmail: string;
+}
+
 interface TutorCalendarContextType {
   // State
   tutors: TutorSchedule[];
@@ -51,6 +63,8 @@ interface TutorCalendarContextType {
   isAvailabilityModalOpen: boolean;
   loading: boolean;
   error: string | null;
+  pendingChanges: PendingChange[];
+  hasPendingChanges: boolean;
 
   // Actions
   setSelectedDate: (date: Date) => void;
@@ -60,6 +74,8 @@ interface TutorCalendarContextType {
   closeAvailabilityModal: () => void;
   saveAvailability: (tutorId: string, availability: AvailabilitySlot[]) => Promise<void>;
   refreshData: () => Promise<void>;
+  commitChanges: () => Promise<void>;
+  discardChanges: () => void;
 }
 
 const TutorCalendarContext = createContext<TutorCalendarContextType | undefined>(undefined);
@@ -185,8 +201,10 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+  const hasPendingChanges = pendingChanges.length > 0;
 
   // Fetch data from backend
   const fetchData = async () => {
@@ -347,8 +365,21 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       // Refresh data to get updated state from database
       await fetchData();
 
+      // Add to pending changes
+      const newChange: PendingChange = {
+        id: `${interviewId}-${Date.now()}`,
+        type: 'assignment',
+        interviewId,
+        tutorId,
+        tutorName: tutor.tutorName,
+        date,
+        time,
+        studentName: interview.studentName,
+        studentEmail: interview.studentEmail,
+      };
+      setPendingChanges(prev => [...prev, newChange]);
+
       console.log(`Successfully assigned ${interview.studentName} to ${tutor.tutorName} on ${date} at ${time}`);
-      alert(`✓ Interview assigned to ${tutor.tutorName}`);
     } catch (err: any) {
       console.error('Error assigning interview:', err);
       alert(`Failed to assign interview: ${err.message}`);
@@ -458,6 +489,65 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     await fetchData();
   };
 
+  const commitChanges = async () => {
+    if (pendingChanges.length === 0) {
+      alert('No pending changes to commit');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Send all pending changes to backend to trigger emails
+      for (const change of pendingChanges) {
+        const response = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/confirm`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tutor_id: change.tutorId,
+            tutor_name: change.tutorName,
+            scheduled_at: `${change.date}T${change.time}:00Z`,
+            student_email: change.studentEmail,
+            student_name: change.studentName,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to confirm interview');
+        }
+
+        console.log(`Sent confirmation emails for interview ${change.interviewId}`);
+      }
+
+      // Clear pending changes
+      setPendingChanges([]);
+      
+      // Refresh data
+      await fetchData();
+
+      alert(`✓ Successfully committed ${pendingChanges.length} change(s) and sent confirmation emails!`);
+    } catch (err: any) {
+      console.error('Error committing changes:', err);
+      alert(`Failed to commit changes: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const discardChanges = () => {
+    if (pendingChanges.length === 0) return;
+    
+    if (confirm(`Discard ${pendingChanges.length} pending change(s)?`)) {
+      setPendingChanges([]);
+      // Refresh to get original state
+      fetchData();
+    }
+  };
+
   const value: TutorCalendarContextType = {
     tutors,
     unassignedInterviews,
@@ -466,6 +556,8 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     isAvailabilityModalOpen,
     loading,
     error,
+    pendingChanges,
+    hasPendingChanges,
     setSelectedDate,
     assignInterview,
     markSlotsAvailable,
@@ -473,6 +565,8 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     closeAvailabilityModal,
     saveAvailability,
     refreshData,
+    commitChanges,
+    discardChanges,
   };
 
   return (

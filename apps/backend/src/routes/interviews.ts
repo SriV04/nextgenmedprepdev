@@ -8,6 +8,7 @@ import {
   assignInterviewToTutor,
   completeInterview,
   deleteInterview,
+  confirmInterview,
 } from '../controllers/interviewController';
 
 const router = Router();
@@ -20,6 +21,7 @@ router.get('/interviews/:id', getInterview);
 router.put('/interviews/:id', updateInterview);
 router.post('/interviews/:id/assign', assignInterviewToTutor);
 router.post('/interviews/:id/complete', completeInterview);
+router.post('/interviews/:id/confirm', confirmInterview);
 router.delete('/interviews/:id', deleteInterview);
 
 export default router;

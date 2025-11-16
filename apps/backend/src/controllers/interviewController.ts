@@ -488,3 +488,67 @@ export const deleteInterview = async (
     next(error);
   }
 };
+
+/**
+ * Confirm interview and send confirmation emails
+ */
+export const confirmInterview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { tutor_id, tutor_name, scheduled_at, student_email, student_name } = req.body;
+
+    // Validate required fields
+    if (!tutor_id || !tutor_name || !scheduled_at || !student_email || !student_name) {
+      res.status(400).json({
+        success: false,
+        message: 'Missing required fields: tutor_id, tutor_name, scheduled_at, student_email, student_name',
+      });
+      return;
+    }
+
+    const supabase = createSupabaseClient();
+
+    // Get tutor email
+    const { data: tutor, error: tutorError } = await supabase
+      .from('tutors')
+      .select('email')
+      .eq('id', tutor_id)
+      .single();
+
+    if (tutorError || !tutor) {
+      res.status(404).json({
+        success: false,
+        message: 'Tutor not found',
+      });
+      return;
+    }
+
+    // Send confirmation emails
+    const emailService = require('../services/emailService').default;
+    await emailService.sendInterviewConfirmationEmail(
+      tutor.email,
+      tutor_name,
+      student_email,
+      student_name,
+      scheduled_at,
+      id
+    );
+
+    res.json({
+      success: true,
+      message: 'Confirmation emails sent successfully',
+      data: {
+        interview_id: id,
+        tutor_email: tutor.email,
+        student_email,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error in confirmInterview:', error);
+    next(error);
+  }
+};

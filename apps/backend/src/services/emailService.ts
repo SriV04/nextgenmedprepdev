@@ -1195,6 +1195,148 @@ Booking ID: ${data.bookingId}
       return false;
     }
   }
+
+  // Generate a Zoom meeting link (placeholder - integrate with Zoom API later)
+  private generateZoomLink(interviewId: string): string {
+    // TODO: Integrate with Zoom API to create actual meetings
+    // For now, return a placeholder link
+    return `https://zoom.us/j/${Math.floor(Math.random() * 1000000000)}?pwd=placeholder`;
+  }
+
+  async sendInterviewConfirmationEmail(
+    tutorEmail: string,
+    tutorName: string,
+    studentEmail: string,
+    studentName: string,
+    scheduledAt: string,
+    interviewId: string
+  ): Promise<void> {
+    const zoomLink = this.generateZoomLink(interviewId);
+    const interviewDate = new Date(scheduledAt);
+    const dateStr = interviewDate.toLocaleDateString('en-GB', { 
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    const timeStr = interviewDate.toLocaleTimeString('en-GB', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+
+    // Email to tutor
+    const tutorTemplate = this.getInterviewConfirmationTemplateTutor(
+      tutorName,
+      studentName,
+      dateStr,
+      timeStr,
+      zoomLink
+    );
+
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: tutorEmail,
+      subject: tutorTemplate.subject,
+      text: tutorTemplate.text,
+      html: tutorTemplate.html,
+    });
+
+    // Email to student
+    const studentTemplate = this.getInterviewConfirmationTemplateStudent(
+      studentName,
+      tutorName,
+      dateStr,
+      timeStr,
+      zoomLink
+    );
+
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: studentEmail,
+      subject: studentTemplate.subject,
+      text: studentTemplate.text,
+      html: studentTemplate.html,
+    });
+
+    console.log(`Sent interview confirmation emails to ${tutorEmail} and ${studentEmail}`);
+  }
+
+  private getInterviewConfirmationTemplateTutor(
+    tutorName: string,
+    studentName: string,
+    dateStr: string,
+    timeStr: string,
+    zoomLink: string
+  ): EmailTemplate {
+    return {
+      subject: `New Interview Scheduled - ${studentName}`,
+      text: `Hi ${tutorName},\n\nYou have a new interview scheduled!\n\nStudent: ${studentName}\nDate: ${dateStr}\nTime: ${timeStr}\n\nZoom Link: ${zoomLink}\n\nPlease join the meeting on time and prepare accordingly.\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #2563eb;">New Interview Scheduled 📅</h1>
+          <p>Hi <strong>${tutorName}</strong>,</p>
+          <p>You have a new interview scheduled!</p>
+          
+          <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">Interview Details</h3>
+            <p style="margin: 10px 0;"><strong>Student:</strong> ${studentName}</p>
+            <p style="margin: 10px 0;"><strong>Date:</strong> ${dateStr}</p>
+            <p style="margin: 10px 0;"><strong>Time:</strong> ${timeStr}</p>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Join the Meeting</h3>
+            <a href="${zoomLink}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Join Zoom Meeting</a>
+            <p style="margin-top: 15px; font-size: 12px; color: #6b7280;">Or copy this link: ${zoomLink}</p>
+          </div>
+
+          <p>Please join the meeting on time and prepare accordingly.</p>
+          <p>Best regards,<br>The NextGen MedPrep Team</p>
+        </div>
+      `
+    };
+  }
+
+  private getInterviewConfirmationTemplateStudent(
+    studentName: string,
+    tutorName: string,
+    dateStr: string,
+    timeStr: string,
+    zoomLink: string
+  ): EmailTemplate {
+    return {
+      subject: `Interview Confirmed with ${tutorName}`,
+      text: `Hi ${studentName},\n\nYour interview has been confirmed!\n\nTutor: ${tutorName}\nDate: ${dateStr}\nTime: ${timeStr}\n\nZoom Link: ${zoomLink}\n\nPlease join the meeting on time. We recommend logging in 5 minutes early to test your audio and video.\n\nGood luck!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #059669;">Interview Confirmed! ✅</h1>
+          <p>Hi <strong>${studentName}</strong>,</p>
+          <p>Your interview has been confirmed!</p>
+          
+          <div style="background-color: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #047857;">Interview Details</h3>
+            <p style="margin: 10px 0;"><strong>Tutor:</strong> ${tutorName}</p>
+            <p style="margin: 10px 0;"><strong>Date:</strong> ${dateStr}</p>
+            <p style="margin: 10px 0;"><strong>Time:</strong> ${timeStr}</p>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Join the Meeting</h3>
+            <a href="${zoomLink}" style="display: inline-block; background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Join Zoom Meeting</a>
+            <p style="margin-top: 15px; font-size: 12px; color: #6b7280;">Or copy this link: ${zoomLink}</p>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; color: #92400e;"><strong>💡 Tip:</strong> Please join the meeting on time. We recommend logging in 5 minutes early to test your audio and video.</p>
+          </div>
+
+          <p>Good luck!</p>
+          <p>Best regards,<br>The NextGen MedPrep Team</p>
+        </div>
+      `
+    };
+  }
 }
 
 export default new EmailService();
