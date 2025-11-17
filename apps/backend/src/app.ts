@@ -34,19 +34,36 @@ const allowedOrigins = [
   'https://nextgenmedprep.com'
 ];
 
+// Wildcard patterns for Vercel preview deployments
+const allowedOriginPatterns = [
+  /^https:\/\/nextgenmedprepdev-frontend.*\.vercel\.app$/,
+  /^https:\/\/.*-nextgenmedprepdev-frontend\.vercel\.app$/
+];
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
+    // Check exact matches
     if (allowedOrigins.includes(origin)) {
       console.log(`CORS allowed request from origin: ${origin}`);
       callback(null, true);
-    } else {
-      console.warn(`CORS blocked request from origin: ${origin}`);
-      console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
-      callback(new Error('Not allowed by CORS'));
+      return;
     }
+    
+    // Check pattern matches for preview deployments
+    const isPatternMatch = allowedOriginPatterns.some(pattern => pattern.test(origin));
+    if (isPatternMatch) {
+      console.log(`CORS allowed request from preview deployment: ${origin}`);
+      callback(null, true);
+      return;
+    }
+    
+    console.warn(`CORS blocked request from origin: ${origin}`);
+    console.warn(`Allowed origins: ${allowedOrigins.join(', ')}`);
+    console.warn(`Allowed patterns: Vercel preview deployments`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
