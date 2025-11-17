@@ -29,7 +29,12 @@ export default function LoginForm() {
       setError(null);
 
       const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      
+      // Get the current origin, prioritizing window.location for client-side
+      let origin = '';
+      if (typeof window !== 'undefined') {
+        origin = window.location.origin;
+      }
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',

@@ -2,9 +2,14 @@ import { createClient } from '../../../utils/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const requestUrl = new URL(request.url);
+  const { searchParams } = requestUrl;
   const code = searchParams.get('code');
   const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
+
+  // Determine the correct origin (Vercel or localhost)
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || 
+                 (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : requestUrl.origin);
 
   if (code) {
     const supabase = await createClient();
