@@ -12,6 +12,9 @@ import { createClient } from '../../utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
+
 interface Booking {
   id: string;
   email: string;

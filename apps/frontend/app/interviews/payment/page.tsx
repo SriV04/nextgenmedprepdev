@@ -14,6 +14,9 @@ import Step3_5InterviewDates from '../../../components/interview-payment/Step3_5
 import Step4Contact from '../../../components/interview-payment/Step4Contact';
 import { TutorCalendarProvider } from '../../../contexts/TutorCalendarContext';
 
+// Disable static generation for this page (uses TutorCalendarProvider which needs runtime)
+export const dynamic = 'force-dynamic';
+
 export default function InterviewsPaymentPage() {
   const {
     // State
