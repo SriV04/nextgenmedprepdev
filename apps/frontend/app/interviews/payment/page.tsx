@@ -12,6 +12,7 @@ import Step2Package from '../../../components/interview-payment/Step2Package';
 import Step3Universities from '../../../components/interview-payment/Step3Universities';
 import Step3_5InterviewDates from '../../../components/interview-payment/Step3_5InterviewDates';
 import Step4Contact from '../../../components/interview-payment/Step4Contact';
+import { TutorCalendarProvider } from '../../../contexts/TutorCalendarContext';
 
 export default function InterviewsPaymentPage() {
   const {
@@ -55,24 +56,25 @@ export default function InterviewsPaymentPage() {
   } = usePaymentForm();
 
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Starfield background */}
-      <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10">
-        {Array.from({length: 144}).map((_, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.3, 0] }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity, 
-              repeatType: "mirror", 
-              delay: i * 0.01 % 3
-            }}
-            className="border border-indigo-500/20"
-          />
-        ))}
-      </div>
+    <TutorCalendarProvider>
+      <main className="min-h-screen bg-black text-white overflow-hidden">
+        {/* Starfield background */}
+        <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10">
+          {Array.from({length: 144}).map((_, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.3, 0] }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                repeatType: "mirror", 
+                delay: i * 0.01 % 3
+              }}
+              className="border border-indigo-500/20"
+            />
+          ))}
+        </div>
 
       {/* Header */}
       <div className="relative z-10 bg-black/80 border-b border-indigo-500/30 backdrop-blur-xl">
@@ -184,5 +186,6 @@ export default function InterviewsPaymentPage() {
         </AnimatePresence>
       </div>
     </main>
+    </TutorCalendarProvider>
   );
 }

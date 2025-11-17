@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, UserPlus, LogOut, User } from 'lucide-react';
 import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
@@ -650,9 +650,8 @@ function DashboardContent() {
                   </tr>
                 ) : (
                   filteredBookings.map((booking) => (
-                    <>
+                    <React.Fragment key={booking.id}>
                       <tr 
-                        key={booking.id} 
                         className="hover:bg-gray-50 cursor-pointer"
                         onClick={() => handleRowClick(booking)}
                       >
@@ -826,7 +825,7 @@ function DashboardContent() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </React.Fragment>
                   ))
                 )}
               </tbody>
