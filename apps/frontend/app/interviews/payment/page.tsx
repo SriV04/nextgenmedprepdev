@@ -23,7 +23,7 @@ export default function InterviewsPaymentPage() {
     serviceType,
     packageId,
     universities,
-    interviewDates,
+    availability,
     contact,
     personalStatement,
     additionalNotes,
@@ -36,12 +36,8 @@ export default function InterviewsPaymentPage() {
     canProceedToDetails,
     canProceedToPayment,
     
-    // Interview dates handlers
-    handleInterviewDateAdd,
-    handleInterviewDateRemove,
-    getUniversityDateCount,
-    getTotalDateCount,
-    canAddDateForUniversity,
+    // Availability handler
+    handleAvailabilityChange,
     
     // Handlers
     handleServiceTypeChange,
@@ -159,12 +155,8 @@ export default function InterviewsPaymentPage() {
             <Step3_5InterviewDates
               selectedUniversities={universities}
               selectedPackage={selectedPackage}
-              interviewDates={interviewDates}
-              onInterviewDateAdd={handleInterviewDateAdd}
-              onInterviewDateRemove={handleInterviewDateRemove}
-              getUniversityDateCount={getUniversityDateCount}
-              getTotalDateCount={getTotalDateCount}
-              canAddDateForUniversity={canAddDateForUniversity}
+              availability={availability}
+              onAvailabilityChange={handleAvailabilityChange}
               onProceedToNext={handleProceedToNext}
             />
           )}

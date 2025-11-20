@@ -11,8 +11,7 @@ export interface ContactDetails {
   field: 'medicine' | 'dentistry' | '';
 }
 
-export interface InterviewDate {
-  universityId: string;
+export interface AvailabilitySlot {
   date: string;
   timeSlot: string;
 }
@@ -22,7 +21,7 @@ export function usePaymentForm() {
   const [serviceType, setServiceType] = useState<'generated' | 'live' | ''>('');
   const [packageId, setPackageId] = useState('');
   const [universities, setUniversities] = useState<string[]>([]);
-  const [interviewDates, setInterviewDates] = useState<InterviewDate[]>([]);
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [contact, setContact] = useState<ContactDetails>({
     firstName: '',
     lastName: '',
@@ -65,7 +64,7 @@ export function usePaymentForm() {
   const isStep1Complete = !!serviceType;
   const isStep2Complete = !!packageId && !!selectedPackage;
   const isStep3Complete = universities.length > 0;
-  const isStep3_5Complete = serviceType === 'generated' ? true : interviewDates.length > 0; // Only require dates for live sessions
+  const isStep3_5Complete = true; // Availability is optional
   const isStep4Complete = !!(contact.firstName && contact.lastName && contact.email && contact.field);
 
   const canProceedToUniversities = (): boolean => isStep1Complete && isStep2Complete;
@@ -101,60 +100,20 @@ export function usePaymentForm() {
       const isSelected = prev.includes(universityId);
       
       if (isSelected) {
-        // Remove university and its associated interview dates
-        setInterviewDates(prevDates => prevDates.filter(date => date.universityId !== universityId));
         return prev.filter(id => id !== universityId);
       } else {
         const maxUniversities = selectedPackage.interviews;
         if (prev.length < maxUniversities) {
           return [...prev, universityId];
         } else {
-          // Replace the first one if at limit and remove its dates
-          const removedUniversityId = prev[0];
-          setInterviewDates(prevDates => prevDates.filter(date => date.universityId !== removedUniversityId));
           return [...prev.slice(1), universityId];
         }
       }
     });
   };
 
-  const handleInterviewDateAdd = (universityId: string, date: string, timeSlot: string) => {
-    if (!selectedPackage) return false;
-    
-    const maxDates = selectedPackage.interviews;
-    const currentDateCount = interviewDates.length;
-    
-    if (currentDateCount >= maxDates) {
-      return false; // Cannot add more dates
-    }
-    
-    const newDate: InterviewDate = {
-      universityId,
-      date,
-      timeSlot
-    };
-    
-    setInterviewDates(prev => [...prev, newDate]);
-    return true;
-  };
-
-  const handleInterviewDateRemove = (universityId: string, date: string, timeSlot: string) => {
-    setInterviewDates(prev => 
-      prev.filter(d => !(d.universityId === universityId && d.date === date && d.timeSlot === timeSlot))
-    );
-  };
-
-  const getUniversityDateCount = (universityId: string): number => {
-    return interviewDates.filter(date => date.universityId === universityId).length;
-  };
-
-  const getTotalDateCount = (): number => {
-    return interviewDates.length;
-  };
-
-  const canAddDateForUniversity = (universityId: string): boolean => {
-    if (!selectedPackage) return false;
-    return getTotalDateCount() < selectedPackage.interviews;
+  const handleAvailabilityChange = (newAvailability: AvailabilitySlot[]) => {
+    setAvailability(newAvailability);
   };
 
   const handleContactChange = (field: keyof ContactDetails, value: string) => {
@@ -209,9 +168,9 @@ export function usePaymentForm() {
       formData.append('universities', JSON.stringify(universities));
       formData.append('amount', calculatePrice().toString());
       
-      // Add interview dates for live sessions
-      if (serviceType === 'live' && interviewDates.length > 0) {
-        formData.append('interviewDates', JSON.stringify(interviewDates));
+      // Add availability for live sessions
+      if (serviceType === 'live' && availability.length > 0) {
+        formData.append('availability', JSON.stringify(availability));
       }
       
       // Add optional fields
@@ -274,7 +233,7 @@ export function usePaymentForm() {
     serviceType,
     packageId,
     universities,
-    interviewDates,
+    availability,
     contact,
     personalStatement,
     additionalNotes,
@@ -294,12 +253,8 @@ export function usePaymentForm() {
     canProceedToDetails,
     canProceedToPayment,
     
-    // Interview dates handlers
-    handleInterviewDateAdd,
-    handleInterviewDateRemove,
-    getUniversityDateCount,
-    getTotalDateCount,
-    canAddDateForUniversity,
+    // Availability handler
+    handleAvailabilityChange,
     
     // Handlers
     handleServiceTypeChange,
