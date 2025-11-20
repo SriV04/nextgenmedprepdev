@@ -160,7 +160,7 @@ export default function InterviewsPaymentPage() {
               onProceedToNext={handleProceedToNext}
             />
           )}
-
+        
           {/* Step 4: Contact Details & Checkout */}
           {currentStep === 4 && canProceedToDetails() && (
             <Step4Contact

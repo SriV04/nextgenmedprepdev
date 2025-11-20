@@ -35,9 +35,9 @@ export default function Step3_5InterviewDates({
   if (!selectedPackage || selectedUniversities.length === 0) return null;
 
   const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'
+    '09:00', '10:00', '11:00', '12:00',
+    '13:00', '14:00', '15:00', '16:00',
+    '17:00', '18:00'
   ];
   const totalSlots = availability?.length || 0;
 
@@ -168,6 +168,31 @@ export default function Step3_5InterviewDates({
     return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
   }, []);
 
+  // Check if a date has any availability slots
+  const dateHasAvailability = (date: Date): boolean => {
+    const dateStr = formatDate(date);
+    return availability?.some(slot => slot.date === dateStr) || false;
+  };
+
+  // Get count of slots for a date
+  const getDateSlotCount = (date: Date): number => {
+    const dateStr = formatDate(date);
+    return availability?.filter(slot => slot.date === dateStr).length || 0;
+  };
+
+  // Check if a time slot is already added to availability
+  const isTimeSlotAdded = (time: string): boolean => {
+    if (!selectedDate) return false;
+    const dateStr = formatDate(selectedDate);
+    const endHour = parseInt(time.split(':')[0]) + (time.includes(':30') ? 1 : 1);
+    const endMinute = time.includes(':30') ? '30' : '00';
+    const timeSlot = `${time} - ${String(endHour).padStart(2, '0')}:${endMinute}`;
+    
+    return availability?.some(
+      slot => slot.date === dateStr && slot.timeSlot === timeSlot
+    ) || false;
+  };
+
   // Toggle time slot selection
   const toggleTimeSlot = (time: string) => {
     setSelectedTimeSlots(prev => {
@@ -211,9 +236,8 @@ export default function Step3_5InterviewDates({
 
     onAvailabilityChange(updatedAvailability);
 
-    // Clear selection after adding
+    // Clear only selected time slots, keep the date selected
     setSelectedTimeSlots([]);
-    setSelectedDate(null);
   };
 
   const calendarDays = getCalendarDays();
@@ -250,14 +274,6 @@ export default function Step3_5InterviewDates({
                 <h3 className="text-xl font-bold text-white">
                   {formatMonthYear(currentMonth)}
                 </h3>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleToday}
-                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-500/20 rounded-lg transition-all"
-                  >
-                    Today
-                  </button>
-                </div>
               </div>
 
               {/* Weekday Headers */}
@@ -278,6 +294,8 @@ export default function Step3_5InterviewDates({
                   const isSelected = isDateSelected(day);
                   const isTodayDate = isToday(day);
                   const inMonth = isCurrentMonth(day);
+                  const hasAvailability = dateHasAvailability(day);
+                  const slotCount = getDateSlotCount(day);
 
                   return (
                     <motion.button
@@ -290,6 +308,8 @@ export default function Step3_5InterviewDates({
                         ${!inMonth ? 'text-gray-600' : 'text-gray-200'}
                         ${isSelected 
                           ? 'bg-indigo-500 text-white ring-2 ring-indigo-400 shadow-lg shadow-indigo-500/50' 
+                          : hasAvailability
+                          ? 'bg-green-500/20 border-2 border-green-500/50 text-white'
                           : isTodayDate
                           ? 'bg-purple-500/20 border-2 border-purple-400 text-purple-200'
                           : 'bg-black/40 border border-gray-600 hover:bg-indigo-500/10 hover:border-indigo-500/50'
@@ -299,7 +319,14 @@ export default function Step3_5InterviewDates({
                       whileTap={!isPast ? { scale: 0.95 } : {}}
                     >
                       {day.getDate()}
-                      {isTodayDate && !isSelected && (
+                      {hasAvailability && !isSelected && (
+                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
+                          <div className="flex items-center justify-center">
+                            <div className="w-1 h-1 bg-green-400 rounded-full" />
+                          </div>
+                        </div>
+                      )}
+                      {isTodayDate && !isSelected && !hasAvailability && (
                         <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-purple-400 rounded-full" />
                       )}
                     </motion.button>
@@ -328,19 +355,25 @@ export default function Step3_5InterviewDates({
             animate={{ opacity: 1, x: 0 }}
           >
             <div className="border-b border-indigo-500/30 px-6 py-4 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
                   <h3 className="text-lg font-bold text-white">Select Time Slots</h3>
                   <p className="text-sm text-gray-400 mt-1">
                     {selectedDate ? 'Choose your available times' : 'Pick a date first'}
                   </p>
                 </div>
                 {selectedTimeSlots.length > 0 && (
-                  <div className="bg-indigo-500/20 px-3 py-1 rounded-full">
-                    <span className="text-sm font-semibold text-indigo-300">
-                      {selectedTimeSlots.length} selected
-                    </span>
-                  </div>
+                  <motion.button
+                    onClick={handleAddAvailability}
+                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg shadow-green-500/25 flex items-center gap-2 whitespace-nowrap"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add {selectedTimeSlots.length}
+                  </motion.button>
                 )}
               </div>
             </div>
@@ -355,36 +388,47 @@ export default function Step3_5InterviewDates({
                 <div className="space-y-2">
                   {timeSlots.map((time) => {
                     const isSelected = selectedTimeSlots.includes(time);
+                    const isAdded = isTimeSlotAdded(time);
                     
                     return (
                       <motion.button
                         key={time}
-                        onMouseDown={() => handleMouseDown(time)}
-                        onMouseEnter={() => handleMouseEnter(time)}
+                        onMouseDown={() => !isAdded && handleMouseDown(time)}
+                        onMouseEnter={() => !isAdded && handleMouseEnter(time)}
                         onMouseUp={handleMouseUp}
+                        disabled={isAdded}
                         className={`
                           w-full p-4 rounded-lg border-2 transition-all flex items-center justify-between select-none
-                          ${isSelected
+                          ${isAdded
+                            ? 'bg-green-500/20 border-green-500/50 cursor-not-allowed'
+                            : isSelected
                             ? 'bg-indigo-500/30 border-indigo-500 shadow-md shadow-indigo-500/20'
                             : 'bg-black/40 border-gray-600 hover:border-indigo-500/50 hover:bg-indigo-500/10'
                           }
                         `}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={!isAdded ? { scale: 1.02 } : {}}
+                        whileTap={!isAdded ? { scale: 0.98 } : {}}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`
                             w-10 h-10 rounded-lg flex items-center justify-center
-                            ${isSelected ? 'bg-indigo-500' : 'bg-gray-700'}
+                            ${isAdded ? 'bg-green-500' : isSelected ? 'bg-indigo-500' : 'bg-gray-700'}
                           `}>
-                            <Clock className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-400'}`} />
+                            <Clock className={`w-5 h-5 ${isAdded || isSelected ? 'text-white' : 'text-gray-400'}`} />
                           </div>
-                          <span className={`font-medium ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                          <span className={`font-medium ${isAdded || isSelected ? 'text-white' : 'text-gray-300'}`}>
                             {time}
                           </span>
                         </div>
                         
-                        {isSelected && (
+                        {isAdded ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-green-400 font-medium">Added</span>
+                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                              <Check className="w-4 h-4 text-white" />
+                            </div>
+                          </div>
+                        ) : isSelected && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
@@ -398,40 +442,28 @@ export default function Step3_5InterviewDates({
                   })}
                 </div>
               )}
-
-              {selectedTimeSlots.length > 0 && (
-                <motion.button
-                  onClick={handleAddAvailability}
-                  className="w-full mt-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg shadow-green-500/25 flex items-center justify-center gap-2"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Plus className="w-5 h-5" />
-                  Add {selectedTimeSlots.length} Slot{selectedTimeSlots.length > 1 ? 's' : ''}
-                </motion.button>
-              )}
             </div>
           </motion.div>
         </div>
 
       {/* Navigation */}
       <div className="flex justify-center gap-4 mt-8">
-        <AnimatePresence>
-          <motion.button
-            onClick={onProceedToNext}
-            className="px-8 py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-semibold transition-all shadow-lg"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Skip Availability Selection
-          </motion.button>
-          
+        <motion.button
+          key="skip-button"
+          onClick={onProceedToNext}
+          className="px-8 py-4 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-semibold transition-all shadow-lg"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Skip Availability Selection
+        </motion.button>
+        
+        <AnimatePresence mode="wait">
           {totalSlots > 0 && (
             <motion.button
+              key="submit-button"
               onClick={onProceedToNext}
               className="px-12 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-600 transition-all shadow-xl shadow-indigo-500/25 overflow-hidden group"
               initial={{ opacity: 0, y: 20 }}
@@ -448,7 +480,7 @@ export default function Step3_5InterviewDates({
               />
               
               <span className="relative z-10 flex items-center gap-2">
-                Submit & Continue ({totalSlots} slot{totalSlots > 1 ? 's' : ''})
+                Submit & Continue
                 <motion.svg 
                   className="w-5 h-5"
                   fill="none" 

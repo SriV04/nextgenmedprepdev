@@ -132,6 +132,7 @@ export function usePaymentForm() {
         setCurrentStep(3.5); // Go to interview dates step for live sessions
       }
     } else if (currentStep === 3.5 && canProceedToDetails()) {
+      console.log('Selected availability:', availability);
       setCurrentStep(4);
     }
   };
@@ -179,7 +180,7 @@ export function usePaymentForm() {
       }
       
       // Submit to backend API
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
       const response = await fetch(`${apiUrl}/api/v1/interview-bookings`, {
         method: 'POST',
         body: formData,
