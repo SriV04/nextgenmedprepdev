@@ -29,6 +29,29 @@ const interviewBookingSchema = z.object({
       return [val];
     }
   })),
+  interviewDates: z.array(z.object({
+    universityId: z.string(),
+    date: z.string(),
+    timeSlot: z.string()
+  })).optional().or(z.string().transform((val) => {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })),
+  availability: z.array(z.object({
+    date: z.string(),
+    timeSlot: z.string()
+  })).optional().or(z.string().transform((val) => {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  })),
   notes: z.string().optional(),
   amount: z.number().positive('Amount must be positive').or(z.string().transform((val) => parseFloat(val))),
   preferredDate: z.string().optional(),
@@ -92,6 +115,8 @@ export class InterviewBookingController {
           service_type: validatedData.serviceType,
           package_identifier: packageIdentifier,
           universities: universitiesArray.join(','),
+          interview_dates: validatedData.interviewDates ? JSON.stringify(validatedData.interviewDates) : '',
+          availability: validatedData.availability ? JSON.stringify(validatedData.availability) : '',
           file_path: filePath,
           first_name: validatedData.firstName,
           last_name: validatedData.lastName,
@@ -160,6 +185,8 @@ export class InterviewBookingController {
       package_type: string;
       service_type: string;
       universities: string;
+      interview_dates?: string;
+      availability?: string;
       file_path: string;
       first_name: string;
       last_name: string;
@@ -211,6 +238,61 @@ export class InterviewBookingController {
       });
 
       console.log('Booking created:', booking);
+
+      // Parse and create student availability if provided
+      if (metadata.availability && metadata.availability !== '') {
+        try {
+          const availabilitySlots = JSON.parse(metadata.availability);
+          console.log('Parsed availability slots:', availabilitySlots);
+          
+          if (Array.isArray(availabilitySlots) && availabilitySlots.length > 0) {
+            const availabilityRecords = availabilitySlots.map((slot: { date: string; timeSlot: string }) => {
+              // Parse timeSlot format "HH:mm - HH:mm" to extract hours
+              const [startTime, endTime] = slot.timeSlot.split(' - ');
+              const hourStart = parseInt(startTime.split(':')[0]);
+              const hourEnd = parseInt(endTime.split(':')[0]);
+              
+              return {
+                student_id: user.id,
+                date: slot.date,
+                hour_start: hourStart,
+                hour_end: hourEnd,
+                type: 'interview' as const
+              };
+            });
+            
+            await supabaseService.createBulkStudentAvailability(availabilityRecords);
+            console.log('Student availability records created');
+          }
+        } catch (error) {
+          console.error('Error creating student availability:', error);
+          // Continue even if availability creation fails
+        }
+      }
+
+      // Determine number of interviews based on package type
+      let numberOfInterviews = 1; // default for essentials
+      if (metadata.package_type === 'core') {
+        numberOfInterviews = 3;
+      } else if (metadata.package_type === 'premium') {
+        numberOfInterviews = 5;
+      }
+
+      // Create interview records
+      console.log(`Creating ${numberOfInterviews} interview records...`);
+      const interviewRecords = [];
+      
+      for (let i = 0; i < numberOfInterviews; i++) {
+        interviewRecords.push({
+          student_id: user.id,
+          booking_id: booking.id,
+          university: universitiesArray[i] || undefined, // Assign university if available, undefined if not
+          notes: metadata.notes || undefined
+        });
+      }
+
+      await supabaseService.createBulkInterviews(interviewRecords);
+      console.log(`${numberOfInterviews} interview records created`);
 
       // Send confirmation email to customer
       console.log('Sending confirmation email to customer...');

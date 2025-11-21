@@ -1,7 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Download, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, UserPlus, LogOut, User } from 'lucide-react';
+import InterviewBookingModal from '../../components/InterviewBookingModal';
+import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
+import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
+import InterviewDetailsModal from '../../components/tutor-calendar/InterviewDetailsModal';
+import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
+import CommitChangesBar from '../../components/tutor-calendar/CommitChangesBar';
+import { TutorCalendarProvider, useTutorCalendar } from '../../contexts/TutorCalendarContext';
+import { createClient } from '../../utils/supabase/client';
+import { useRouter } from 'next/navigation';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+
+// Disable static generation for this page
+export const dynamic = 'force-dynamic';
 
 interface Booking {
   id: string;
@@ -31,13 +44,32 @@ interface BookingStats {
   totalRevenue: number;
 }
 
-export default function AdminDashboard() {
+function DashboardContent() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [stats, setStats] = useState<BookingStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedBooking, setExpandedBooking] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  // Tab management
+  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar'>('calendar');
+  const [isBookingsUnlocked, setIsBookingsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  // Password for bookings tab (in production, this should be env variable or more secure)
+  const BOOKINGS_PASSWORD = process.env.NEXT_PUBLIC_BOOKINGS_PASSWORD || 'admin123';
+
+  // Use calendar context - only need tutors for display purposes
+  const { tutors } = useTutorCalendar();
+  
+  const router = useRouter();
+  const supabase = createClient();
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -47,6 +79,46 @@ export default function AdminDashboard() {
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/auth/login?redirectTo=/tutor-dashboard');
+      } else {
+        setUser(user);
+      }
+    };
+    checkAuth();
+  }, [router, supabase]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
+
+  const handleBookingsTabClick = () => {
+    if (!isBookingsUnlocked) {
+      setShowPasswordDialog(true);
+    } else {
+      setActiveTab('bookings');
+    }
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === BOOKINGS_PASSWORD) {
+      setIsBookingsUnlocked(true);
+      setActiveTab('bookings');
+      setShowPasswordDialog(false);
+      setPasswordInput('');
+      setPasswordError('');
+    } else {
+      setPasswordError('Incorrect password. Please try again.');
+      setPasswordInput('');
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -116,6 +188,72 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRowClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  const handleScheduleInterview = async (bookingId: string, interviewId: number, date: string, time: string, comments: string) => {
+    try {
+      // Combine date and time into start_time
+      const startTime = `${date}T${time}:00`;
+      
+      // For core packages, we need to handle multiple interviews
+      // For now, we'll store the interview info in the notes field
+      const isCore = bookings.find(b => b.id === bookingId)?.package?.toLowerCase().includes('core');
+      let noteText = comments;
+      
+      if (isCore) {
+        noteText = `Interview ${interviewId} scheduled for ${date} at ${time}. ${comments || ''}`.trim();
+      } else {
+        noteText = comments ? `${comments} (Scheduled on ${new Date().toISOString()})` : `Scheduled on ${new Date().toISOString()}`;
+      }
+      
+      const response = await fetch(`${backendUrl}/api/v1/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          start_time: startTime,
+          notes: noteText,
+          status: 'confirmed'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to schedule interview');
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Update local state
+        setBookings((prev) =>
+          prev.map((b) => 
+            b.id === bookingId 
+              ? { 
+                  ...b, 
+                  start_time: startTime, 
+                  status: 'confirmed' as any,
+                  notes: noteText
+                } 
+              : b
+          )
+        );
+        // Refresh stats
+        fetchData();
+        
+        if (isCore) {
+          alert(`Interview ${interviewId} scheduled successfully!`);
+        } else {
+          alert('Interview scheduled successfully!');
+        }
+      }
+    } catch (err: any) {
+      alert('Failed to schedule interview: ' + err.message);
+    }
+  };
+
   const downloadPersonalStatement = async (bookingId: string) => {
     try {
       const response = await fetch(
@@ -133,6 +271,25 @@ export default function AdminDashboard() {
     } catch (err: any) {
       alert('Failed to download personal statement: ' + err.message);
     }
+  };
+
+  const handleSlotClick = (slot: any, tutor: any) => {
+    if (slot.type === 'interview' && slot.bookingId) {
+      // Find the booking and open modal
+      const booking = bookings.find(b => b.id === slot.bookingId);
+      if (booking) {
+        setSelectedBooking(booking);
+        setIsModalOpen(true);
+      } else {
+        alert(`Interview: ${slot.title}\nStudent: ${slot.student}\nPackage: ${slot.package}`);
+      }
+    } else if (slot.type === 'available') {
+      alert(`Available slot for ${tutor.tutorName}\nTime: ${slot.startTime} - ${slot.endTime}`);
+    }
+  };
+
+  const handleUnassignedInterviewClick = (interview: any) => {
+    alert(`Interview Details:\nStudent: ${interview.studentName}\nPackage: ${interview.package}\nUniversities: ${interview.universities}`);
   };
 
   const filteredBookings = bookings.filter((booking) => {
@@ -247,24 +404,70 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Tutor Dashboard</h1>
             <p className="text-gray-600 mt-1">Manage bookings and view statistics</p>
+            {user && (
+              <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{user.email}</span>
+              </div>
+            )}
           </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchData}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-gray-200 mb-6">
           <button
-            onClick={fetchData}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => setActiveTab('calendar')}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+              activeTab === 'calendar'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
           >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
+            <CalendarIcon className="w-5 h-5" />
+            Calendar
+          </button>
+          <button
+            onClick={handleBookingsTabClick}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+              activeTab === 'bookings'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <List className="w-5 h-5" />
+            Bookings
+            {!isBookingsUnlocked && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                🔒
+              </span>
+            )}
           </button>
         </div>
 
         {/* Statistics Cards */}
-        {stats && (
+        {activeTab === 'bookings' && stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-sm font-medium text-gray-500">Total Bookings</h3>
@@ -289,7 +492,10 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Search and Filters */}
+        {/* Bookings Tab Content */}
+        {activeTab === 'bookings' && (
+          <>
+            {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filters</h3>
           
@@ -438,6 +644,14 @@ export default function AdminDashboard() {
 
         {/* Bookings Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Bookings</h3>
+              <p className="text-sm text-gray-500">
+                💡 Click on any row to view details, schedule interviews, or manage core package interviews
+              </p>
+            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -474,13 +688,19 @@ export default function AdminDashboard() {
                   </tr>
                 ) : (
                   filteredBookings.map((booking) => (
-                    <>
-                      <tr key={booking.id} className="hover:bg-gray-50">
+                    <React.Fragment key={booking.id}>
+                      <tr 
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleRowClick(booking)}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{booking.email}</div>
                           {!selectedCustomer && (
                             <button
-                              onClick={() => setSelectedCustomer(booking.email)}
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent row click
+                                setSelectedCustomer(booking.email);
+                              }}
                               className="text-xs text-blue-600 hover:text-blue-800 mt-1"
                             >
                               View all bookings →
@@ -488,7 +708,22 @@ export default function AdminDashboard() {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{booking.package}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-gray-900">{booking.package}</div>
+                            {(booking.package?.toLowerCase().includes('live') || 
+                              booking.package?.toLowerCase().includes('_live') ||
+                              booking.package?.toLowerCase().includes('interview') ||
+                              booking.package?.toLowerCase().includes('core')) && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                {booking.package?.toLowerCase().includes('core') ? 'Core' : 'Live'}
+                              </span>
+                            )}
+                            {booking.package?.toLowerCase().includes('core') && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                3 Interviews
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
@@ -518,11 +753,12 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
-                            onClick={() =>
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent row click
                               setExpandedBooking(
                                 expandedBooking === booking.id ? null : booking.id
-                              )
-                            }
+                              );
+                            }}
                             className="text-blue-600 hover:text-blue-900"
                           >
                             {expandedBooking === booking.id ? (
@@ -627,14 +863,112 @@ export default function AdminDashboard() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </React.Fragment>
                   ))
                 )}
               </tbody>
             </table>
           </div>
         </div>
+
+            {/* Interview Booking Modal */}
+            <InterviewBookingModal
+              isOpen={isModalOpen}
+              onClose={() => {
+                setIsModalOpen(false);
+                setSelectedBooking(null);
+              }}
+              booking={selectedBooking}
+              onSchedule={handleScheduleInterview}
+            />
+          </>
+        )}
+
+        {/* Calendar Tab Content */}
+        {activeTab === 'calendar' && (
+          <div className="flex flex-col gap-6">
+            {/* Commit Changes Bar */}
+            <CommitChangesBar />
+
+            {/* Unassigned Interviews - Horizontal Scrollable */}
+            <UnassignedInterviews
+              onInterviewClick={handleUnassignedInterviewClick}
+            />
+
+            {/* Calendar Grid - Full Width */}
+            <TutorCalendar
+              onSlotClick={handleSlotClick}
+            />
+          </div>
+        )}
+
+        {/* Availability Modal */}
+        <AvailabilityModal />
+        
+        {/* Interview Details Modal */}
+        <InterviewDetailsModal />
+
+        {/* Password Dialog for Bookings Tab */}
+        {showPasswordDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Protected Area</h2>
+              <p className="text-gray-600 mb-6">Please enter the password to access the bookings tab.</p>
+              
+              <form onSubmit={handlePasswordSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setPasswordError('');
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter password"
+                    autoFocus
+                  />
+                  {passwordError && (
+                    <p className="mt-2 text-sm text-red-600">{passwordError}</p>
+                  )}
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordDialog(false);
+                      setPasswordInput('');
+                      setPasswordError('');
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Unlock
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+export default function AdminDashboard() {
+  return (
+    <TutorCalendarProvider>
+      <DashboardContent />
+    </TutorCalendarProvider>
   );
 }

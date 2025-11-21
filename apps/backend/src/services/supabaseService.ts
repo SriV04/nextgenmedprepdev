@@ -773,6 +773,104 @@ class SupabaseService {
     return data.signedUrl;
   }
 
+  // Student Availability methods
+  async createStudentAvailability(availabilityData: {
+    student_id: string;
+    date: string;
+    hour_start: number;
+    hour_end: number;
+    type?: 'interview' | 'tutoring' | 'consultation';
+  }): Promise<any> {
+    console.log('=== Creating Student Availability ===');
+    console.log('Availability data:', availabilityData);
+
+    const { data, error } = await this.supabase
+      .from('student_availability')
+      .insert(availabilityData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating student availability:', error);
+      throw new Error(`Failed to create student availability: ${error.message}`);
+    }
+
+    console.log('Successfully created student availability:', data);
+    return data;
+  }
+
+  async createBulkStudentAvailability(availabilityDataArray: Array<{
+    student_id: string;
+    date: string;
+    hour_start: number;
+    hour_end: number;
+    type?: 'interview' | 'tutoring' | 'consultation';
+  }>): Promise<any[]> {
+    console.log('=== Creating Bulk Student Availability ===');
+    console.log('Number of slots:', availabilityDataArray.length);
+
+    const { data, error } = await this.supabase
+      .from('student_availability')
+      .insert(availabilityDataArray)
+      .select();
+
+    if (error) {
+      console.error('Error creating bulk student availability:', error);
+      throw new Error(`Failed to create bulk student availability: ${error.message}`);
+    }
+
+    console.log('Successfully created student availability records:', data?.length);
+    return data || [];
+  }
+
+  // Interview methods
+  async createInterview(interviewData: {
+    student_id: string;
+    booking_id: string;
+    university?: string;
+    notes?: string;
+  }): Promise<any> {
+    console.log('=== Creating Interview ===');
+    console.log('Interview data:', interviewData);
+
+    const { data, error } = await this.supabase
+      .from('interviews')
+      .insert(interviewData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating interview:', error);
+      throw new Error(`Failed to create interview: ${error.message}`);
+    }
+
+    console.log('Successfully created interview:', data);
+    return data;
+  }
+
+  async createBulkInterviews(interviewDataArray: Array<{
+    student_id: string;
+    booking_id: string;
+    university?: string;
+    notes?: string;
+  }>): Promise<any[]> {
+    console.log('=== Creating Bulk Interviews ===');
+    console.log('Number of interviews:', interviewDataArray.length);
+
+    const { data, error } = await this.supabase
+      .from('interviews')
+      .insert(interviewDataArray)
+      .select();
+
+    if (error) {
+      console.error('Error creating bulk interviews:', error);
+      throw new Error(`Failed to create bulk interviews: ${error.message}`);
+    }
+
+    console.log('Successfully created interview records:', data?.length);
+    return data || [];
+  }
+
   // Get client for direct queries if needed
   getClient(): SupabaseClient {
     return this.supabase;

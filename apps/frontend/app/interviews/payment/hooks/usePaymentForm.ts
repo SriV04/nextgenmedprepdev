@@ -11,11 +11,17 @@ export interface ContactDetails {
   field: 'medicine' | 'dentistry' | '';
 }
 
+export interface AvailabilitySlot {
+  date: string;
+  timeSlot: string;
+}
+
 export function usePaymentForm() {
   // Flattened state for better predictability
   const [serviceType, setServiceType] = useState<'generated' | 'live' | ''>('');
   const [packageId, setPackageId] = useState('');
   const [universities, setUniversities] = useState<string[]>([]);
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [contact, setContact] = useState<ContactDetails>({
     firstName: '',
     lastName: '',
@@ -26,7 +32,7 @@ export function usePaymentForm() {
   const [personalStatement, setPersonalStatement] = useState<File | null>(null);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [selectedPackage, setSelectedPackage] = useState<ExtendedPackage | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<number>(1);
 
   // Initialize from URL parameters safely (idempotent)
   useEffect(() => {
@@ -58,10 +64,12 @@ export function usePaymentForm() {
   const isStep1Complete = !!serviceType;
   const isStep2Complete = !!packageId && !!selectedPackage;
   const isStep3Complete = universities.length > 0;
+  const isStep3_5Complete = true; // Availability is optional
   const isStep4Complete = !!(contact.firstName && contact.lastName && contact.email && contact.field);
 
   const canProceedToUniversities = (): boolean => isStep1Complete && isStep2Complete;
-  const canProceedToDetails = (): boolean => canProceedToUniversities() && isStep3Complete;
+  const canProceedToInterviewDates = (): boolean => canProceedToUniversities() && isStep3Complete;
+  const canProceedToDetails = (): boolean => canProceedToInterviewDates() && isStep3_5Complete;
   const canProceedToPayment = (): boolean => canProceedToDetails() && isStep4Complete;
 
   const calculatePrice = () => {
@@ -98,11 +106,14 @@ export function usePaymentForm() {
         if (prev.length < maxUniversities) {
           return [...prev, universityId];
         } else {
-          // Replace the first one if at limit
           return [...prev.slice(1), universityId];
         }
       }
     });
+  };
+
+  const handleAvailabilityChange = (newAvailability: AvailabilitySlot[]) => {
+    setAvailability(newAvailability);
   };
 
   const handleContactChange = (field: keyof ContactDetails, value: string) => {
@@ -113,8 +124,22 @@ export function usePaymentForm() {
   };
 
   const handleProceedToNext = () => {
-    if (currentStep === 3 && canProceedToDetails()) {
+    if (currentStep === 3 && canProceedToInterviewDates()) {
+      // For generated questions, skip interview dates and go straight to contact
+      if (serviceType === 'generated') {
+        setCurrentStep(4);
+      } else {
+        setCurrentStep(3.5); // Go to interview dates step for live sessions
+      }
+    } else if (currentStep === 3.5 && canProceedToDetails()) {
+      console.log('Selected availability:', availability);
       setCurrentStep(4);
+    }
+  };
+
+  const handleProceedToInterviewDates = () => {
+    if (canProceedToInterviewDates()) {
+      setCurrentStep(3.5);
     }
   };
 
@@ -144,13 +169,18 @@ export function usePaymentForm() {
       formData.append('universities', JSON.stringify(universities));
       formData.append('amount', calculatePrice().toString());
       
+      // Add availability for live sessions
+      if (serviceType === 'live' && availability.length > 0) {
+        formData.append('availability', JSON.stringify(availability));
+      }
+      
       // Add optional fields
       if (additionalNotes) {
         formData.append('notes', additionalNotes);
       }
       
       // Submit to backend API
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
       const response = await fetch(`${apiUrl}/api/v1/interview-bookings`, {
         method: 'POST',
         body: formData,
@@ -167,6 +197,7 @@ export function usePaymentForm() {
           contactDetails: contact,
           price: calculatePrice().toString(),
           notes: additionalNotes,
+          availability,
           timestamp: new Date().toISOString(),
           session_id: data.data.session_id
         };
@@ -184,7 +215,17 @@ export function usePaymentForm() {
   };
 
   const goBack = () => {
-    if (currentStep > 1) {
+    if (currentStep === 4) {
+      // From contact details, go back to interview dates (if live) or universities (if generated)
+      if (serviceType === 'live') {
+        setCurrentStep(3.5);
+      } else {
+        setCurrentStep(3);
+      }
+    } else if (currentStep === 3.5) {
+      // From interview dates, go back to universities
+      setCurrentStep(3);
+    } else if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
@@ -194,6 +235,7 @@ export function usePaymentForm() {
     serviceType,
     packageId,
     universities,
+    availability,
     contact,
     personalStatement,
     additionalNotes,
@@ -204,12 +246,17 @@ export function usePaymentForm() {
     isStep1Complete,
     isStep2Complete,
     isStep3Complete,
+    isStep3_5Complete,
     isStep4Complete,
     
     // Validation functions
     canProceedToUniversities,
+    canProceedToInterviewDates,
     canProceedToDetails,
     canProceedToPayment,
+    
+    // Availability handler
+    handleAvailabilityChange,
     
     // Handlers
     handleServiceTypeChange,
@@ -217,6 +264,7 @@ export function usePaymentForm() {
     handleUniversityToggle,
     handleContactChange,
     handleProceedToNext,
+    handleProceedToInterviewDates,
     handleProceedToPayment,
     goBack,
     setPersonalStatement,

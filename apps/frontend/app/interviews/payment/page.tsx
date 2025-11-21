@@ -10,7 +10,12 @@ import { usePaymentForm } from './hooks/usePaymentForm';
 import Step1ServiceType from '../../../components/interview-payment/Step1ServiceType';
 import Step2Package from '../../../components/interview-payment/Step2Package';
 import Step3Universities from '../../../components/interview-payment/Step3Universities';
+import Step3_5InterviewDates from '../../../components/interview-payment/Step3_5InterviewDates';
 import Step4Contact from '../../../components/interview-payment/Step4Contact';
+import { TutorCalendarProvider } from '../../../contexts/TutorCalendarContext';
+
+// Disable static generation for this page (uses TutorCalendarProvider which needs runtime)
+export const dynamic = 'force-dynamic';
 
 export default function InterviewsPaymentPage() {
   const {
@@ -18,6 +23,7 @@ export default function InterviewsPaymentPage() {
     serviceType,
     packageId,
     universities,
+    availability,
     contact,
     personalStatement,
     additionalNotes,
@@ -26,8 +32,12 @@ export default function InterviewsPaymentPage() {
     
     // Validation functions
     canProceedToUniversities,
+    canProceedToInterviewDates,
     canProceedToDetails,
     canProceedToPayment,
+    
+    // Availability handler
+    handleAvailabilityChange,
     
     // Handlers
     handleServiceTypeChange,
@@ -45,24 +55,25 @@ export default function InterviewsPaymentPage() {
   } = usePaymentForm();
 
   return (
-    <main className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Starfield background */}
-      <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10">
-        {Array.from({length: 144}).map((_, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.3, 0] }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity, 
-              repeatType: "mirror", 
-              delay: i * 0.01 % 3
-            }}
-            className="border border-indigo-500/20"
-          />
-        ))}
-      </div>
+    <TutorCalendarProvider>
+      <main className="min-h-screen bg-black text-white overflow-hidden">
+        {/* Starfield background */}
+        <div className="absolute inset-0 grid grid-cols-12 grid-rows-12 opacity-10">
+          {Array.from({length: 144}).map((_, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.3, 0] }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity, 
+                repeatType: "mirror", 
+                delay: i * 0.01 % 3
+              }}
+              className="border border-indigo-500/20"
+            />
+          ))}
+        </div>
 
       {/* Header */}
       <div className="relative z-10 bg-black/80 border-b border-indigo-500/30 backdrop-blur-xl">
@@ -88,16 +99,21 @@ export default function InterviewsPaymentPage() {
             </div>
             <div className="ml-auto">
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <span>Step {currentStep} of 4</span>
+                <span>Step {currentStep === 3.5 ? '3.5' : currentStep} of {serviceType === 'live' ? '4' : '4'}</span>
                 <div className="flex gap-1">
-                  {[1, 2, 3, 4].map((step) => (
-                    <div 
-                      key={step}
-                      className={`w-2 h-2 rounded-full ${
-                        step <= currentStep ? 'bg-indigo-500' : 'bg-gray-600'
-                      }`}
-                    />
-                  ))}
+                  {[1, 2, 3, 3.5, 4].map((step) => {
+                    // Skip 3.5 for generated service type
+                    if (step === 3.5 && serviceType === 'generated') return null;
+                    
+                    return (
+                      <div 
+                        key={step}
+                        className={`w-2 h-2 rounded-full ${
+                          step <= currentStep ? 'bg-indigo-500' : 'bg-gray-600'
+                        }`}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -134,6 +150,17 @@ export default function InterviewsPaymentPage() {
             />
           )}
 
+          {/* Step 3.5: Interview Dates Selection (Live sessions only) */}
+          {currentStep === 3.5 && serviceType === 'live' && canProceedToInterviewDates() && (
+            <Step3_5InterviewDates
+              selectedUniversities={universities}
+              selectedPackage={selectedPackage}
+              availability={availability}
+              onAvailabilityChange={handleAvailabilityChange}
+              onProceedToNext={handleProceedToNext}
+            />
+          )}
+        
           {/* Step 4: Contact Details & Checkout */}
           {currentStep === 4 && canProceedToDetails() && (
             <Step4Contact
@@ -154,5 +181,6 @@ export default function InterviewsPaymentPage() {
         </AnimatePresence>
       </div>
     </main>
+    </TutorCalendarProvider>
   );
 }

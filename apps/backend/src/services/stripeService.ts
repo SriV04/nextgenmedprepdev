@@ -469,6 +469,8 @@ export class StripeService {
         package_type: metadata.package_type || 'essentials',
         service_type: metadata.service_type || 'generated',
         universities: metadata.universities || '',
+        interview_dates: metadata.interview_dates,
+        availability: metadata.availability,
         file_path: metadata.file_path || '',
         first_name: firstName,
         last_name: lastName,
