@@ -71,19 +71,18 @@ export class InterviewBookingController {
       const validatedData = interviewBookingSchema.parse(req.body);
       console.log('Validated data:', validatedData);
 
-      // Check if personal statement file is uploaded
-      if (!req.file) {
-        console.error('No file uploaded in request');
-        throw new AppError('Personal statement file is required', 400);
+      // Upload personal statement to Supabase storage if provided
+      let filePath: string | null = null;
+      if (req.file) {
+        console.log('Uploading personal statement...');
+        filePath = await fileUploadService.uploadPersonalStatement(
+          req.file,
+          validatedData.email
+        );
+        console.log('Personal statement uploaded:', filePath);
+      } else {
+        console.log('No personal statement file provided - proceeding without it');
       }
-
-      // Upload personal statement to Supabase storage
-      console.log('Uploading personal statement...');
-      const filePath = await fileUploadService.uploadPersonalStatement(
-        req.file,
-        validatedData.email
-      );
-      console.log('Personal statement uploaded:', filePath);
 
       // Ensure universities is an array
       const universitiesArray = Array.isArray(validatedData.universities) 
@@ -117,7 +116,7 @@ export class InterviewBookingController {
           universities: universitiesArray.join(','),
           interview_dates: validatedData.interviewDates ? JSON.stringify(validatedData.interviewDates) : '',
           availability: validatedData.availability ? JSON.stringify(validatedData.availability) : '',
-          file_path: filePath,
+          file_path: filePath || '',
           first_name: validatedData.firstName,
           last_name: validatedData.lastName,
           field: validatedData.field,
@@ -310,15 +309,19 @@ export class InterviewBookingController {
         }
       );
 
-      // Generate signed URL for personal statement download
-      console.log('Generating signed URL for personal statement...');
+      // Generate signed URL for personal statement download (if provided)
       let downloadUrl: string | undefined;
-      try {
-        downloadUrl = await supabaseService.getPersonalStatementSignedUrl(metadata.file_path);
-        console.log('Generated download URL:', downloadUrl);
-      } catch (error) {
-        console.error('Error generating signed URL:', error);
-        // Continue without download URL - admin can still access via dashboard
+      if (metadata.file_path) {
+        console.log('Generating signed URL for personal statement...');
+        try {
+          downloadUrl = await supabaseService.getPersonalStatementSignedUrl(metadata.file_path);
+          console.log('Generated download URL:', downloadUrl);
+        } catch (error) {
+          console.error('Error generating signed URL:', error);
+          // Continue without download URL - admin can still access via dashboard
+        }
+      } else {
+        console.log('No personal statement provided - skipping download URL generation');
       }
 
       // Send notification email to admin

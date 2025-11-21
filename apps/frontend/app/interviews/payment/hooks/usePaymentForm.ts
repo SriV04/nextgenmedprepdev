@@ -144,8 +144,8 @@ export function usePaymentForm() {
   };
 
   const handleProceedToPayment = async () => {
-    if (!selectedPackage || !canProceedToPayment() || !personalStatement) {
-      alert('Please upload your personal statement before proceeding to payment.');
+    if (!selectedPackage || !canProceedToPayment()) {
+      alert('Please complete all required fields before proceeding to payment.');
       return;
     }
 
@@ -153,8 +153,10 @@ export function usePaymentForm() {
       // Create FormData for multipart upload
       const formData = new FormData();
       
-      // Add personal statement file
-      formData.append('personalStatement', personalStatement);
+      // Add personal statement file if provided
+      if (personalStatement) {
+        formData.append('personalStatement', personalStatement);
+      }
       
       // Add contact details
       formData.append('email', contact.email);

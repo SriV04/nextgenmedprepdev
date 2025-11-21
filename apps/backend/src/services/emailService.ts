@@ -903,7 +903,7 @@ The NextGen MedPrep Team
     serviceType: string;
     universities: string[];
     amount: number;
-    filePath: string;
+    filePath?: string;
     downloadUrl?: string;
     notes?: string;
     preferredDate?: string;
@@ -956,8 +956,6 @@ ${data.notes ? `- Notes: ${data.notes}` : ''}
 
 What happens next:
 • Our team will review your personal statement and university choices
-• We'll contact you within 24 hours to schedule your session
-• You'll receive preparation materials tailored to your universities
 • Our expert tutors will help you excel in your interviews
 
 Our interview tutors are current medical students who have successfully gained places at top UK medical schools.
@@ -1055,7 +1053,7 @@ The NextGen MedPrep Team
     serviceType: string;
     universities: string[];
     amount: number;
-    filePath: string;
+    filePath?: string;
     downloadUrl?: string;
     notes?: string;
     preferredDate?: string;
@@ -1081,13 +1079,14 @@ Booking Details:
 - Amount: £${data.amount}
 ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
 ${data.notes ? `- Notes: ${data.notes}` : ''}
-
+${data.filePath ? `
 Personal Statement:
 - File Path: ${data.filePath}
-${data.downloadUrl ? `- Download Link: ${data.downloadUrl} (valid for 7 days)` : ''}
+${data.downloadUrl ? `- Download Link: ${data.downloadUrl} (valid for 7 days)` : ''}` : `
+Note: No personal statement was provided with this booking.`}
 
 Action Required:
-1. Download the personal statement using the link above or from Supabase storage
+1. Download the personal statement (if provided)
 2. Review the universities and student preferences
 3. Assign a suitable tutor (if live session)
 4. Contact the student within 24 hours to schedule the session
@@ -1148,6 +1147,7 @@ Booking ID: ${data.bookingId}
           </div>
           ` : ''}
 
+          ${data.filePath ? `
           <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
             <h3 style="margin-top: 0; color: #991b1b;">Personal Statement</h3>
             <p style="margin: 0; color: #374151;"><strong>File Path:</strong> <code style="background-color: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${data.filePath}</code></p>
@@ -1163,11 +1163,16 @@ Booking ID: ${data.bookingId}
             <p style="margin: 10px 0 0 0; font-size: 14px; color: #6b7280;">Download from Supabase "Personal Statements" bucket</p>
             `}
           </div>
+          ` : `
+          <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <p style="margin: 0; color: #92400e;"><strong>Note:</strong> No personal statement was provided with this booking.</p>
+          </div>
+          `}
 
           <div style="background-color: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
             <h3 style="margin-top: 0; color: #991b1b;">Action Required</h3>
             <ol style="color: #374151; margin: 0; padding-left: 20px;">
-              <li>Download the personal statement from Supabase storage</li>
+              <li>Download the personal statement from Supabase storage (if provided)</li>
               <li>Review the universities and student preferences</li>
               <li>Assign a suitable tutor (if live session)</li>
               <li>Contact the student within <strong>24 hours</strong> to schedule the session</li>

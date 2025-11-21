@@ -152,7 +152,7 @@ export default function Step4Contact({
       <div className="col-span-2">
         <label className="block text-sm font-medium text-gray-300 mb-2">
           <DocumentTextIcon className="w-4 h-4 inline mr-1" />
-          Personal Statement *
+          Personal Statement (Optional)
         </label>
         <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
           <input
@@ -161,7 +161,6 @@ export default function Step4Contact({
             onChange={(e) => onPersonalStatementChange(e.target.files?.[0] || null)}
             className="hidden"
             id="personal-statement-upload"
-            required
           />
           <label 
             htmlFor="personal-statement-upload" 
@@ -191,7 +190,7 @@ export default function Step4Contact({
                   PDF, DOC, or DOCX (Max 10MB)
                 </p>
                 <p className="text-xs text-indigo-400 mt-2">
-                  Required for personalized interview preparation
+                  Optional - helps us provide more personalized preparation
                 </p>
               </div>
             )}
