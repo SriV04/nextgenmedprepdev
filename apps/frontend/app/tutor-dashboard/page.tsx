@@ -56,7 +56,14 @@ function DashboardContent() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
 
   // Tab management
-  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar'>('calendar');
+  const [isBookingsUnlocked, setIsBookingsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  // Password for bookings tab (in production, this should be env variable or more secure)
+  const BOOKINGS_PASSWORD = process.env.NEXT_PUBLIC_BOOKINGS_PASSWORD || 'admin123';
 
   // Use calendar context - only need tutors for display purposes
   const { tutors } = useTutorCalendar();
@@ -89,6 +96,28 @@ function DashboardContent() {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push('/auth/login');
+  };
+
+  const handleBookingsTabClick = () => {
+    if (!isBookingsUnlocked) {
+      setShowPasswordDialog(true);
+    } else {
+      setActiveTab('bookings');
+    }
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === BOOKINGS_PASSWORD) {
+      setIsBookingsUnlocked(true);
+      setActiveTab('bookings');
+      setShowPasswordDialog(false);
+      setPasswordInput('');
+      setPasswordError('');
+    } else {
+      setPasswordError('Incorrect password. Please try again.');
+      setPasswordInput('');
+    }
   };
 
   const fetchData = async () => {
@@ -409,17 +438,6 @@ function DashboardContent() {
         {/* Tab Navigation */}
         <div className="flex border-b border-gray-200 mb-6">
           <button
-            onClick={() => setActiveTab('bookings')}
-            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
-              activeTab === 'bookings'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <List className="w-5 h-5" />
-            Bookings
-          </button>
-          <button
             onClick={() => setActiveTab('calendar')}
             className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
               activeTab === 'calendar'
@@ -429,6 +447,22 @@ function DashboardContent() {
           >
             <CalendarIcon className="w-5 h-5" />
             Calendar
+          </button>
+          <button
+            onClick={handleBookingsTabClick}
+            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+              activeTab === 'bookings'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <List className="w-5 h-5" />
+            Bookings
+            {!isBookingsUnlocked && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                🔒
+              </span>
+            )}
           </button>
         </div>
 
@@ -873,6 +907,59 @@ function DashboardContent() {
         
         {/* Interview Details Modal */}
         <InterviewDetailsModal />
+
+        {/* Password Dialog for Bookings Tab */}
+        {showPasswordDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Protected Area</h2>
+              <p className="text-gray-600 mb-6">Please enter the password to access the bookings tab.</p>
+              
+              <form onSubmit={handlePasswordSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setPasswordError('');
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter password"
+                    autoFocus
+                  />
+                  {passwordError && (
+                    <p className="mt-2 text-sm text-red-600">{passwordError}</p>
+                  )}
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordDialog(false);
+                      setPasswordInput('');
+                      setPasswordError('');
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Unlock
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
