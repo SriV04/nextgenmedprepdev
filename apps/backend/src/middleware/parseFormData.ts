@@ -15,10 +15,14 @@ export const parseFormData = (req: Request, res: Response, next: NextFunction) =
             // Try to parse JSON strings for specific fields
             if ((key === 'med_dent_grades' || key === 'ucat' || key === 'bmat') && value) {
               parsedBody[key] = JSON.parse(value as string);
-            } else if (key === 'subjects_can_tutor' || key === 'availability' || key === 'universities') {
+            } else if (key === 'subjects_can_tutor' || key === 'universities') {
               // Handle arrays - parse JSON string to array
               const arrayValue = JSON.parse(value as string);
               parsedBody[key] = Array.isArray(arrayValue) ? arrayValue : [arrayValue];
+            } else if (key === 'availability') {
+              // Handle availability - can be tutor availability (simple array) or student availability (array of objects)
+              const arrayValue = JSON.parse(value as string);
+              parsedBody[key] = arrayValue;
             } else {
               parsedBody[key] = value;
             }

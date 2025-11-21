@@ -197,6 +197,7 @@ export function usePaymentForm() {
           contactDetails: contact,
           price: calculatePrice().toString(),
           notes: additionalNotes,
+          availability,
           timestamp: new Date().toISOString(),
           session_id: data.data.session_id
         };
