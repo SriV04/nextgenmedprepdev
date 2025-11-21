@@ -4,6 +4,8 @@ import "@/styles/globals.css";
 import Link from "next/link";
 import MegaMenu from "@/components/home/MegaMenu";
 import MobileMenu from "@/components/home/MobileMenu";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from '@vercel/analytics/react';
 
 const karla = Karla({
   subsets: ['latin'],
@@ -177,6 +179,8 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        <SpeedInsights />
+        <Analytics/>
       </body>
     </html>
   );
