@@ -32,6 +32,17 @@ export default function Step3_5InterviewDates({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartSlot, setDragStartSlot] = useState<string | null>(null);
 
+  // useEffect must be called before any conditional returns
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      setDragStartSlot(null);
+    };
+    
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
+  }, []);
+
   if (!selectedPackage || selectedUniversities.length === 0) return null;
 
   const timeSlots = [
@@ -157,16 +168,6 @@ export default function Step3_5InterviewDates({
     setIsDragging(false);
     setDragStartSlot(null);
   };
-
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-      setDragStartSlot(null);
-    };
-    
-    document.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => document.removeEventListener('mouseup', handleGlobalMouseUp);
-  }, []);
 
   // Check if a date has any availability slots
   const dateHasAvailability = (date: Date): boolean => {
