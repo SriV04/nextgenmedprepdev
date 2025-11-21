@@ -29,10 +29,35 @@ interface UnassignedInterview {
   id: string;
   studentName: string;
   studentEmail: string;
+  studentId?: string;
   package: string;
   universities: string;
   preferredTime?: string;
   createdAt: string;
+}
+
+interface StudentAvailabilitySlot {
+  id: string;
+  date: string;
+  dayOfWeek: number;
+  hourStart: number;
+  hourEnd: number;
+  type: string;
+}
+
+interface InterviewDetails {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  package: string;
+  universities: string;
+  preferredTime?: string;
+  createdAt: string;
+  field?: string;
+  phone?: string;
+  notes?: string;
+  studentAvailability: StudentAvailabilitySlot[];
 }
 
 interface AvailabilitySlot {
@@ -61,6 +86,8 @@ interface TutorCalendarContextType {
   selectedDate: Date;
   selectedTutor: { tutorId: string; tutorName: string; tutorEmail: string } | null;
   isAvailabilityModalOpen: boolean;
+  isInterviewDetailsModalOpen: boolean;
+  selectedInterviewDetails: InterviewDetails | null;
   loading: boolean;
   error: string | null;
   pendingChanges: PendingChange[];
@@ -72,6 +99,8 @@ interface TutorCalendarContextType {
   markSlotsAvailable: (slots: { tutorId: string; date: string; time: string }[]) => Promise<void>;
   openAvailabilityModal: (tutorId?: string) => void;
   closeAvailabilityModal: () => void;
+  openInterviewDetailsModal: (interviewId: string) => Promise<void>;
+  closeInterviewDetailsModal: () => void;
   saveAvailability: (tutorId: string, availability: AvailabilitySlot[]) => Promise<void>;
   refreshData: () => Promise<void>;
   commitChanges: () => Promise<void>;
@@ -86,119 +115,14 @@ const getTutorColor = (index: number): string => {
   return colors[index % colors.length];
 };
 
-// Mock data
-const initialTutors: TutorSchedule[] = [
-  {
-    tutorId: 'tutor-1',
-    tutorName: 'Dr. Sarah Johnson',
-    tutorEmail: 'sarah.johnson@nextgen.com',
-    color: '#3B82F6',
-    schedule: {
-      '2025-11-11': [
-        { id: 's1', startTime: '09:00', endTime: '10:00', type: 'available' },
-        { id: 's2', startTime: '10:00', endTime: '11:00', type: 'interview', title: 'MMI Mock', student: 'John Smith', package: 'Core Package', bookingId: 'b1' },
-        { id: 's3', startTime: '14:00', endTime: '15:00', type: 'available' },
-      ],
-      '2025-11-12': [
-        { id: 's4', startTime: '09:00', endTime: '12:00', type: 'available' },
-        { id: 's5', startTime: '15:00', endTime: '16:00', type: 'interview', title: 'Panel Interview', student: 'Emma Wilson', package: 'Premium', bookingId: 'b2' },
-      ],
-      '2025-11-13': [
-        { id: 's6', startTime: '10:00', endTime: '12:00', type: 'available' },
-        { id: 's7', startTime: '13:00', endTime: '14:00', type: 'blocked', title: 'Lunch Break' },
-        { id: 's8', startTime: '14:00', endTime: '17:00', type: 'available' },
-      ],
-    },
-    availability: [
-      { id: 'av1', dayOfWeek: 1, startTime: '09:00', endTime: '12:00' },
-      { id: 'av2', dayOfWeek: 1, startTime: '14:00', endTime: '17:00' },
-      { id: 'av3', dayOfWeek: 3, startTime: '10:00', endTime: '16:00' },
-    ]
-  },
-  {
-    tutorId: 'tutor-2',
-    tutorName: 'Prof. Michael Chen',
-    tutorEmail: 'michael.chen@nextgen.com',
-    color: '#10B981',
-    schedule: {
-      '2025-11-11': [
-        { id: 's9', startTime: '11:00', endTime: '12:00', type: 'interview', title: 'Cambridge Prep', student: 'Oliver Brown', package: 'Essentials', bookingId: 'b3' },
-        { id: 's10', startTime: '13:00', endTime: '16:00', type: 'available' },
-      ],
-      '2025-11-12': [
-        { id: 's11', startTime: '09:00', endTime: '11:00', type: 'available' },
-        { id: 's12', startTime: '14:00', endTime: '15:00', type: 'interview', title: 'Ethics Discussion', student: 'Sophia Davis', package: 'Core Package', bookingId: 'b4' },
-      ],
-      '2025-11-14': [
-        { id: 's13', startTime: '09:00', endTime: '13:00', type: 'available' },
-      ],
-    },
-    availability: [
-      { id: 'av4', dayOfWeek: 1, startTime: '11:00', endTime: '16:00' },
-      { id: 'av5', dayOfWeek: 2, startTime: '09:00', endTime: '15:00' },
-      { id: 'av6', dayOfWeek: 4, startTime: '09:00', endTime: '13:00' },
-    ]
-  },
-  {
-    tutorId: 'tutor-3',
-    tutorName: 'Dr. Emily Martinez',
-    tutorEmail: 'emily.martinez@nextgen.com',
-    color: '#8B5CF6',
-    schedule: {
-      '2025-11-11': [
-        { id: 's14', startTime: '10:00', endTime: '13:00', type: 'available' },
-      ],
-      '2025-11-13': [
-        { id: 's15', startTime: '09:00', endTime: '10:00', type: 'interview', title: 'Oxford Mock', student: 'James Taylor', package: 'Premium', bookingId: 'b5' },
-        { id: 's16', startTime: '11:00', endTime: '14:00', type: 'available' },
-      ],
-      '2025-11-14': [
-        { id: 's17', startTime: '14:00', endTime: '18:00', type: 'available' },
-      ],
-    },
-    availability: [
-      { id: 'av7', dayOfWeek: 1, startTime: '10:00', endTime: '13:00' },
-      { id: 'av8', dayOfWeek: 3, startTime: '09:00', endTime: '14:00' },
-      { id: 'av9', dayOfWeek: 4, startTime: '14:00', endTime: '18:00' },
-    ]
-  }
-];
-
-const initialUnassignedInterviews: UnassignedInterview[] = [
-  {
-    id: 'unassigned-1',
-    studentName: 'Alice Thompson',
-    studentEmail: 'alice.thompson@email.com',
-    package: 'Core Package',
-    universities: 'Cambridge, Oxford',
-    preferredTime: 'Weekday mornings',
-    createdAt: '2025-11-10T10:00:00Z'
-  },
-  {
-    id: 'unassigned-2',
-    studentName: 'Ben Anderson',
-    studentEmail: 'ben.anderson@email.com',
-    package: 'Premium Package',
-    universities: 'Imperial, UCL, Kings',
-    preferredTime: 'Afternoons',
-    createdAt: '2025-11-09T14:30:00Z'
-  },
-  {
-    id: 'unassigned-3',
-    studentName: 'Charlotte Lee',
-    studentEmail: 'charlotte.lee@email.com',
-    package: 'Essentials',
-    universities: 'Edinburgh, Manchester',
-    createdAt: '2025-11-08T16:45:00Z'
-  }
-];
-
 export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [tutors, setTutors] = useState<TutorSchedule[]>([]);
   const [unassignedInterviews, setUnassignedInterviews] = useState<UnassignedInterview[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTutor, setSelectedTutor] = useState<{ tutorId: string; tutorName: string; tutorEmail: string } | null>(null);
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
+  const [isInterviewDetailsModalOpen, setIsInterviewDetailsModalOpen] = useState(false);
+  const [selectedInterviewDetails, setSelectedInterviewDetails] = useState<InterviewDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
@@ -285,6 +209,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
         console.log('Fetched unassigned interviews:', interviewsData.data);
         const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: any) => ({
           id: interview.id,
+          studentId: interview.student_id,
           studentName: interview.booking?.email?.split('@')[0] || 'Student',
           studentEmail: interview.booking?.email || '',
           package: interview.booking?.package || '',
@@ -457,6 +382,71 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     setSelectedTutor(null);
   };
 
+  const openInterviewDetailsModal = async (interviewId: string) => {
+    try {
+      setLoading(true);
+      
+      // Fetch full interview details
+      const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
+      const interviewData = await interviewRes.json();
+
+      if (!interviewData.success) {
+        throw new Error('Failed to fetch interview details');
+      }
+
+      const interview = interviewData.data;
+      
+      // Fetch student availability if student_id exists
+      let studentAvailability: StudentAvailabilitySlot[] = [];
+      if (interview.student_id) {
+        const availRes = await fetch(
+          `${backendUrl}/api/v1/students/${interview.student_id}/availability`
+        );
+        const availData = await availRes.json();
+        
+        if (availData.success && availData.data) {
+          studentAvailability = availData.data.map((slot: any) => ({
+            id: slot.id,
+            date: slot.date,
+            dayOfWeek: slot.day_of_week,
+            hourStart: slot.hour_start,
+            hourEnd: slot.hour_end,
+            type: slot.type,
+          }));
+        }
+      }
+
+      // Transform to InterviewDetails format
+      const details: InterviewDetails = {
+        id: interview.id,
+        studentId: interview.student_id,
+        studentName: interview.booking?.email?.split('@')[0] || 'Student',
+        studentEmail: interview.booking?.email || '',
+        package: interview.booking?.package || '',
+        universities: interview.university || interview.booking?.universities || '',
+        preferredTime: interview.booking?.preferred_time,
+        createdAt: interview.created_at,
+        field: interview.booking?.field,
+        phone: interview.booking?.phone,
+        notes: interview.notes || interview.booking?.notes,
+        studentAvailability,
+      };
+
+      setSelectedInterviewDetails(details);
+      setIsInterviewDetailsModalOpen(true);
+    } catch (err: any) {
+      console.error('Error fetching interview details:', err);
+      alert(`Failed to load interview details: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const closeInterviewDetailsModal = () => {
+    setIsInterviewDetailsModalOpen(false);
+    setSelectedInterviewDetails(null);
+  };
+
   const saveAvailability = async (tutorId: string, availability: AvailabilitySlot[]) => {
     try {
       console.log('Saving availability for', tutorId, availability);
@@ -554,6 +544,8 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     selectedDate,
     selectedTutor,
     isAvailabilityModalOpen,
+    isInterviewDetailsModalOpen,
+    selectedInterviewDetails,
     loading,
     error,
     pendingChanges,
@@ -563,6 +555,8 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     markSlotsAvailable,
     openAvailabilityModal,
     closeAvailabilityModal,
+    openInterviewDetailsModal,
+    closeInterviewDetailsModal,
     saveAvailability,
     refreshData,
     commitChanges,

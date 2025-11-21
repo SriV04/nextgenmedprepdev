@@ -190,28 +190,52 @@ export const getInterview = async (
     const { id } = req.params;
     const supabase = createSupabaseClient();
 
+    // Fetch interview
     const { data: interview, error } = await supabase
       .from('interviews')
-      .select(`
-        *,
-        tutor:tutors!interviews_tutor_id_fkey(id, name, email, subjects),
-        booking:bookings(id, email, package, universities, field, phone, preferred_time),
-        university:universities(id, name)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
     if (error || !interview) {
+      console.error('Error fetching interview:', error);
       res.status(404).json({
         success: false,
         message: 'Interview not found',
+        error: error?.message,
       });
       return;
     }
 
+    // Fetch related tutor if exists
+    let tutor = null;
+    if (interview.tutor_id) {
+      const { data: tutorData } = await supabase
+        .from('tutors')
+        .select('id, name, email, subjects')
+        .eq('id', interview.tutor_id)
+        .single();
+      tutor = tutorData;
+    }
+
+    // Fetch related booking if exists
+    let booking = null;
+    if (interview.booking_id) {
+      const { data: bookingData } = await supabase
+        .from('bookings')
+        .select('id, email, package, universities, field, phone, preferred_time, notes')
+        .eq('id', interview.booking_id)
+        .single();
+      booking = bookingData;
+    }
+
     res.json({
       success: true,
-      data: interview,
+      data: {
+        ...interview,
+        tutor,
+        booking,
+      },
     });
   } catch (error: any) {
     console.error('Error in getInterview:', error);

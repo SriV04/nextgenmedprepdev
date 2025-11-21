@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, 
 import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
 import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
+import InterviewDetailsModal from '../../components/tutor-calendar/InterviewDetailsModal';
 import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
 import CommitChangesBar from '../../components/tutor-calendar/CommitChangesBar';
 import { TutorCalendarProvider, useTutorCalendar } from '../../contexts/TutorCalendarContext';
@@ -869,6 +870,9 @@ function DashboardContent() {
 
         {/* Availability Modal */}
         <AvailabilityModal />
+        
+        {/* Interview Details Modal */}
+        <InterviewDetailsModal />
       </div>
     </div>
   );

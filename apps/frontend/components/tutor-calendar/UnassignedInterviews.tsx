@@ -21,11 +21,15 @@ interface UnassignedInterviewsProps {
 const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
   onInterviewClick
 }) => {
-  const { unassignedInterviews } = useTutorCalendar();
+  const { unassignedInterviews, openInterviewDetailsModal } = useTutorCalendar();
   const interviews = unassignedInterviews;
   const handleDragStart = (e: React.DragEvent, interviewId: string) => {
     e.dataTransfer.setData('interviewId', interviewId);
     e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleInterviewClick = (interview: UnassignedInterview) => {
+    openInterviewDetailsModal(interview.id);
   };
 
   return (
@@ -57,8 +61,8 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
               key={interview.id}
               draggable
               onDragStart={(e) => handleDragStart(e, interview.id)}
-              onClick={() => onInterviewClick(interview)}
-              className="flex-shrink-0 w-64 bg-gradient-to-br from-orange-50 to-white border-2 border-orange-200 rounded-lg p-3 hover:shadow-lg hover:border-orange-300 transition-all cursor-move"
+              onClick={() => handleInterviewClick(interview)}
+              className="flex-shrink-0 w-64 bg-gradient-to-br from-orange-50 to-white border-2 border-orange-200 rounded-lg p-3 hover:shadow-lg hover:border-orange-300 transition-all cursor-pointer"
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
