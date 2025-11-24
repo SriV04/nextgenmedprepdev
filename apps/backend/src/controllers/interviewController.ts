@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { createSupabaseClient } from '../../supabase/config';
+import zoomService from '../services/zoomService';
+import emailService from '../services/emailService';
 
 // Validation schemas
 const createInterviewSchema = z.object({
@@ -346,14 +348,72 @@ export const assignInterviewToTutor = async (
       }
     }
 
-    // Update interview with tutor and scheduled time
+    // Get interview details including booking info
+    const { data: existingInterview } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        booking:bookings(
+          id,
+          email,
+          universities
+        )
+      `)
+      .eq('id', id)
+      .single();
+
+    // Create Zoom meeting if Zoom is configured
+    let zoomMeetingId: string | undefined;
+    let zoomJoinUrl: string | undefined;
+    let zoomStartUrl: string | undefined;
+
+    if (zoomService.isConfigured()) {
+      try {
+        console.log('Creating Zoom meeting for interview...');
+        const scheduledDate = new Date(validatedData.scheduled_at);
+        
+        // Get student name from booking
+        const studentName = existingInterview?.booking?.email?.split('@')[0] || 'Student';
+        const universityName = existingInterview?.university || existingInterview?.booking?.universities?.split(',')[0] || undefined;
+
+        const zoomMeeting = await zoomService.createInterviewMeeting({
+          studentName,
+          universityName,
+          startTime: scheduledDate,
+          duration: 60, // Default 60 minutes
+        });
+
+        zoomMeetingId = zoomMeeting.meetingId;
+        zoomJoinUrl = zoomMeeting.joinUrl;
+        zoomStartUrl = zoomMeeting.startUrl;
+
+        console.log('Zoom meeting created:', {
+          meetingId: zoomMeetingId,
+          joinUrl: zoomJoinUrl,
+        });
+      } catch (error) {
+        console.error('Failed to create Zoom meeting:', error);
+        // Continue without Zoom meeting - it can be created manually
+      }
+    } else {
+      console.warn('Zoom is not configured - skipping Zoom meeting creation');
+    }
+
+    // Update interview with tutor, scheduled time, and Zoom details
+    const updateData: any = {
+      tutor_id: validatedData.tutor_id,
+      scheduled_at: validatedData.scheduled_at,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (zoomMeetingId) {
+      updateData.zoom_meeting_id = zoomMeetingId;
+      updateData.zoom_join_url = zoomJoinUrl;
+    }
+
     const { data: interview, error: interviewError } = await supabase
       .from('interviews')
-      .update({
-        tutor_id: validatedData.tutor_id,
-        scheduled_at: validatedData.scheduled_at,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();
@@ -469,10 +529,10 @@ export const deleteInterview = async (
     const { id } = req.params;
     const supabase = createSupabaseClient();
 
-    // Get interview to check if it has an availability slot
+    // Get interview to check if it has an availability slot and Zoom meeting
     const { data: interview } = await supabase
       .from('interviews')
-      .select('id')
+      .select('id, zoom_meeting_id')
       .eq('id', id)
       .single();
 
@@ -482,6 +542,17 @@ export const deleteInterview = async (
         message: 'Interview not found',
       });
       return;
+    }
+
+    // Delete Zoom meeting if exists
+    if (interview.zoom_meeting_id && zoomService.isConfigured()) {
+      try {
+        await zoomService.deleteMeeting(interview.zoom_meeting_id);
+        console.log('Deleted Zoom meeting:', interview.zoom_meeting_id);
+      } catch (error) {
+        console.error('Failed to delete Zoom meeting:', error);
+        // Continue with interview deletion even if Zoom deletion fails
+      }
     }
 
     // Clear the availability slot if exists
@@ -551,15 +622,59 @@ export const confirmInterview = async (
       return;
     }
 
+    // Get interview to check if Zoom meeting exists
+    const { data: interview } = await supabase
+      .from('interviews')
+      .select('zoom_meeting_id, zoom_join_url')
+      .eq('id', id)
+      .single();
+
+    // If no Zoom meeting exists, create one
+    let zoomJoinUrl = interview?.zoom_join_url;
+    
+    if (!zoomJoinUrl && zoomService.isConfigured()) {
+      try {
+        console.log('Creating Zoom meeting for confirmation...');
+        const scheduledDate = new Date(scheduled_at);
+        
+        const zoomMeeting = await zoomService.createInterviewMeeting({
+          studentName: student_name,
+          tutorName: tutor_name,
+          startTime: scheduledDate,
+          duration: 60,
+        });
+
+        // Update interview with Zoom details
+        await supabase
+          .from('interviews')
+          .update({
+            zoom_meeting_id: zoomMeeting.meetingId,
+            zoom_join_url: zoomMeeting.joinUrl,
+          })
+          .eq('id', id);
+
+        zoomJoinUrl = zoomMeeting.joinUrl;
+        console.log('Zoom meeting created and stored:', zoomMeeting.meetingId);
+      } catch (error) {
+        console.error('Failed to create Zoom meeting:', error);
+        // Use a placeholder if Zoom fails
+        zoomJoinUrl = 'Zoom link will be provided separately';
+      }
+    }
+
+    if (!zoomJoinUrl) {
+      zoomJoinUrl = 'Zoom link will be provided separately';
+    }
+
     // Send confirmation emails
-    const emailService = require('../services/emailService').default;
     await emailService.sendInterviewConfirmationEmail(
       tutor.email,
       tutor_name,
       student_email,
       student_name,
       scheduled_at,
-      id
+      id,
+      zoomJoinUrl
     );
 
     res.json({

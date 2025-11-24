@@ -1201,22 +1201,26 @@ Booking ID: ${data.bookingId}
     }
   }
 
-  // Generate a Zoom meeting link (placeholder - integrate with Zoom API later)
-  private generateZoomLink(interviewId: string): string {
-    // TODO: Integrate with Zoom API to create actual meetings
-    // For now, return a placeholder link
-    return `https://zoom.us/j/${Math.floor(Math.random() * 1000000000)}?pwd=placeholder`;
-  }
-
+  /**
+   * Send interview confirmation emails with Zoom meeting link
+   * @param tutorEmail - Email of the tutor
+   * @param tutorName - Name of the tutor
+   * @param studentEmail - Email of the student
+   * @param studentName - Name of the student
+   * @param scheduledAt - ISO date string of the scheduled interview
+   * @param interviewId - ID of the interview
+   * @param zoomJoinUrl - Zoom meeting join URL (required)
+   */
   async sendInterviewConfirmationEmail(
     tutorEmail: string,
     tutorName: string,
     studentEmail: string,
     studentName: string,
     scheduledAt: string,
-    interviewId: string
+    interviewId: string,
+    zoomJoinUrl: string
   ): Promise<void> {
-    const zoomLink = this.generateZoomLink(interviewId);
+    const zoomLink = zoomJoinUrl;
     const interviewDate = new Date(scheduledAt);
     const dateStr = interviewDate.toLocaleDateString('en-GB', { 
       weekday: 'long',
