@@ -44,7 +44,7 @@ export default function InterviewsPage() {
 
   return (
     <div className="min-h-screen">
-      <section className="relative bg-slate-50 pt-32 pb-20 px-6 overflow-hidden">
+      <section className="relative bg-slate-50 pt-16 pb-20 px-6 overflow-hidden">
       
         {/* --- Background Elements (The "Cool" Factor) --- */}
         
