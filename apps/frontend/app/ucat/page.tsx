@@ -88,25 +88,79 @@ export default function UCATPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-16 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="mb-8">
-            <span className="text-6xl mb-4 block">🧠</span>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Master the
-              <span className="block text-gradient-primary">UCAT</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Achieve your target UCAT score with our comprehensive preparation program. Expert tutoring, proven strategies, and unlimited practice tests.
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8">
+      <section className="relative bg-slate-950 py-24 px-6 overflow-hidden">
+        
+        {/* --- Background Elements --- */}
+        
+        {/* 1. Technical Grid (Same as previous for consistency) */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+        
+        {/* 2. Cognitive Glow Effects (Purple/Pink focus) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] -z-10" />
 
-            <Link href="#tutoring-packages" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:border-gray-400 transition-all duration-300">
-              Join our Programs
-            </Link>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          
+          {/* Floating Icon Container */}
+          <div className="mx-auto w-20 h-20 mb-8 bg-white/5 border border-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-[0_0_30px_-5px_rgba(168,85,247,0.4)] animate-float">
+            <span className="text-4xl filter drop-shadow-lg">🧠</span>
           </div>
+
+          {/* Headline */}
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+            Master the <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 animate-gradient-x">
+              UCAT
+            </span>
+          </h1>
+
+          {/* Description */}
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+            Achieve your target score with a data-driven approach. 
+            Get expert tutoring, proven logic strategies, and unlimited practice tests.
+          </p>
+          
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link 
+                href="#tutoring-packages" 
+                className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold transition-all duration-300 shadow-[0_0_40px_-10px_rgba(192,38,211,0.4)] hover:shadow-[0_0_60px_-15px_rgba(192,38,211,0.6)] hover:-translate-y-1"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  Join Our Programs
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+                {/* Shine overlay */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </Link>
+
+              {/* Optional Secondary Button for consistency */}
+              <Link 
+                  href="/ucat/free-test" 
+                  className="px-8 py-4 rounded-xl font-medium text-slate-300 border border-slate-700 hover:bg-slate-800 hover:text-white hover:border-slate-600 transition-all duration-300"
+              >
+                  Take Free Test
+              </Link>
+          </div>
+
+          {/* Small Stats/Trust Strip */}
+          <div className="mt-16 pt-8 border-t border-white/5 flex flex-wrap justify-center gap-8 md:gap-16 text-sm font-medium text-slate-500">
+              <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                  <span>3000+ Question Bank</span>
+              </div>
+              <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                  <span>Top 1% Tutors</span>
+              </div>
+              <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                  <span>Average Score: 2800+</span>
+              </div>
+          </div>
+
         </div>
       </section>
 

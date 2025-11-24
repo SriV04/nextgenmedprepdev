@@ -38,11 +38,13 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     setSelectedDate,
     assignInterview,
     markSlotsAvailable,
+    removeAvailability,
     openAvailabilityModal
   } = useTutorCalendar();
   const [draggedBooking, setDraggedBooking] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [dragOverSlot, setDragOverSlot] = useState<string | null>(null);
+  const [draggedStudentAvailability, setDraggedStudentAvailability] = useState<any[]>([]);
   
   // Multi-selection state
   const [isSelecting, setIsSelecting] = useState(false);
@@ -86,21 +88,40 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
   const handleDragStart = (e: React.DragEvent, bookingId: string) => {
     setDraggedBooking(bookingId);
     e.dataTransfer.effectAllowed = 'move';
+    // Clear student availability when dragging existing interview
+    setDraggedStudentAvailability([]);
   };
 
   const handleDragOver = (e: React.DragEvent, slotKey: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverSlot(slotKey);
+    
+    // Try to get student availability from drag data
+    const availabilityData = e.dataTransfer.getData('studentAvailability');
+    if (availabilityData && draggedStudentAvailability.length === 0) {
+      try {
+        const availability = JSON.parse(availabilityData);
+        setDraggedStudentAvailability(availability);
+      } catch (err) {
+        console.error('Error parsing student availability:', err);
+      }
+    }
   };
 
   const handleDragLeave = () => {
+    setDragOverSlot(null);
+  };
+  
+  const handleDragEnd = () => {
+    setDraggedStudentAvailability([]);
     setDragOverSlot(null);
   };
 
   const handleDropOnSlot = (e: React.DragEvent, tutorId: string, date: string, time: string) => {
     e.preventDefault();
     setDragOverSlot(null);
+    setDraggedStudentAvailability([]);
     
     // Try to get interview ID from dataTransfer (from UnassignedInterviews)
     const interviewId = e.dataTransfer.getData('interviewId');
@@ -118,24 +139,43 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     const daySlots = tutor.schedule[date] || [];
     return daySlots.find(slot => slot.startTime === time);
   };
+  
+  // Check if a time slot matches student availability
+  const isStudentAvailable = (date: string, time: string): boolean => {
+    if (draggedStudentAvailability.length === 0) return false;
+    
+    const slotDate = new Date(date);
+    const dayOfWeek = slotDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const hour = parseInt(time.split(':')[0], 10);
+    
+    return draggedStudentAvailability.some((avail: any) => {
+      // Check if the day of week matches
+      if (avail.day_of_week !== dayOfWeek) return false;
+      
+      // Check if the hour falls within the availability window
+      return hour >= avail.hour_start && hour < avail.hour_end;
+    });
+  };
 
   // Multi-selection handlers
   const handleMouseDown = (e: React.MouseEvent, tutorId: string, time: string, slot: TimeSlot | undefined) => {
-    // Only start selection on empty slots or blocked slots
-    if (!slot || slot.type === 'blocked' || slot.type === 'available') {
-      e.preventDefault();
-      setIsSelecting(true);
-      setSelectionStartTutor(tutorId);
-      const slotKey = `${tutorId}-${time}`;
-      setSelectedSlots(new Set([slotKey]));
+    // Don't interfere with interview slots
+    if (slot && slot.type === 'interview') {
+      return;
     }
+    
+    e.preventDefault();
+    setIsSelecting(true);
+    setSelectionStartTutor(tutorId);
+    const slotKey = `${tutorId}-${time}-${slot?.id || 'empty'}`;
+    setSelectedSlots(new Set([slotKey]));
   };
 
   const handleMouseEnter = (tutorId: string, time: string, slot: TimeSlot | undefined) => {
     if (isSelecting && tutorId === selectionStartTutor) {
-      // Only select empty, blocked, or available slots
+      // Don't select interview slots
       if (!slot || slot.type === 'blocked' || slot.type === 'available') {
-        const slotKey = `${tutorId}-${time}`;
+        const slotKey = `${tutorId}-${time}-${slot?.id || 'empty'}`;
         setSelectedSlots(prev => new Set([...prev, slotKey]));
       }
     }
@@ -149,18 +189,70 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     if (selectedSlots.size === 0) return;
 
     const dateStr = formatDate(selectedDate);
-    const slotsToMark = Array.from(selectedSlots).map(slotKey => {
-      const lastDash = slotKey.lastIndexOf("-");
-      const tutorId = slotKey.slice(0, lastDash);
-      const time = slotKey.slice(lastDash + 1);
-      return { tutorId, date: dateStr, time };
-    });
+    const slotsToMark = Array.from(selectedSlots)
+      .filter(slotKey => slotKey.endsWith('-empty')) // Only mark empty slots
+      .map(slotKey => {
+        // Format: ${tutorId}-${time}-empty
+        // Find the last occurrence of time pattern (HH:MM) to split correctly
+        const timeMatch = slotKey.match(/-([\d]{2}:[\d]{2})-empty$/);
+        if (timeMatch) {
+          const time = timeMatch[1];
+          const tutorId = slotKey.substring(0, slotKey.lastIndexOf(timeMatch[0]));
+          return { tutorId, date: dateStr, time };
+        }
+        // Fallback if pattern doesn't match
+        const parts = slotKey.split('-');
+        const time = parts[parts.length - 2];
+        const tutorId = parts.slice(0, parts.length - 2).join('-');
+        return { tutorId, date: dateStr, time };
+      });
+
+    if (slotsToMark.length === 0) {
+      alert('No empty slots selected. Please select empty time slots to mark as available.');
+      return;
+    }
 
     markSlotsAvailable(slotsToMark);
     
     // Clear selection
     setSelectedSlots(new Set());
     setSelectionStartTutor(null);
+  };
+
+  const handleRemoveAvailability = () => {
+    if (selectedSlots.size === 0) return;
+
+    const slotsToRemove = Array.from(selectedSlots)
+      .filter(slotKey => !slotKey.endsWith('-empty')) // Only remove existing slots
+      .map(slotKey => {
+        // Format: ${tutorId}-${time}-${slotId}
+        // Find the last occurrence of time pattern (HH:MM) to split correctly
+        const timeMatch = slotKey.match(/-([\d]{2}:[\d]{2})-([^-]+)$/);
+        if (timeMatch) {
+          const slotId = timeMatch[2];
+          const tutorId = slotKey.substring(0, slotKey.lastIndexOf(timeMatch[0]));
+          return { tutorId, slotId };
+        }
+        // Fallback if pattern doesn't match
+        const lastDashIndex = slotKey.lastIndexOf('-');
+        const slotId = slotKey.substring(lastDashIndex + 1);
+        const secondLastDashIndex = slotKey.lastIndexOf('-', lastDashIndex - 1);
+        const tutorId = slotKey.substring(0, secondLastDashIndex);
+        return { tutorId, slotId };
+      });
+
+    if (slotsToRemove.length === 0) {
+      alert('No available slots selected. Please select existing availability slots to remove.');
+      return;
+    }
+
+    if (confirm(`Remove ${slotsToRemove.length} availability slot(s)?`)) {
+      removeAvailability(slotsToRemove);
+      
+      // Clear selection
+      setSelectedSlots(new Set());
+      setSelectionStartTutor(null);
+    }
   };
 
   const handleClearSelection = () => {
@@ -257,6 +349,12 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                 <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></div>
                 <span className="text-gray-600">Blocked</span>
               </div>
+              {draggedStudentAvailability.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 bg-blue-200 border border-blue-400 rounded"></div>
+                  <span className="text-gray-600">Student Available</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -287,23 +385,34 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
             </span>
             <div className="h-4 w-px bg-blue-400"></div>
             <span className="text-sm text-blue-100">
-              Drag to select multiple slots • Click to deselect
+              Drag to select multiple • Click individual slots to toggle
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleMarkAsAvailable}
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm"
-            >
-              <Check className="w-4 h-4" />
-              Mark as Available
-            </button>
+            {Array.from(selectedSlots).some(key => key.endsWith('-empty')) && (
+              <button
+                onClick={handleMarkAsAvailable}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm"
+              >
+                <Check className="w-4 h-4" />
+                Mark as Available
+              </button>
+            )}
+            {Array.from(selectedSlots).some(key => !key.endsWith('-empty')) && (
+              <button
+                onClick={handleRemoveAvailability}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium text-sm"
+              >
+                <X className="w-4 h-4" />
+                Remove Availability
+              </button>
+            )}
             <button
               onClick={handleClearSelection}
               className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
             >
               <X className="w-4 h-4" />
-              Clear Selection
+              Clear
             </button>
           </div>
         </div>
@@ -354,10 +463,11 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                 {/* Time Slot Columns */}
                 {timeSlots.map((time) => {
                   const slot = daySlots.find(s => s.startTime === time);
-                  const slotKey = `${tutor.tutorId}-${time}`;
+                  const slotKey = `${tutor.tutorId}-${time}-${slot?.id || 'empty'}`;
                   const isDragOver = dragOverSlot === slotKey;
                   const isSelected = selectedSlots.has(slotKey);
                   const isSelectable = !slot || slot.type === 'blocked' || slot.type === 'available';
+                  const showStudentAvailability = draggedStudentAvailability.length > 0 && isStudentAvailable(dateStr, time);
 
                   return (
                     <div
@@ -370,17 +480,27 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                         isDragOver ? 'ring-2 ring-blue-500 ring-inset bg-blue-50' : ''
                       } ${
                         isSelected ? 'ring-4 ring-purple-500 ring-inset bg-purple-100' : ''
+                      } ${
+                        showStudentAvailability && !slot ? 'bg-blue-100 border-blue-300' : ''
+                      } ${
+                        showStudentAvailability && slot?.type === 'available' ? 'bg-blue-200 border-blue-400' : ''
                       }`}
                       onClick={(e) => {
+                        // Interview slots open details modal
+                        if (slot && slot.type === 'interview') {
+                          onSlotClick(slot, tutor);
+                          return;
+                        }
+                        
+                        // Other slots toggle selection
                         if (isSelected) {
-                          // Deselect if already selected
                           setSelectedSlots(prev => {
                             const newSet = new Set(prev);
                             newSet.delete(slotKey);
                             return newSet;
                           });
-                        } else if (slot && slot.type === 'interview') {
-                          onSlotClick(slot, tutor);
+                        } else if (!slot || slot.type === 'available' || slot.type === 'blocked') {
+                          setSelectedSlots(prev => new Set([...prev, slotKey]));
                         }
                       }}
                       onMouseDown={(e) => handleMouseDown(e, tutor.tutorId, time, slot)}
@@ -388,6 +508,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                       onDragOver={(e) => !isSelecting && handleDragOver(e, slotKey)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => !isSelecting && handleDropOnSlot(e, tutor.tutorId, dateStr, time)}
+                      onDragEnd={handleDragEnd}
                     >
                       {slot ? (
                         <div 

@@ -65,8 +65,8 @@ function DashboardContent() {
   // Password for bookings tab (in production, this should be env variable or more secure)
   const BOOKINGS_PASSWORD = process.env.NEXT_PUBLIC_BOOKINGS_PASSWORD || 'admin123';
 
-  // Use calendar context - only need tutors for display purposes
-  const { tutors } = useTutorCalendar();
+  // Use calendar context
+  const { tutors, setCurrentUserId } = useTutorCalendar();
   
   const router = useRouter();
   const supabase = createClient();
@@ -80,7 +80,7 @@ function DashboardContent() {
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
-  // Check authentication on mount
+  // Check authentication on mount and set current user
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -88,10 +88,12 @@ function DashboardContent() {
         router.push('/auth/login?redirectTo=/tutor-dashboard');
       } else {
         setUser(user);
+        // Set the current user ID in the calendar context
+        setCurrentUserId(user.id);
       }
     };
     checkAuth();
-  }, [router, supabase]);
+  }, [router, supabase, setCurrentUserId]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

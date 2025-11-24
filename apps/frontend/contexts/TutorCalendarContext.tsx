@@ -92,11 +92,13 @@ interface TutorCalendarContextType {
   error: string | null;
   pendingChanges: PendingChange[];
   hasPendingChanges: boolean;
+  currentUserId: string | null;
 
   // Actions
   setSelectedDate: (date: Date) => void;
   assignInterview: (tutorId: string, date: string, time: string, interviewId: string) => Promise<void>;
   markSlotsAvailable: (slots: { tutorId: string; date: string; time: string }[]) => Promise<void>;
+  removeAvailability: (slots: { tutorId: string; slotId: string }[]) => Promise<void>;
   openAvailabilityModal: (tutorId?: string) => void;
   closeAvailabilityModal: () => void;
   openInterviewDetailsModal: (interviewId: string) => Promise<void>;
@@ -105,6 +107,7 @@ interface TutorCalendarContextType {
   refreshData: () => Promise<void>;
   commitChanges: () => Promise<void>;
   discardChanges: () => void;
+  setCurrentUserId: (userId: string | null) => void;
 }
 
 const TutorCalendarContext = createContext<TutorCalendarContextType | undefined>(undefined);
@@ -126,6 +129,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
   const hasPendingChanges = pendingChanges.length > 0;
@@ -363,6 +367,37 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
+  const removeAvailability = async (slots: { tutorId: string; slotId: string }[]) => {
+    try {
+      // Delete each availability slot
+      for (const { slotId } of slots) {
+        console.log('Deleting availability slot:', slotId);
+
+        const response = await fetch(`${backendUrl}/api/v1/tutors/availability/${slotId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to remove availability');
+        }
+      }
+
+      // Refresh data
+      await fetchData();
+
+      console.log('Removed availability slots:', slots);
+      alert(`✓ Removed ${slots.length} availability slot(s)`);
+    } catch (err: any) {
+      console.error('Error removing availability:', err);
+      alert(`Failed to remove availability: ${err.message}`);
+    }
+  };
+
   const openAvailabilityModal = (tutorId?: string) => {
     const targetTutorId = tutorId || tutors[0]?.tutorId;
     const tutor = tutors.find(t => t.tutorId === targetTutorId);
@@ -550,9 +585,11 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     error,
     pendingChanges,
     hasPendingChanges,
+    currentUserId,
     setSelectedDate,
     assignInterview,
     markSlotsAvailable,
+    removeAvailability,
     openAvailabilityModal,
     closeAvailabilityModal,
     openInterviewDetailsModal,
@@ -561,6 +598,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     refreshData,
     commitChanges,
     discardChanges,
+    setCurrentUserId,
   };
 
   return (
