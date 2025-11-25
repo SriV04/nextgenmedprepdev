@@ -57,29 +57,58 @@ export default function Step2Package({ serviceType, packageId, onPackageSelect }
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
           >
-            {pkg.popular && (
-              <div className="absolute -top-2 -right-2">
-                <span className="bg-yellow-400 text-purple-900 text-xs font-bold px-2 py-1 rounded-full">
+            <div className="absolute -top-3 -right-3 flex flex-col gap-1">
+              {pkg.popular && (
+                <span className="bg-yellow-400 text-purple-900 text-xs font-bold px-2 py-1 rounded-full shadow-lg">
                   POPULAR
                 </span>
-              </div>
-            )}
+              )}
+              {serviceType === 'live' && pkg.blackFridayPrice && (
+                <span className="bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                  🔥 30% OFF
+                </span>
+              )}
+              {serviceType === 'generated' && pkg.originalGeneratedPrice && (
+                <span className="bg-gradient-to-r from-red-600 to-red-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg animate-pulse">
+                  🔥 {Math.round(((pkg.originalGeneratedPrice - pkg.generatedPrice) / pkg.originalGeneratedPrice) * 100)}% OFF
+                </span>
+              )}
+            </div>
             <h4 className="text-xl font-semibold mb-2">{pkg.name}</h4>
             <p className="text-gray-400 text-sm mb-4">{pkg.description}</p>
             <div className="text-center mb-4">
               <div className="text-sm text-gray-400">
                 {serviceType === 'generated' ? 'Generated Questions' : 'With Tutor'}
               </div>
-              <div className="text-3xl font-bold text-indigo-400">
-                £{serviceType === 'generated' ? pkg.generatedPrice : pkg.tutorPrice}
-              </div>
-              {((pkg.originalPrice && serviceType === 'live') || pkg.originalGeneratedPrice) && (
-                <div className="text-sm text-gray-500 line-through">
-                  £{serviceType === 'generated' && pkg.originalGeneratedPrice
-                    ? pkg.originalGeneratedPrice
-                    : pkg.originalPrice
-                  }
-                </div>
+              {/* Black Friday pricing for live tutors */}
+              {serviceType === 'live' && pkg.blackFridayPrice ? (
+                <>
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="text-2xl text-gray-500 line-through">
+                      £{pkg.tutorPrice}
+                    </div>
+                    <div className="text-3xl font-bold text-red-400">
+                      £{pkg.blackFridayPrice}
+                    </div>
+                  </div>
+                  <div className="text-xs text-red-400 font-semibold mt-1">
+                    Black Friday Sale
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-3xl font-bold text-indigo-400">
+                    £{serviceType === 'generated' ? pkg.generatedPrice : pkg.tutorPrice}
+                  </div>
+                  {((pkg.originalPrice && serviceType === 'live') || pkg.originalGeneratedPrice) && (
+                    <div className="text-sm text-gray-500 line-through">
+                      £{serviceType === 'generated' && pkg.originalGeneratedPrice
+                        ? pkg.originalGeneratedPrice
+                        : pkg.originalPrice
+                      }
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <ul className="space-y-2 text-gray-300 text-sm">
