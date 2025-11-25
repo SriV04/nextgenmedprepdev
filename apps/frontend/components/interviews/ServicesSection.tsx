@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon } from '@heroicons/react/24/outline';
+import GeneratedMocks from './GeneratedMocks';
 
 export default function ServicesSection() {
   const services = [
@@ -39,14 +40,15 @@ export default function ServicesSection() {
   ];
 
   return (
-    <section id="services" className="py-16 px-4 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Interview Services</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Comprehensive preparation for every type of medical school interview
-          </p>
-        </div>
+    <>
+      <section id="services" className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Live Tutor Interview Services</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Comprehensive preparation with expert tutors for every type of medical school interview
+            </p>
+          </div>
         
         <div className="grid md:grid-cols-2 gap-8">
           {services.map((service, index) => (
@@ -93,5 +95,6 @@ export default function ServicesSection() {
         </div>
       </div>
     </section>
+    </>
   );
 }

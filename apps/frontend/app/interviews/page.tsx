@@ -6,6 +6,7 @@ import FreeResourcesCarousel from '@/components/interviews/FreeResourcesCarousel
 import HeroSection from '@/components/interviews/HeroSection';
 import ServicesSection from '@/components/interviews/ServicesSection';
 import BlackFridayBanner from '@/components/black-friday/BlackFridayBanner';
+import GeneratedMocks from '@/components/interviews/GeneratedMocks';
 
 export default function InterviewsPage() {
 
@@ -119,6 +120,8 @@ export default function InterviewsPage() {
         </div>
       </section>
 
+      <GeneratedMocks />
+
 
       <section className="py-16 px-4 bg-white">
          <div className="max-w-6xl mx-auto">
@@ -170,8 +173,8 @@ export default function InterviewsPage() {
             Slots are filling up fast for Black Friday. Secure your tutor today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/interviews/payment?service=live&package=core" className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-600/30">
-              Get the Deal
+            <Link href="#interview-packages" className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-all duration-300 shadow-lg shadow-red-600/30">
+              Get the Deals
             </Link>
             <a href="mailto:contact@nextgenmedprep.com" className="border-2 border-gray-500 text-gray-300 px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-slate-900 transition-all duration-300">
               Ask Questions
