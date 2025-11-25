@@ -1,8 +1,9 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
+import { FireIcon } from '@heroicons/react/24/outline';
 
-export default function HeroSection() {
+export default function BlackFridayHeroSection() {
   return (
     <section className="relative pt-12 pb-20 px-6 overflow-hidden">
       {/* Background effects */}
@@ -12,18 +13,11 @@ export default function HeroSection() {
 
       <div className="relative max-w-5xl mx-auto text-center z-10">
         
-        {/* Badge */}
-        <a 
-          href="https://uk.trustpilot.com/review/nextgenmedprep.com" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 border border-slate-200 shadow-sm backdrop-blur-md mb-8 hover:bg-slate-900/10 hover:border-slate-300 transition-all duration-200"
-        >
-           <span className="text-sm font-semibold text-slate-700 tracking-wide">Trusted by 300+ Medical Students</span>
-           <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-           </svg>
-        </a>
+        {/* Updated Badge for Black Friday */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 border border-slate-200 shadow-sm backdrop-blur-md mb-8">
+           <FireIcon className="w-4 h-4 text-red-500" />
+           <span className="text-sm font-semibold text-slate-700 tracking-wide">Black Friday Sale Now Live</span>
+        </div>
 
         <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-tight">
           Master Your Medical <br className="hidden md:block" />
@@ -41,9 +35,12 @@ export default function HeroSection() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
           <Link 
             href="#interview-packages" 
-            className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:-translate-y-1"
+            className="relative group px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:-translate-y-1"
           >
-            View Packages
+            View Deals
+            <div className="absolute top-[-10px] right-[-10px] bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-bounce">
+              SALE
+            </div>
           </Link>
           
           <Link 
@@ -57,8 +54,8 @@ export default function HeroSection() {
         {/* Stats / Social Proof */}
         <div className="inline-flex flex-col md:flex-row items-center gap-8 md:gap-12 px-8 py-6 bg-white/40 backdrop-blur-lg border border-white/60 rounded-2xl shadow-xl shadow-blue-900/5">
           <div className="text-center">
-            <p className="text-3xl font-bold text-slate-900">100%</p>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">University-Specific</p>
+            <p className="text-3xl font-bold text-slate-900">90%</p>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Offer Rate</p>
           </div>
           <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>
           <div className="text-center">
