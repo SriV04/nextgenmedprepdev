@@ -907,6 +907,7 @@ The NextGen MedPrep Team
     downloadUrl?: string;
     notes?: string;
     preferredDate?: string;
+    availability?: Array<{ date: string; timeSlot: string }>;
   }): Promise<void> {
     const adminEmail = process.env.REVIEW_TEAM_EMAIL || 'contact@nextgenmedprep.com';
     console.log('Sending interview booking notification to:', adminEmail);
@@ -1057,6 +1058,7 @@ The NextGen MedPrep Team
     downloadUrl?: string;
     notes?: string;
     preferredDate?: string;
+    availability?: Array<{ date: string; timeSlot: string }>;
   }): EmailTemplate {
     const packageLabel = data.packageType === 'single' ? 'Single Session' : 'Package Deal';
     const serviceLabel = data.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
@@ -1078,6 +1080,9 @@ Booking Details:
 - Universities: ${universitiesStr}
 - Amount: £${data.amount}
 ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
+${data.availability && data.availability.length > 0 ? `
+Student Availability:
+${data.availability.map((slot) => `  • ${slot.date} at ${slot.timeSlot}`).join('\n')}` : ''}
 ${data.notes ? `- Notes: ${data.notes}` : ''}
 ${data.filePath ? `
 Personal Statement:
@@ -1139,6 +1144,15 @@ Booking ID: ${data.bookingId}
               </tr>
             </table>
           </div>
+
+          ${data.availability && data.availability.length > 0 ? `
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">📅 Student Availability</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              ${data.availability.map((slot) => `<li><strong>${slot.date}</strong> at ${slot.timeSlot}</li>`).join('\n              ')}
+            </ul>
+          </div>
+          ` : ''}
 
           ${data.notes ? `
           <div style="background-color: #fffbeb; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
