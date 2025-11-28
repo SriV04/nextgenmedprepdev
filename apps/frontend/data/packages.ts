@@ -41,7 +41,7 @@ export const interviewPackages: ExtendedPackage[] = [
     interviews: 1,
     generatedPrice: 7,
     tutorPrice: 45,
-    // blackFridayPrice: 40,
+    blackFridayPrice: 40,
     features: [
       'A mock interview with Prometheus-powered university-specific questions',
       'Ensuring that your mock interview is as realistic as possible',
@@ -71,7 +71,7 @@ export const interviewPackages: ExtendedPackage[] = [
     originalGeneratedPrice: 14,
     tutorPrice: 125,
     originalPrice: 150,
-    // blackFridayPrice: 115,
+    blackFridayPrice: 115,
     popular: true,
     features: [
       '3 mock interviews with Prometheus-powered university-specific mock questions',
@@ -105,7 +105,7 @@ export const interviewPackages: ExtendedPackage[] = [
     originalGeneratedPrice: 21,
     tutorPrice: 250,
     originalPrice: 275,
-    // blackFridayPrice: 200,
+    blackFridayPrice: 200,
     features: [
       '4 mock interviews with Prometheus-powered university-specific mock questions',
       'A Background knowledge session for success at the interview',

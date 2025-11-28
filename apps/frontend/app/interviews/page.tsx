@@ -8,12 +8,16 @@ import GeneratedMocks from '@/components/interviews/GeneratedMocks';
 import HeroSection from '@/components/interviews/HeroSection';
 import BlackFridayCTA from '@/components/black-friday/BlackFridayCTA';
 import CTASection from '@/components/interviews/CTAsection';
+import BlackFridayBanner from '@/components/black-friday/BlackFridayBanner';
+import BlackFridayHeroSection from '@/components/black-friday/BlackFridayHeroSection';
 
 export default function InterviewsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <HeroSection />
+      <BlackFridayBanner />
+
+      <BlackFridayHeroSection />
 
       <ServicesSection />
 
@@ -160,7 +164,7 @@ export default function InterviewsPage() {
       <FreeResourcesCarousel />
 
       {/* CTA Section with slight BF tweak */}
-      <CTASection />
+      <BlackFridayCTA />
     </div>
   );
 }
