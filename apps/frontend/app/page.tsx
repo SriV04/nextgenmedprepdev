@@ -4,11 +4,13 @@ import NewsletterSignup from '@/components/home/NewsletterSignup';
 import SuccessStories from '@/components/home/SuccessStories';
 import TimelineSection from '@/components/home/TimelineSection';
 import React from 'react';
+import BlackFridayBanner from '@/components/black-friday/BlackFridayBanner';
 
 export default function HomePage() {
   return (
     <main className="bg-[var(--color-background-primary)] text-[var(--color-text-primary)] font-karla scroll-smooth w-full overflow-x-hidden">
       {/* Hero Section */}
+
       <div className='snap-start flex justify-center items-center'> {/* No negative margins needed */}
         <Hero />
       </div>

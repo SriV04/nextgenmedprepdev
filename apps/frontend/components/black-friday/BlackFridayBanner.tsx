@@ -33,7 +33,9 @@ export default function BlackFridayBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="sticky top-0 z-50 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-4 shadow-2xl overflow-hidden relative">
+    // UPDATED: z-40 ensures it sits behind the header (z-100) and mega menu
+    // top-[61px] aligns it right below the fixed header
+    <div className="sticky top-[60px] sm:top-[64px] z-40 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-3 px-4 shadow-2xl overflow-hidden relative transition-all duration-300">
       {/* Animated gradient border */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 animate-pulse"></div>
       

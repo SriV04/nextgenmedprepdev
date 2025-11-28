@@ -15,7 +15,7 @@ export default function InterviewsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <BlackFridayBanner />
+      <BlackFridayBanner /> 
 
       <BlackFridayHeroSection />
 
