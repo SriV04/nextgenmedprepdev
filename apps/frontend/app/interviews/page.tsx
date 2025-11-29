@@ -1,367 +1,145 @@
-"use client";
 import React from 'react';
 import Link from 'next/link';
-import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon } from '@heroicons/react/24/outline';
-
+import { UserGroupIcon, AcademicCapIcon, ReceiptPercentIcon, SparklesIcon, FireIcon } from '@heroicons/react/24/outline';
 import { interviewPackages } from '../../data/packages';
 import FreeResourcesCarousel from '@/components/interviews/FreeResourcesCarousel';
+import ServicesSection from '@/components/interviews/ServicesSection';
+import GeneratedMocks from '@/components/interviews/GeneratedMocks';
+import HeroSection from '@/components/interviews/HeroSection';
+import BlackFridayCTA from '@/components/black-friday/BlackFridayCTA';
+import CTASection from '@/components/interviews/CTAsection';
+import BlackFridayBanner from '@/components/black-friday/BlackFridayBanner';
+import BlackFridayHeroSection from '@/components/black-friday/BlackFridayHeroSection';
 
 export default function InterviewsPage() {
-  const services = [
-    {
-      title: "Mock MMIs (Multiple Mini Interviews)",
-      description: "Excel in MMI stations with targeted practice and expert guidance from our tutors.",
-      features: ["Station-based practice", "Ethical scenarios", "Communication skills", "Time management"],
-      icon: ReceiptPercentIcon,
-      color: "bg-green-50 border-green-200",
-      buttonColor: "bg-green-600 hover:bg-green-700"
-    },
-    {
-      title: "Mock Panel Interviews",
-      description: "Master traditional medical school interviews with our experienced panel of medical professionals.",
-      features: ["Mock interview sessions", "Personalised feedback", "Question bank practice", "Confidence building"],
-      icon: UserGroupIcon,
-      color: "bg-blue-50 border-blue-200",
-      buttonColor: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      title: "Interview Background Knowledge",
-      description: "Interview Conference sessions to cover all the essential background knowledge for medical school interviews.",
-      features: ["Individual coaching", "Tailored preparation", "Personal statement alignment", "Body language tips"],
-      icon: AcademicCapIcon,
-      color: "bg-purple-50 border-purple-200",
-      buttonColor: "bg-purple-600 hover:bg-purple-700"
-    },
-    {
-      title: "Interview Conferences",
-      description: "Join our intensive group sessions and learn alongside fellow medical school applicants.",
-      features: ["Group workshops", "Peer learning", "Expert seminars", "Networking opportunities"],
-      icon: ReceiptPercentIcon,
-      color: "bg-orange-50 border-orange-200",
-      buttonColor: "bg-orange-600 hover:bg-orange-700"
-    }
-  ];
 
   return (
-    <div className="min-h-screen">
-      <section className="relative bg-slate-50 pt-16 pb-20 px-6 overflow-hidden">
-        
-        {/* 1. Technical Grid Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        
-        {/* 2. Soft Gradient Blobs (Option 1 Vibe, adapted for Light Mode) */}
-        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-teal-400/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[100px]" />
+    <div className="min-h-screen bg-slate-50">
+      <BlackFridayBanner /> 
 
+      <BlackFridayHeroSection />
 
-        {/* --- Main Content --- */}
-        <div className="relative max-w-5xl mx-auto text-center z-10">
-          
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 border border-blue-100 shadow-sm backdrop-blur-md mb-8 animate-fade-in-up">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-blue-600 animate-pulse"></span>
-            <span className="text-sm font-semibold text-blue-900 tracking-wide">#1 Rated Interview Prep</span>
-          </div>
+      <ServicesSection />
 
-          {/* Headline with Gradient Text */}
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-tight">
-            Master Your Medical <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-blue-600 to-indigo-600">
-              School Interviews
-            </span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Stop guessing what the panels want. Build confidence with mock interviews, 
-            real-time feedback, and strategies used by top medical students.
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-            <Link 
-              href="/interviews/payment" 
-              className="relative group px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:-translate-y-1"
-            >
-              Book Mock Interview
-              {/* Subtle sheen effect on hover */}
-              <div className="absolute inset-0 rounded-xl overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-              </div>
-            </Link>
-            
-            <Link 
-              href="/interviews/free-resources" 
-              className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 shadow-sm"
-            >
-              Free Resources
-            </Link>
-          </div>
-
-          {/* Stats / Social Proof (Glassmorphism Card) */}
-          <div className="inline-flex flex-col md:flex-row items-center gap-8 md:gap-12 px-8 py-6 bg-white/40 backdrop-blur-lg border border-white/60 rounded-2xl shadow-xl shadow-blue-900/5">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-slate-900">90%</p>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Offer Rate</p>
-            </div>
-            <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-slate-900">300+</p>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Students</p>
-            </div>
-            <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>
-            <div className="flex items-center gap-[-10px]">
-              {/* Example Avatars (using CSS circles for simplicity) */}
-              <div className="flex -space-x-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-teal-100 flex items-center justify-center text-xs font-bold text-teal-700">JD</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700">AS</div>
-                  <div className="w-10 h-10 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700">MK</div>
-              </div>
-              <span className="ml-4 text-sm font-medium text-slate-600">Joined this week</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Interview Prep Matters */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Interview Preparation Matters</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Medical school interviews are your chance to shine beyond grades and test scores.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
-              <div className="text-4xl mb-4">📈</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Boost Success Rate</h3>
-              <p className="text-gray-600">Students who practice interviews are 3x more likely to receive offers</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
-              <div className="text-4xl mb-4">💪</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Build Confidence</h3>
-              <p className="text-gray-600">Reduce anxiety and nervousness through realistic practice scenarios</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-purple-50 border border-purple-100">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Stand Out</h3>
-              <p className="text-gray-600">Learn to articulate your passion and unique qualities effectively</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Interview Services</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Comprehensive preparation for every type of medical school interview
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className={`p-8 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300 flex flex-col h-full`}>
-                <div className="flex items-start gap-4 mb-6">
-                  {/* <span className="text-4xl">{service.icon}</span> */}
-                  <service.icon className="w-10 h-10 text-current" />
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                    <p className="text-gray-600">{service.description}</p>
-                  </div>
-                </div>
-                
-                <div className="mb-6 flex-grow">
-                  <h4 className="font-semibold text-gray-900 mb-3">What's included:</h4>
-                  <ul className="space-y-2">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-gray-600">
-                        <span className="text-green-500">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                    {/* Prometheus link excluded from Interview Background knowledger service */}
-                    {service.title !== "Interview Background knowledger" && !service.title.toLowerCase().includes("background") && (
-                      <li className="mt-4 pt-2 border-t border-dashed border-gray-200">
-                        <Link href="/prometheus" className="flex items-center gap-2 text-purple-600 hover:text-purple-800 transition-all duration-200 group">
-                          <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">NEW</span>
-                          <span className="font-medium">Powered by our innovative <span className="underline decoration-2 decoration-purple-400 group-hover:decoration-purple-600">Prometheus</span> mock generator</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-                
-                <Link 
-                  href={
-                    service.title.toLowerCase().includes("background") || service.title.toLowerCase().includes("conference") 
-                      ? "/events" 
-                      : "/interviews/payment"
-                  } 
-                  className={`block w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300 text-center mt-auto`}
-                >
-                  {service.title.toLowerCase().includes("background") || service.title.toLowerCase().includes("conference") 
-                    ? "View Events" 
-                    : "Book Now"
-                  }
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Interview Packages */}
       <section id="interview-packages" className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Interview Packages</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Black Friday Packages</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Choose from our tailored interview preparation packages to maximize your success
+              Limited time offers to maximize your interview success
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Essentials Package */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
-              <div className="bg-blue-500 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{interviewPackages[0].name}</h3>
-                <p className="opacity-90">{interviewPackages[0].description}</p>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-3 mb-8">
-                  {interviewPackages[0].features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-1">✓</span>
-                      <span>{feature.includes('Prometheus') ? (
-                        <>
-                          {feature.split('Prometheus')[0]}
-                          <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
-                          {feature.split('Prometheus')[1]}
-                        </>
-                      ) : feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="border-t pt-6 mt-4">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£{interviewPackages[0].tutorPrice}</span>
-                    <span className="text-sm text-gray-500">per interview</span>
-                  </div>
-                  <Link href={`/interviews/payment?service=live&package=${interviewPackages[0].id}`} className="block w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 text-center">
-                    Book Now
-                  </Link>
-                </div>
-              </div>
-            </div>
-            
-            {/* Core Package */}
-            <div className="relative bg-white rounded-xl shadow-md overflow-hidden border-2 border-yellow-400 hover:shadow-lg transition-all duration-300 transform scale-105 z-10 ring-2 ring-yellow-200">
-              {/* Popular Tag */}
-              <div className="absolute -top-2 -right-2 z-20">
-                <span className="bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                  POPULAR
-                </span>
-              </div>
+            {interviewPackages.map((pkg, index) => {
+              // Determine border/styling based on popularity or pricing
+              const isPopular = pkg.popular;
+              const hasDiscount = !!pkg.blackFridayPrice;
 
-              <div className="bg-purple-600 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{interviewPackages[1].name}</h3>
-                <p className="opacity-90">{interviewPackages[1].description}</p>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-3 mb-8">
-                  {interviewPackages[1].features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-1">✓</span>
-                      <span>{feature.includes('Prometheus') ? (
-                        <>
-                          {feature.split('Prometheus')[0]}
-                          <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
-                          {feature.split('Prometheus')[1]}
-                        </>
-                      ) : feature}</span>
-                      {idx === 1 && <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium ml-2">FREE</span>}
-                    </li>
-                  ))}
-                </ul>
-                <div className="border-t pt-6 mt-4">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£{interviewPackages[1].tutorPrice}</span>
-                    <span className="text-sm text-gray-500">complete package</span>
-                  </div>
-                  <Link href={`/interviews/payment?service=live&package=${interviewPackages[1].id}`} className="block w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 text-center">
-                    Book Now
-                  </Link>
-                </div>
-              </div>
-            </div>
+              return (
+                <div key={pkg.id} className={`
+                  relative bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 flex flex-col
+                  ${isPopular ? 'border-2 border-yellow-400 transform scale-105 z-10 ring-4 ring-yellow-400/20' : 'border border-gray-200 hover:shadow-xl'}
+                `}>
+                  
+                  {/* Popular Badge */}
+                  {isPopular && (
+                    <div className="absolute -top-2 -right-2 z-20">
+                      <span className="bg-yellow-400 text-purple-900 text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                        POPULAR
+                      </span>
+                    </div>
+                  )}
 
-            
-            {/* Premium Package */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300">
-              <div className="bg-indigo-600 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{interviewPackages[2].name}</h3>
-                <p className="opacity-90">{interviewPackages[2].description}</p>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-3 mb-8">
-                  {interviewPackages[2].features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <span className="text-green-500 mr-2 mt-1">✓</span>
-                      <span>{feature.includes('Prometheus') ? (
-                        <>
-                          {feature.split('Prometheus')[0]}
-                          <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
-                          {feature.split('Prometheus')[1]}
-                        </>
-                      ) : feature}</span>
-                      {idx === 1 && <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-medium ml-2">FREE</span>}
-                    </li>
-                  ))}
-                </ul>
-                <div className="border-t pt-6 mt-4">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-3xl font-bold text-gray-900">£{interviewPackages[2].tutorPrice}</span>
-                    <span className="text-sm text-gray-500">complete package</span>
+                  {/* Header */}
+                  <div className={`p-6 text-white ${
+                    index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-purple-600' : 'bg-indigo-600'
+                  }`}>
+                    <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
+                    <p className="opacity-90">{pkg.description}</p>
                   </div>
-                  <Link href={`/interviews/payment?service=live&package=${interviewPackages[2].id}`} className="block w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-all duration-300 text-center">
-                    Book Now
-                  </Link>
+
+                  {/* Features */}
+                  <div className="p-6 flex-grow">
+                    <ul className="space-y-3 mb-8">
+                      {pkg.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start">
+                          <span className="text-green-500 mr-2 mt-1">✓</span>
+                          <span className="text-sm text-gray-600">
+                            {feature.includes('Prometheus') ? (
+                              <>
+                                {feature.split('Prometheus')[0]}
+                                <Link href="/prometheus" className="text-purple-600 font-medium hover:text-purple-800 transition-all duration-200 underline decoration-dotted">Prometheus</Link>
+                                {feature.split('Prometheus')[1]}
+                              </>
+                            ) : feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* Pricing Section */}
+                    <div className="border-t pt-6 mt-auto">
+                      <div className="flex flex-col mb-6">
+                        {hasDiscount ? (
+                          <>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm text-gray-400 line-through decoration-red-500 decoration-2">
+                                £{pkg.tutorPrice}
+                              </span>
+                              <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                                SAVE {Math.round(((pkg.tutorPrice - (pkg.blackFridayPrice || 0)) / pkg.tutorPrice) * 100)}%
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-end">
+                               <span className="text-4xl font-extrabold text-gray-900">£{pkg.blackFridayPrice}</span>
+                               <span className="text-sm text-gray-500 mb-1">complete package</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <span className="text-3xl font-bold text-gray-900">£{pkg.tutorPrice}</span>
+                            <span className="text-sm text-gray-500">complete package</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <Link 
+                        href={`/interviews/payment?service=live&package=${pkg.id}`} 
+                        className={`
+                          block w-full py-3 rounded-lg font-bold transition-all duration-300 text-center text-white shadow-lg
+                          ${index === 0 ? 'bg-blue-600 hover:bg-blue-700' : index === 1 ? 'bg-purple-600 hover:bg-purple-700' : 'bg-indigo-600 hover:bg-indigo-700'}
+                          ${hasDiscount ? 'ring-2 ring-offset-2 ring-red-500' : ''}
+                        `}
+                      >
+                        {hasDiscount ? 'Claim Offer Now' : 'Book Now'}
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
-          
         </div>
       </section>
 
-      {/* Interview Types Info */}
+      <GeneratedMocks />
+
+
       <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
+         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Understanding Interview Formats</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Different medical schools use different interview formats. We'll prepare you for all of them.
-            </p>
           </div>
-          
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+           <div className="grid lg:grid-cols-2 gap-12 items-center">
+             <div>
               <div className="space-y-6">
                 <div className="border-l-4 border-blue-500 pl-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Traditional Panel Interviews</h3>
                   <p className="text-gray-600">Face a panel of 2-4 interviewers in a formal setting. Duration: 15-30 minutes.</p>
                 </div>
                 <div className="border-l-4 border-green-500 pl-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Multiple Mini Interviews (MMI)</h3>
+                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Multiple Mini Interviews (MMI)</h3>
                   <p className="text-gray-600">Rotate through 6-10 stations, each lasting 5-8 minutes with different scenarios.</p>
                 </div>
                 <div className="border-l-4 border-purple-500 pl-6">
@@ -371,7 +149,7 @@ export default function InterviewsPage() {
               </div>
             </div>
             <div className="text-center">
-              <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-8 rounded-2xl">
+               <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-8 rounded-2xl">
                 <span className="text-6xl block mb-4">🎭</span>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Practice Makes Perfect</h3>
                 <p className="text-gray-600">
@@ -383,27 +161,10 @@ export default function InterviewsPage() {
         </div>
       </section>
 
-      {/* Free Resources Shopping Carousel */}
       <FreeResourcesCarousel />
 
-
-      {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Need More than Free Resources</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join hundreds of successful applicants who prepared with NextGenMedPrep
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/interviews/payment?service=live&package=core" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
-              Book Mock Interview Now!
-            </Link>
-            <a href="mailto:contact@nextgenmedprep.com" className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300">
-              Ask Questions
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* CTA Section with slight BF tweak */}
+      <BlackFridayCTA />
     </div>
   );
 }

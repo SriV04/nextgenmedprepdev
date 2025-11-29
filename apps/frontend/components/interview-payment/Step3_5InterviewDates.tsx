@@ -257,7 +257,10 @@ export default function Step3_5InterviewDates({
           Share Your <span className="text-gradient-aurora">Availability</span>
         </h2>
         <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-          Select dates and drag through time slots to quickly mark your availability
+          Let us know when you're generally available. We'll reach out to schedule your mock interviews based on your preferences.
+        </p>
+        <p className="text-sm text-gray-400 mt-2">
+          💡 You're not booking specific interview times yet - just sharing when you're typically free
         </p>
       </div>
 
@@ -358,9 +361,9 @@ export default function Step3_5InterviewDates({
             <div className="border-b border-indigo-500/30 px-6 py-4 bg-gradient-to-r from-purple-500/10 to-indigo-500/10">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white">Select Time Slots</h3>
+                  <h3 className="text-lg font-bold text-white">When Are You Available?</h3>
                   <p className="text-sm text-gray-400 mt-1">
-                    {selectedDate ? 'Choose your available times' : 'Pick a date first'}
+                    {selectedDate ? 'Share your general availability for this date' : 'Pick a date first'}
                   </p>
                 </div>
                 {selectedTimeSlots.length > 0 && (
@@ -458,7 +461,7 @@ export default function Step3_5InterviewDates({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
         >
-          Skip Availability Selection
+          Skip for Now - We'll Contact You
         </motion.button>
         
         <AnimatePresence mode="wait">

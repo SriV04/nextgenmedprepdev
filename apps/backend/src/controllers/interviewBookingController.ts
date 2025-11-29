@@ -330,6 +330,17 @@ export class InterviewBookingController {
 
       // Send notification email to admin
       console.log('Sending notification email to admin...');
+      
+      // Parse availability if provided
+      let availabilitySlots: Array<{ date: string; timeSlot: string }> | undefined;
+      if (metadata.availability && metadata.availability !== '') {
+        try {
+          availabilitySlots = JSON.parse(metadata.availability);
+        } catch (error) {
+          console.error('Error parsing availability for email:', error);
+        }
+      }
+      
       await emailService.sendInterviewBookingNotificationEmail({
         bookingId: booking.id,
         customerEmail: customerEmail,
@@ -342,6 +353,7 @@ export class InterviewBookingController {
         downloadUrl: downloadUrl,
         notes: metadata.notes,
         preferredDate: metadata.preferred_date,
+        availability: availabilitySlots,
       });
 
       console.log('=== Interview Booking Confirmed Successfully ===');

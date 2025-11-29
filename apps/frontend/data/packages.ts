@@ -7,6 +7,8 @@ export interface ExtendedPackage {
   interviews: number;
   generatedPrice: number;
   tutorPrice: number;
+  // New Optional Field
+  blackFridayPrice?: number; 
   originalPrice?: number;
   originalGeneratedPrice?: number;
   popular?: boolean;
@@ -39,6 +41,7 @@ export const interviewPackages: ExtendedPackage[] = [
     interviews: 1,
     generatedPrice: 7,
     tutorPrice: 45,
+    blackFridayPrice: 40,
     features: [
       'A mock interview with Prometheus-powered university-specific questions',
       'Ensuring that your mock interview is as realistic as possible',
@@ -68,9 +71,10 @@ export const interviewPackages: ExtendedPackage[] = [
     originalGeneratedPrice: 14,
     tutorPrice: 125,
     originalPrice: 150,
+    blackFridayPrice: 115,
     popular: true,
     features: [
-      '3 sets of Prometheus-powered university-specific mock questions',
+      '3 mock interviews with Prometheus-powered university-specific mock questions',
       'Mock interviews tailored to the universities you are applying to',
       'Coverage of ethical scenarios, common trick questions, and general interview technique',
       'We will aim to match you with a tutor who has sat the interview you are sitting'
@@ -101,8 +105,9 @@ export const interviewPackages: ExtendedPackage[] = [
     originalGeneratedPrice: 21,
     tutorPrice: 250,
     originalPrice: 275,
+    blackFridayPrice: 200,
     features: [
-      '4 sets of Prometheus-powered university-specific mock questions',
+      '4 mock interviews with Prometheus-powered university-specific mock questions',
       'A Background knowledge session for success at the interview',
       'Mock interviews tailored to the universities you are applying to',
       'Coverage of ethical scenarios, common trick questions, and general interview technique',
