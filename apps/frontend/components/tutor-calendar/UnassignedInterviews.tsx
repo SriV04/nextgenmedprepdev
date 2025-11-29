@@ -1,17 +1,21 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Calendar, User, GraduationCap, Clock, Search, Filter, X } from 'lucide-react';
+import { Calendar, User, GraduationCap, Clock, Search, Filter, X, Mail, Phone, CalendarClock, BookOpen } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 
 interface UnassignedInterview {
   id: string;
   studentName: string;
   studentEmail: string;
+  studentId?: string;
   package: string;
   universities: string;
   preferredTime?: string;
   createdAt: string;
+  field?: string;
+  phone?: string;
+  notes?: string;
 }
 
 interface UnassignedInterviewsProps {
@@ -56,34 +60,87 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
   }, [unassignedInterviews, searchQuery, packageFilter]);
   
   const interviews = filteredInterviews;
+  const [studentAvailabilities, setStudentAvailabilities] = useState<Record<string, any[]>>({});
+  
+  // Fetch student availability for all interviews
+  React.useEffect(() => {
+    const fetchAvailabilities = async () => {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+      const availMap: Record<string, any[]> = {};
+      
+      for (const interview of unassignedInterviews) {
+        if (interview.studentId) {
+          try {
+            const availRes = await fetch(
+              `${backendUrl}/api/v1/students/${interview.studentId}/availability`
+            );
+            const availData = await availRes.json();
+            
+            if (availData.success && availData.data) {
+              availMap[interview.id] = availData.data;
+            }
+          } catch (err) {
+            console.error(`Error fetching availability for ${interview.studentId}:`, err);
+          }
+        }
+      }
+      
+      setStudentAvailabilities(availMap);
+    };
+    
+    if (unassignedInterviews.length > 0) {
+      fetchAvailabilities();
+    }
+  }, [unassignedInterviews]);
+  
   const handleDragStart = async (e: React.DragEvent, interviewId: string) => {
     e.dataTransfer.setData('interviewId', interviewId);
     e.dataTransfer.effectAllowed = 'move';
     
-    // Fetch and pass student availability for this interview
-    try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
-      const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
-      const interviewData = await interviewRes.json();
-      
-      if (interviewData.success && interviewData.data.student_id) {
-        const availRes = await fetch(
-          `${backendUrl}/api/v1/students/${interviewData.data.student_id}/availability`
-        );
-        const availData = await availRes.json();
-        
-        if (availData.success && availData.data) {
-          // Store availability in dataTransfer
-          e.dataTransfer.setData('studentAvailability', JSON.stringify(availData.data));
-        }
-      }
-    } catch (err) {
-      console.error('Error fetching student availability:', err);
+    // Pass student availability if available
+    if (studentAvailabilities[interviewId]) {
+      e.dataTransfer.setData('studentAvailability', JSON.stringify(studentAvailabilities[interviewId]));
     }
   };
 
   const handleInterviewClick = (interview: UnassignedInterview) => {
     openInterviewDetailsModal(interview.id);
+  };
+  
+  // Format availability into a readable summary
+  const formatAvailability = (availability: any[]) => {
+    if (!availability || availability.length === 0) return null;
+    
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    // Group by day
+    const dayGroups = availability.reduce((acc, slot) => {
+      // Ensure dayOfWeek is a valid number
+      console.log('Processing slot:', slot);
+      const dayIndex = parseInt(slot.dayOfWeek);
+      if (isNaN(dayIndex) || dayIndex < 0 || dayIndex > 6) return acc;
+      
+      const day = dayNames[dayIndex];
+      if (!acc[day]) acc[day] = 0;
+      acc[day]++;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    const days = Object.keys(dayGroups);
+    console.log('Formatted Availability:', availability);
+    
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {days.map((day) => (
+          <span key={day} className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">
+            {day}
+            <span className="bg-green-200 text-green-800 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
+              {dayGroups[day]}
+            </span>
+          </span>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -207,50 +264,100 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
             <p className="text-sm">No unassigned interviews</p>
           </div>
         ) : (
-          interviews.map((interview) => (
-            <div
-              key={interview.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, interview.id)}
-              onClick={() => handleInterviewClick(interview)}
-              className="flex-shrink-0 w-64 bg-gradient-to-br from-orange-50 to-white border-2 border-orange-200 rounded-lg p-3 hover:shadow-lg hover:border-orange-300 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5 text-white" />
+          interviews.map((interview) => {
+            const availability = studentAvailabilities[interview.id];
+            const hasAvailability = availability && availability.length > 0;
+            
+            return (
+              <div
+                key={interview.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, interview.id)}
+                onClick={() => handleInterviewClick(interview)}
+                className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-50 to-white border-2 border-orange-200 rounded-lg p-3 hover:shadow-lg hover:border-orange-300 transition-all cursor-pointer"
+              >
+                {/* Header with Student Info */}
+                <div className="flex items-start gap-2 mb-2 pb-2 border-b border-orange-100">
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-gray-900 text-sm mb-0.5 truncate">
+                      {interview.studentName}
+                    </h4>
+                    <div className="flex items-center gap-1 text-xs text-gray-600 truncate">
+                      <Mail className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{interview.studentEmail}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold text-gray-900 text-sm truncate">
-                    {interview.studentName}
-                  </h4>
-                  <p className="text-xs text-gray-500 truncate">{interview.studentEmail}</p>
-                </div>
-              </div>
 
-              <div className="space-y-1.5 text-xs">
-                <div className="flex items-center gap-2 text-gray-700">
-                  <GraduationCap className="w-3.5 h-3.5 text-orange-600 flex-shrink-0" />
-                  <span className="font-medium truncate">{interview.package}</span>
+                {/* Package and University Info */}
+                <div className="space-y-1.5 mb-2">
+                  <div className="flex items-start gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5 text-orange-600 flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs font-semibold text-gray-900 block">{interview.package}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-orange-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-xs text-gray-700 line-clamp-1">{interview.universities}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-gray-700">
-                  <Calendar className="w-3.5 h-3.5 text-orange-600 flex-shrink-0" />
-                  <span className="truncate">{interview.universities}</span>
-                </div>
-                {interview.preferredTime && (
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <Clock className="w-3.5 h-3.5 text-orange-600 flex-shrink-0" />
-                    <span className="truncate">Preferred: {interview.preferredTime}</span>
+
+                {/* Student Availability */}
+                {hasAvailability ? (
+                  <div className="bg-green-50 rounded-md p-2 mb-2 border border-green-200">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <CalendarClock className="w-3.5 h-3.5 text-green-600" />
+                      <span className="text-xs font-semibold text-green-800">
+                        Available ({availability.length} slots)
+                      </span>
+                    </div>
+                    {formatAvailability(availability)}
+                  </div>
+                ) : (
+                  <div className="bg-yellow-50 rounded-md p-2 mb-2 border border-yellow-200">
+                    <div className="flex items-center gap-1.5">
+                      <CalendarClock className="w-3.5 h-3.5 text-yellow-600" />
+                      <span className="text-xs text-yellow-800">No availability set</span>
+                    </div>
                   </div>
                 )}
-              </div>
 
-              <div className="mt-3 pt-2 border-t border-orange-100">
-                <span className="text-xs text-gray-500">
-                  Created {new Date(interview.createdAt).toLocaleDateString()}
-                </span>
+                {/* Preferred Time */}
+                {interview.preferredTime && (
+                  <div className="bg-blue-50 rounded-md p-1.5 mb-2 border border-blue-200">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <span className="text-xs text-blue-700 truncate">
+                        Prefers: {interview.preferredTime}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {interview.notes && (
+                  <div className="bg-gray-50 rounded-md p-1.5 mb-2 border border-gray-200">
+                    <p className="text-xs text-gray-700 line-clamp-2">{interview.notes}</p>
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="pt-2 border-t border-orange-100 flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    {new Date(interview.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className="text-[10px] font-medium text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">
+                    Drag to assign
+                  </span>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

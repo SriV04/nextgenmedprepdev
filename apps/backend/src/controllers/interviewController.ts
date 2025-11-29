@@ -366,6 +366,7 @@ export const assignInterviewToTutor = async (
     let zoomMeetingId: string | undefined;
     let zoomJoinUrl: string | undefined;
     let zoomStartUrl: string | undefined;
+    let zoomHostEmail: string | undefined;
 
     if (zoomService.isConfigured()) {
       try {
@@ -386,10 +387,12 @@ export const assignInterviewToTutor = async (
         zoomMeetingId = zoomMeeting.meetingId;
         zoomJoinUrl = zoomMeeting.joinUrl;
         zoomStartUrl = zoomMeeting.startUrl;
+        zoomHostEmail = zoomMeeting.hostEmail;
 
         console.log('Zoom meeting created:', {
           meetingId: zoomMeetingId,
           joinUrl: zoomJoinUrl,
+          hostEmail: zoomHostEmail,
         });
       } catch (error) {
         console.error('Failed to create Zoom meeting:', error);
@@ -409,6 +412,7 @@ export const assignInterviewToTutor = async (
     if (zoomMeetingId) {
       updateData.zoom_meeting_id = zoomMeetingId;
       updateData.zoom_join_url = zoomJoinUrl;
+      updateData.zoom_host_email = zoomHostEmail;
     }
 
     const { data: interview, error: interviewError } = await supabase
@@ -622,15 +626,21 @@ export const confirmInterview = async (
       return;
     }
 
-    // Get interview to check if Zoom meeting exists
+    // Get interview to check if Zoom meeting exists and get booking details
     const { data: interview } = await supabase
       .from('interviews')
-      .select('zoom_meeting_id, zoom_join_url')
+      .select(`
+        zoom_meeting_id, 
+        zoom_join_url, 
+        zoom_host_email,
+        booking:bookings(universities)
+      `)
       .eq('id', id)
       .single();
 
     // If no Zoom meeting exists, create one
     let zoomJoinUrl = interview?.zoom_join_url;
+    let zoomHostEmail = interview?.zoom_host_email;
     
     if (!zoomJoinUrl && zoomService.isConfigured()) {
       try {
@@ -650,21 +660,44 @@ export const confirmInterview = async (
           .update({
             zoom_meeting_id: zoomMeeting.meetingId,
             zoom_join_url: zoomMeeting.joinUrl,
+            zoom_host_email: zoomMeeting.hostEmail,
           })
           .eq('id', id);
 
         zoomJoinUrl = zoomMeeting.joinUrl;
-        console.log('Zoom meeting created and stored:', zoomMeeting.meetingId);
+        zoomHostEmail = zoomMeeting.hostEmail;
+        console.log('✅ Zoom meeting created and stored:', {
+          meetingId: zoomMeeting.meetingId,
+          joinUrl: zoomMeeting.joinUrl,
+          hostEmail: zoomMeeting.hostEmail
+        });
       } catch (error) {
-        console.error('Failed to create Zoom meeting:', error);
-        // Use a placeholder if Zoom fails
-        zoomJoinUrl = 'Zoom link will be provided separately';
+        console.error('❌ Failed to create Zoom meeting:', error);
+        console.error('Error details:', error instanceof Error ? error.message : error);
+        // Don't send email if Zoom creation fails - throw error instead
+        res.status(500).json({
+          success: false,
+          message: 'Failed to create Zoom meeting. Please try again or contact support.',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        return;
       }
     }
 
     if (!zoomJoinUrl) {
-      zoomJoinUrl = 'Zoom link will be provided separately';
+      console.error('❌ No Zoom link available - interview may not have been properly assigned');
+      res.status(400).json({
+        success: false,
+        message: 'Interview does not have a Zoom link. Please assign the interview first.',
+      });
+      return;
     }
+
+    // Get university information
+    const bookingData = interview?.booking as any;
+    const universities = Array.isArray(bookingData) && bookingData.length > 0 
+      ? bookingData[0].universities 
+      : bookingData?.universities || 'Not specified';
 
     // Send confirmation emails
     await emailService.sendInterviewConfirmationEmail(
@@ -674,7 +707,9 @@ export const confirmInterview = async (
       student_name,
       scheduled_at,
       id,
-      zoomJoinUrl
+      zoomJoinUrl,
+      zoomHostEmail || 'Not specified',
+      universities
     );
 
     res.json({

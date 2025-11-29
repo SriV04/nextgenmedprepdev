@@ -51,12 +51,26 @@ interface ZoomTokenResponse {
   scope: string;
 }
 
+interface ZoomHost {
+  email: string;
+  userId: string;
+}
+
 class ZoomService {
   private accountId: string;
   private clientId: string;
   private clientSecret: string;
   private accessToken: string | null = null;
   private tokenExpiresAt: number = 0;
+  
+  // Licensed host accounts
+  private zoomHosts: ZoomHost[] = [
+    { email: 'tutor@nextgenmedprep.com', userId: 'tutor@nextgenmedprep.com' },
+    { email: 'contact@nextgenmedprep.com', userId: 'contact@nextgenmedprep.com' },
+  ];
+  
+  // Track which host is handling which time slot
+  private hostSchedule: Map<string, Set<string>> = new Map();
 
   constructor() {
     this.accountId = process.env.ZOOM_ACCOUNT_ID || '';
@@ -71,6 +85,14 @@ class ZoomService {
         ZOOM_CLIENT_SECRET: !!this.clientSecret
       });
     }
+    
+    // Initialize schedule tracking for each host
+    this.zoomHosts.forEach(host => {
+      this.hostSchedule.set(host.email, new Set());
+    });
+    
+    console.log(`Zoom service initialized with ${this.zoomHosts.length} licensed hosts:`, 
+      this.zoomHosts.map(h => h.email).join(', '));
   }
 
   /**
@@ -116,7 +138,52 @@ class ZoomService {
   }
 
   /**
-   * Create a Zoom meeting
+   * Get available host for a given time slot
+   * Implements round-robin load balancing
+   */
+  private getAvailableHost(startTime: Date): ZoomHost {
+    const timeKey = startTime.toISOString();
+    
+    // Find a host that doesn't have a meeting at this time
+    for (const host of this.zoomHosts) {
+      const hostSchedule = this.hostSchedule.get(host.email);
+      if (hostSchedule && !hostSchedule.has(timeKey)) {
+        console.log(`Assigning meeting to host: ${host.email}`);
+        return host;
+      }
+    }
+    
+    // If all hosts are busy, use round-robin (first available)
+    console.warn(`All hosts busy at ${timeKey}, using round-robin assignment`);
+    return this.zoomHosts[0];
+  }
+
+  /**
+   * Mark a time slot as occupied for a host
+   */
+  private markTimeSlot(hostEmail: string, startTime: Date): void {
+    const timeKey = startTime.toISOString();
+    const hostSchedule = this.hostSchedule.get(hostEmail);
+    if (hostSchedule) {
+      hostSchedule.add(timeKey);
+      console.log(`Marked ${timeKey} as occupied for ${hostEmail}`);
+    }
+  }
+
+  /**
+   * Clear a time slot for a host
+   */
+  private clearTimeSlot(hostEmail: string, startTime: Date): void {
+    const timeKey = startTime.toISOString();
+    const hostSchedule = this.hostSchedule.get(hostEmail);
+    if (hostSchedule) {
+      hostSchedule.delete(timeKey);
+      console.log(`Cleared ${timeKey} for ${hostEmail}`);
+    }
+  }
+
+  /**
+   * Create a Zoom meeting with automatic host selection
    */
   async createMeeting(params: {
     topic: string;
@@ -128,6 +195,9 @@ class ZoomService {
   }): Promise<ZoomMeetingResponse> {
     try {
       const token = await this.getAccessToken();
+
+      // Get available host for this time slot
+      const host = this.getAvailableHost(params.startTime);
 
       // Format start time in ISO 8601
       const startTimeISO = params.startTime.toISOString();
@@ -142,7 +212,7 @@ class ZoomService {
         settings: {
           host_video: true,
           participant_video: true,
-          join_before_host: false,
+          join_before_host: true, // Allow participants to join without host
           mute_upon_entry: false,
           waiting_room: true,
           audio: 'both',
@@ -150,7 +220,8 @@ class ZoomService {
         },
       };
 
-      const response = await fetch('https://api.zoom.us/v2/users/me/meetings', {
+      // Create meeting for the selected host user
+      const response = await fetch(`https://api.zoom.us/v2/users/${host.userId}/meetings`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -166,8 +237,12 @@ class ZoomService {
 
       const meeting = await response.json() as ZoomMeetingResponse;
       
+      // Mark this time slot as occupied for this host
+      this.markTimeSlot(host.email, params.startTime);
+      
       console.log('Successfully created Zoom meeting:', {
         id: meeting.id,
+        host: meeting.host_email,
         topic: meeting.topic,
         start_time: meeting.start_time,
         join_url: meeting.join_url,
@@ -252,11 +327,14 @@ class ZoomService {
   }
 
   /**
-   * Delete a Zoom meeting
+   * Delete a Zoom meeting and clear host schedule
    */
   async deleteMeeting(meetingId: string | number): Promise<void> {
     try {
       const token = await this.getAccessToken();
+
+      // Get meeting details to find the host and time
+      const meeting = await this.getMeeting(meetingId);
 
       const response = await fetch(`https://api.zoom.us/v2/meetings/${meetingId}`, {
         method: 'DELETE',
@@ -270,6 +348,11 @@ class ZoomService {
         throw new Error(`Failed to delete Zoom meeting: ${response.status} - ${errorText}`);
       }
 
+      // Clear the time slot for this host
+      if (meeting.host_email && meeting.start_time) {
+        this.clearTimeSlot(meeting.host_email, new Date(meeting.start_time));
+      }
+
       console.log('Successfully deleted Zoom meeting:', meetingId);
     } catch (error) {
       console.error('Error deleting Zoom meeting:', error);
@@ -278,7 +361,7 @@ class ZoomService {
   }
 
   /**
-   * Create a meeting for interview booking
+   * Create a meeting for interview booking with automatic host selection
    */
   async createInterviewMeeting(params: {
     studentName: string;
@@ -286,7 +369,7 @@ class ZoomService {
     universityName?: string;
     startTime: Date;
     duration?: number;
-  }): Promise<{ meetingId: string; joinUrl: string; startUrl: string; password?: string }> {
+  }): Promise<{ meetingId: string; joinUrl: string; startUrl: string; password?: string; hostEmail: string }> {
     const topic = `Interview Session - ${params.studentName}${params.universityName ? ` (${params.universityName})` : ''}`;
     const agenda = `Mock interview session for ${params.studentName}${params.tutorName ? ` with tutor ${params.tutorName}` : ''}`;
 
@@ -303,7 +386,23 @@ class ZoomService {
       joinUrl: meeting.join_url,
       startUrl: meeting.start_url,
       password: meeting.password,
+      hostEmail: meeting.host_email,
     };
+  }
+
+  /**
+   * Get all licensed hosts
+   */
+  getHosts(): ZoomHost[] {
+    return this.zoomHosts;
+  }
+
+  /**
+   * Get schedule for a specific host
+   */
+  getHostSchedule(hostEmail: string): string[] {
+    const schedule = this.hostSchedule.get(hostEmail);
+    return schedule ? Array.from(schedule) : [];
   }
 
   /**

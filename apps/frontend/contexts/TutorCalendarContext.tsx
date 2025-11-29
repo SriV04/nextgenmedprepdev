@@ -34,6 +34,9 @@ interface UnassignedInterview {
   universities: string;
   preferredTime?: string;
   createdAt: string;
+  field?: string;
+  phone?: string;
+  notes?: string;
 }
 
 interface StudentAvailabilitySlot {
@@ -217,9 +220,12 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
           studentName: interview.booking?.email?.split('@')[0] || 'Student',
           studentEmail: interview.booking?.email || '',
           package: interview.booking?.package || '',
-          universities: interview.university || '',
+          universities: interview.booking?.universities || interview.university || '',
           preferredTime: interview.booking?.preferred_time,
           createdAt: interview.booking?.created_at || interview.created_at,
+          field: interview.booking?.field,
+          phone: interview.booking?.phone,
+          notes: interview.booking?.notes || interview.notes,
         }));
 
         setUnassignedInterviews(transformedInterviews);
