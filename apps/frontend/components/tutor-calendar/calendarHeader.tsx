@@ -5,9 +5,10 @@ import { formatDate, formatDateHeader } from './utils/calendarUtils';
 
 interface CalendarHeaderProps {
   onCreateInterview: () => void;
+  isAdmin?: boolean;
 }
 
-export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onCreateInterview }) => {
+export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onCreateInterview, isAdmin = false }) => {
   const { 
     selectedDate, 
     setSelectedDate, 
@@ -63,13 +64,15 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onCreateIntervie
         
         {/* Legend and Actions */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={onCreateInterview}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Create Interview
-          </button>
+          {isAdmin && (
+            <button
+              onClick={onCreateInterview}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Create Interview
+            </button>
+          )}
           <button
             onClick={() => openAvailabilityModal()}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"

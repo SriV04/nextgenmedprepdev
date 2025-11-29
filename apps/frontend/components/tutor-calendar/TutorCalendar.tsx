@@ -15,7 +15,7 @@ import {
   isStudentAvailable 
 } from './utils/calendarUtils';
 
-const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick }) => {
+const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick, isAdmin = false }) => {
   const {
     tutors,
     selectedDate,
@@ -59,7 +59,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick }) => {
       />
       
       <div className="flex flex-col h-full bg-white rounded-lg shadow">
-        <CalendarHeader onCreateInterview={() => setIsCreateModalOpen(true)} />
+        <CalendarHeader onCreateInterview={() => setIsCreateModalOpen(true)} isAdmin={isAdmin} />
       
       <SelectionToolbar
         selectedCount={selectedSlots.size}

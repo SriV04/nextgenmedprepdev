@@ -166,6 +166,7 @@ export interface TutorCalendarContextType {
 
 export interface TutorCalendarProps {
   onSlotClick: (slot: TimeSlot, tutor: TutorSchedule) => void;
+  isAdmin?: boolean;
 }
 
 export interface UnassignedInterviewsProps {
