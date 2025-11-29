@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { X, User, Mail, GraduationCap, Calendar, Clock, Phone, FileText, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
+import { X, User, Mail, GraduationCap, Calendar, Clock, Phone, FileText, MapPin, CheckCircle, AlertTriangle, Trash2, XCircle, Video } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 
 interface TutorMatch {
@@ -27,13 +27,21 @@ const InterviewDetailsModal: React.FC = () => {
     selectedInterviewDetails, 
     closeInterviewDetailsModal,
     tutors,
-    assignInterview
+    assignInterview,
+    cancelInterview,
+    deleteInterview
   } = useTutorCalendar();
   
   const [selectedSlot, setSelectedSlot] = useState<AvailabilityMatch | null>(null);
   const [selectedTutor, setSelectedTutor] = useState<TutorMatch | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
+  
+  // Custom booking state
+  const [showCustomBooking, setShowCustomBooking] = useState(false);
+  const [customDate, setCustomDate] = useState('');
+  const [customTime, setCustomTime] = useState('09:00');
+  const [customTutorId, setCustomTutorId] = useState('');
 
   // Find matching tutors for each student availability slot
   const availabilityMatches = useMemo<AvailabilityMatch[]>(() => {
@@ -164,6 +172,63 @@ const InterviewDetailsModal: React.FC = () => {
     setShowConfirmation(false);
   };
 
+  // Handle cancel (unassign)
+  const handleCancelInterview = async () => {
+    if (!confirm('Are you sure you want to cancel this interview? This will unassign the tutor, remove the Zoom meeting, and return the interview to unassigned status.')) {
+      return;
+    }
+
+    try {
+      await cancelInterview(selectedInterviewDetails.id);
+      closeInterviewDetailsModal();
+    } catch (error) {
+      console.error('Error cancelling interview:', error);
+    }
+  };
+
+  // Handle delete
+  const handleDeleteInterview = async () => {
+    if (!confirm('Are you sure you want to delete this interview? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteInterview(selectedInterviewDetails.id);
+      closeInterviewDetailsModal();
+    } catch (error) {
+      console.error('Error deleting interview:', error);
+    }
+  };
+
+  // Handle custom booking
+  const handleCustomBooking = async () => {
+    if (!customDate || !customTime || !customTutorId) {
+      alert('Please fill in all custom booking fields');
+      return;
+    }
+
+    setIsBooking(true);
+    try {
+      await assignInterview(
+        customTutorId,
+        customDate,
+        customTime,
+        selectedInterviewDetails.id
+      );
+      
+      // Reset custom booking state
+      setShowCustomBooking(false);
+      setCustomDate('');
+      setCustomTime('09:00');
+      setCustomTutorId('');
+      closeInterviewDetailsModal();
+    } catch (error) {
+      console.error('Error with custom booking:', error);
+    } finally {
+      setIsBooking(false);
+    }
+  };
+
   // Early return AFTER all hooks
   if (!isInterviewDetailsModalOpen || !selectedInterviewDetails) return null;
 
@@ -190,6 +255,80 @@ const InterviewDetailsModal: React.FC = () => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {/* Show assigned interview details if already scheduled */}
+          {selectedInterviewDetails.tutorId && selectedInterviewDetails.scheduledAt && (
+            <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-lg font-bold text-green-900">Interview Scheduled</h3>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3">
+                  <User className="w-5 h-5 text-green-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">Tutor</p>
+                    <p className="font-semibold text-gray-900">{selectedInterviewDetails.tutorName}</p>
+                    <p className="text-xs text-gray-600">{selectedInterviewDetails.tutorEmail}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-green-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-gray-500">Scheduled Date & Time</p>
+                    <p className="font-semibold text-gray-900">
+                      {new Date(selectedInterviewDetails.scheduledAt).toLocaleDateString('en-GB', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      {new Date(selectedInterviewDetails.scheduledAt).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedInterviewDetails.zoomJoinUrl && (
+                <div className="mt-3 pt-3 border-t border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Video className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-gray-700">Zoom Meeting</span>
+                  </div>
+                  <a
+                    href={selectedInterviewDetails.zoomJoinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
+                  >
+                    {selectedInterviewDetails.zoomJoinUrl}
+                  </a>
+                </div>
+              )}
+              
+              <div className="mt-4 pt-3 border-t border-green-200 flex gap-2">
+                <button
+                  onClick={handleCancelInterview}
+                  className="flex items-center gap-2 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancel & Unassign Interview
+                </button>
+                <span className="text-xs text-gray-600 flex items-center">
+                  This will remove the assignment and allow rescheduling
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Student Information */}
             <div className="space-y-4">
@@ -293,7 +432,9 @@ const InterviewDetailsModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Student Availability & Booking */}
+          {/* Student Availability & Booking - Only show if not already assigned */}
+          {!selectedInterviewDetails.tutorId && (
+            <>
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">
               Book Interview
@@ -371,6 +512,100 @@ const InterviewDetailsModal: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Custom Booking Section */}
+          <div className="mt-6">
+            <button
+              onClick={() => setShowCustomBooking(!showCustomBooking)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-purple-600" />
+                <span className="font-semibold text-purple-900">Custom Booking</span>
+              </div>
+              <span className="text-purple-600 text-sm">
+                {showCustomBooking ? 'Hide' : 'Show'}
+              </span>
+            </button>
+
+            {showCustomBooking && (
+              <div className="mt-3 p-4 bg-purple-50 border border-purple-200 rounded-lg space-y-4">
+                <p className="text-sm text-purple-800 mb-3">
+                  Manually book an interview with a custom date, time, and tutor selection.
+                </p>
+
+                {/* Custom Date and Time */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Calendar className="w-4 h-4 inline mr-1" />
+                      Date *
+                    </label>
+                    <input
+                      type="date"
+                      value={customDate}
+                      onChange={(e) => setCustomDate(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Clock className="w-4 h-4 inline mr-1" />
+                      Time (HH:MM) *
+                    </label>
+                    <input
+                      type="time"
+                      value={customTime}
+                      onChange={(e) => setCustomTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                {/* Custom Tutor Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <User className="w-4 h-4 inline mr-1" />
+                    Select Tutor *
+                  </label>
+                  <select
+                    value={customTutorId}
+                    onChange={(e) => setCustomTutorId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  >
+                    <option value="">Choose a tutor</option>
+                    {tutors.map(tutor => (
+                      <option key={tutor.tutorId} value={tutor.tutorId}>
+                        {tutor.tutorName} ({tutor.tutorEmail})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Custom Book Button */}
+                <button
+                  onClick={handleCustomBooking}
+                  disabled={isBooking || !customDate || !customTime || !customTutorId}
+                  className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {isBooking ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Booking...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-5 h-5" />
+                      Book Custom Interview
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+            </>
+          )}
 
           {/* Tutor Selection */}
           {selectedSlot && !showConfirmation && (
@@ -494,12 +729,22 @@ const InterviewDetailsModal: React.FC = () => {
         {/* Footer */}
         <div className="border-t bg-gray-50 px-6 py-4">
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              {availabilityMatches.length > 0 && (
-                <span>
-                  {availabilityMatches.length} available slot{availabilityMatches.length !== 1 ? 's' : ''} found
-                </span>
-              )}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleDeleteInterview}
+                disabled={isBooking}
+                className="flex items-center gap-2 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Interview
+              </button>
+              <div className="text-sm text-gray-600">
+                {availabilityMatches.length > 0 && (
+                  <span>
+                    {availabilityMatches.length} available slot{availabilityMatches.length !== 1 ? 's' : ''} found
+                  </span>
+                )}
+              </div>
             </div>
             <button
               onClick={closeInterviewDetailsModal}

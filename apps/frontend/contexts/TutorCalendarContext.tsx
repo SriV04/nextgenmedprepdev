@@ -334,19 +334,40 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     setSelectedTutor(null);
   };
 
-  const openInterviewDetailsModal = async (interviewId: string) => {
+  const openInterviewDetailsModal = async (interviewId: string, interviewData?: UnassignedInterview) => {
     try {
       setLoading(true);
       
-      // Fetch full interview details
-      const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
-      const interviewData = await interviewRes.json();
+      let interview: any;
+      
+      // Use provided interview data if available, otherwise fetch
+      if (interviewData) {
+        interview = {
+          id: interviewData.id,
+          student_id: interviewData.studentId,
+          booking: {
+            email: interviewData.studentEmail,
+            package: interviewData.package,
+            universities: interviewData.universities,
+            preferred_time: interviewData.preferredTime,
+            field: interviewData.field,
+            phone: interviewData.phone,
+            notes: interviewData.notes,
+          },
+          created_at: interviewData.createdAt,
+          notes: interviewData.notes,
+        };
+      } else {
+        // Fetch full interview details
+        const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
+        const interviewResData = await interviewRes.json();
 
-      if (!interviewData.success) {
-        throw new Error('Failed to fetch interview details');
+        if (!interviewResData.success) {
+          throw new Error('Failed to fetch interview details');
+        }
+
+        interview = interviewResData.data;
       }
-
-      const interview = interviewData.data;
       
       // Fetch student availability if student_id exists
       let studentAvailability: StudentAvailabilitySlot[] = [];
@@ -372,16 +393,21 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       const details: InterviewDetails = {
         id: interview.id,
         studentId: interview.student_id,
-        studentName: interview.booking?.email?.split('@')[0] || 'Student',
-        studentEmail: interview.booking?.email || '',
-        package: interview.booking?.package || '',
-        universities: interview.university || interview.booking?.universities || '',
+        studentName: interview.booking?.email?.split('@')[0] || interview.booking?.email || 'Unknown Student',
+        studentEmail: interview.booking?.email || 'No email provided',
+        package: interview.booking?.package || 'No package',
+        universities: interview.university?.name || interview.booking?.universities || 'No university specified',
         preferredTime: interview.booking?.preferred_time,
         createdAt: interview.created_at,
         field: interview.booking?.field,
         phone: interview.booking?.phone,
         notes: interview.notes || interview.booking?.notes,
         studentAvailability,
+        tutorId: interview.tutor_id,
+        tutorName: interview.tutor?.name,
+        tutorEmail: interview.tutor?.email,
+        scheduledAt: interview.scheduled_at,
+        zoomJoinUrl: interview.zoom_join_url,
       };
 
       setSelectedInterviewDetails(details);
@@ -528,6 +554,97 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
+  const createInterview = async (data: { booking_id: string; university_id: string; scheduled_at: string; notes?: string }) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${backendUrl}/api/v1/interviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create interview');
+      }
+
+      // Refresh data to show new interview
+      await fetchData();
+      
+      alert('✓ Interview created successfully!');
+    } catch (err: any) {
+      console.error('Error creating interview:', err);
+      alert(`Failed to create interview: ${err.message}`);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelInterview = async (interviewId: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}/cancel`, {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to cancel interview');
+      }
+
+      // Remove from pending changes if exists
+      setPendingChanges(prev => prev.filter(c => c.interviewId !== interviewId));
+
+      // Refresh data
+      await fetchData();
+      
+      alert('✓ Interview cancelled and unassigned successfully!');
+    } catch (err: any) {
+      console.error('Error cancelling interview:', err);
+      alert(`Failed to cancel interview: ${err.message}`);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteInterview = async (interviewId: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to delete interview');
+      }
+
+      // Remove from pending changes if exists
+      setPendingChanges(prev => prev.filter(c => c.interviewId !== interviewId));
+
+      // Refresh data
+      await fetchData();
+      
+      alert('✓ Interview deleted successfully!');
+    } catch (err: any) {
+      console.error('Error deleting interview:', err);
+      alert(`Failed to delete interview: ${err.message}`);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value: TutorCalendarContextType = {
     tutors,
     unassignedInterviews,
@@ -543,12 +660,15 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     currentUserId,
     setSelectedDate,
     assignInterview,
+    cancelInterview,
     markSlotsAvailable,
     removeAvailability,
     openAvailabilityModal,
     closeAvailabilityModal,
     openInterviewDetailsModal,
     closeInterviewDetailsModal,
+    createInterview,
+    deleteInterview,
     saveAvailability,
     refreshData,
     commitChanges,

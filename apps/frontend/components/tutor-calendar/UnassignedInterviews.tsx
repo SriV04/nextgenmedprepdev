@@ -119,8 +119,8 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
     }
   };
 
-  const handleInterviewClick = (interviewId: string): void => {
-    openInterviewDetailsModal(interviewId);
+  const handleInterviewClick = (interview: any): void => {
+    openInterviewDetailsModal(interview.id, interview);
   };
   
   // Format availability into a readable summary
@@ -286,7 +286,7 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
                 key={interview.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, interview.id)}
-                onClick={() => handleInterviewClick(interview.id)}
+                onClick={() => handleInterviewClick(interview)}
                 className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-50 to-white border-2 border-orange-200 rounded-lg p-3 hover:shadow-lg hover:border-orange-300 transition-all cursor-pointer"
               >
                 {/* Header with Student Info */}

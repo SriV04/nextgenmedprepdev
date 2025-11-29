@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import type { TutorCalendarProps } from '../../types/tutor-calendar';
 import { CalendarHeader } from './calendarHeader';
 import { SelectionToolbar } from './SelectionToolbar';
 import { TimeSlotCell } from './TimeSlotCell';
+import { CreateInterviewModal } from './CreateInterviewModal';
 import { useCalendarInteractions } from './hooks/useCalendarInteractions';
 import { 
   TIME_SLOTS, 
@@ -19,8 +20,11 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick }) => {
     tutors,
     selectedDate,
     selectedInterviewDetails,
-    isInterviewDetailsModalOpen
+    isInterviewDetailsModalOpen,
+    createInterview
   } = useTutorCalendar();
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const {
     isSelecting,
@@ -47,8 +51,15 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick }) => {
   const hasExistingSlots = Array.from(selectedSlots).some(key => !key.endsWith('::empty'));
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow">
-      <CalendarHeader />
+    <>
+      <CreateInterviewModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreateInterview={createInterview}
+      />
+      
+      <div className="flex flex-col h-full bg-white rounded-lg shadow">
+        <CalendarHeader onCreateInterview={() => setIsCreateModalOpen(true)} />
       
       <SelectionToolbar
         selectedCount={selectedSlots.size}
@@ -150,6 +161,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

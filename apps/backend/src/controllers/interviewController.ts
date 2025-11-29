@@ -6,7 +6,7 @@ import emailService from '../services/emailService';
 
 // Validation schemas
 const createInterviewSchema = z.object({
-  university_id: z.string().uuid().optional(),
+  university: z.string().uuid().optional(),
   student_id: z.string().uuid().optional(),
   tutor_id: z.string().uuid().optional(),
   booking_id: z.string().uuid().optional(),
@@ -148,23 +148,26 @@ export const getUnassignedInterviews = async (
   try {
     const supabase = createSupabaseClient();
 
+    const cutoffDate = new Date('2025-11-29T00:00:00Z').toISOString();
+
     const { data: interviews, error } = await supabase
       .from('interviews')
       .select(`
-        *,
-        booking:bookings(
-          id,
-          email,
-          package,
-          universities,
-          field,
-          preferred_time,
-          created_at
-        )
+      *,
+      booking:bookings(
+        id,
+        email,
+        package,
+        universities,
+        field,
+        preferred_time,
+        created_at
+      )
       `)
       .is('tutor_id', null)
       .eq('completed', false)
-      .order('created_at', { ascending: true });
+      .gt('updated_at', cutoffDate)
+      .order('updated_at', { ascending: true });
 
     if (error) {
       throw new Error(error.message);
@@ -231,12 +234,24 @@ export const getInterview = async (
       booking = bookingData;
     }
 
+    // Fetch related university if exists
+    let university = null;
+    if (interview.university_id) {
+      const { data: universityData } = await supabase
+        .from('universities')
+        .select('id, name')
+        .eq('id', interview.university_id)
+        .single();
+      university = universityData;
+    }
+
     res.json({
       success: true,
       data: {
         ...interview,
         tutor,
         booking,
+        university,
       },
     });
   } catch (error: any) {
@@ -517,6 +532,80 @@ export const completeInterview = async (
     });
   } catch (error: any) {
     console.error('Error in completeInterview:', error);
+    next(error);
+  }
+};
+
+/**
+ * Cancel/Unassign interview (keeps interview record but removes assignment)
+ */
+export const cancelInterview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const supabase = createSupabaseClient();
+
+    // Get interview to check if it has a Zoom meeting
+    const { data: interview } = await supabase
+      .from('interviews')
+      .select('id, zoom_meeting_id, tutor_id')
+      .eq('id', id)
+      .single();
+
+    if (!interview) {
+      res.status(404).json({
+        success: false,
+        message: 'Interview not found',
+      });
+      return;
+    }
+
+    // Delete Zoom meeting if exists
+    if (interview.zoom_meeting_id && zoomService.isConfigured()) {
+      try {
+        await zoomService.deleteMeeting(interview.zoom_meeting_id);
+        console.log('Deleted Zoom meeting:', interview.zoom_meeting_id);
+      } catch (error) {
+        console.error('Failed to delete Zoom meeting:', error);
+        // Continue with cancellation even if Zoom deletion fails
+      }
+    }
+
+    // Clear the availability slot if exists
+    await supabase
+      .from('tutor_availability')
+      .update({
+        type: 'available',
+        interview_id: null,
+      })
+      .eq('interview_id', id);
+
+    // Unassign interview - clear tutor_id, scheduled_at, and Zoom details
+    const { error } = await supabase
+      .from('interviews')
+      .update({
+        tutor_id: null,
+        scheduled_at: null,
+        zoom_meeting_id: null,
+        zoom_join_url: null,
+        zoom_host_email: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Interview cancelled and unassigned successfully',
+    });
+  } catch (error: any) {
+    console.error('Error in cancelInterview:', error);
     next(error);
   }
 };
