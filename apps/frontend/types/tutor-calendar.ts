@@ -19,6 +19,7 @@ export interface TimeSlot {
   interviewId?: string;
   student?: string;
   package?: string;
+  isPending?: boolean; // For staged assignments not yet committed
 }
 
 export interface AvailabilitySlot {

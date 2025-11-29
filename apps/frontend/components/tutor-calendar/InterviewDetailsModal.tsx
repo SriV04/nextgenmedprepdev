@@ -137,6 +137,7 @@ const InterviewDetailsModal: React.FC = () => {
     
     setIsBooking(true);
     try {
+      // Stage the assignment (no backend call yet)
       await assignInterview(
         selectedTutor.tutorId,
         selectedSlot.date,
@@ -150,7 +151,7 @@ const InterviewDetailsModal: React.FC = () => {
       setShowConfirmation(false);
       closeInterviewDetailsModal();
     } catch (error) {
-      console.error('Error booking interview:', error);
+      console.error('Error staging interview:', error);
     } finally {
       setIsBooking(false);
     }

@@ -1,425 +1,66 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Check, X } from 'lucide-react';
+import React from 'react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
-import type { 
-  TutorCalendarProps, 
-  TimeSlot, 
-  TutorSchedule,
-  StudentAvailabilitySlot,
-  SlotType 
-} from '../../types/tutor-calendar';
+import type { TutorCalendarProps } from '../../types/tutor-calendar';
+import { CalendarHeader } from './calendarHeader';
+import { SelectionToolbar } from './SelectionToolbar';
+import { TimeSlotCell } from './TimeSlotCell';
+import { useCalendarInteractions } from './hooks/useCalendarInteractions';
+import { 
+  TIME_SLOTS, 
+  formatDate, 
+  generateSlotKey, 
+  isStudentAvailable 
+} from './utils/calendarUtils';
 
-const TutorCalendar: React.FC<TutorCalendarProps> = ({
-  onSlotClick
-}) => {
-  // Use context for state management
+const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick }) => {
   const {
     tutors,
     selectedDate,
-    setSelectedDate,
-    assignInterview,
-    markSlotsAvailable,
-    removeAvailability,
-    openAvailabilityModal,
     selectedInterviewDetails,
     isInterviewDetailsModalOpen
   } = useTutorCalendar();
-  const [draggedBooking, setDraggedBooking] = useState<string | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
-  const [dragOverSlot, setDragOverSlot] = useState<string | null>(null);
-  const [draggedStudentAvailability, setDraggedStudentAvailability] = useState<StudentAvailabilitySlot[]>([]);
-  
-  // Multi-selection state
-  const [isSelecting, setIsSelecting] = useState<boolean>(false);
-  const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
-  const [selectionStartTutor, setSelectionStartTutor] = useState<string | null>(null);
 
-  const timeSlots: string[] = [
-    '09:00', '10:00', '11:00', '12:00', '13:00', 
-    '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'
-  ];
-
-  const formatDate = (date: Date): string => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const formatDateHeader = (date: Date): string => {
-    return date.toLocaleDateString('en-GB', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    });
-  };
-
-  const handlePreviousDay = (): void => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() - 1);
-    setSelectedDate(newDate);
-  };
-
-  const handleNextDay = (): void => {
-    const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + 1);
-    setSelectedDate(newDate);
-  };
-
-  const handleToday = (): void => {
-    setSelectedDate(new Date());
-  };
-
-  const handleDragStart = (e: React.DragEvent, bookingId: string): void => {
-    setDraggedBooking(bookingId);
-    e.dataTransfer.effectAllowed = 'move';
-    setDraggedStudentAvailability([]);
-  };
-
-  const handleDragOver = (e: React.DragEvent, slotKey: string): void => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverSlot(slotKey);
-    
-    // Try to get student availability from drag data
-    const availabilityData = e.dataTransfer.getData('studentAvailability');
-    if (availabilityData && draggedStudentAvailability.length === 0) {
-      try {
-        const availability = JSON.parse(availabilityData);
-        setDraggedStudentAvailability(availability);
-      } catch (err) {
-        console.error('Error parsing student availability:', err);
-      }
-    }
-  };
-
-  const handleDragLeave = (): void => {
-    setDragOverSlot(null);
-  };
-  
-  const handleDragEnd = (): void => {
-    setDraggedStudentAvailability([]);
-    setDragOverSlot(null);
-  };
-
-  const handleDropOnSlot = (e: React.DragEvent, tutorId: string, date: string, time: string): void => {
-    e.preventDefault();
-    setDragOverSlot(null);
-    setDraggedStudentAvailability([]);
-    
-    // Try to get interview ID from dataTransfer (from UnassignedInterviews)
-    const interviewId = e.dataTransfer.getData('interviewId');
-    
-    if (interviewId) {
-      assignInterview(tutorId, date, time, interviewId);
-    } else if (draggedBooking) {
-      // Handle internal drag from within calendar
-      assignInterview(tutorId, date, time, draggedBooking);
-      setDraggedBooking(null);
-    }
-  };
-
-  const getSlotForTime = (tutor: TutorSchedule, date: string, time: string): TimeSlot | undefined => {
-    const daySlots = tutor.schedule[date] || [];
-    return daySlots.find(slot => slot.startTime === time);
-  };
-  
-  // Check if a time slot matches student availability (from dragging or selected interview)
-  const isStudentAvailable = (date: string, time: string): boolean => {
-    // Check dragged availability first (takes priority during drag operations)
-    if (draggedStudentAvailability.length > 0) {
-      const slotDate = new Date(date);
-      const dayOfWeek = slotDate.getDay();
-      const hour = parseInt(time.split(':')[0], 10);
-      
-      return draggedStudentAvailability.some((avail) => {
-        if (avail.dayOfWeek !== dayOfWeek) return false;
-        return hour >= avail.hourStart && hour < avail.hourEnd;
-      });
-    }
-    
-    // Check selected interview availability (when modal is open)
-    if (isInterviewDetailsModalOpen && selectedInterviewDetails?.studentAvailability) {
-      const availability = selectedInterviewDetails.studentAvailability.filter(avail => avail.date === date);
-      if (availability.length === 0) return false;
-      
-      const hour = parseInt(time.split(':')[0], 10);
-      return availability.some((avail) => {
-        return hour >= avail.hourStart && hour < avail.hourEnd;
-      });
-    }
-    
-    return false;
-  };
-
-  // Multi-selection handlers
-  const handleMouseDown = (e: React.MouseEvent, tutorId: string, time: string, slot: TimeSlot | undefined): void => {
-    // Don't interfere with interview slots
-    if (slot && slot.type === 'interview') {
-      return;
-    }
-    
-    e.preventDefault();
-    setIsSelecting(true);
-    setSelectionStartTutor(tutorId);
-    const slotKey = `${tutorId}-${time}-${slot?.id || 'empty'}`;
-    setSelectedSlots(new Set([slotKey]));
-  };
-
-  const handleMouseEnter = (tutorId: string, time: string, slot: TimeSlot | undefined): void => {
-    if (isSelecting && tutorId === selectionStartTutor) {
-      if (!slot || slot.type === 'blocked' || slot.type === 'available') {
-        const slotKey = `${tutorId}-${time}-${slot?.id || 'empty'}`;
-        setSelectedSlots(prev => new Set([...prev, slotKey]));
-      }
-    }
-  };
-
-  const handleMouseUp = (): void => {
-    setIsSelecting(false);
-  };
-
-  const handleMarkAsAvailable = (): void => {
-    if (selectedSlots.size === 0) return;
-
-    const dateStr = formatDate(selectedDate);
-    const slotsToMark = Array.from(selectedSlots)
-      .filter(slotKey => slotKey.endsWith('-empty')) // Only mark empty slots
-      .map(slotKey => {
-        // Format: ${tutorId}-${time}-empty
-        // Find the last occurrence of time pattern (HH:MM) to split correctly
-        const timeMatch = slotKey.match(/-([\d]{2}:[\d]{2})-empty$/);
-        if (timeMatch) {
-          const time = timeMatch[1];
-          const tutorId = slotKey.substring(0, slotKey.lastIndexOf(timeMatch[0]));
-          return { tutorId, date: dateStr, time };
-        }
-        // Fallback if pattern doesn't match
-        const parts = slotKey.split('-');
-        const time = parts[parts.length - 2];
-        const tutorId = parts.slice(0, parts.length - 2).join('-');
-        return { tutorId, date: dateStr, time };
-      });
-
-    if (slotsToMark.length === 0) {
-      alert('No empty slots selected. Please select empty time slots to mark as available.');
-      return;
-    }
-
-    markSlotsAvailable(slotsToMark);
-    
-    // Clear selection
-    setSelectedSlots(new Set());
-    setSelectionStartTutor(null);
-  };
-
-  const handleRemoveAvailability = (): void => {
-    if (selectedSlots.size === 0) return;
-
-    const slotsToRemove = Array.from(selectedSlots)
-      .filter(slotKey => !slotKey.endsWith('-empty')) // Only remove existing slots
-      .map(slotKey => {
-        // Format: ${tutorId}-${time}-${slotId}
-        // Find the last occurrence of time pattern (HH:MM) to split correctly
-        const timeMatch = slotKey.match(/-([\d]{2}:[\d]{2})-([^-]+)$/);
-        if (timeMatch) {
-          const slotId = timeMatch[2];
-          const tutorId = slotKey.substring(0, slotKey.lastIndexOf(timeMatch[0]));
-          return { tutorId, slotId };
-        }
-        // Fallback if pattern doesn't match
-        const lastDashIndex = slotKey.lastIndexOf('-');
-        const slotId = slotKey.substring(lastDashIndex + 1);
-        const secondLastDashIndex = slotKey.lastIndexOf('-', lastDashIndex - 1);
-        const tutorId = slotKey.substring(0, secondLastDashIndex);
-        return { tutorId, slotId };
-      });
-
-    if (slotsToRemove.length === 0) {
-      alert('No available slots selected. Please select existing availability slots to remove.');
-      return;
-    }
-
-    if (confirm(`Remove ${slotsToRemove.length} availability slot(s)?`)) {
-      removeAvailability(slotsToRemove);
-      
-      // Clear selection
-      setSelectedSlots(new Set());
-      setSelectionStartTutor(null);
-    }
-  };
-
-  const handleClearSelection = (): void => {
-    setSelectedSlots(new Set());
-    setSelectionStartTutor(null);
-  };
-
-  // Add global mouse up listener
-  useEffect(() => {
-    const handleGlobalMouseUp = (): void => {
-      if (isSelecting) {
-        setIsSelecting(false);
-      }
-    };
-
-    window.addEventListener('mouseup', handleGlobalMouseUp);
-    return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
-  }, [isSelecting]);
-
-  const getSlotColor = (type: SlotType): string => {
-    switch (type) {
-      case 'available':
-        return 'bg-green-100 border-green-300 hover:bg-green-200';
-      case 'interview':
-        return 'bg-blue-100 border-blue-300 hover:bg-blue-200';
-      case 'blocked':
-        return 'bg-gray-100 border-gray-300';
-      default:
-        return 'bg-white border-gray-200';
-    }
-  };
+  const {
+    isSelecting,
+    selectedSlots,
+    dragOverSlot,
+    draggedStudentAvailability,
+    handleSlotMouseDown,
+    handleSlotMouseEnter,
+    toggleSlotSelection,
+    clearSelection,
+    handleBatchAvailability,
+    handleBatchRemove,
+    handleDragStart,
+    handleDragOver,
+    handleDragLeave,
+    handleDragEnd,
+    handleDropOnSlot,
+  } = useCalendarInteractions();
 
   const dateStr = formatDate(selectedDate);
+  
+  // Determine selection toolbar props
+  const hasEmptySlots = Array.from(selectedSlots).some(key => key.endsWith('::empty'));
+  const hasExistingSlots = Array.from(selectedSlots).some(key => !key.endsWith('::empty'));
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
-      {/* Calendar Header */}
-      <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {formatDateHeader(selectedDate)}
-            </h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handlePreviousDay}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Previous day"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <button
-                onClick={handleToday}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Today
-              </button>
-              <button
-                onClick={handleNextDay}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="Next day"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
-              <button
-                onClick={() => setShowDatePicker(!showDatePicker)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2"
-                title="Select date"
-              >
-                <CalendarIcon className="w-5 h-5 text-gray-600" />
-              </button>
-            </div>
-          </div>
-          
-          {/* Legend and Actions */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => openAvailabilityModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-            >
-              <Clock className="w-4 h-4" />
-              Manage Availability
-            </button>
-            <div className="flex items-center gap-2 text-sm">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                <span className="text-gray-600">Available</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
-                <span className="text-gray-600">Interview</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></div>
-                <span className="text-gray-600">Blocked</span>
-              </div>
-              {(draggedStudentAvailability.length > 0 || (isInterviewDetailsModalOpen && selectedInterviewDetails?.studentAvailability?.length)) && (
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
-                    <span className="text-xs text-gray-600">Student Available</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-200 border-2 border-green-400 rounded"></div>
-                    <span className="text-xs text-gray-600">Tutor & Student Match</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Date Picker Dropdown */}
-        {showDatePicker && (
-          <div className="absolute mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-20">
-            <input
-              type="date"
-              value={formatDate(selectedDate)}
-              onChange={(e) => {
-                const newDate = new Date(e.target.value);
-                setSelectedDate(newDate);
-                setShowDatePicker(false);
-              }}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Selection Toolbar */}
-      {selectedSlots.size > 0 && (
-        <div className="bg-blue-600 text-white px-6 py-3 flex items-center justify-between shadow-lg">
-          <div className="flex items-center gap-3">
-            <span className="font-medium">
-              {selectedSlots.size} slot{selectedSlots.size > 1 ? 's' : ''} selected
-            </span>
-            <div className="h-4 w-px bg-blue-400"></div>
-            <span className="text-sm text-blue-100">
-              Drag to select multiple • Click individual slots to toggle
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {Array.from(selectedSlots).some(key => key.endsWith('-empty')) && (
-              <button
-                onClick={handleMarkAsAvailable}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm"
-              >
-                <Check className="w-4 h-4" />
-                Mark as Available
-              </button>
-            )}
-            {Array.from(selectedSlots).some(key => !key.endsWith('-empty')) && (
-              <button
-                onClick={handleRemoveAvailability}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium text-sm"
-              >
-                <X className="w-4 h-4" />
-                Remove Availability
-              </button>
-            )}
-            <button
-              onClick={handleClearSelection}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
-            >
-              <X className="w-4 h-4" />
-              Clear
-            </button>
-          </div>
-        </div>
-      )}
+      <CalendarHeader />
+      
+      <SelectionToolbar
+        selectedCount={selectedSlots.size}
+        hasEmptySlots={hasEmptySlots}
+        hasExistingSlots={hasExistingSlots}
+        onMarkAvailable={handleBatchAvailability}
+        onRemoveAvailability={handleBatchRemove}
+        onClear={clearSelection}
+      />
 
       {/* Calendar Grid */}
-      <div className="flex-1 overflow-auto" onMouseLeave={() => isSelecting && setIsSelecting(false)}>
+      <div className="flex-1 overflow-auto">
         <div className="min-w-full">
           {/* Time Header */}
           <div className="sticky top-0 bg-gray-50 border-b-2 border-gray-300 z-10">
@@ -427,7 +68,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
               <div className="w-48 p-3 border-r border-gray-300 font-medium text-sm text-gray-700">
                 Tutor
               </div>
-              {timeSlots.map((time) => (
+              {TIME_SLOTS.map((time) => (
                 <div
                   key={time}
                   className="flex-1 min-w-[100px] p-3 text-center border-r border-gray-200 font-medium text-sm text-gray-700"
@@ -461,89 +102,46 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                 </div>
 
                 {/* Time Slot Columns */}
-                {timeSlots.map((time) => {
+                {TIME_SLOTS.map((time) => {
                   const slot = daySlots.find(s => s.startTime === time);
-                  const slotKey = `${tutor.tutorId}-${time}-${slot?.id || 'empty'}`;
+                  const slotKey = generateSlotKey(tutor.tutorId, time, slot?.id);
                   const isDragOver = dragOverSlot === slotKey;
                   const isSelected = selectedSlots.has(slotKey);
                   const isSelectable = !slot || slot.type === 'blocked' || slot.type === 'available';
-                  const showStudentAvailability = isStudentAvailable(dateStr, time);
+                  const showStudentAvailability = isStudentAvailable(
+                    dateStr, 
+                    time, 
+                    draggedStudentAvailability,
+                    isInterviewDetailsModalOpen ? selectedInterviewDetails?.studentAvailability : undefined
+                  );
                   const hasMatchingTutor = showStudentAvailability && slot?.type === 'available';
 
                   return (
-                    <div
+                    <TimeSlotCell
                       key={slotKey}
-                      className={`flex-1 min-w-[100px] p-2 border-r border-gray-200 transition-all ${
-                        isSelectable ? 'cursor-pointer' : 'cursor-default'
-                      } ${
-                        slot ? getSlotColor(slot.type) : 'bg-white hover:bg-gray-100'
-                      } ${
-                        isDragOver ? 'ring-2 ring-blue-500 ring-inset bg-blue-50' : ''
-                      } ${
-                        isSelected ? 'ring-4 ring-purple-500 ring-inset bg-purple-100' : ''
-                      } ${
-                        showStudentAvailability && !slot ? 'bg-yellow-50 border-yellow-300' : ''
-                      } ${
-                        hasMatchingTutor ? 'bg-green-200 border-green-400 ring-2 ring-green-300' : ''
-                      }`}
-                      onClick={(e) => {
-                        // Interview slots open details modal
+                      tutor={tutor}
+                      time={time}
+                      slot={slot}
+                      isSelected={isSelected}
+                      isDragOver={isDragOver}
+                      showStudentAvailability={showStudentAvailability}
+                      hasMatchingTutor={hasMatchingTutor}
+                      isSelectable={isSelectable}
+                      onMouseDown={(e) => handleSlotMouseDown(tutor.tutorId, time, slot)}
+                      onMouseEnter={() => handleSlotMouseEnter(tutor.tutorId, time, slot)}
+                      onClick={() => {
                         if (slot && slot.type === 'interview') {
                           onSlotClick(slot, tutor);
-                          return;
-                        }
-                        
-                        // Other slots toggle selection
-                        if (isSelected) {
-                          setSelectedSlots(prev => {
-                            const newSet = new Set(prev);
-                            newSet.delete(slotKey);
-                            return newSet;
-                          });
-                        } else if (!slot || slot.type === 'available' || slot.type === 'blocked') {
-                          setSelectedSlots(prev => new Set([...prev, slotKey]));
+                        } else if (isSelectable) {
+                          toggleSlotSelection(tutor.tutorId, time, slot);
                         }
                       }}
-                      onMouseDown={(e) => handleMouseDown(e, tutor.tutorId, time, slot)}
-                      onMouseEnter={() => handleMouseEnter(tutor.tutorId, time, slot)}
                       onDragOver={(e) => !isSelecting && handleDragOver(e, slotKey)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => !isSelecting && handleDropOnSlot(e, tutor.tutorId, dateStr, time)}
                       onDragEnd={handleDragEnd}
-                    >
-                      {slot ? (
-                        <div 
-                          className={`h-full p-2 rounded text-xs ${
-                            slot.type === 'interview' ? 'border border-blue-400 bg-blue-50' : ''
-                          }`}
-                          draggable={slot.type === 'interview'}
-                          onDragStart={(e) => slot.bookingId && handleDragStart(e, slot.bookingId)}
-                        >
-                          <div className="font-semibold truncate text-gray-900">{slot.title}</div>
-                          {slot.student && (
-                            <div className="text-gray-700 truncate mt-1">{slot.student}</div>
-                          )}
-                          {slot.package && (
-                            <div className="text-gray-600 truncate mt-0.5 text-[10px]">{slot.package}</div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="h-full flex items-center justify-center">
-                          {isSelected ? (
-                            <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
-                              <Check className="w-4 h-4 text-white" />
-                            </div>
-                          ) : showStudentAvailability ? (
-                            <div className="text-center">
-                              <div className="text-xs font-medium text-yellow-700">Student Available</div>
-                              <div className="text-[10px] text-yellow-600 mt-0.5">No tutor match</div>
-                            </div>
-                          ) : (
-                            <div className="w-2 h-2 bg-gray-200 rounded-full opacity-0 group-hover:opacity-50"></div>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                      onDragStart={slot?.bookingId ? (e) => handleDragStart(e, slot.bookingId!) : undefined}
+                    />
                   );
                 })}
               </div>

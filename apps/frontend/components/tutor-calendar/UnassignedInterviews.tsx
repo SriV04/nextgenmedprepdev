@@ -44,44 +44,70 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
   
   const interviews = filteredInterviews;
   const [studentAvailabilities, setStudentAvailabilities] = useState<Record<string, StudentAvailabilitySlot[]>>({});
+  const [fetchedStudentIds, setFetchedStudentIds] = useState<Set<string>>(new Set());
   
-  // Fetch student availability for all interviews
+  // Fetch student availability for interviews we haven't fetched yet
   useEffect(() => {
     const fetchAvailabilities = async () => {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
-      const availMap: Record<string, StudentAvailabilitySlot[]> = {};
+      
+      // Find interviews with studentIds we haven't fetched yet
+      const studentIdsToFetch = new Set<string>();
+      const interviewsByStudent = new Map<string, string[]>(); // studentId -> interviewIds[]
       
       for (const interview of unassignedInterviews) {
-        if (interview.studentId) {
-          try {
-            const availRes = await fetch(
-              `${backendUrl}/api/v1/students/${interview.studentId}/availability`
-            );
-            const availData = await availRes.json();
-            
-            if (availData.success && availData.data) {
-              // Transform backend format to frontend format
-              availMap[interview.id] = availData.data.map((slot: any) => ({
-                id: slot.id,
-                date: slot.date,
-                dayOfWeek: slot.day_of_week,
-                hourStart: slot.hour_start,
-                hourEnd: slot.hour_end,
-                type: slot.type,
-              }));
-            }
-          } catch (err) {
-            console.error(`Error fetching availability for ${interview.studentId}:`, err);
+        if (interview.studentId && !fetchedStudentIds.has(interview.studentId)) {
+          studentIdsToFetch.add(interview.studentId);
+          if (!interviewsByStudent.has(interview.studentId)) {
+            interviewsByStudent.set(interview.studentId, []);
           }
+          interviewsByStudent.get(interview.studentId)!.push(interview.id);
         }
       }
-      setStudentAvailabilities(availMap);
+      
+      if (studentIdsToFetch.size === 0) return;
+      
+      const availMap: Record<string, StudentAvailabilitySlot[]> = {};
+      const newlyFetchedIds = new Set(fetchedStudentIds);
+      
+      // Fetch only for new student IDs
+      for (const studentId of studentIdsToFetch) {
+        try {
+          const availRes = await fetch(
+            `${backendUrl}/api/v1/students/${studentId}/availability`
+          );
+          const availData = await availRes.json();
+          
+          if (availData.success && availData.data) {
+            // Transform backend format to frontend format
+            const slots = availData.data.map((slot: any) => ({
+              id: slot.id,
+              date: slot.date,
+              dayOfWeek: slot.day_of_week,
+              hourStart: slot.hour_start,
+              hourEnd: slot.hour_end,
+              type: slot.type,
+            }));
+            
+            // Apply to all interviews for this student
+            const interviewIds = interviewsByStudent.get(studentId) || [];
+            for (const interviewId of interviewIds) {
+              availMap[interviewId] = slots;
+            }
+            
+            newlyFetchedIds.add(studentId);
+          }
+        } catch (err) {
+          console.error(`Error fetching availability for ${studentId}:`, err);
+        }
+      }
+      
+      setStudentAvailabilities(prev => ({ ...prev, ...availMap }));
+      setFetchedStudentIds(newlyFetchedIds);
     };
     
-    if (unassignedInterviews.length > 0) {
-      fetchAvailabilities();
-    }
-  }, [unassignedInterviews]);
+    fetchAvailabilities();
+  }, [unassignedInterviews, fetchedStudentIds]);
   
   const handleDragStart = (e: React.DragEvent, interviewId: string): void => {
     e.dataTransfer.setData('interviewId', interviewId);

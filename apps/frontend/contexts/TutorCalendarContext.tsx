@@ -176,34 +176,14 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
         return;
       }
 
-      // Create scheduled_at timestamp
-      const scheduledAt = `${date}T${time}:00Z`;
-
-      console.log(`Assigning interview ${interviewId} to tutor ${tutorId} at ${scheduledAt}, slot ID: ${availableSlot.id}`);
-
-      // Call backend to assign interview with availability slot ID
-      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}/assign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tutor_id: tutorId,
-          scheduled_at: scheduledAt,
-          availability_slot_id: availableSlot.id,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to assign interview');
+      // Check if this interview is already in pending changes
+      const existingChange = pendingChanges.find(c => c.interviewId === interviewId);
+      if (existingChange) {
+        alert('This interview is already scheduled in pending changes');
+        return;
       }
 
-      // Refresh data to get updated state from database
-      await fetchData();
-
-      // Add to pending changes
+      // Stage the change without backend call
       const newChange: PendingChange = {
         id: `${interviewId}-${Date.now()}`,
         type: 'assignment',
@@ -217,10 +197,38 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       };
       setPendingChanges(prev => [...prev, newChange]);
 
-      console.log(`Successfully assigned ${interview.studentName} to ${tutor.tutorName} on ${date} at ${time}`);
+      // Update UI optimistically - add interview slot to tutor's schedule
+      setTutors(prevTutors => prevTutors.map(t => {
+        if (t.tutorId !== tutorId) return t;
+        
+        const updatedSchedule = { ...t.schedule };
+        const daySlots = [...(updatedSchedule[date] || [])];
+        
+        // Find and update the available slot to interview
+        const slotIndex = daySlots.findIndex(s => s.id === availableSlot.id);
+        if (slotIndex !== -1) {
+          daySlots[slotIndex] = {
+            ...daySlots[slotIndex],
+            type: 'interview',
+            title: interview.studentName,
+            student: interview.studentName,
+            package: interview.package,
+            interviewId: interviewId,
+            isPending: true, // Mark as pending commit
+          };
+        }
+        
+        updatedSchedule[date] = daySlots;
+        return { ...t, schedule: updatedSchedule };
+      }));
+
+      // Remove from unassigned interviews list
+      setUnassignedInterviews(prev => prev.filter(i => i.id !== interviewId));
+
+      console.log(`Staged assignment: ${interview.studentName} to ${tutor.tutorName} on ${date} at ${time}`);
     } catch (err: any) {
-      console.error('Error assigning interview:', err);
-      alert(`Failed to assign interview: ${err.message}`);
+      console.error('Error staging interview assignment:', err);
+      alert(`Failed to stage interview: ${err.message}`);
     }
   };
 
@@ -432,9 +440,46 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       setLoading(true);
 
-      // Send all pending changes to backend to trigger emails
+      // Execute all pending assignments
       for (const change of pendingChanges) {
-        const response = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/confirm`, {
+        // Find the tutor to get the availability slot ID
+        const tutor = tutors.find(t => t.tutorId === change.tutorId);
+        if (!tutor) continue;
+
+        const daySlots = tutor.schedule[change.date] || [];
+        const hour = parseInt(change.time.split(':')[0], 10);
+        
+        const availableSlot = daySlots.find(slot => {
+          const slotHour = parseInt(slot.startTime.split(':')[0], 10);
+          return slotHour === hour && (slot.type === 'available' || slot.interviewId === change.interviewId);
+        });
+
+        if (!availableSlot) {
+          throw new Error(`Slot not found for ${change.tutorName} at ${change.time}`);
+        }
+
+        const scheduledAt = `${change.date}T${change.time}:00Z`;
+
+        // Call backend to assign interview
+        const assignResponse = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/assign`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tutor_id: change.tutorId,
+            scheduled_at: scheduledAt,
+            availability_slot_id: availableSlot.id,
+          }),
+        });
+
+        const assignResult = await assignResponse.json();
+        if (!assignResult.success) {
+          throw new Error(assignResult.message || 'Failed to assign interview');
+        }
+
+        // Send confirmation emails
+        const confirmResponse = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/confirm`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -442,19 +487,18 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
           body: JSON.stringify({
             tutor_id: change.tutorId,
             tutor_name: change.tutorName,
-            scheduled_at: `${change.date}T${change.time}:00Z`,
+            scheduled_at: scheduledAt,
             student_email: change.studentEmail,
             student_name: change.studentName,
           }),
         });
 
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to confirm interview');
+        const confirmResult = await confirmResponse.json();
+        if (!confirmResult.success) {
+          throw new Error(confirmResult.message || 'Failed to send confirmation emails');
         }
 
-        console.log(`Sent confirmation emails for interview ${change.interviewId}`);
+        console.log(`Committed and sent emails for interview ${change.interviewId}`);
       }
 
       // Clear pending changes
@@ -467,6 +511,8 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     } catch (err: any) {
       console.error('Error committing changes:', err);
       alert(`Failed to commit changes: ${err.message}`);
+      // Refresh data to restore original state
+      await fetchData();
     } finally {
       setLoading(false);
     }
