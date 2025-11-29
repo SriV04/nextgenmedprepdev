@@ -22,7 +22,9 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     assignInterview,
     markSlotsAvailable,
     removeAvailability,
-    openAvailabilityModal
+    openAvailabilityModal,
+    selectedInterviewDetails,
+    isInterviewDetailsModalOpen
   } = useTutorCalendar();
   const [draggedBooking, setDraggedBooking] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
@@ -122,18 +124,32 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     return daySlots.find(slot => slot.startTime === time);
   };
   
-  // Check if a time slot matches student availability
+  // Check if a time slot matches student availability (from dragging or selected interview)
   const isStudentAvailable = (date: string, time: string): boolean => {
-    if (draggedStudentAvailability.length === 0) return false;
+    // Check dragged availability first (takes priority during drag operations)
+    if (draggedStudentAvailability.length > 0) {
+      const slotDate = new Date(date);
+      const dayOfWeek = slotDate.getDay();
+      const hour = parseInt(time.split(':')[0], 10);
+      
+      return draggedStudentAvailability.some((avail) => {
+        if (avail.dayOfWeek !== dayOfWeek) return false;
+        return hour >= avail.hourStart && hour < avail.hourEnd;
+      });
+    }
     
-    const slotDate = new Date(date);
-    const dayOfWeek = slotDate.getDay();
-    const hour = parseInt(time.split(':')[0], 10);
+    // Check selected interview availability (when modal is open)
+    if (isInterviewDetailsModalOpen && selectedInterviewDetails?.studentAvailability) {
+      const availability = selectedInterviewDetails.studentAvailability.filter(avail => avail.date === date);
+      if (availability.length === 0) return false;
+      
+      const hour = parseInt(time.split(':')[0], 10);
+      return availability.some((avail) => {
+        return hour >= avail.hourStart && hour < avail.hourEnd;
+      });
+    }
     
-    return draggedStudentAvailability.some((avail) => {
-      if (avail.dayOfWeek !== dayOfWeek) return false;
-      return hour >= avail.hourStart && hour < avail.hourEnd;
-    });
+    return false;
   };
 
   // Multi-selection handlers
@@ -327,10 +343,16 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                 <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></div>
                 <span className="text-gray-600">Blocked</span>
               </div>
-              {draggedStudentAvailability.length > 0 && (
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-blue-200 border border-blue-400 rounded"></div>
-                  <span className="text-gray-600">Student Available</span>
+              {(draggedStudentAvailability.length > 0 || (isInterviewDetailsModalOpen && selectedInterviewDetails?.studentAvailability?.length)) && (
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
+                    <span className="text-xs text-gray-600">Student Available</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 bg-green-200 border-2 border-green-400 rounded"></div>
+                    <span className="text-xs text-gray-600">Tutor & Student Match</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -445,7 +467,8 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                   const isDragOver = dragOverSlot === slotKey;
                   const isSelected = selectedSlots.has(slotKey);
                   const isSelectable = !slot || slot.type === 'blocked' || slot.type === 'available';
-                  const showStudentAvailability = draggedStudentAvailability.length > 0 && isStudentAvailable(dateStr, time);
+                  const showStudentAvailability = isStudentAvailable(dateStr, time);
+                  const hasMatchingTutor = showStudentAvailability && slot?.type === 'available';
 
                   return (
                     <div
@@ -459,9 +482,9 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                       } ${
                         isSelected ? 'ring-4 ring-purple-500 ring-inset bg-purple-100' : ''
                       } ${
-                        showStudentAvailability && !slot ? 'bg-blue-100 border-blue-300' : ''
+                        showStudentAvailability && !slot ? 'bg-yellow-50 border-yellow-300' : ''
                       } ${
-                        showStudentAvailability && slot?.type === 'available' ? 'bg-blue-200 border-blue-400' : ''
+                        hasMatchingTutor ? 'bg-green-200 border-green-400 ring-2 ring-green-300' : ''
                       }`}
                       onClick={(e) => {
                         // Interview slots open details modal
@@ -509,6 +532,11 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
                           {isSelected ? (
                             <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
                               <Check className="w-4 h-4 text-white" />
+                            </div>
+                          ) : showStudentAvailability ? (
+                            <div className="text-center">
+                              <div className="text-xs font-medium text-yellow-700">Student Available</div>
+                              <div className="text-[10px] text-yellow-600 mt-0.5">No tutor match</div>
                             </div>
                           ) : (
                             <div className="w-2 h-2 bg-gray-200 rounded-full opacity-0 group-hover:opacity-50"></div>
