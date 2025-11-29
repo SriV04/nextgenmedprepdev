@@ -66,7 +66,7 @@ function DashboardContent() {
   const BOOKINGS_PASSWORD = process.env.NEXT_PUBLIC_BOOKINGS_PASSWORD || 'admin123';
 
   // Use calendar context
-  const { tutors, setCurrentUserId } = useTutorCalendar();
+  const { tutors, setCurrentUserId, openInterviewDetailsModal } = useTutorCalendar();
   
   const router = useRouter();
   const supabase = createClient();
@@ -276,8 +276,11 @@ function DashboardContent() {
   };
 
   const handleSlotClick = (slot: any, tutor: any) => {
-    if (slot.type === 'interview' && slot.bookingId) {
-      // Find the booking and open modal
+    if (slot.type === 'interview' && slot.interviewId) {
+      // Open interview details modal for assigned interviews
+      openInterviewDetailsModal(slot.interviewId);
+    } else if (slot.type === 'interview' && slot.bookingId) {
+      // Fallback: Find the booking and open modal
       const booking = bookings.find(b => b.id === slot.bookingId);
       if (booking) {
         setSelectedBooking(booking);

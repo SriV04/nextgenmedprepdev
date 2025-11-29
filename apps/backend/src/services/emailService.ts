@@ -1215,22 +1215,28 @@ Booking ID: ${data.bookingId}
     }
   }
 
-  // Generate a Zoom meeting link (placeholder - integrate with Zoom API later)
-  private generateZoomLink(interviewId: string): string {
-    // TODO: Integrate with Zoom API to create actual meetings
-    // For now, return a placeholder link
-    return `https://zoom.us/j/${Math.floor(Math.random() * 1000000000)}?pwd=placeholder`;
-  }
-
+  /**
+   * Send interview confirmation emails with Zoom meeting link
+   * @param tutorEmail - Email of the tutor
+   * @param tutorName - Name of the tutor
+   * @param studentEmail - Email of the student
+   * @param studentName - Name of the student
+   * @param scheduledAt - ISO date string of the scheduled interview
+   * @param interviewId - ID of the interview
+   * @param zoomJoinUrl - Zoom meeting join URL (required)
+   */
   async sendInterviewConfirmationEmail(
     tutorEmail: string,
     tutorName: string,
     studentEmail: string,
     studentName: string,
     scheduledAt: string,
-    interviewId: string
+    interviewId: string,
+    zoomJoinUrl: string,
+    zoomHostEmail: string,
+    universities: string
   ): Promise<void> {
-    const zoomLink = this.generateZoomLink(interviewId);
+    const zoomLink = zoomJoinUrl;
     const interviewDate = new Date(scheduledAt);
     const dateStr = interviewDate.toLocaleDateString('en-GB', { 
       weekday: 'long',
@@ -1250,7 +1256,9 @@ Booking ID: ${data.bookingId}
       studentName,
       dateStr,
       timeStr,
-      zoomLink
+      zoomLink,
+      zoomHostEmail,
+      universities
     );
 
     await this.transporter.sendMail({
@@ -1267,7 +1275,8 @@ Booking ID: ${data.bookingId}
       tutorName,
       dateStr,
       timeStr,
-      zoomLink
+      zoomLink,
+      universities
     );
 
     await this.transporter.sendMail({
@@ -1286,33 +1295,167 @@ Booking ID: ${data.bookingId}
     studentName: string,
     dateStr: string,
     timeStr: string,
-    zoomLink: string
+    zoomLink: string,
+    zoomHostEmail: string,
+    universities: string
   ): EmailTemplate {
     return {
-      subject: `New Interview Scheduled - ${studentName}`,
+      subject: `🎓 New Interview Scheduled - ${studentName}`,
       text: `Hi ${tutorName},\n\nYou have a new interview scheduled!\n\nStudent: ${studentName}\nDate: ${dateStr}\nTime: ${timeStr}\n\nZoom Link: ${zoomLink}\n\nPlease join the meeting on time and prepare accordingly.\n\nBest regards,\nThe NextGen MedPrep Team`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2563eb;">New Interview Scheduled 📅</h1>
-          <p>Hi <strong>${tutorName}</strong>,</p>
-          <p>You have a new interview scheduled!</p>
-          
-          <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
-            <h3 style="margin-top: 0; color: #1e40af;">Interview Details</h3>
-            <p style="margin: 10px 0;"><strong>Student:</strong> ${studentName}</p>
-            <p style="margin: 10px 0;"><strong>Date:</strong> ${dateStr}</p>
-            <p style="margin: 10px 0;"><strong>Time:</strong> ${timeStr}</p>
-          </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header with gradient -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                      <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                        📅 New Interview Scheduled
+                      </h1>
+                      <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                        Your next tutoring session is confirmed
+                      </p>
+                    </td>
+                  </tr>
 
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Join the Meeting</h3>
-            <a href="${zoomLink}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Join Zoom Meeting</a>
-            <p style="margin-top: 15px; font-size: 12px; color: #6b7280;">Or copy this link: ${zoomLink}</p>
-          </div>
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 20px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        Hi <strong style="color: #0f172a;">${tutorName}</strong>,
+                      </p>
+                      <p style="margin: 0 0 30px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        You have a new interview session scheduled. Please review the details below and join the meeting on time.
+                      </p>
 
-          <p>Please join the meeting on time and prepare accordingly.</p>
-          <p>Best regards,<br>The NextGen MedPrep Team</p>
-        </div>
+                      <!-- Interview Details Card -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; border: 2px solid #0ea5e9; margin: 0 0 30px 0;">
+                        <tr>
+                          <td style="padding: 25px;">
+                            <h2 style="margin: 0 0 20px 0; color: #0c4a6e; font-size: 18px; font-weight: 600; display: flex; align-items: center;">
+                              🎯 Interview Details
+                            </h2>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                              <tr>
+                                <td style="padding: 8px 0; color: #0c4a6e; font-weight: 600; font-size: 14px; width: 80px;">
+                                  Student:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px; font-weight: 500;">
+                                  ${studentName}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 8px 0; color: #0c4a6e; font-weight: 600; font-size: 14px;">
+                                  Date:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  📆 ${dateStr}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 8px 0; color: #0c4a6e; font-weight: 600; font-size: 14px;">
+                                  Time:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  ⏰ ${timeStr}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 8px 0; color: #0c4a6e; font-weight: 600; font-size: 14px;">
+                                  University:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  🎓 ${universities}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Zoom Host Account Info -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; border: 2px solid #f59e0b; margin: 0 0 30px 0;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <h3 style="margin: 0 0 10px 0; color: #92400e; font-size: 16px; font-weight: 600;">
+                              🔐 Zoom Host Account
+                            </h3>
+                            <p style="margin: 0; color: #78350f; font-size: 14px; line-height: 1.6;">
+                              <strong>Important:</strong> This meeting is hosted on the <strong>${zoomHostEmail}</strong> account. Please ensure you have access to this account to start the meeting.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Zoom Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 25px 0;">
+                        <tr>
+                          <td align="center" style="padding: 30px 20px; background-color: #f8fafc; border-radius: 12px;">
+                            <p style="margin: 0 0 15px 0; color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                              Ready to Join?
+                            </p>
+                            <a href="${zoomLink}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.4); transition: all 0.3s;">
+                              🎥 Join Zoom Meeting
+                            </a>
+                            <p style="margin: 15px 0 0 0; color: #94a3b8; font-size: 12px;">
+                              Or copy this link: <a href="${zoomLink}" style="color: #667eea; word-break: break-all;">${zoomLink}</a>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Tips Box -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; margin: 0 0 25px 0;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                              <strong>💡 Quick Tips:</strong><br>
+                              • Review the student's application materials beforehand<br>
+                              • Join the meeting 2-3 minutes early to test your setup<br>
+                              • Keep structured feedback notes during the session
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        If you have any questions or need to reschedule, please contact us immediately.
+                      </p>
+                      
+                      <p style="margin: 20px 0 0 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        Best regards,<br>
+                        <strong style="color: #667eea;">The NextGen MedPrep Team</strong>
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0 0 10px 0; color: #64748b; font-size: 13px;">
+                        NextGen MedPrep | Empowering Future Medical Professionals
+                      </p>
+                      <p style="margin: 0; color: #94a3b8; font-size: 12px;">
+                        © ${new Date().getFullYear()} NextGen MedPrep. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `
     };
   }
@@ -1322,37 +1465,172 @@ Booking ID: ${data.bookingId}
     tutorName: string,
     dateStr: string,
     timeStr: string,
-    zoomLink: string
+    zoomLink: string,
+    universities: string
   ): EmailTemplate {
     return {
-      subject: `Interview Confirmed with ${tutorName}`,
+      subject: `✅ Interview Confirmed with ${tutorName}`,
       text: `Hi ${studentName},\n\nYour interview has been confirmed!\n\nTutor: ${tutorName}\nDate: ${dateStr}\nTime: ${timeStr}\n\nZoom Link: ${zoomLink}\n\nPlease join the meeting on time. We recommend logging in 5 minutes early to test your audio and video.\n\nGood luck!\n\nBest regards,\nThe NextGen MedPrep Team`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #059669;">Interview Confirmed! ✅</h1>
-          <p>Hi <strong>${studentName}</strong>,</p>
-          <p>Your interview has been confirmed!</p>
-          
-          <div style="background-color: #d1fae5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
-            <h3 style="margin-top: 0; color: #047857;">Interview Details</h3>
-            <p style="margin: 10px 0;"><strong>Tutor:</strong> ${tutorName}</p>
-            <p style="margin: 10px 0;"><strong>Date:</strong> ${dateStr}</p>
-            <p style="margin: 10px 0;"><strong>Time:</strong> ${timeStr}</p>
-          </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f0fdf4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0fdf4; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header with gradient -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 30px; text-align: center;">
+                      <div style="background-color: rgba(255,255,255,0.2); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">
+                        ✅
+                      </div>
+                      <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                        Interview Confirmed!
+                      </h1>
+                      <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                        You're all set for your mock interview
+                      </p>
+                    </td>
+                  </tr>
 
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Join the Meeting</h3>
-            <a href="${zoomLink}" style="display: inline-block; background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Join Zoom Meeting</a>
-            <p style="margin-top: 15px; font-size: 12px; color: #6b7280;">Or copy this link: ${zoomLink}</p>
-          </div>
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 10px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        Hi <strong style="color: #0f172a;">${studentName}</strong>,
+                      </p>
+                      <p style="margin: 0 0 30px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        Great news! Your mock interview has been confirmed. We're excited to help you prepare for your medical school journey. 🎓
+                      </p>
 
-          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #92400e;"><strong>💡 Tip:</strong> Please join the meeting on time. We recommend logging in 5 minutes early to test your audio and video.</p>
-          </div>
+                      <!-- Interview Details Card -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-radius: 12px; border: 2px solid #10b981; margin: 0 0 30px 0;">
+                        <tr>
+                          <td style="padding: 25px;">
+                            <h2 style="margin: 0 0 20px 0; color: #065f46; font-size: 18px; font-weight: 600;">
+                              📋 Your Interview Details
+                            </h2>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                              <tr>
+                                <td style="padding: 8px 0; color: #065f46; font-weight: 600; font-size: 14px; width: 80px;">
+                                  Tutor:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px; font-weight: 500;">
+                                  👨‍🏫 ${tutorName}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 8px 0; color: #065f46; font-weight: 600; font-size: 14px;">
+                                  Date:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  📆 ${dateStr}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 8px 0; color: #065f46; font-weight: 600; font-size: 14px;">
+                                  Time:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  ⏰ ${timeStr}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td style="padding: 8px 0; color: #065f46; font-weight: 600; font-size: 14px;">
+                                  University:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  🎓 ${universities}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
 
-          <p>Good luck!</p>
-          <p>Best regards,<br>The NextGen MedPrep Team</p>
-        </div>
+                      <!-- Zoom Button -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="margin: 0 0 25px 0;">
+                        <tr>
+                          <td align="center" style="padding: 30px 20px; background-color: #f8fafc; border-radius: 12px;">
+                            <p style="margin: 0 0 15px 0; color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                              Join Your Interview
+                            </p>
+                            <a href="${zoomLink}" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.4);">
+                              🎥 Join Zoom Meeting
+                            </a>
+                            <p style="margin: 15px 0 0 0; color: #94a3b8; font-size: 12px;">
+                              Or copy this link: <a href="${zoomLink}" style="color: #10b981; word-break: break-all;">${zoomLink}</a>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Preparation Tips -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; margin: 0 0 25px 0;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <p style="margin: 0 0 10px 0; color: #92400e; font-size: 15px; font-weight: 600;">
+                              💡 Interview Preparation Tips
+                            </p>
+                            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.7;">
+                              <strong>Before the Interview:</strong><br>
+                              • Test your camera and microphone<br>
+                              • Find a quiet, well-lit space<br>
+                              • Review your personal statement & application<br>
+                              • Prepare questions about the university<br>
+                              • Join 5 minutes early to check your setup
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Confidence Boost -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); border-radius: 8px; margin: 0 0 25px 0;">
+                        <tr>
+                          <td style="padding: 20px; text-align: center;">
+                            <p style="margin: 0 0 5px 0; font-size: 24px;">🌟</p>
+                            <p style="margin: 0; color: #5b21b6; font-size: 15px; font-weight: 600; font-style: italic;">
+                              "You've got this! Remember, preparation meets opportunity."
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        If you need to reschedule or have any questions, please contact us as soon as possible.
+                      </p>
+                      
+                      <p style="margin: 20px 0 0 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        Best of luck! <br>
+u                        <strong style="color: #10b981;">The NextGen MedPrep Team</strong>
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f0fdf4; padding: 30px; text-align: center; border-top: 1px solid #d1fae5;">
+                      <p style="margin: 0 0 10px 0; color: #064e3b; font-size: 13px; font-weight: 600;">
+                        NextGen MedPrep | Your Path to Medical School Success
+                      </p>
+                      <p style="margin: 0; color: #6b7280; font-size: 12px;">
+                        © ${new Date().getFullYear()} NextGen MedPrep. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `
     };
   }

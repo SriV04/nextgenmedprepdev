@@ -37,6 +37,11 @@ EMAIL_PORT=465
 EMAIL_USER="your_email@domain.com"
 EMAIL_PASS="your_email_password"
 EMAIL_FROM="your_from_email@domain.com"
+
+# Zoom API (Video Conferencing)
+ZOOM_ACCOUNT_ID="your_zoom_account_id"
+ZOOM_CLIENT_ID="your_zoom_client_id"
+ZOOM_CLIENT_SECRET="your_zoom_client_secret"
 ```
 
 ### Optional Variables
@@ -59,6 +64,11 @@ STRIPE_SECRET_KEY=sk_test_...     # Your Stripe secret key (backend only)
 STRIPE_WEBHOOK_SECRET=whsec_...   # Stripe webhook endpoint secret
 BACKEND_URL=http://localhost:5001 # Backend URL for webhook callbacks
 FRONTEND_URL=http://localhost:3000 # Frontend URL for payment redirects
+
+# Zoom API (Video Conferencing)
+ZOOM_ACCOUNT_ID=your_zoom_account_id           # Zoom Account ID for Server-to-Server OAuth
+ZOOM_CLIENT_ID=your_zoom_client_id             # Zoom OAuth Client ID
+ZOOM_CLIENT_SECRET=your_zoom_client_secret     # Zoom OAuth Client Secret
 
 # Logging
 LOG_LEVEL=info

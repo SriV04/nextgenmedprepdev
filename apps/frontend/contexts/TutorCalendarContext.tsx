@@ -1,114 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-// Types
-interface TimeSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-  type: 'available' | 'interview' | 'blocked';
-  title?: string;
-  bookingId?: string;
-  interviewId?: string;
-  student?: string;
-  package?: string;
-}
-
-interface TutorSchedule {
-  tutorId: string;
-  tutorName: string;
-  tutorEmail: string;
-  avatar?: string;
-  color: string;
-  schedule: Record<string, TimeSlot[]>;
-  availability: AvailabilitySlot[];
-}
-
-interface UnassignedInterview {
-  id: string;
-  studentName: string;
-  studentEmail: string;
-  studentId?: string;
-  package: string;
-  universities: string;
-  preferredTime?: string;
-  createdAt: string;
-}
-
-interface StudentAvailabilitySlot {
-  id: string;
-  date: string;
-  dayOfWeek: number;
-  hourStart: number;
-  hourEnd: number;
-  type: string;
-}
-
-interface InterviewDetails {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentEmail: string;
-  package: string;
-  universities: string;
-  preferredTime?: string;
-  createdAt: string;
-  field?: string;
-  phone?: string;
-  notes?: string;
-  studentAvailability: StudentAvailabilitySlot[];
-}
-
-interface AvailabilitySlot {
-  id: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-}
-
-interface PendingChange {
-  id: string;
-  type: 'assignment';
-  interviewId: string;
-  tutorId: string;
-  tutorName: string;
-  date: string;
-  time: string;
-  studentName: string;
-  studentEmail: string;
-}
-
-interface TutorCalendarContextType {
-  // State
-  tutors: TutorSchedule[];
-  unassignedInterviews: UnassignedInterview[];
-  selectedDate: Date;
-  selectedTutor: { tutorId: string; tutorName: string; tutorEmail: string } | null;
-  isAvailabilityModalOpen: boolean;
-  isInterviewDetailsModalOpen: boolean;
-  selectedInterviewDetails: InterviewDetails | null;
-  loading: boolean;
-  error: string | null;
-  pendingChanges: PendingChange[];
-  hasPendingChanges: boolean;
-  currentUserId: string | null;
-
-  // Actions
-  setSelectedDate: (date: Date) => void;
-  assignInterview: (tutorId: string, date: string, time: string, interviewId: string) => Promise<void>;
-  markSlotsAvailable: (slots: { tutorId: string; date: string; time: string }[]) => Promise<void>;
-  removeAvailability: (slots: { tutorId: string; slotId: string }[]) => Promise<void>;
-  openAvailabilityModal: (tutorId?: string) => void;
-  closeAvailabilityModal: () => void;
-  openInterviewDetailsModal: (interviewId: string) => Promise<void>;
-  closeInterviewDetailsModal: () => void;
-  saveAvailability: (tutorId: string, availability: AvailabilitySlot[]) => Promise<void>;
-  refreshData: () => Promise<void>;
-  commitChanges: () => Promise<void>;
-  discardChanges: () => void;
-  setCurrentUserId: (userId: string | null) => void;
-}
+import type {
+  TutorSchedule,
+  UnassignedInterview,
+  InterviewDetails,
+  AvailabilitySlot,
+  PendingChange,
+  TutorCalendarContextType,
+  TimeSlot,
+  StudentAvailabilitySlot,
+  TutorInfo,
+  BackendTutorData,
+  BackendAvailabilitySlot,
+  BackendInterviewData,
+} from '../types/tutor-calendar';
 
 const TutorCalendarContext = createContext<TutorCalendarContextType | undefined>(undefined);
 
@@ -122,7 +28,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   const [tutors, setTutors] = useState<TutorSchedule[]>([]);
   const [unassignedInterviews, setUnassignedInterviews] = useState<UnassignedInterview[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedTutor, setSelectedTutor] = useState<{ tutorId: string; tutorName: string; tutorEmail: string } | null>(null);
+  const [selectedTutor, setSelectedTutor] = useState<TutorInfo | null>(null);
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [isInterviewDetailsModalOpen, setIsInterviewDetailsModalOpen] = useState(false);
   const [selectedInterviewDetails, setSelectedInterviewDetails] = useState<InterviewDetails | null>(null);
@@ -158,11 +64,11 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (tutorsData.success) {
         // Transform backend data to frontend format
-        const transformedTutors: TutorSchedule[] = tutorsData.data.map((tutor: any, index: number) => {
+        const transformedTutors: TutorSchedule[] = tutorsData.data.map((tutor: BackendTutorData, index: number) => {
           const schedule: Record<string, TimeSlot[]> = {};
 
           // Group availability by date
-          tutor.availability?.forEach((slot: any) => {
+          tutor.availability?.forEach((slot: BackendAvailabilitySlot) => {
             const dateStr = slot.date;
             if (!schedule[dateStr]) {
               schedule[dateStr] = [];
@@ -172,7 +78,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
               id: slot.id,
               startTime: `${String(slot.hour_start).padStart(2, '0')}:00`,
               endTime: `${String(slot.hour_end).padStart(2, '0')}:00`,
-              type: slot.type || 'available',
+              type: (slot.type as 'available' | 'interview' | 'blocked') || 'available',
             };
 
             // Add interview details if exists
@@ -198,7 +104,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
             tutorEmail: tutor.email,
             color: getTutorColor(index),
             schedule,
-            availability: [], // Computed availability patterns if needed
+            availability: [],
           };
         });
 
@@ -211,15 +117,18 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (interviewsData.success) {
         console.log('Fetched unassigned interviews:', interviewsData.data);
-        const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: any) => ({
+        const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: BackendInterviewData) => ({
           id: interview.id,
           studentId: interview.student_id,
           studentName: interview.booking?.email?.split('@')[0] || 'Student',
           studentEmail: interview.booking?.email || '',
           package: interview.booking?.package || '',
-          universities: interview.university || '',
+          universities: interview.booking?.universities || interview.university || '',
           preferredTime: interview.booking?.preferred_time,
           createdAt: interview.booking?.created_at || interview.created_at,
+          field: interview.booking?.field,
+          phone: interview.booking?.phone,
+          notes: interview.booking?.notes || interview.notes,
         }));
 
         setUnassignedInterviews(transformedInterviews);
@@ -267,34 +176,14 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
         return;
       }
 
-      // Create scheduled_at timestamp
-      const scheduledAt = `${date}T${time}:00Z`;
-
-      console.log(`Assigning interview ${interviewId} to tutor ${tutorId} at ${scheduledAt}, slot ID: ${availableSlot.id}`);
-
-      // Call backend to assign interview with availability slot ID
-      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}/assign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tutor_id: tutorId,
-          scheduled_at: scheduledAt,
-          availability_slot_id: availableSlot.id,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to assign interview');
+      // Check if this interview is already in pending changes
+      const existingChange = pendingChanges.find(c => c.interviewId === interviewId);
+      if (existingChange) {
+        alert('This interview is already scheduled in pending changes');
+        return;
       }
 
-      // Refresh data to get updated state from database
-      await fetchData();
-
-      // Add to pending changes
+      // Stage the change without backend call
       const newChange: PendingChange = {
         id: `${interviewId}-${Date.now()}`,
         type: 'assignment',
@@ -308,10 +197,38 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       };
       setPendingChanges(prev => [...prev, newChange]);
 
-      console.log(`Successfully assigned ${interview.studentName} to ${tutor.tutorName} on ${date} at ${time}`);
+      // Update UI optimistically - add interview slot to tutor's schedule
+      setTutors(prevTutors => prevTutors.map(t => {
+        if (t.tutorId !== tutorId) return t;
+        
+        const updatedSchedule = { ...t.schedule };
+        const daySlots = [...(updatedSchedule[date] || [])];
+        
+        // Find and update the available slot to interview
+        const slotIndex = daySlots.findIndex(s => s.id === availableSlot.id);
+        if (slotIndex !== -1) {
+          daySlots[slotIndex] = {
+            ...daySlots[slotIndex],
+            type: 'interview',
+            title: interview.studentName,
+            student: interview.studentName,
+            package: interview.package,
+            interviewId: interviewId,
+            isPending: true, // Mark as pending commit
+          };
+        }
+        
+        updatedSchedule[date] = daySlots;
+        return { ...t, schedule: updatedSchedule };
+      }));
+
+      // Remove from unassigned interviews list
+      setUnassignedInterviews(prev => prev.filter(i => i.id !== interviewId));
+
+      console.log(`Staged assignment: ${interview.studentName} to ${tutor.tutorName} on ${date} at ${time}`);
     } catch (err: any) {
-      console.error('Error assigning interview:', err);
-      alert(`Failed to assign interview: ${err.message}`);
+      console.error('Error staging interview assignment:', err);
+      alert(`Failed to stage interview: ${err.message}`);
     }
   };
 
@@ -417,19 +334,40 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     setSelectedTutor(null);
   };
 
-  const openInterviewDetailsModal = async (interviewId: string) => {
+  const openInterviewDetailsModal = async (interviewId: string, interviewData?: UnassignedInterview) => {
     try {
       setLoading(true);
       
-      // Fetch full interview details
-      const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
-      const interviewData = await interviewRes.json();
+      let interview: any;
+      
+      // Use provided interview data if available, otherwise fetch
+      if (interviewData) {
+        interview = {
+          id: interviewData.id,
+          student_id: interviewData.studentId,
+          booking: {
+            email: interviewData.studentEmail,
+            package: interviewData.package,
+            universities: interviewData.universities,
+            preferred_time: interviewData.preferredTime,
+            field: interviewData.field,
+            phone: interviewData.phone,
+            notes: interviewData.notes,
+          },
+          created_at: interviewData.createdAt,
+          notes: interviewData.notes,
+        };
+      } else {
+        // Fetch full interview details
+        const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
+        const interviewResData = await interviewRes.json();
 
-      if (!interviewData.success) {
-        throw new Error('Failed to fetch interview details');
+        if (!interviewResData.success) {
+          throw new Error('Failed to fetch interview details');
+        }
+
+        interview = interviewResData.data;
       }
-
-      const interview = interviewData.data;
       
       // Fetch student availability if student_id exists
       let studentAvailability: StudentAvailabilitySlot[] = [];
@@ -455,16 +393,21 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       const details: InterviewDetails = {
         id: interview.id,
         studentId: interview.student_id,
-        studentName: interview.booking?.email?.split('@')[0] || 'Student',
-        studentEmail: interview.booking?.email || '',
-        package: interview.booking?.package || '',
-        universities: interview.university || interview.booking?.universities || '',
+        studentName: interview.booking?.email?.split('@')[0] || interview.booking?.email || 'Unknown Student',
+        studentEmail: interview.booking?.email || 'No email provided',
+        package: interview.booking?.package || 'No package',
+        universities: interview.university?.name || interview.booking?.universities || 'No university specified',
         preferredTime: interview.booking?.preferred_time,
         createdAt: interview.created_at,
         field: interview.booking?.field,
         phone: interview.booking?.phone,
         notes: interview.notes || interview.booking?.notes,
         studentAvailability,
+        tutorId: interview.tutor_id,
+        tutorName: interview.tutor?.name,
+        tutorEmail: interview.tutor?.email,
+        scheduledAt: interview.scheduled_at,
+        zoomJoinUrl: interview.zoom_join_url,
       };
 
       setSelectedInterviewDetails(details);
@@ -523,9 +466,46 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     try {
       setLoading(true);
 
-      // Send all pending changes to backend to trigger emails
+      // Execute all pending assignments
       for (const change of pendingChanges) {
-        const response = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/confirm`, {
+        // Find the tutor to get the availability slot ID
+        const tutor = tutors.find(t => t.tutorId === change.tutorId);
+        if (!tutor) continue;
+
+        const daySlots = tutor.schedule[change.date] || [];
+        const hour = parseInt(change.time.split(':')[0], 10);
+        
+        const availableSlot = daySlots.find(slot => {
+          const slotHour = parseInt(slot.startTime.split(':')[0], 10);
+          return slotHour === hour && (slot.type === 'available' || slot.interviewId === change.interviewId);
+        });
+
+        if (!availableSlot) {
+          throw new Error(`Slot not found for ${change.tutorName} at ${change.time}`);
+        }
+
+        const scheduledAt = `${change.date}T${change.time}:00Z`;
+
+        // Call backend to assign interview
+        const assignResponse = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/assign`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tutor_id: change.tutorId,
+            scheduled_at: scheduledAt,
+            availability_slot_id: availableSlot.id,
+          }),
+        });
+
+        const assignResult = await assignResponse.json();
+        if (!assignResult.success) {
+          throw new Error(assignResult.message || 'Failed to assign interview');
+        }
+
+        // Send confirmation emails
+        const confirmResponse = await fetch(`${backendUrl}/api/v1/interviews/${change.interviewId}/confirm`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -533,19 +513,18 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
           body: JSON.stringify({
             tutor_id: change.tutorId,
             tutor_name: change.tutorName,
-            scheduled_at: `${change.date}T${change.time}:00Z`,
+            scheduled_at: scheduledAt,
             student_email: change.studentEmail,
             student_name: change.studentName,
           }),
         });
 
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to confirm interview');
+        const confirmResult = await confirmResponse.json();
+        if (!confirmResult.success) {
+          throw new Error(confirmResult.message || 'Failed to send confirmation emails');
         }
 
-        console.log(`Sent confirmation emails for interview ${change.interviewId}`);
+        console.log(`Committed and sent emails for interview ${change.interviewId}`);
       }
 
       // Clear pending changes
@@ -558,6 +537,8 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     } catch (err: any) {
       console.error('Error committing changes:', err);
       alert(`Failed to commit changes: ${err.message}`);
+      // Refresh data to restore original state
+      await fetchData();
     } finally {
       setLoading(false);
     }
@@ -570,6 +551,97 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       setPendingChanges([]);
       // Refresh to get original state
       fetchData();
+    }
+  };
+
+  const createInterview = async (data: { booking_id: string; university_id: string; scheduled_at: string; notes?: string }) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${backendUrl}/api/v1/interviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create interview');
+      }
+
+      // Refresh data to show new interview
+      await fetchData();
+      
+      alert('✓ Interview created successfully!');
+    } catch (err: any) {
+      console.error('Error creating interview:', err);
+      alert(`Failed to create interview: ${err.message}`);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelInterview = async (interviewId: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}/cancel`, {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to cancel interview');
+      }
+
+      // Remove from pending changes if exists
+      setPendingChanges(prev => prev.filter(c => c.interviewId !== interviewId));
+
+      // Refresh data
+      await fetchData();
+      
+      alert('✓ Interview cancelled and unassigned successfully!');
+    } catch (err: any) {
+      console.error('Error cancelling interview:', err);
+      alert(`Failed to cancel interview: ${err.message}`);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteInterview = async (interviewId: string) => {
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to delete interview');
+      }
+
+      // Remove from pending changes if exists
+      setPendingChanges(prev => prev.filter(c => c.interviewId !== interviewId));
+
+      // Refresh data
+      await fetchData();
+      
+      alert('✓ Interview deleted successfully!');
+    } catch (err: any) {
+      console.error('Error deleting interview:', err);
+      alert(`Failed to delete interview: ${err.message}`);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -588,12 +660,15 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     currentUserId,
     setSelectedDate,
     assignInterview,
+    cancelInterview,
     markSlotsAvailable,
     removeAvailability,
     openAvailabilityModal,
     closeAvailabilityModal,
     openInterviewDetailsModal,
     closeInterviewDetailsModal,
+    createInterview,
+    deleteInterview,
     saveAvailability,
     refreshData,
     commitChanges,

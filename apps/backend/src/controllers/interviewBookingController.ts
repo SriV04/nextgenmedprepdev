@@ -3,6 +3,7 @@ import { stripeService } from '../services/stripeService';
 import supabaseService from '../services/supabaseService';
 import emailService from '../services/emailService';
 import fileUploadService from '../services/fileUploadService';
+import zoomService from '../services/zoomService';
 import { AppError, ApiResponse } from '@nextgenmedprep/common-types';
 import { z } from 'zod';
 
@@ -290,8 +291,11 @@ export class InterviewBookingController {
         });
       }
 
-      await supabaseService.createBulkInterviews(interviewRecords);
+      const createdInterviews = await supabaseService.createBulkInterviews(interviewRecords);
       console.log(`${numberOfInterviews} interview records created`);
+
+      // Note: Zoom meetings will be created when interviews are scheduled with specific times
+      // via the assignInterviewToTutor method in interviewController.ts
 
       // Send confirmation email to customer
       console.log('Sending confirmation email to customer...');
