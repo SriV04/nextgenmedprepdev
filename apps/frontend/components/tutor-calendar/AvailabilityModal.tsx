@@ -3,14 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, Plus, Trash2, Check } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
-
-interface DateAvailabilitySlot {
-  id?: string;
-  date: string;
-  hour_start: number;
-  hour_end: number;
-  isExisting: boolean;
-}
+import type { DateAvailabilitySlot } from '../../types/tutor-calendar';
 
 const AvailabilityModal: React.FC = () => {
   const {
@@ -59,16 +52,16 @@ const AvailabilityModal: React.FC = () => {
     }
   }, [isAvailabilityModalOpen, selectedDate, currentTutor]);
 
-  const hours = Array.from({ length: 13 }, (_, i) => i + 9); // 9 AM to 9 PM
+  const hours: number[] = Array.from({ length: 13 }, (_, i) => i + 9); // 9 AM to 9 PM
 
-  const formatHour = (hour: number) => {
+  const formatHour = (hour: number): string => {
     if (hour === 12) return '12:00 PM';
     if (hour === 0) return '12:00 AM';
     if (hour > 12) return `${hour - 12}:00 PM`;
     return `${hour}:00 AM`;
   };
 
-  const toggleHour = (hour: number) => {
+  const toggleHour = (hour: number): void => {
     const newSelected = new Set(selectedHours);
     if (newSelected.has(hour)) {
       newSelected.delete(hour);
@@ -84,7 +77,7 @@ const AvailabilityModal: React.FC = () => {
     );
   };
 
-  const handleAddAvailability = async () => {
+  const handleAddAvailability = async (): Promise<void> => {
     if (!currentUserId || !selectedDate || selectedHours.size === 0) {
       alert('Please select at least one hour to add availability.');
       return;
@@ -112,7 +105,7 @@ const AvailabilityModal: React.FC = () => {
     }
   };
 
-  const handleRemoveSlot = async (slot: DateAvailabilitySlot) => {
+  const handleRemoveSlot = async (slot: DateAvailabilitySlot): Promise<void> => {
     if (!slot.id || !currentUserId) return;
 
     if (!confirm(`Remove availability for ${formatHour(slot.hour_start)}?`)) {
@@ -132,7 +125,7 @@ const AvailabilityModal: React.FC = () => {
     }
   };
 
-  const handleQuickSelect = (type: 'morning' | 'afternoon' | 'evening' | 'all' | 'clear') => {
+  const handleQuickSelect = (type: 'morning' | 'afternoon' | 'evening' | 'all' | 'clear'): void => {
     const newSelected = new Set<number>();
     
     switch (type) {

@@ -1,26 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { Calendar, User, GraduationCap, Clock, Search, Filter, X, Mail, Phone, CalendarClock, BookOpen } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Calendar, User, GraduationCap, Clock, Search, Filter, X, Mail, CalendarClock, BookOpen } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
-
-interface UnassignedInterview {
-  id: string;
-  studentName: string;
-  studentEmail: string;
-  studentId?: string;
-  package: string;
-  universities: string;
-  preferredTime?: string;
-  createdAt: string;
-  field?: string;
-  phone?: string;
-  notes?: string;
-}
-
-interface UnassignedInterviewsProps {
-  onInterviewClick: (interview: UnassignedInterview) => void;
-}
+import type { UnassignedInterviewsProps, StudentAvailabilitySlot } from '../../types/tutor-calendar';
 
 const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
   onInterviewClick
@@ -60,13 +43,13 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
   }, [unassignedInterviews, searchQuery, packageFilter]);
   
   const interviews = filteredInterviews;
-  const [studentAvailabilities, setStudentAvailabilities] = useState<Record<string, any[]>>({});
+  const [studentAvailabilities, setStudentAvailabilities] = useState<Record<string, StudentAvailabilitySlot[]>>({});
   
   // Fetch student availability for all interviews
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchAvailabilities = async () => {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
-      const availMap: Record<string, any[]> = {};
+      const availMap: Record<string, StudentAvailabilitySlot[]> = {};
       
       for (const interview of unassignedInterviews) {
         if (interview.studentId) {
@@ -77,14 +60,21 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
             const availData = await availRes.json();
             
             if (availData.success && availData.data) {
-              availMap[interview.id] = availData.data;
+              // Transform backend format to frontend format
+              availMap[interview.id] = availData.data.map((slot: any) => ({
+                id: slot.id,
+                date: slot.date,
+                dayOfWeek: slot.day_of_week,
+                hourStart: slot.hour_start,
+                hourEnd: slot.hour_end,
+                type: slot.type,
+              }));
             }
           } catch (err) {
             console.error(`Error fetching availability for ${interview.studentId}:`, err);
           }
         }
       }
-      
       setStudentAvailabilities(availMap);
     };
     
@@ -93,7 +83,7 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
     }
   }, [unassignedInterviews]);
   
-  const handleDragStart = async (e: React.DragEvent, interviewId: string) => {
+  const handleDragStart = (e: React.DragEvent, interviewId: string): void => {
     e.dataTransfer.setData('interviewId', interviewId);
     e.dataTransfer.effectAllowed = 'move';
     
@@ -103,21 +93,19 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
     }
   };
 
-  const handleInterviewClick = (interview: UnassignedInterview) => {
-    openInterviewDetailsModal(interview.id);
+  const handleInterviewClick = (interviewId: string): void => {
+    openInterviewDetailsModal(interviewId);
   };
   
   // Format availability into a readable summary
-  const formatAvailability = (availability: any[]) => {
+  const formatAvailability = (availability: StudentAvailabilitySlot[]): JSX.Element | null => {
     if (!availability || availability.length === 0) return null;
     
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     
     // Group by day
     const dayGroups = availability.reduce((acc, slot) => {
-      // Ensure dayOfWeek is a valid number
-      console.log('Processing slot:', slot);
-      const dayIndex = parseInt(slot.dayOfWeek);
+      const dayIndex = typeof slot.dayOfWeek === 'number' ? slot.dayOfWeek : parseInt(String(slot.dayOfWeek));
       if (isNaN(dayIndex) || dayIndex < 0 || dayIndex > 6) return acc;
       
       const day = dayNames[dayIndex];
@@ -127,7 +115,6 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
     }, {} as Record<string, number>);
     
     const days = Object.keys(dayGroups);
-    console.log('Formatted Availability:', availability);
     
     return (
       <div className="flex flex-wrap gap-1.5">
@@ -273,7 +260,7 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
                 key={interview.id}
                 draggable
                 onDragStart={(e) => handleDragStart(e, interview.id)}
-                onClick={() => handleInterviewClick(interview)}
+                onClick={() => handleInterviewClick(interview.id)}
                 className="flex-shrink-0 w-72 bg-gradient-to-br from-orange-50 to-white border-2 border-orange-200 rounded-lg p-3 hover:shadow-lg hover:border-orange-300 transition-all cursor-pointer"
               >
                 {/* Header with Student Info */}

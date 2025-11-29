@@ -1,117 +1,20 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-// Types
-interface TimeSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-  type: 'available' | 'interview' | 'blocked';
-  title?: string;
-  bookingId?: string;
-  interviewId?: string;
-  student?: string;
-  package?: string;
-}
-
-interface TutorSchedule {
-  tutorId: string;
-  tutorName: string;
-  tutorEmail: string;
-  avatar?: string;
-  color: string;
-  schedule: Record<string, TimeSlot[]>;
-  availability: AvailabilitySlot[];
-}
-
-interface UnassignedInterview {
-  id: string;
-  studentName: string;
-  studentEmail: string;
-  studentId?: string;
-  package: string;
-  universities: string;
-  preferredTime?: string;
-  createdAt: string;
-  field?: string;
-  phone?: string;
-  notes?: string;
-}
-
-interface StudentAvailabilitySlot {
-  id: string;
-  date: string;
-  dayOfWeek: number;
-  hourStart: number;
-  hourEnd: number;
-  type: string;
-}
-
-interface InterviewDetails {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentEmail: string;
-  package: string;
-  universities: string;
-  preferredTime?: string;
-  createdAt: string;
-  field?: string;
-  phone?: string;
-  notes?: string;
-  studentAvailability: StudentAvailabilitySlot[];
-}
-
-interface AvailabilitySlot {
-  id: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-}
-
-interface PendingChange {
-  id: string;
-  type: 'assignment';
-  interviewId: string;
-  tutorId: string;
-  tutorName: string;
-  date: string;
-  time: string;
-  studentName: string;
-  studentEmail: string;
-}
-
-interface TutorCalendarContextType {
-  // State
-  tutors: TutorSchedule[];
-  unassignedInterviews: UnassignedInterview[];
-  selectedDate: Date;
-  selectedTutor: { tutorId: string; tutorName: string; tutorEmail: string } | null;
-  isAvailabilityModalOpen: boolean;
-  isInterviewDetailsModalOpen: boolean;
-  selectedInterviewDetails: InterviewDetails | null;
-  loading: boolean;
-  error: string | null;
-  pendingChanges: PendingChange[];
-  hasPendingChanges: boolean;
-  currentUserId: string | null;
-
-  // Actions
-  setSelectedDate: (date: Date) => void;
-  assignInterview: (tutorId: string, date: string, time: string, interviewId: string) => Promise<void>;
-  markSlotsAvailable: (slots: { tutorId: string; date: string; time: string }[]) => Promise<void>;
-  removeAvailability: (slots: { tutorId: string; slotId: string }[]) => Promise<void>;
-  openAvailabilityModal: (tutorId?: string) => void;
-  closeAvailabilityModal: () => void;
-  openInterviewDetailsModal: (interviewId: string) => Promise<void>;
-  closeInterviewDetailsModal: () => void;
-  saveAvailability: (tutorId: string, availability: AvailabilitySlot[]) => Promise<void>;
-  refreshData: () => Promise<void>;
-  commitChanges: () => Promise<void>;
-  discardChanges: () => void;
-  setCurrentUserId: (userId: string | null) => void;
-}
+import type {
+  TutorSchedule,
+  UnassignedInterview,
+  InterviewDetails,
+  AvailabilitySlot,
+  PendingChange,
+  TutorCalendarContextType,
+  TimeSlot,
+  StudentAvailabilitySlot,
+  TutorInfo,
+  BackendTutorData,
+  BackendAvailabilitySlot,
+  BackendInterviewData,
+} from '../types/tutor-calendar';
 
 const TutorCalendarContext = createContext<TutorCalendarContextType | undefined>(undefined);
 
@@ -125,7 +28,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   const [tutors, setTutors] = useState<TutorSchedule[]>([]);
   const [unassignedInterviews, setUnassignedInterviews] = useState<UnassignedInterview[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [selectedTutor, setSelectedTutor] = useState<{ tutorId: string; tutorName: string; tutorEmail: string } | null>(null);
+  const [selectedTutor, setSelectedTutor] = useState<TutorInfo | null>(null);
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [isInterviewDetailsModalOpen, setIsInterviewDetailsModalOpen] = useState(false);
   const [selectedInterviewDetails, setSelectedInterviewDetails] = useState<InterviewDetails | null>(null);
@@ -161,11 +64,11 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (tutorsData.success) {
         // Transform backend data to frontend format
-        const transformedTutors: TutorSchedule[] = tutorsData.data.map((tutor: any, index: number) => {
+        const transformedTutors: TutorSchedule[] = tutorsData.data.map((tutor: BackendTutorData, index: number) => {
           const schedule: Record<string, TimeSlot[]> = {};
 
           // Group availability by date
-          tutor.availability?.forEach((slot: any) => {
+          tutor.availability?.forEach((slot: BackendAvailabilitySlot) => {
             const dateStr = slot.date;
             if (!schedule[dateStr]) {
               schedule[dateStr] = [];
@@ -175,7 +78,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
               id: slot.id,
               startTime: `${String(slot.hour_start).padStart(2, '0')}:00`,
               endTime: `${String(slot.hour_end).padStart(2, '0')}:00`,
-              type: slot.type || 'available',
+              type: (slot.type as 'available' | 'interview' | 'blocked') || 'available',
             };
 
             // Add interview details if exists
@@ -201,7 +104,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
             tutorEmail: tutor.email,
             color: getTutorColor(index),
             schedule,
-            availability: [], // Computed availability patterns if needed
+            availability: [],
           };
         });
 
@@ -214,7 +117,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (interviewsData.success) {
         console.log('Fetched unassigned interviews:', interviewsData.data);
-        const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: any) => ({
+        const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: BackendInterviewData) => ({
           id: interview.id,
           studentId: interview.student_id,
           studentName: interview.booking?.email?.split('@')[0] || 'Student',

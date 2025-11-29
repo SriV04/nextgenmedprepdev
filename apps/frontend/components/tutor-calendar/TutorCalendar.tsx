@@ -3,30 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Check, X } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
-
-interface TimeSlot {
-  id: string;
-  startTime: string;
-  endTime: string;
-  type: 'available' | 'interview' | 'blocked';
-  title?: string;
-  bookingId?: string;
-  student?: string;
-  package?: string;
-}
-
-interface TutorSchedule {
-  tutorId: string;
-  tutorName: string;
-  tutorEmail: string;
-  avatar?: string;
-  color: string;
-  schedule: Record<string, TimeSlot[]>; // date -> slots
-}
-
-interface TutorCalendarProps {
-  onSlotClick: (slot: TimeSlot, tutor: TutorSchedule) => void;
-}
+import type { 
+  TutorCalendarProps, 
+  TimeSlot, 
+  TutorSchedule,
+  StudentAvailabilitySlot,
+  SlotType 
+} from '../../types/tutor-calendar';
 
 const TutorCalendar: React.FC<TutorCalendarProps> = ({
   onSlotClick
@@ -42,25 +25,25 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     openAvailabilityModal
   } = useTutorCalendar();
   const [draggedBooking, setDraggedBooking] = useState<string | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [dragOverSlot, setDragOverSlot] = useState<string | null>(null);
-  const [draggedStudentAvailability, setDraggedStudentAvailability] = useState<any[]>([]);
+  const [draggedStudentAvailability, setDraggedStudentAvailability] = useState<StudentAvailabilitySlot[]>([]);
   
   // Multi-selection state
-  const [isSelecting, setIsSelecting] = useState(false);
+  const [isSelecting, setIsSelecting] = useState<boolean>(false);
   const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
   const [selectionStartTutor, setSelectionStartTutor] = useState<string | null>(null);
 
-  const timeSlots = [
+  const timeSlots: string[] = [
     '09:00', '10:00', '11:00', '12:00', '13:00', 
     '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'
   ];
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date): string => {
     return date.toISOString().split('T')[0];
   };
 
-  const formatDateHeader = (date: Date) => {
+  const formatDateHeader = (date: Date): string => {
     return date.toLocaleDateString('en-GB', { 
       weekday: 'long', 
       day: 'numeric', 
@@ -69,30 +52,29 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     });
   };
 
-  const handlePreviousDay = () => {
+  const handlePreviousDay = (): void => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() - 1);
     setSelectedDate(newDate);
   };
 
-  const handleNextDay = () => {
+  const handleNextDay = (): void => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + 1);
     setSelectedDate(newDate);
   };
 
-  const handleToday = () => {
+  const handleToday = (): void => {
     setSelectedDate(new Date());
   };
 
-  const handleDragStart = (e: React.DragEvent, bookingId: string) => {
+  const handleDragStart = (e: React.DragEvent, bookingId: string): void => {
     setDraggedBooking(bookingId);
     e.dataTransfer.effectAllowed = 'move';
-    // Clear student availability when dragging existing interview
     setDraggedStudentAvailability([]);
   };
 
-  const handleDragOver = (e: React.DragEvent, slotKey: string) => {
+  const handleDragOver = (e: React.DragEvent, slotKey: string): void => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverSlot(slotKey);
@@ -109,16 +91,16 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     }
   };
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (): void => {
     setDragOverSlot(null);
   };
   
-  const handleDragEnd = () => {
+  const handleDragEnd = (): void => {
     setDraggedStudentAvailability([]);
     setDragOverSlot(null);
   };
 
-  const handleDropOnSlot = (e: React.DragEvent, tutorId: string, date: string, time: string) => {
+  const handleDropOnSlot = (e: React.DragEvent, tutorId: string, date: string, time: string): void => {
     e.preventDefault();
     setDragOverSlot(null);
     setDraggedStudentAvailability([]);
@@ -145,20 +127,17 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     if (draggedStudentAvailability.length === 0) return false;
     
     const slotDate = new Date(date);
-    const dayOfWeek = slotDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const dayOfWeek = slotDate.getDay();
     const hour = parseInt(time.split(':')[0], 10);
     
-    return draggedStudentAvailability.some((avail: any) => {
-      // Check if the day of week matches
-      if (avail.day_of_week !== dayOfWeek) return false;
-      
-      // Check if the hour falls within the availability window
-      return hour >= avail.hour_start && hour < avail.hour_end;
+    return draggedStudentAvailability.some((avail) => {
+      if (avail.dayOfWeek !== dayOfWeek) return false;
+      return hour >= avail.hourStart && hour < avail.hourEnd;
     });
   };
 
   // Multi-selection handlers
-  const handleMouseDown = (e: React.MouseEvent, tutorId: string, time: string, slot: TimeSlot | undefined) => {
+  const handleMouseDown = (e: React.MouseEvent, tutorId: string, time: string, slot: TimeSlot | undefined): void => {
     // Don't interfere with interview slots
     if (slot && slot.type === 'interview') {
       return;
@@ -171,9 +150,8 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     setSelectedSlots(new Set([slotKey]));
   };
 
-  const handleMouseEnter = (tutorId: string, time: string, slot: TimeSlot | undefined) => {
+  const handleMouseEnter = (tutorId: string, time: string, slot: TimeSlot | undefined): void => {
     if (isSelecting && tutorId === selectionStartTutor) {
-      // Don't select interview slots
       if (!slot || slot.type === 'blocked' || slot.type === 'available') {
         const slotKey = `${tutorId}-${time}-${slot?.id || 'empty'}`;
         setSelectedSlots(prev => new Set([...prev, slotKey]));
@@ -181,11 +159,11 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (): void => {
     setIsSelecting(false);
   };
 
-  const handleMarkAsAvailable = () => {
+  const handleMarkAsAvailable = (): void => {
     if (selectedSlots.size === 0) return;
 
     const dateStr = formatDate(selectedDate);
@@ -219,7 +197,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     setSelectionStartTutor(null);
   };
 
-  const handleRemoveAvailability = () => {
+  const handleRemoveAvailability = (): void => {
     if (selectedSlots.size === 0) return;
 
     const slotsToRemove = Array.from(selectedSlots)
@@ -255,14 +233,14 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     }
   };
 
-  const handleClearSelection = () => {
+  const handleClearSelection = (): void => {
     setSelectedSlots(new Set());
     setSelectionStartTutor(null);
   };
 
   // Add global mouse up listener
   useEffect(() => {
-    const handleGlobalMouseUp = () => {
+    const handleGlobalMouseUp = (): void => {
       if (isSelecting) {
         setIsSelecting(false);
       }
@@ -272,7 +250,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
   }, [isSelecting]);
 
-  const getSlotColor = (type: TimeSlot['type']) => {
+  const getSlotColor = (type: SlotType): string => {
     switch (type) {
       case 'available':
         return 'bg-green-100 border-green-300 hover:bg-green-200';

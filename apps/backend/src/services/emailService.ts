@@ -1594,7 +1594,7 @@ Booking ID: ${data.bookingId}
                       
                       <p style="margin: 20px 0 0 0; color: #334155; font-size: 15px; line-height: 1.6;">
                         Best of luck! <br>
-                        <strong style="color: #10b981;">The NextGen MedPrep Team</strong>
+u                        <strong style="color: #10b981;">The NextGen MedPrep Team</strong>
                       </p>
                     </td>
                   </tr>
