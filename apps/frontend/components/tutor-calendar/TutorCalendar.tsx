@@ -58,7 +58,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick, isAdmin = fa
         onCreateInterview={createInterview}
       />
       
-      <div className="flex flex-col h-full bg-white rounded-lg shadow">
+      <div className="flex flex-col h-full bg-white rounded-lg shadow overflow-hidden">
         <CalendarHeader onCreateInterview={() => setIsCreateModalOpen(true)} isAdmin={isAdmin} />
       
       <SelectionToolbar
@@ -71,18 +71,18 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick, isAdmin = fa
       />
 
       {/* Calendar Grid */}
-      <div className="flex-1 overflow-auto">
-        <div className="min-w-full">
+      <div className="flex-1 overflow-auto -webkit-overflow-scrolling-touch">
+        <div className="w-max min-w-full">
           {/* Time Header */}
           <div className="sticky top-0 bg-gray-50 border-b-2 border-gray-300 z-10">
             <div className="flex">
-              <div className="w-48 p-3 border-r border-gray-300 font-medium text-sm text-gray-700">
+              <div className="w-32 sm:w-48 shrink-0 sticky left-0 bg-gray-50 p-2 sm:p-3 border-r border-gray-300 font-medium text-xs sm:text-sm text-gray-700 z-20">
                 Tutor
               </div>
               {TIME_SLOTS.map((time) => (
                 <div
                   key={time}
-                  className="flex-1 min-w-[100px] p-3 text-center border-r border-gray-200 font-medium text-sm text-gray-700"
+                  className="flex-1 min-w-[80px] sm:min-w-[100px] shrink-0 p-2 sm:p-3 text-center border-r border-gray-200 font-medium text-xs sm:text-sm text-gray-700"
                 >
                   {time}
                 </div>
@@ -95,19 +95,19 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick, isAdmin = fa
             const daySlots = tutor.schedule[dateStr] || [];
             
             return (
-              <div key={tutor.tutorId} className="flex border-b border-gray-200 hover:bg-gray-50 transition-colors">
+              <div key={tutor.tutorId} className="flex w-full border-b border-gray-200 hover:bg-gray-50 transition-colors min-h-[60px] sm:min-h-[80px]">
                 {/* Tutor Info Column */}
-                <div className="w-48 p-4 border-r border-gray-300 bg-white">
-                  <div className="flex items-center gap-3">
+                <div className="w-32 sm:w-48 shrink-0 sticky left-0 bg-white p-2 sm:p-4 border-r border-gray-300 z-10">
+                  <div className="flex items-center gap-2 sm:gap-3 h-full">
                     <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0"
                       style={{ backgroundColor: tutor.color }}
                     >
                       {tutor.tutorName.split(' ').map(n => n[0]).join('')}
                     </div>
-                    <div className="min-w-0">
-                      <div className="font-medium text-gray-900 truncate">{tutor.tutorName}</div>
-                      <div className="text-xs text-gray-500 truncate">{tutor.tutorEmail}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-gray-900 truncate text-xs sm:text-sm">{tutor.tutorName}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-500 truncate hidden sm:block">{tutor.tutorEmail}</div>
                     </div>
                   </div>
                 </div>

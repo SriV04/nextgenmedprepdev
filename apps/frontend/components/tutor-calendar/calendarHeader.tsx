@@ -25,85 +25,89 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onCreateIntervie
   };
 
   return (
-    <div className="border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+    <div className="border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+        <div className="flex items-center justify-between lg:justify-start gap-3 sm:gap-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 whitespace-nowrap">
             {formatDateHeader(selectedDate)}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => handleDayChange(-1)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Previous day"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             </button>
             <button
               onClick={() => setSelectedDate(new Date())}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               Today
             </button>
             <button
               onClick={() => handleDayChange(1)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Next day"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             </button>
             <button
               onClick={() => setShowDatePicker(!showDatePicker)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors ml-2"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors ml-1 sm:ml-2"
               title="Select date"
             >
-              <CalendarIcon className="w-5 h-5 text-gray-600" />
+              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             </button>
           </div>
         </div>
         
         {/* Legend and Actions */}
-        <div className="flex items-center gap-4">
-          {isAdmin && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 lg:gap-4">
+          <div className="flex gap-2 sm:gap-3">
+            {isAdmin && (
+              <button
+                onClick={onCreateInterview}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-xs sm:text-sm"
+              >
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Create Interview</span>
+                <span className="sm:hidden">Create</span>
+              </button>
+            )}
             <button
-              onClick={onCreateInterview}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+              onClick={() => openAvailabilityModal()}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs sm:text-sm"
             >
-              <Plus className="w-4 h-4" />
-              Create Interview
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Manage Availability</span>
+              <span className="sm:hidden">Availability</span>
             </button>
-          )}
-          <button
-            onClick={() => openAvailabilityModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-          >
-            <Clock className="w-4 h-4" />
-            Manage Availability
-          </button>
-          <div className="flex items-center gap-2 text-sm">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+          </div>
+          <div className="hidden xl:flex items-center gap-2 text-xs sm:text-sm flex-wrap">
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-100 border border-green-300 rounded"></div>
               <span className="text-gray-600">Available</span>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-100 border border-blue-300 rounded"></div>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-100 border border-blue-300 rounded"></div>
               <span className="text-gray-600">Interview</span>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></div>
+            <div className="flex items-center gap-1 whitespace-nowrap">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-100 border border-gray-300 rounded"></div>
               <span className="text-gray-600">Blocked</span>
             </div>
             {(isInterviewDetailsModalOpen && selectedInterviewDetails?.studentAvailability?.length) && (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
-                  <span className="text-xs text-gray-600">Student Available</span>
+              <>
+                <div className="flex items-center gap-1 whitespace-nowrap">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-yellow-100 border border-yellow-300 rounded"></div>
+                  <span className="text-gray-600">Student Avail</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-3 h-3 bg-green-200 border-2 border-green-400 rounded"></div>
-                  <span className="text-xs text-gray-600">Tutor & Student Match</span>
+                <div className="flex items-center gap-1 whitespace-nowrap">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-200 border-2 border-green-400 rounded"></div>
+                  <span className="text-gray-600">Match</span>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

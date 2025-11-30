@@ -431,25 +431,25 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4 lg:px-8">
       <div className="max-w-[1600px] mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 truncate">
               {isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'Tutor Dashboard'}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
               {isAdmin ? 'Manage bookings, assign interviews, and view statistics' : 
                isManager ? 'Assign interviews and manage schedules' : 
                'View your calendar and scheduled interviews'}
             </p>
             {user && (
-              <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span>{user.email}</span>
+              <div className="flex items-center gap-2 mt-2 text-xs sm:text-sm text-gray-600 flex-wrap">
+                <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">{user.email}</span>
                 {userRole && (
-                  <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                     isAdmin ? 'bg-purple-100 text-purple-800' : 
                     isManager ? 'bg-orange-100 text-orange-800' : 
                     'bg-blue-100 text-blue-800'
@@ -460,46 +460,46 @@ function DashboardContent() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={fetchData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
+              <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
             >
-              <LogOut className="w-4 h-4" />
-              Sign Out
+              <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200 mb-6">
+        <div className="flex border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+            className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
               activeTab === 'calendar'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            <CalendarIcon className="w-5 h-5" />
+            <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Calendar
           </button>
           <button
             onClick={handleBookingsTabClick}
-            className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium transition-colors ${
+            className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
               activeTab === 'bookings'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
-            <List className="w-5 h-5" />
+            <List className="w-4 h-4 sm:w-5 sm:h-5" />
             Bookings
             {!isBookingsUnlocked && (
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -511,24 +511,24 @@ function DashboardContent() {
 
         {/* Statistics Cards */}
         {activeTab === 'bookings' && stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500">Total Bookings</h3>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.total}</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500">Total Bookings</h3>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{stats.total}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500">Recent (7 days)</h3>
-              <p className="text-3xl font-bold text-blue-600 mt-2">{stats.recent}</p>
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500">Recent (7 days)</h3>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1 sm:mt-2">{stats.recent}</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500">Total Revenue</h3>
-              <p className="text-3xl font-bold text-green-600 mt-2">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500">Total Revenue</h3>
+              <p className="text-xl sm:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
                 {formatCurrency(stats.totalRevenue)}
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-sm font-medium text-gray-500">Completed</h3>
-              <p className="text-3xl font-bold text-gray-900 mt-2">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h3 className="text-xs sm:text-sm font-medium text-gray-500">Completed</h3>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
                 {stats.byStatus.completed || 0}
               </p>
             </div>
