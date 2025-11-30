@@ -120,7 +120,7 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
   };
 
   const handleInterviewClick = (interview: any): void => {
-    openInterviewDetailsModal(interview.id, interview);
+    openInterviewDetailsModal(interview.id);
   };
   
   // Format availability into a readable summary

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import EventsClientWrapper from '../../components/events/EventsClientWrapper';
 import { upcomingEvent, previousEvents, conferenceTypes } from '../../data/events';
 import '@/styles/globals.css';
-import { ArrowRight, Calendar, CheckCircle2, Clock, Gift, Sparkles, Target, Users, Zap } from 'lucide-react';
+import { ArrowRight, Calendar, CheckCircle, CheckCircle2, Clock, Gift, Sparkles, Star, Target, Users, Zap } from 'lucide-react';
 
 const ConferencesPage = () => {
 
@@ -27,176 +27,144 @@ const ConferencesPage = () => {
 
       {/* Upcoming Event - Featured Section */}
       <section className="relative py-20 px-4 overflow-hidden bg-slate-900">
-        {/* Background Decor */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[100px]" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px]" />
+        {/* Flashy Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-700 to-fuchsia-800"></div>
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-40">
+            <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-500 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute top-1/2 right-0 w-80 h-80 bg-pink-500 rounded-full blur-3xl mix-blend-overlay"></div>
+            <div className="absolute bottom-0 left-1/3 w-[500px] h-[500px] bg-purple-900 rounded-full blur-[100px]"></div>
         </div>
 
         <div className="relative max-w-7xl mx-auto z-10">
-          
-          {/* Header Section */}
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 font-medium text-sm mb-6 animate-fade-in-up">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-              </span>
-              Upcoming Live Event
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-bold mb-6 tracking-wide uppercase shadow-lg">
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+              Upcoming Live Masterclass
             </div>
-            
-            <h2 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-blue-200 mb-6 tracking-tight leading-tight">
+            <h2 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-md">
               {upcomingEvent.title}
             </h2>
-            
-            <p className="text-xl text-slate-400 leading-relaxed">
+            <div className="flex flex-wrap justify-center gap-4 text-white/90 font-medium text-lg">
+                <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm">
+                    <Calendar className="w-5 h-5 text-yellow-300"/> {upcomingEvent.date}
+                </span>
+                <span className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm">
+                    <Clock className="w-5 h-5 text-yellow-300"/> {upcomingEvent.time}
+                </span>
+            </div>
+            <p className="mt-8 text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-light">
               {upcomingEvent.description}
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Main Content Column */}
+          <div className="grid lg:grid-cols-12 gap-8 max-w-7xl mx-auto">
+            {/* Left Column: Content (Span 7) */}
             <div className="lg:col-span-7 space-y-8">
-              {/* What You'll Learn Card */}
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-8 hover:border-purple-500/30 transition-colors duration-300">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-blue-500/10 rounded-xl">
-                    <Sparkles className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white">Master Class Overview</h3>
-                </div>
                 
-                <p className="text-slate-300 mb-8 text-lg leading-relaxed">
-                  {upcomingEvent.details}
-                </p>
-                
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Key Takeaways</h4>
-                  <div className="grid gap-4">
-                    {upcomingEvent.benefits.map((benefit, index) => (
-                      <div key={index} className="flex gap-4 p-4 rounded-xl bg-slate-800 border border-slate-700/50 hover:bg-slate-750 transition-colors">
-                        <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-                        <span className="text-slate-200 font-medium">{benefit}</span>
-                      </div>
-                    ))}
-                  </div>
+                {/* Description Card */}
+                <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <Star className="w-6 h-6 text-purple-600 fill-purple-600" />
+                        What You'll Learn
+                    </h3>
+                    <p className="text-slate-700 mb-8 text-lg leading-relaxed">
+                        {upcomingEvent.details}
+                    </p>
+                    
+                    <h4 className="font-bold text-slate-900 mb-4 text-lg">Key Topics Covered:</h4>
+                    <ul className="space-y-4">
+                        {upcomingEvent.benefits.map((benefit, index) => (
+                        <li key={index} className="flex gap-4">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center mt-1">
+                                <CheckCircle className="w-4 h-4 text-purple-700" />
+                            </div>
+                            <span className="text-slate-800 font-medium">{benefit}</span>
+                        </li>
+                        ))}
+                    </ul>
                 </div>
-              </div>
 
-              {/* What to Expect - Organized Card Layout */}
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-3xl p-8 hover:border-purple-500/30 transition-colors duration-300">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-purple-500/10 rounded-xl">
-                    <Target className="w-6 h-6 text-purple-400" />
+                {/* Expectations Card */}
+                <div className="bg-slate-900 text-white rounded-3xl p-8 shadow-2xl relative overflow-hidden border border-slate-700">
+                    {/* Abstract bg decoration */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/30 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                    
+                    <h4 className="font-bold text-xl mb-6 relative z-10 flex items-center gap-2">
+                        What to Expect
+                    </h4>
+                    <div className="grid sm:grid-cols-2 gap-4 relative z-10">
+                        {upcomingEvent.whatToExpect.map((item, index) => (
+                            <div key={index} className="bg-white/5 backdrop-blur-md p-4 rounded-xl border border-white/10 hover:bg-white/10 transition-colors group">
+                                <div className="text-purple-400 font-bold text-lg mb-2 group-hover:text-purple-300 transition-colors">0{index + 1}</div>
+                                <p className="text-slate-300 text-sm font-medium leading-snug group-hover:text-white transition-colors">{item}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white">What to Expect</h3>
-              </div>
-              
-              <div className="grid sm:grid-cols-2 gap-4">
-                {upcomingEvent.whatToExpect.map((item, index) => (
-                  <div key={index} className="group bg-slate-900/40 border border-slate-700/50 p-5 rounded-2xl hover:bg-slate-800 transition-all duration-300 flex items-start gap-4">
-                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-500/20 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                      {index + 1}
-                    </span>
-                    <span className="text-slate-300 font-medium pt-1 group-hover:text-white transition-colors leading-snug">
-                      {item}
-                    </span>
-                  </div>
-                ))}
-              </div>
+
             </div>
-          </div>
 
-          {/* Booking Sidebar */}
-          <div className="lg:col-span-5 sticky top-8">
-            <div className="bg-white rounded-3xl p-1 shadow-2xl shadow-purple-900/20 overflow-hidden relative group">
-              {/* Animated Gradient Border Effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-purple-600 opacity-10 group-hover:opacity-20 transition-opacity duration-500" />
-              
-              <div className="bg-white rounded-[20px] p-8 relative z-10 h-full flex flex-col">
-                
-                {/* Value Badge */}
-                <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 rounded-xl mb-8 shadow-lg transform -rotate-1 hover:rotate-0 transition-transform duration-300">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-lg">
-                      <Gift className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-lg leading-none">Free £10 Voucher</p>
-                      <p className="text-amber-100 text-sm font-medium mt-1">Included with your ticket</p>
+            {/* Right Column: Booking (Span 5) */}
+            <div className="lg:col-span-5 relative">
+              <div className="sticky top-8">
+                  <div className="bg-white rounded-3xl p-1 shadow-2xl shadow-indigo-900/30">
+                    <div className="bg-white rounded-[20px] p-6 sm:p-8 relative overflow-hidden">
+                        
+                        {/* Offer Banner */}
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 rounded-2xl p-5 mb-8 flex items-center gap-4 relative z-10">
+                            <div className="h-12 w-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0 text-white shadow-md transform -rotate-3">
+                                <Gift className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <p className="text-slate-900 font-bold text-lg">Bonus Included</p>
+                                <p className="text-slate-600 text-sm font-medium">Get a £10 Voucher for mock interviews</p>
+                            </div>
+                        </div>
+
+                        {/* Price Tag */}
+                        <div className="flex items-end gap-2 mb-2 relative z-10">
+                            <span className="text-5xl font-extrabold text-slate-900 tracking-tight">£{upcomingEvent.price}</span>
+                            <span className="text-slate-500 font-medium mb-2">/ ticket</span>
+                        </div>
+                        <p className="text-emerald-600 font-semibold text-sm mb-8 flex items-center gap-1 relative z-10">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Selling fast! Only {upcomingEvent.spots} spots total.
+                        </p>
+
+                        {/* Quick Stats */}
+                        <div className="space-y-4 mb-8 bg-slate-50 p-5 rounded-xl border border-slate-100 relative z-10">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Date</span>
+                                <span className="font-bold text-slate-900">{upcomingEvent.date}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Time</span>
+                                <span className="font-bold text-slate-900">{upcomingEvent.time}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500">Format</span>
+                                <span className="font-bold text-slate-900 text-purple-600">Interactive Zoom</span>
+                            </div>
+                        </div>
+
+                        <a 
+                            href={`/event-pay?eventId=${upcomingEvent.id}&event=${encodeURIComponent(upcomingEvent.title)}&date=${upcomingEvent.date}&price=${upcomingEvent.price}`}
+                            className="w-full bg-slate-900 hover:bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 shadow-xl shadow-slate-900/20 hover:shadow-indigo-600/40 flex items-center justify-center gap-2 group relative z-10 transform hover:-translate-y-1"
+                        >
+                            Book Your Spot
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <p className="text-center text-slate-400 text-xs mt-4 relative z-10">
+                            100% Secure payment via Stripe
+                        </p>
                     </div>
                   </div>
-                </div>
-
-                {/* Event Details */}
-                <div className="space-y-6 mb-8 flex-grow">
-                  <div className="flex items-center justify-between pb-6 border-b border-gray-100">
-                    <div>
-                      <p className="text-gray-500 text-sm font-medium mb-1">Ticket Price</p>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-5xl font-extrabold text-slate-900">£{upcomingEvent.price}</span>
-                        <span className="text-gray-500 font-medium">GBP</span>
-                      </div>
-                    </div>
-                    <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wide flex items-center gap-1">
-                      <Zap className="w-3 h-3 fill-current" />
-                      Selling Fast
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4 text-slate-700">
-                      <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                        <Calendar className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900">Saturday, {upcomingEvent.date}</p>
-                        <p className="text-sm text-slate-500">Live Interactive Session</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-slate-700">
-                       <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                        <Clock className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900">{upcomingEvent.time}</p>
-                        <p className="text-sm text-slate-500">BST (British Summer Time)</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-slate-700">
-                       <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900">{upcomingEvent.spots} Spots Only</p>
-                        <p className="text-sm text-slate-500">Intimate workshop format</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CTA Button */}
-                <a 
-                  href={`/event-pay?eventId=${upcomingEvent.id}&event=${encodeURIComponent(upcomingEvent.title)}&date=${upcomingEvent.date}&price=${upcomingEvent.price}`}
-                  className="group relative w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-4 px-8 rounded-xl font-bold text-lg shadow-xl shadow-slate-900/10 transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  Book Your Spot
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </a>
-                
-                <p className="text-center text-gray-400 text-xs mt-4 flex items-center justify-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  Secure payment powered by Stripe
-                </p>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
       {/* Previous Events Section */}
       <section id="previous-events" className="py-16 px-4 bg-gray-50">

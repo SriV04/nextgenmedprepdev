@@ -144,14 +144,14 @@ export interface TutorCalendarContextType {
   // Actions
   setSelectedDate: (date: Date) => void;
   assignInterview: (tutorId: string, date: string, time: string, interviewId: string) => Promise<void>;
-  createInterview: (data: { booking_id: string; university_id: string; scheduled_at: string; notes?: string }) => Promise<void>;
+  createInterview: (data: { booking_id: string; student_id: string; university: string; scheduled_at: string; notes?: string }) => Promise<void>;
   cancelInterview: (interviewId: string) => Promise<void>;
   deleteInterview: (interviewId: string) => Promise<void>;
   markSlotsAvailable: (slots: { tutorId: string; date: string; time: string }[]) => Promise<void>;
   removeAvailability: (slots: { tutorId: string; slotId: string }[]) => Promise<void>;
   openAvailabilityModal: (tutorId?: string) => void;
   closeAvailabilityModal: () => void;
-  openInterviewDetailsModal: (interviewId: string, interviewData?: UnassignedInterview) => Promise<void>;
+  openInterviewDetailsModal: (interviewId: string) => Promise<void>;
   closeInterviewDetailsModal: () => void;
   saveAvailability: (tutorId: string, availability: AvailabilitySlot[]) => Promise<void>;
   refreshData: () => Promise<void>;
@@ -202,11 +202,27 @@ export interface BackendAvailabilitySlot {
 
 export interface BackendInterviewData {
   id: string;
-  student_id: string;
-  university?: string;
+  student_id?: string;
+  booking_id?: string;
+  tutor_id?: string;
+  university_id?: string;
+  university?: string; // Can be string name from interviews table
   notes?: string;
-  created_at: string;
+  created_at?: string;
+  updated_at?: string;
+  scheduled_at?: string;
+  zoom_join_url?: string;
+  zoom_meeting_id?: string;
+  completed?: boolean;
+  student_feedback?: string;
+  tutor?: {
+    id: string;
+    name: string;
+    email: string;
+    subjects?: string[];
+  };
   booking?: {
+    id: string;
     email: string;
     package: string;
     universities?: string;
@@ -214,7 +230,7 @@ export interface BackendInterviewData {
     field?: string;
     phone?: string;
     notes?: string;
-    created_at: string;
+    created_at?: string;
   };
 }
 

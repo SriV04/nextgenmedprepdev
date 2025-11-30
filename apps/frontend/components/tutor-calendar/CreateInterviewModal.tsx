@@ -5,6 +5,7 @@ import { X, Search, User, GraduationCap, Package, Plus } from 'lucide-react';
 
 interface Booking {
   id: string;
+  user_id: string;
   email: string;
   package: string;
   universities: string;
@@ -21,7 +22,8 @@ interface CreateInterviewModalProps {
   onClose: () => void;
   onCreateInterview: (data: {
     booking_id: string;
-    university_id: string;
+    student_id: string;
+    university: string;
     scheduled_at: string;
     notes?: string;
   }) => Promise<void>;
@@ -110,7 +112,8 @@ export const CreateInterviewModal: React.FC<CreateInterviewModalProps> = ({
       
       await onCreateInterview({
         booking_id: selectedBooking.id,
-        university_id: selectedUniversity.id,
+        student_id: selectedBooking.user_id,
+        university: selectedUniversity.name,
         scheduled_at,
         notes: notes.trim() || undefined,
       });

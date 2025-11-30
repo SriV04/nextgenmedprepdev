@@ -27,6 +27,7 @@ const getTutorColor = (index: number): string => {
 export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [tutors, setTutors] = useState<TutorSchedule[]>([]);
   const [unassignedInterviews, setUnassignedInterviews] = useState<UnassignedInterview[]>([]);
+  const [interviewsDataMap, setInterviewsDataMap] = useState<Map<string, BackendInterviewData>>(new Map());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTutor, setSelectedTutor] = useState<TutorInfo | null>(null);
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
@@ -117,20 +118,28 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
 
       if (interviewsData.success) {
         console.log('Fetched unassigned interviews:', interviewsData.data);
-        const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: BackendInterviewData) => ({
-          id: interview.id,
-          studentId: interview.student_id,
-          studentName: interview.booking?.email?.split('@')[0] || 'Student',
-          studentEmail: interview.booking?.email || '',
-          package: interview.booking?.package || '',
-          universities: interview.booking?.universities || interview.university || '',
-          preferredTime: interview.booking?.preferred_time,
-          createdAt: interview.booking?.created_at || interview.created_at,
-          field: interview.booking?.field,
-          phone: interview.booking?.phone,
-          notes: interview.booking?.notes || interview.notes,
-        }));
+        
+        // Store full interview data in map for easy lookup
+        const dataMap = new Map<string, BackendInterviewData>();
+        const transformedInterviews: UnassignedInterview[] = interviewsData.data.map((interview: BackendInterviewData) => {
+          dataMap.set(interview.id, interview);
+          
+          return {
+            id: interview.id,
+            studentId: interview.student_id,
+            studentName: interview.booking?.email?.split('@')[0] || 'Student',
+            studentEmail: interview.booking?.email || '',
+            package: interview.booking?.package || '',
+            universities: interview.university || interview.booking?.universities || '',
+            preferredTime: interview.booking?.preferred_time,
+            createdAt: interview.booking?.created_at || interview.created_at,
+            field: interview.booking?.field,
+            phone: interview.booking?.phone,
+            notes: interview.booking?.notes || interview.notes,
+          };
+        });
 
+        setInterviewsDataMap(dataMap);
         setUnassignedInterviews(transformedInterviews);
       }
     } catch (err: any) {
@@ -334,39 +343,41 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     setSelectedTutor(null);
   };
 
-  const openInterviewDetailsModal = async (interviewId: string, interviewData?: UnassignedInterview) => {
+  const openInterviewDetailsModal = async (interviewId: string) => {
     try {
       setLoading(true);
       
-      let interview: any;
+      let interview: BackendInterviewData;
+
+      console.log('Opening interview details for:', interviewId);
       
-      // Use provided interview data if available, otherwise fetch
-      if (interviewData) {
-        interview = {
-          id: interviewData.id,
-          student_id: interviewData.studentId,
-          booking: {
-            email: interviewData.studentEmail,
-            package: interviewData.package,
-            universities: interviewData.universities,
-            preferred_time: interviewData.preferredTime,
-            field: interviewData.field,
-            phone: interviewData.phone,
-            notes: interviewData.notes,
-          },
-          created_at: interviewData.createdAt,
-          notes: interviewData.notes,
-        };
+      // Check if we have the data in our local map first
+      const cachedInterview = interviewsDataMap.get(interviewId);
+      
+      if (cachedInterview) {
+        console.log('Using cached interview data');
+        interview = cachedInterview;
       } else {
-        // Fetch full interview details
+        console.log('Fetching interview details from backend');
+        // Fetch full interview details from backend
         const interviewRes = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`);
         const interviewResData = await interviewRes.json();
 
+        const bookingRes = await fetch(`${backendUrl}/api/v1/bookings/${interviewResData.data.booking_id}`);
+        const bookingResData = await bookingRes.json();
+
+        
+        
         if (!interviewResData.success) {
           throw new Error('Failed to fetch interview details');
         }
+        
+        interview = {...interviewResData.data, booking: bookingResData.data};
 
-        interview = interviewResData.data;
+        console.log('Fetched interview data:', interview);
+        
+        // Cache it for future use
+        setInterviewsDataMap(prev => new Map(prev).set(interviewId, interview));
       }
       
       // Fetch student availability if student_id exists
@@ -392,13 +403,13 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       // Transform to InterviewDetails format
       const details: InterviewDetails = {
         id: interview.id,
-        studentId: interview.student_id,
+        studentId: interview.student_id || '',
         studentName: interview.booking?.email?.split('@')[0] || interview.booking?.email || 'Unknown Student',
         studentEmail: interview.booking?.email || 'No email provided',
         package: interview.booking?.package || 'No package',
-        universities: interview.university?.name || interview.booking?.universities || 'No university specified',
+        universities: interview.university || interview.booking?.universities || 'No university specified',
         preferredTime: interview.booking?.preferred_time,
-        createdAt: interview.created_at,
+        createdAt: interview.created_at || new Date().toISOString(),
         field: interview.booking?.field,
         phone: interview.booking?.phone,
         notes: interview.notes || interview.booking?.notes,
@@ -554,7 +565,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
-  const createInterview = async (data: { booking_id: string; university_id: string; scheduled_at: string; notes?: string }) => {
+  const createInterview = async (data: { booking_id: string; student_id: string; university: string; scheduled_at: string; notes?: string }) => {
     try {
       setLoading(true);
       

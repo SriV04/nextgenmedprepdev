@@ -6,7 +6,7 @@ import emailService from '../services/emailService';
 
 // Validation schemas
 const createInterviewSchema = z.object({
-  university: z.string().uuid().optional(),
+  university: z.string().nonempty(),
   student_id: z.string().uuid().optional(),
   tutor_id: z.string().uuid().optional(),
   booking_id: z.string().uuid().optional(),
