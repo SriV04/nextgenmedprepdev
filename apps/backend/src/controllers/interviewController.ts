@@ -548,10 +548,18 @@ export const cancelInterview = async (
     const { id } = req.params;
     const supabase = createSupabaseClient();
 
-    // Get interview to check if it has a Zoom meeting
+    // Get interview with full details including tutor and booking info
     const { data: interview } = await supabase
       .from('interviews')
-      .select('id, zoom_meeting_id, tutor_id')
+      .select(`
+        id,
+        zoom_meeting_id,
+        tutor_id,
+        scheduled_at,
+        university,
+        tutor:tutors!interviews_tutor_id_fkey(id, name, email),
+        booking:bookings(id, email, universities)
+      `)
       .eq('id', id)
       .single();
 
@@ -562,6 +570,24 @@ export const cancelInterview = async (
       });
       return;
     }
+
+    // Extract data for email notifications
+    const tutorData = interview.tutor as any;
+    const bookingData = interview.booking as any;
+    
+    const tutorEmail = tutorData?.email;
+    const tutorName = tutorData?.name;
+    const studentEmail = Array.isArray(bookingData) && bookingData.length > 0 
+      ? bookingData[0].email 
+      : bookingData?.email;
+    const universities = interview.university || 
+      (Array.isArray(bookingData) && bookingData.length > 0 
+        ? bookingData[0].universities?.split(',')[0] 
+        : bookingData?.universities?.split(',')[0]) || 
+      'Not specified';
+    
+    // Get student name from email (basic extraction)
+    const studentName = studentEmail?.split('@')[0] || 'Student';
 
     // Delete Zoom meeting if exists
     if (interview.zoom_meeting_id && zoomService.isConfigured()) {
@@ -598,6 +624,26 @@ export const cancelInterview = async (
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    // Send cancellation emails if student email exists
+    if (studentEmail) {
+      try {
+        await emailService.sendInterviewCancellationEmail(
+          tutorEmail,
+          tutorName,
+          studentEmail,
+          studentName,
+          interview.scheduled_at,
+          universities
+        );
+        console.log('Sent cancellation emails successfully');
+      } catch (emailError) {
+        console.error('Failed to send cancellation emails:', emailError);
+        // Don't fail the cancellation if email fails
+      }
+    } else {
+      console.warn('No student email found, skipping cancellation email');
     }
 
     res.json({

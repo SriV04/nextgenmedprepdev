@@ -1216,6 +1216,82 @@ Booking ID: ${data.bookingId}
   }
 
   /**
+   * Send interview cancellation emails to tutor and student
+   * @param tutorEmail - Email of the tutor (can be undefined if no tutor assigned)
+   * @param tutorName - Name of the tutor (can be undefined if no tutor assigned)
+   * @param studentEmail - Email of the student
+   * @param studentName - Name of the student
+   * @param scheduledAt - ISO date string of the scheduled interview (can be undefined)
+   * @param universities - University name(s) for the interview
+   */
+  async sendInterviewCancellationEmail(
+    tutorEmail: string | undefined,
+    tutorName: string | undefined,
+    studentEmail: string,
+    studentName: string,
+    scheduledAt: string | undefined,
+    universities: string
+  ): Promise<void> {
+    let dateStr = 'Not yet scheduled';
+    let timeStr = '';
+    
+    if (scheduledAt) {
+      const interviewDate = new Date(scheduledAt);
+      dateStr = interviewDate.toLocaleDateString('en-GB', { 
+        weekday: 'long',
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      timeStr = interviewDate.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    }
+
+    // Email to student (always send)
+    const studentTemplate = this.getInterviewCancellationTemplateStudent(
+      studentName,
+      tutorName || 'your tutor',
+      dateStr,
+      timeStr,
+      universities
+    );
+
+    await this.transporter.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: studentEmail,
+      subject: studentTemplate.subject,
+      text: studentTemplate.text,
+      html: studentTemplate.html,
+    });
+
+    console.log(`Sent interview cancellation email to student: ${studentEmail}`);
+
+    // Email to tutor (only if tutor was assigned)
+    if (tutorEmail && tutorName) {
+      const tutorTemplate = this.getInterviewCancellationTemplateTutor(
+        tutorName,
+        studentName,
+        dateStr,
+        timeStr,
+        universities
+      );
+
+      await this.transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: tutorEmail,
+        subject: tutorTemplate.subject,
+        text: tutorTemplate.text,
+        html: tutorTemplate.html,
+      });
+
+      console.log(`Sent interview cancellation email to tutor: ${tutorEmail}`);
+    }
+  }
+
+  /**
    * Send interview confirmation emails with Zoom meeting link
    * @param tutorEmail - Email of the tutor
    * @param tutorName - Name of the tutor
@@ -1288,6 +1364,307 @@ Booking ID: ${data.bookingId}
     });
 
     console.log(`Sent interview confirmation emails to ${tutorEmail} and ${studentEmail}`);
+  }
+
+  private getInterviewCancellationTemplateStudent(
+    studentName: string,
+    tutorName: string,
+    dateStr: string,
+    timeStr: string,
+    universities: string
+  ): EmailTemplate {
+    return {
+      subject: `📅 Interview Rescheduling - NextGen MedPrep`,
+      text: `Hi ${studentName},\n\nWe're writing to inform you that your scheduled interview has been cancelled and will be rescheduled.\n\n${tutorName !== 'your tutor' ? `Tutor: ${tutorName}\n` : ''}${dateStr !== 'Not yet scheduled' ? `Original Date: ${dateStr}\n` : ''}${timeStr ? `Original Time: ${timeStr}\n` : ''}University: ${universities}\n\nWhat happens next:\n• Our team will reach out within 24 hours to reschedule your interview\n• We'll work with you to find a new time that suits your schedule\n• All your preparation materials remain valid\n\nWe apologize for any inconvenience caused. If you have any urgent questions, please contact us at contact@nextgenmedprep.com.\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 40px 30px; text-align: center;">
+                      <div style="background-color: rgba(255,255,255,0.2); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">
+                        📅
+                      </div>
+                      <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                        Interview Rescheduling
+                      </h1>
+                      <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                        We'll find a new time that works for you
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 20px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        Hi ${studentName},
+                      </p>
+                      <p style="margin: 0 0 30px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        We need to reschedule your upcoming interview. Don't worry - we'll work with you to find a new time that suits your schedule.
+                      </p>
+
+                      <!-- Original Interview Details -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f1f5f9; border-radius: 12px; border-left: 4px solid #64748b; margin: 0 0 30px 0;">
+                        <tr>
+                          <td style="padding: 25px;">
+                            <h2 style="margin: 0 0 20px 0; color: #475569; font-size: 18px; font-weight: 600;">
+                              📋 Original Interview Details
+                            </h2>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                              ${tutorName !== 'your tutor' ? `
+                              <tr>
+                                <td style="padding: 8px 0; color: #64748b; font-weight: 500; font-size: 14px; width: 100px;">
+                                  Tutor:
+                                </td>
+                                <td style="padding: 8px 0; color: #334155; font-size: 15px;">
+                                  ${tutorName}
+                                </td>
+                              </tr>
+                              ` : ''}
+                              ${dateStr !== 'Not yet scheduled' ? `
+                              <tr>
+                                <td style="padding: 8px 0; color: #64748b; font-weight: 500; font-size: 14px;">
+                                  Date:
+                                </td>
+                                <td style="padding: 8px 0; color: #334155; font-size: 15px;">
+                                  📆 ${dateStr}
+                                </td>
+                              </tr>
+                              ` : ''}
+                              ${timeStr ? `
+                              <tr>
+                                <td style="padding: 8px 0; color: #64748b; font-weight: 500; font-size: 14px;">
+                                  Time:
+                                </td>
+                                <td style="padding: 8px 0; color: #334155; font-size: 15px;">
+                                  ⏰ ${timeStr}
+                                </td>
+                              </tr>
+                              ` : ''}
+                              <tr>
+                                <td style="padding: 8px 0; color: #64748b; font-weight: 500; font-size: 14px;">
+                                  University:
+                                </td>
+                                <td style="padding: 8px 0; color: #334155; font-size: 15px;">
+                                  🎓 ${universities}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- What's Next -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 8px; margin: 0 0 25px 0;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px; font-weight: 600;">
+                              📅 What happens next?
+                            </h3>
+                            <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.7;">
+                              • Our team will reach out within <strong>24 hours</strong> to reschedule your interview<br>
+                              • We'll work with you to find a new time that suits your schedule<br>
+                              • All your preparation materials remain valid<br>
+                              • Your booking remains active - no need to repay
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Reassurance Box -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 8px; margin: 0 0 25px 0;">
+                        <tr>
+                          <td style="padding: 20px; text-align: center;">
+                            <p style="margin: 0 0 5px 0; font-size: 24px;">✨</p>
+                            <p style="margin: 0; color: #1e40af; font-size: 15px; font-weight: 600;">
+                              We're still committed to your success!
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        We apologize for any inconvenience. If you have any questions, please contact us at <a href="mailto:contact@nextgenmedprep.com" style="color: #3b82f6; text-decoration: none;">contact@nextgenmedprep.com</a>.
+                      </p>
+                      
+                      <p style="margin: 20px 0 0 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        Best regards,<br>
+                        <strong style="color: #3b82f6;">The NextGen MedPrep Team</strong>
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #f8fafc; padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0 0 10px 0; color: #64748b; font-size: 13px; font-weight: 600;">
+                        NextGen MedPrep | We're Here to Support You
+                      </p>
+                      <p style="margin: 0; color: #94a3b8; font-size: 12px;">
+                        © ${new Date().getFullYear()} NextGen MedPrep. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    };
+  }
+
+  private getInterviewCancellationTemplateTutor(
+    tutorName: string,
+    studentName: string,
+    dateStr: string,
+    timeStr: string,
+    universities: string
+  ): EmailTemplate {
+    return {
+      subject: `❌ Interview Cancelled - ${studentName}`,
+      text: `Hi ${tutorName},\n\nThe following interview has been cancelled:\n\nStudent: ${studentName}\n${dateStr !== 'Not yet scheduled' ? `Date: ${dateStr}\n` : ''}${timeStr ? `Time: ${timeStr}\n` : ''}University: ${universities}\n\nThis time slot has been released and is now available for other bookings. You don't need to take any action.\n\nIf you have any questions, please contact us.\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #fef2f2; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef2f2; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 40px 30px; text-align: center;">
+                      <h1 style="margin: 0; color: white; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+                        ❌ Interview Cancelled
+                      </h1>
+                      <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                        Time slot released
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Content -->
+                  <tr>
+                    <td style="padding: 40px 30px;">
+                      <p style="margin: 0 0 20px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        Hi <strong style="color: #0f172a;">${tutorName}</strong>,
+                      </p>
+                      <p style="margin: 0 0 30px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                        The following interview has been cancelled:
+                      </p>
+
+                      <!-- Interview Details -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); border-radius: 12px; border: 2px solid #f59e0b; margin: 0 0 30px 0;">
+                        <tr>
+                          <td style="padding: 25px;">
+                            <h2 style="margin: 0 0 20px 0; color: #92400e; font-size: 18px; font-weight: 600;">
+                              📋 Cancelled Interview
+                            </h2>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                              <tr>
+                                <td style="padding: 8px 0; color: #92400e; font-weight: 600; font-size: 14px; width: 100px;">
+                                  Student:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px; font-weight: 500;">
+                                  ${studentName}
+                                </td>
+                              </tr>
+                              ${dateStr !== 'Not yet scheduled' ? `
+                              <tr>
+                                <td style="padding: 8px 0; color: #92400e; font-weight: 600; font-size: 14px;">
+                                  Date:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  📆 ${dateStr}
+                                </td>
+                              </tr>
+                              ` : ''}
+                              ${timeStr ? `
+                              <tr>
+                                <td style="padding: 8px 0; color: #92400e; font-weight: 600; font-size: 14px;">
+                                  Time:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  ⏰ ${timeStr}
+                                </td>
+                              </tr>
+                              ` : ''}
+                              <tr>
+                                <td style="padding: 8px 0; color: #92400e; font-weight: 600; font-size: 14px;">
+                                  University:
+                                </td>
+                                <td style="padding: 8px 0; color: #0f172a; font-size: 15px;">
+                                  🎓 ${universities}
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Info Box -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 8px; margin: 0 0 25px 0;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <p style="margin: 0; color: #1e3a8a; font-size: 14px; line-height: 1.7;">
+                              ✓ This time slot has been released and is now available for other bookings<br>
+                              ✓ No action needed from you<br>
+                              ✓ Your calendar will be updated automatically
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        If you have any questions, please contact us at <a href="mailto:contact@nextgenmedprep.com" style="color: #3b82f6; text-decoration: none;">contact@nextgenmedprep.com</a>.
+                      </p>
+                      
+                      <p style="margin: 20px 0 0 0; color: #334155; font-size: 15px; line-height: 1.6;">
+                        Best regards,<br>
+                        <strong style="color: #f59e0b;">The NextGen MedPrep Team</strong>
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background-color: #fef2f2; padding: 30px; text-align: center; border-top: 1px solid #fecaca;">
+                      <p style="margin: 0 0 10px 0; color: #92400e; font-size: 13px; font-weight: 600;">
+                        NextGen MedPrep | Thank you for your flexibility
+                      </p>
+                      <p style="margin: 0; color: #6b7280; font-size: 12px;">
+                        © ${new Date().getFullYear()} NextGen MedPrep. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `
+    };
   }
 
   private getInterviewConfirmationTemplateTutor(
