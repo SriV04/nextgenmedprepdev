@@ -56,6 +56,7 @@ function DashboardContent() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isManager, setIsManager] = useState(false);
 
   // Tab management
   const [activeTab, setActiveTab] = useState<'bookings' | 'calendar'>('calendar');
@@ -103,12 +104,14 @@ function DashboardContent() {
         if (tutorData && !tutorError) {
           setUserRole(tutorData.role);
           setIsAdmin(tutorData.role === 'admin');
+          setIsManager(tutorData.role === 'manager');
           console.log('Tutor role:', tutorData.role);
         } else {
           console.error('Error fetching tutor role:', tutorError);
           // Default to regular tutor if role not found
           setUserRole('tutor');
           setIsAdmin(false);
+          setIsManager(false);
         }
       }
     };
@@ -433,14 +436,24 @@ function DashboardContent() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{isAdmin ? 'Admin Dashboard' : 'Tutor Dashboard'}</h1>
-            <p className="text-gray-600 mt-1">{isAdmin ? 'Manage bookings, assign interviews, and view statistics' : 'View your calendar and scheduled interviews'}</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {isAdmin ? 'Admin Dashboard' : isManager ? 'Manager Dashboard' : 'Tutor Dashboard'}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {isAdmin ? 'Manage bookings, assign interviews, and view statistics' : 
+               isManager ? 'Assign interviews and manage schedules' : 
+               'View your calendar and scheduled interviews'}
+            </p>
             {user && (
               <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
                 <User className="w-4 h-4" />
                 <span>{user.email}</span>
                 {userRole && (
-                  <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                  <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                    isAdmin ? 'bg-purple-100 text-purple-800' : 
+                    isManager ? 'bg-orange-100 text-orange-800' : 
+                    'bg-blue-100 text-blue-800'
+                  }`}>
                     {userRole}
                   </span>
                 )}
@@ -917,11 +930,11 @@ function DashboardContent() {
         {/* Calendar Tab Content */}
         {activeTab === 'calendar' && (
           <div className="flex flex-col gap-6">
-            {/* Commit Changes Bar - Only show for admins */}
-            {isAdmin && <CommitChangesBar />}
+            {/* Commit Changes Bar - Show for admins and managers */}
+            {(isAdmin || isManager) && <CommitChangesBar />}
 
-            {/* Unassigned Interviews - Only show for admins */}
-            {isAdmin && (
+            {/* Unassigned Interviews - Show for admins and managers */}
+            {(isAdmin || isManager) && (
               <UnassignedInterviews
                 onInterviewClick={handleUnassignedInterviewClick}
               />
@@ -930,7 +943,7 @@ function DashboardContent() {
             {/* Calendar Grid - Full Width */}
             <TutorCalendar
               onSlotClick={handleSlotClick}
-              isAdmin={isAdmin}
+              isAdmin={isAdmin || isManager}
             />
           </div>
         )}

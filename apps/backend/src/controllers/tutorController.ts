@@ -370,10 +370,11 @@ export const getAllTutorsWithAvailability = async (
     const { start_date, end_date } = req.query;
     const supabase = createSupabaseClient();
 
-    // Get all tutors
+    // Get all tutors except managers (managers don't appear in calendar)
     const { data: tutors, error: tutorsError } = await supabase
       .from('tutors')
       .select('*')
+      .neq('role', 'manager')
       .order('name', { ascending: true });
 
     if (tutorsError) {
