@@ -12,6 +12,13 @@ export default function LoginForm() {
   const supabase = createClient();
 
   useEffect(() => {
+    // Check for error messages from callback
+    const errorParam = searchParams.get('error');
+    const messageParam = searchParams.get('message');
+    if (errorParam) {
+      setError(messageParam || 'Authentication failed. Please try again.');
+    }
+
     // Check if user is already logged in
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();

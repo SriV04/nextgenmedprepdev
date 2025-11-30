@@ -214,7 +214,7 @@ class ZoomService {
           participant_video: true,
           join_before_host: true, // Allow participants to join without host
           mute_upon_entry: false,
-          waiting_room: true,
+          waiting_room: false,
           audio: 'both',
           auto_recording: 'none',
         },

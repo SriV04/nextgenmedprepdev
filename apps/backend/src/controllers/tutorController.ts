@@ -8,7 +8,7 @@ const createTutorSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   subjects: z.array(z.string()).min(1).optional().default(['General']),
-  role: z.string().optional(),
+  role: z.string().optional().default('tutor'),
 });
 
 const updateTutorSchema = z.object({
@@ -71,6 +71,7 @@ export const createTutor = async (
         name: validatedData.name,
         email: validatedData.email,
         subjects: validatedData.subjects,
+        role: validatedData.role, // Defaults to 'tutor' from schema
       })
       .select()
       .single();

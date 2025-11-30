@@ -103,6 +103,7 @@ function DashboardContent() {
         if (tutorData && !tutorError) {
           setUserRole(tutorData.role);
           setIsAdmin(tutorData.role === 'admin');
+          console.log('Tutor role:', tutorData.role);
         } else {
           console.error('Error fetching tutor role:', tutorError);
           // Default to regular tutor if role not found
