@@ -6,27 +6,23 @@ import FreeResourcesCarousel from '@/components/interviews/FreeResourcesCarousel
 import ServicesSection from '@/components/interviews/ServicesSection';
 import GeneratedMocks from '@/components/interviews/GeneratedMocks';
 import HeroSection from '@/components/interviews/HeroSection';
-import BlackFridayCTA from '@/components/black-friday/BlackFridayCTA';
 import CTASection from '@/components/interviews/CTAsection';
-import BlackFridayBanner from '@/components/black-friday/BlackFridayBanner';
-import BlackFridayHeroSection from '@/components/black-friday/BlackFridayHeroSection';
+
 
 export default function InterviewsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <BlackFridayBanner /> 
-
-      <BlackFridayHeroSection />
+      <HeroSection />
 
       <ServicesSection />
 
       <section id="interview-packages" className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Black Friday Packages</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Mock Interview Packages</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Limited time offers to maximize your interview success
+              Choose from our range of interview packages designed to suit your preparation needs and budget.
             </p>
           </div>
           
@@ -164,7 +160,7 @@ export default function InterviewsPage() {
       <FreeResourcesCarousel />
 
       {/* CTA Section with slight BF tweak */}
-      <BlackFridayCTA />
+      <CTASection />
     </div>
   );
 }
