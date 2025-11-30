@@ -7,6 +7,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -29,6 +33,88 @@ export default function LoginForm() {
     };
     checkUser();
   }, [router, searchParams, supabase]);
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError(null);
+
+      const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+
+      if (isSignUp) {
+        // Sign up
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+            },
+            emailRedirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+          },
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+          // Check if email confirmation is required
+          if (data.user.identities && data.user.identities.length === 0) {
+            // Email already exists
+            setError('An account with this email already exists. Please sign in instead.');
+            setLoading(false);
+            return;
+          }
+
+          // Create tutor account
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+          try {
+            await fetch(`${backendUrl}/api/v1/tutors`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user_id: data.user.id,
+                name: name || email.split('@')[0],
+                email: email,
+                subjects: ['Interviews', 'UCAT', 'Personal Statement'],
+                role: 'tutor',
+              }),
+            });
+          } catch (backendError) {
+            console.error('Error creating tutor account:', backendError);
+            // Continue anyway
+          }
+
+          // Check if email confirmation is required
+          if (data.session) {
+            // User is auto-confirmed (email confirmation disabled)
+            router.push(redirectTo);
+          } else {
+            // Email confirmation required
+            alert('Account created! Please check your email to verify your account before signing in.');
+            setIsSignUp(false);
+            setEmail('');
+            setPassword('');
+            setName('');
+          }
+        }
+      } else {
+        // Sign in
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+        router.push(redirectTo);
+      }
+    } catch (err: any) {
+      console.error('Error with email auth:', err);
+      setError(err.message || 'Authentication failed');
+      setLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
     try {
@@ -65,10 +151,10 @@ export default function LoginForm() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Tutor Dashboard Login
+            {isSignUp ? 'Create Account' : 'Tutor Dashboard Login'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in with your Google account to access the dashboard
+            {isSignUp ? 'Sign up to access the dashboard' : 'Sign in to access the dashboard'}
           </p>
         </div>
 
@@ -81,6 +167,103 @@ export default function LoginForm() {
           )}
 
           <div className="space-y-6">
+            {/* Email/Password Form */}
+            <form onSubmit={handleEmailAuth} className="space-y-4">
+              {isSignUp && (
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required={isSignUp}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+              )}
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your password"
+                />
+                {isSignUp && (
+                  <p className="mt-1 text-xs text-gray-500">Must be at least 6 characters</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>{isSignUp ? 'Creating account...' : 'Signing in...'}</span>
+                  </>
+                ) : (
+                  <span>{isSignUp ? 'Sign Up' : 'Sign In'}</span>
+                )}
+              </button>
+            </form>
+
+            {/* Toggle Sign Up / Sign In */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError(null);
+                  setEmail('');
+                  setPassword('');
+                  setName('');
+                }}
+                className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+              >
+                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+              </button>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
@@ -116,22 +299,9 @@ export default function LoginForm() {
               )}
             </button>
 
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Secure authentication powered by Supabase
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div className="text-center">
               <p className="text-xs text-gray-500">
-                By signing in, you agree to our Terms of Service and Privacy Policy
+                By signing {isSignUp ? 'up' : 'in'}, you agree to our Terms of Service and Privacy Policy
               </p>
             </div>
           </div>

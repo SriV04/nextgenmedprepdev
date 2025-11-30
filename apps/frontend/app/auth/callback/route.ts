@@ -5,6 +5,8 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const { searchParams } = requestUrl;
   const code = searchParams.get('code');
+  const token_hash = searchParams.get('token_hash');
+  const type = searchParams.get('type');
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
   const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
@@ -19,8 +21,63 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(error)}&message=${encodeURIComponent(errorDescription || 'Authentication failed')}`);
   }
 
+  const supabase = await createClient();
+
+  // Handle email verification (token_hash + type from confirmation link)
+  if (token_hash && type) {
+    console.log('Handling email verification:', { type });
+    
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: type as any,
+    });
+
+    if (verifyError) {
+      console.error('Error verifying email:', verifyError);
+      return NextResponse.redirect(`${origin}/auth/login?error=verification_failed&message=${encodeURIComponent(verifyError.message)}`);
+    }
+
+    if (data.user) {
+      console.log('Email verified successfully:', data.user.email);
+      
+      // Create tutor account in backend
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+        
+        const response = await fetch(`${backendUrl}/api/v1/tutors`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: data.user.id,
+            name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Tutor',
+            email: data.user.email,
+            subjects: ['Interviews', 'UCAT', 'Personal Statement'],
+            role: 'tutor',
+          }),
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('Tutor account created/verified:', result.data);
+        } else {
+          console.error('Failed to create tutor account:', result);
+        }
+      } catch (backendError) {
+        console.error('Error calling backend to create tutor:', backendError);
+        // Continue anyway - user is authenticated
+      }
+
+      return NextResponse.redirect(`${origin}${redirectTo}`);
+    }
+  }
+
+  // Handle OAuth callback (code from OAuth provider)
   if (code) {
-    const supabase = await createClient();
+    console.log('Handling OAuth callback');
+    
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
     
     if (exchangeError) {
@@ -68,6 +125,6 @@ export async function GET(request: Request) {
   }
 
   // Return the user to an error page with instructions
-  console.error('No code or user found in callback');
+  console.error('No code, token_hash, or user found in callback');
   return NextResponse.redirect(`${origin}/auth/login?error=auth_failed&message=${encodeURIComponent('No authentication code received')}`);
 }
