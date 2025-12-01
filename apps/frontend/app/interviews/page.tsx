@@ -161,6 +161,43 @@ export default function InterviewsPage() {
 
       {/* CTA Section with slight BF tweak */}
       <CTASection />
+
+      {/* Footer with Terms Link */}
+      <footer className="bg-gray-900 border-t border-gray-800 py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+            <div className="text-center md:text-left">
+              <p>© {new Date().getFullYear()} NextGen Med Prep. All rights reserved.</p>
+            </div>
+            <div className="flex gap-6">
+              <Link 
+                href="/interviews/terms" 
+                className="hover:text-indigo-400 transition-colors underline"
+              >
+                Terms & Conditions
+              </Link>
+              <a 
+                href="mailto:contact@nextgenmedprep.com" 
+                className="hover:text-indigo-400 transition-colors"
+              >
+                Contact Us
+              </a>
+            </div>
+          </div>
+          <div className="mt-4 text-center text-xs text-gray-500">
+            <p>
+              <span className="text-yellow-400">⚠️</span> Please note: All mock interview bookings are non-refundable. 
+              Rescheduling must be requested at least 24 hours before your scheduled session.{' '}
+              <Link 
+                href="/interviews/terms" 
+                className="text-indigo-400 hover:text-indigo-300 underline"
+              >
+                View full terms
+              </Link>
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
