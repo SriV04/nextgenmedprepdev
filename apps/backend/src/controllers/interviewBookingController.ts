@@ -270,29 +270,34 @@ export class InterviewBookingController {
         }
       }
 
-      // Determine number of interviews based on package type
-      let numberOfInterviews = 1; // default for essentials
-      if (metadata.package_type === 'core') {
-        numberOfInterviews = 3;
-      } else if (metadata.package_type === 'premium') {
-        numberOfInterviews = 5;
-      }
+      // Only create interview records for live sessions, not for generated questions
+      if (metadata.service_type === 'live') {
+        // Determine number of interviews based on package type
+        let numberOfInterviews = 1; // default for essentials
+        if (metadata.package_type === 'core') {
+          numberOfInterviews = 3;
+        } else if (metadata.package_type === 'premium') {
+          numberOfInterviews = 4; // Premium has 4 live sessions
+        }
 
-      // Create interview records
-      console.log(`Creating ${numberOfInterviews} interview records...`);
-      const interviewRecords = [];
-      
-      for (let i = 0; i < numberOfInterviews; i++) {
-        interviewRecords.push({
-          student_id: user.id,
-          booking_id: booking.id,
-          university: universitiesArray[i] || undefined, // Assign university if available, undefined if not
-          notes: metadata.notes || undefined
-        });
-      }
+        // Create interview records
+        console.log(`Creating ${numberOfInterviews} interview records for live sessions...`);
+        const interviewRecords = [];
+        
+        for (let i = 0; i < numberOfInterviews; i++) {
+          interviewRecords.push({
+            student_id: user.id,
+            booking_id: booking.id,
+            university: universitiesArray[i] || undefined, // Assign university if available, undefined if not
+            notes: metadata.notes || undefined
+          });
+        }
 
-      const createdInterviews = await supabaseService.createBulkInterviews(interviewRecords);
-      console.log(`${numberOfInterviews} interview records created`);
+        const createdInterviews = await supabaseService.createBulkInterviews(interviewRecords);
+        console.log(`${numberOfInterviews} interview records created for live sessions`);
+      } else {
+        console.log('Service type is "generated" - skipping interview record creation');
+      }
 
       // Note: Zoom meetings will be created when interviews are scheduled with specific times
       // via the assignInterviewToTutor method in interviewController.ts
