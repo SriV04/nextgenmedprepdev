@@ -22,7 +22,7 @@ export default function GeneratedMocks() {
             Prometheus Generated Mock Interviews
           </h2>
           <p className="text-xl text-purple-200 max-w-3xl mx-auto">
-            University-specific mock interview questions powered by cutting-edge AI technology. Get instant access to tailored practice materials at a fraction of the cost.
+            University-specific mock interview questions powered by our Prometheus Technology. Get access to tailored practice materials at a fraction of the cost.
           </p>
         </div>
 
