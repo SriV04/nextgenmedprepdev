@@ -174,8 +174,24 @@ export default function RootLayout({
                 ))}
               </div>
             </div>
-            <div className="text-center text-text-secondary text-sm">
-              &copy; {new Date().getFullYear()} NextGenMedPrep. All rights reserved.
+            <div className="flex flex-col md:flex-row justify-center md:justify-between items-center gap-4 text-text-secondary text-sm">
+              <div className="text-center md:text-left">
+                &copy; {new Date().getFullYear()} NextGenMedPrep. All rights reserved.
+              </div>
+              <div className="flex gap-6">
+                <Link 
+                  href="/interviews/terms" 
+                  className="hover:text-accent-primary transition-colors underline"
+                >
+                  Terms & Conditions
+                </Link>
+                <a 
+                  href="mailto:contact@nextgenmedprep.com" 
+                  className="hover:text-accent-primary transition-colors"
+                >
+                  Contact Us
+                </a>
+              </div>
             </div>
           </div>
         </footer>
