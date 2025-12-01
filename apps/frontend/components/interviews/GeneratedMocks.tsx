@@ -16,7 +16,7 @@ export default function GeneratedMocks() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 px-4 py-2 rounded-full font-bold text-sm mb-4 shadow-lg">
             <SparklesIcon className="w-5 h-5" />
-            AI-POWERED • INSTANT DELIVERY
+            AI-POWERED • 24HR TURNAROUND
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
             Prometheus Generated Mock Interviews
