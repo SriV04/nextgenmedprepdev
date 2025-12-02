@@ -33,7 +33,7 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick, isAdmin = fa
     draggedStudentAvailability,
     handleSlotMouseDown,
     handleSlotMouseEnter,
-    toggleSlotSelection,
+    handleSlotClick,
     clearSelection,
     handleBatchAvailability,
     handleBatchRemove,
@@ -138,13 +138,13 @@ const TutorCalendar: React.FC<TutorCalendarProps> = ({ onSlotClick, isAdmin = fa
                       showStudentAvailability={showStudentAvailability}
                       hasMatchingTutor={hasMatchingTutor}
                       isSelectable={isSelectable}
-                      onMouseDown={(e) => handleSlotMouseDown(tutor.tutorId, time, slot)}
+                      onMouseDown={(e) => handleSlotMouseDown(tutor.tutorId, time, slot, e.ctrlKey || e.metaKey)}
                       onMouseEnter={() => handleSlotMouseEnter(tutor.tutorId, time, slot)}
-                      onClick={() => {
+                      onClick={(e) => {
                         if (slot && slot.type === 'interview') {
                           onSlotClick(slot, tutor);
                         } else if (isSelectable) {
-                          toggleSlotSelection(tutor.tutorId, time, slot);
+                          handleSlotClick(tutor.tutorId, time, slot);
                         }
                       }}
                       onDragOver={(e) => !isSelecting && handleDragOver(e, slotKey)}

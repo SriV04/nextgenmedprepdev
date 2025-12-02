@@ -14,7 +14,7 @@ interface TimeSlotCellProps {
   isSelectable: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;

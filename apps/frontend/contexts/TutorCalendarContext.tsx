@@ -37,6 +37,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   const [error, setError] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<'admin' | 'tutor' | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
   const hasPendingChanges = pendingChanges.length > 0;
@@ -669,6 +670,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     pendingChanges,
     hasPendingChanges,
     currentUserId,
+    userRole,
     setSelectedDate,
     assignInterview,
     cancelInterview,
@@ -685,6 +687,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     commitChanges,
     discardChanges,
     setCurrentUserId,
+    setUserRole,
   };
 
   return (

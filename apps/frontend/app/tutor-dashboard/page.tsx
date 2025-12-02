@@ -54,7 +54,6 @@ function DashboardContent() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isManager, setIsManager] = useState(false);
 
@@ -69,7 +68,7 @@ function DashboardContent() {
   const BOOKINGS_PASSWORD = process.env.NEXT_PUBLIC_BOOKINGS_PASSWORD || 'admin123';
 
   // Use calendar context
-  const { tutors, setCurrentUserId, openInterviewDetailsModal } = useTutorCalendar();
+  const { tutors, userRole, setCurrentUserId, openInterviewDetailsModal, setUserRole } = useTutorCalendar();
   
   const router = useRouter();
   const supabase = createClient();

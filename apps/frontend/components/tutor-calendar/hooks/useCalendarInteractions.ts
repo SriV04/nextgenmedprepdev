@@ -4,12 +4,13 @@ import { generateSlotKey, parseSlotKey, formatDate } from '../utils/calendarUtil
 import { TimeSlot, StudentAvailabilitySlot } from '@/types/tutor-calendar';
 
 export const useCalendarInteractions = () => {
-  const { markSlotsAvailable, removeAvailability, assignInterview, selectedDate } = useTutorCalendar();
+  const { markSlotsAvailable, removeAvailability, assignInterview, selectedDate, currentUserId, userRole } = useTutorCalendar();
 
   // --- Selection State ---
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
   const [selectionStartTutor, setSelectionStartTutor] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // --- Drag State ---
   const [draggedBooking, setDraggedBooking] = useState<string | null>(null);
@@ -17,27 +18,74 @@ export const useCalendarInteractions = () => {
   const [draggedStudentAvailability, setDraggedStudentAvailability] = useState<StudentAvailabilitySlot[]>([]);
 
   // --- Selection Handlers ---
-  const handleSlotMouseDown = (tutorId: string, time: string, slot: TimeSlot | undefined) => {
+  
+  // Simplified mouse down - only initiates drag selection
+  const handleSlotMouseDown = (tutorId: string, time: string, slot: TimeSlot | undefined, isCtrlOrCmd: boolean) => {
     if (slot?.type === 'interview') return;
     
+    // Permission check: tutors can only select their own slots
+    if (userRole === 'tutor' && currentUserId && tutorId !== currentUserId) {
+      return;
+    }
+    
+    // Reset drag flag
+    setIsDragging(false);
+    
+    // Check if clicking on a different tutor than current selection
+    const existingSelections = Array.from(selectedSlots);
+    const existingTutorIds = existingSelections.map(k => parseSlotKey(k).tutorId);
+    const hasDifferentTutor = existingTutorIds.length > 0 && existingTutorIds.some(id => id !== tutorId);
+    
+    // If clicking on a different tutor, start fresh selection
+    if (hasDifferentTutor) {
+      setSelectionStartTutor(tutorId);
+      setSelectedSlots(new Set());
+    } else {
+      setSelectionStartTutor(tutorId);
+    }
+    
+    // Start drag selection
     setIsSelecting(true);
-    setSelectionStartTutor(tutorId);
-    const key = generateSlotKey(tutorId, time, slot?.id);
-    setSelectedSlots(new Set([key]));
   };
 
   const handleSlotMouseEnter = (tutorId: string, time: string, slot: TimeSlot | undefined) => {
     if (isSelecting && tutorId === selectionStartTutor) {
       if (!slot || slot.type === 'blocked' || slot.type === 'available') {
+        setIsDragging(true); // Mark that we've dragged to another slot
         const key = generateSlotKey(tutorId, time, slot?.id);
         setSelectedSlots(prev => new Set([...prev, key]));
       }
     }
   };
 
-  const toggleSlotSelection = (tutorId: string, time: string, slot: TimeSlot | undefined) => {
+  // Dedicated click handler for toggling individual slots
+  const handleSlotClick = (tutorId: string, time: string, slot: TimeSlot | undefined) => {
+    // Don't toggle if user was dragging
+    if (isDragging) return;
+    
+    if (slot?.type === 'interview') return;
+    
+    // Permission check: tutors can only select their own slots
+    if (userRole === 'tutor' && currentUserId && tutorId !== currentUserId) {
+      return;
+    }
+    
     const slotKey = generateSlotKey(tutorId, time, slot?.id);
     
+    // Check if clicking on a different tutor than current selection
+    const existingSelections = Array.from(selectedSlots);
+    const existingTutorIds = existingSelections.map(k => parseSlotKey(k).tutorId);
+    const hasDifferentTutor = existingTutorIds.length > 0 && existingTutorIds.some(id => id !== tutorId);
+    
+    // If clicking on a different tutor, clear previous selection and start fresh
+    if (hasDifferentTutor) {
+      setSelectionStartTutor(tutorId);
+      setSelectedSlots(new Set([slotKey]));
+      return;
+    }
+    
+    // Same tutor - toggle selection
+    setSelectionStartTutor(tutorId);
     setSelectedSlots(prev => {
       const newSet = new Set(prev);
       if (newSet.has(slotKey)) {
@@ -146,7 +194,11 @@ export const useCalendarInteractions = () => {
 
   // --- Global Mouse Up ---
   useEffect(() => {
-    const handleGlobalMouseUp = () => setIsSelecting(false);
+    const handleGlobalMouseUp = () => {
+      setIsSelecting(false);
+      // Reset drag flag after a short delay to allow click handler to check it
+      setTimeout(() => setIsDragging(false), 50);
+    };
     window.addEventListener('mouseup', handleGlobalMouseUp);
     return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
   }, []);
@@ -158,7 +210,7 @@ export const useCalendarInteractions = () => {
     draggedStudentAvailability,
     handleSlotMouseDown,
     handleSlotMouseEnter,
-    toggleSlotSelection,
+    handleSlotClick,
     clearSelection,
     handleBatchAvailability,
     handleBatchRemove,
