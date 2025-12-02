@@ -5,6 +5,8 @@ import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import { ContactDetails } from '../../app/interviews/payment/hooks/usePaymentForm';
 import { ExtendedPackage } from '../../data/packages';
 import { universities } from '@/data/universities';
+import Link from 'next/link';
+import { useState } from 'react';
 
 interface Step4ContactProps {
   contact: ContactDetails;
@@ -35,6 +37,8 @@ export default function Step4Contact({
   onAdditionalNotesChange,
   onProceedToPayment
 }: Step4ContactProps) {
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  
   if (!selectedPackage) return null;
 
   const getUniversityName = (id: string) => {
@@ -253,16 +257,51 @@ export default function Step4Contact({
         </div>
       </div>
 
+      {/* Terms and Conditions */}
+      <div className="bg-yellow-900/20 border-2 border-yellow-500/50 rounded-lg p-6 mb-6">
+        <div className="flex items-start gap-4">
+          <input
+            type="checkbox"
+            id="terms-checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-1 w-5 h-5 rounded border-yellow-500 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-gray-900 cursor-pointer"
+          />
+          <label htmlFor="terms-checkbox" className="text-gray-200 text-sm cursor-pointer">
+            I have read and agree to the{' '}
+            <Link 
+              href="/interviews/terms" 
+              target="_blank"
+              className="text-indigo-400 hover:text-indigo-300 underline font-semibold"
+            >
+              Terms and Conditions
+            </Link>
+            , including the <span className="text-yellow-300 font-semibold">no refund policy</span> and{' '}
+            <span className="text-yellow-300 font-semibold">24-hour rescheduling restriction</span>. *
+          </label>
+        </div>
+      </div>
+
       {canProceedToPayment() && (
         <div className="text-center">
           <motion.button
             onClick={onProceedToPayment}
-            className="px-12 py-4 text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all shadow-xl shadow-indigo-500/30 glow-aurora"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
+            disabled={!acceptedTerms}
+            className={`px-12 py-4 text-xl font-bold rounded-lg transition-all shadow-xl ${
+              acceptedTerms
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600 shadow-indigo-500/30 glow-aurora cursor-pointer'
+                : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+            }`}
+            whileHover={acceptedTerms ? { scale: 1.05 } : {}}
+            whileTap={acceptedTerms ? { scale: 0.98 } : {}}
           >
             Complete Purchase - £{calculatePrice()}
           </motion.button>
+          {!acceptedTerms && (
+            <p className="text-yellow-400 text-sm mt-3">
+              Please accept the terms and conditions to continue
+            </p>
+          )}
         </div>
       )}
     </motion.div>
