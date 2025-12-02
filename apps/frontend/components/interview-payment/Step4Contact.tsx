@@ -216,6 +216,30 @@ export default function Step4Contact({
         />
       </div>
 
+      {/* Terms and Conditions */}
+      <div className="bg-black/40 border border-gray-700 rounded-lg p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="terms-checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded border-gray-600 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-gray-900 cursor-pointer"
+          />
+          <label htmlFor="terms-checkbox" className="text-gray-300 text-sm cursor-pointer">
+            I accept the{' '}
+            <Link 
+              href="/interviews/terms" 
+              target="_blank"
+              className="text-gray-300 hover:text-indigo-400"
+            >
+              Terms and Conditions
+            </Link>
+            {' '}*
+          </label>
+        </div>
+      </div>
+
       {/* Booking Summary */}
       <div className="bg-black/60 border border-indigo-500/30 rounded-lg p-6 backdrop-blur-sm mb-8">
         <h4 className="text-xl font-bold mb-4 text-indigo-400">Booking Summary</h4>
@@ -257,31 +281,6 @@ export default function Step4Contact({
         </div>
       </div>
 
-      {/* Terms and Conditions */}
-      <div className="bg-yellow-900/20 border-2 border-yellow-500/50 rounded-lg p-6 mb-6">
-        <div className="flex items-start gap-4">
-          <input
-            type="checkbox"
-            id="terms-checkbox"
-            checked={acceptedTerms}
-            onChange={(e) => setAcceptedTerms(e.target.checked)}
-            className="mt-1 w-5 h-5 rounded border-yellow-500 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-gray-900 cursor-pointer"
-          />
-          <label htmlFor="terms-checkbox" className="text-gray-200 text-sm cursor-pointer">
-            I have read and agree to the{' '}
-            <Link 
-              href="/interviews/terms" 
-              target="_blank"
-              className="text-indigo-400 hover:text-indigo-300 underline font-semibold"
-            >
-              Terms and Conditions
-            </Link>
-            , including the <span className="text-yellow-300 font-semibold">no refund policy</span> and{' '}
-            <span className="text-yellow-300 font-semibold">24-hour rescheduling restriction</span>. *
-          </label>
-        </div>
-      </div>
-
       {canProceedToPayment() && (
         <div className="text-center">
           <motion.button
@@ -298,7 +297,7 @@ export default function Step4Contact({
             Complete Purchase - £{calculatePrice()}
           </motion.button>
           {!acceptedTerms && (
-            <p className="text-yellow-400 text-sm mt-3">
+            <p className="text-indigo-400 text-sm mt-3">
               Please accept the terms and conditions to continue
             </p>
           )}
