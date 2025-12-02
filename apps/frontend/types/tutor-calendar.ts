@@ -140,7 +140,7 @@ export interface TutorCalendarContextType {
   pendingChanges: PendingChange[];
   hasPendingChanges: boolean;
   currentUserId: string | null;
-  userRole: 'admin' | 'tutor' | null;
+  userRole: 'admin' | 'manager' | 'tutor' | null;
 
   // Actions
   setSelectedDate: (date: Date) => void;
@@ -159,7 +159,7 @@ export interface TutorCalendarContextType {
   commitChanges: () => Promise<void>;
   discardChanges: () => void;
   setCurrentUserId: (userId: string | null) => void;
-  setUserRole: (role: 'admin' | 'tutor' | null) => void;
+  setUserRole: (role: 'admin' | 'manager' | 'tutor' | null) => void;
 }
 
 // ============================================================================

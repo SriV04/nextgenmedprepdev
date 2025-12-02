@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, Plus } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import { formatDate, formatDateHeader } from './utils/calendarUtils';
+import { CalendarPicker } from './CalendarPicker';
 
 interface CalendarHeaderProps {
   onCreateInterview: () => void;
@@ -24,35 +25,9 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onCreateIntervie
     setSelectedDate(newDate);
   };
 
-  const handleCalendarDateChange = (year: number, month: number, day: number) => {
-    const newDate = new Date(year, month, day);
-    setSelectedDate(newDate);
+  const handleCalendarDateChange = (date: Date) => {
+    setSelectedDate(date);
     setShowDatePicker(false);
-  };
-
-  const currentMonth = selectedDate.getMonth();
-  const currentYear = selectedDate.getFullYear();
-
-  // Generate calendar grid for current month
-  const generateCalendarDays = () => {
-    const firstDay = new Date(currentYear, currentMonth, 1);
-    const lastDay = new Date(currentYear, currentMonth + 1, 0);
-    const startingDayOfWeek = firstDay.getDay();
-    const daysInMonth = lastDay.getDate();
-
-    const days = [];
-    
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(null);
-    }
-    
-    // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(day);
-    }
-    
-    return days;
   };
 
   return (
@@ -146,90 +121,11 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ onCreateIntervie
 
       {/* Calendar Picker Dropdown */}
       {showDatePicker && (
-        <div className="absolute mt-2 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 min-w-[280px]">
-          {/* Month/Year Header */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setMonth(newDate.getMonth() - 1);
-                setSelectedDate(newDate);
-              }}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <div className="text-sm font-semibold text-gray-900">
-              {selectedDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
-            </div>
-            <button
-              onClick={() => {
-                const newDate = new Date(selectedDate);
-                newDate.setMonth(newDate.getMonth() + 1);
-                setSelectedDate(newDate);
-              }}
-              className="p-1 hover:bg-gray-100 rounded transition-colors"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-
-          {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-              <div key={day} className="text-center text-xs font-medium text-gray-500 py-1">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar Days */}
-          <div className="grid grid-cols-7 gap-1">
-            {generateCalendarDays().map((day, index) => {
-              const isToday = day === new Date().getDate() && 
-                             currentMonth === new Date().getMonth() && 
-                             currentYear === new Date().getFullYear();
-              const isSelected = day === selectedDate.getDate() && 
-                                currentMonth === selectedDate.getMonth() && 
-                                currentYear === selectedDate.getFullYear();
-              
-              return (
-                <button
-                  key={index}
-                  onClick={() => day && handleCalendarDateChange(currentYear, currentMonth, day)}
-                  disabled={!day}
-                  className={`
-                    h-8 flex items-center justify-center text-sm rounded transition-colors
-                    ${!day ? 'invisible' : ''}
-                    ${isSelected ? 'bg-blue-600 text-white font-semibold' : ''}
-                    ${isToday && !isSelected ? 'bg-blue-100 text-blue-600 font-semibold' : ''}
-                    ${!isSelected && !isToday && day ? 'hover:bg-gray-100 text-gray-700' : ''}
-                  `}
-                >
-                  {day}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mt-4 pt-3 border-t border-gray-200 flex gap-2">
-            <button
-              onClick={() => {
-                setSelectedDate(new Date());
-                setShowDatePicker(false);
-              }}
-              className="flex-1 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded transition-colors font-medium"
-            >
-              Today
-            </button>
-            <button
-              onClick={() => setShowDatePicker(false)}
-              className="flex-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors"
-            >
-              Close
-            </button>
-          </div>
+        <div className="absolute mt-2 z-50 min-w-[280px]">
+          <CalendarPicker
+            selectedDate={selectedDate}
+            onDateChange={handleCalendarDateChange}
+          />
         </div>
       )}
     </div>

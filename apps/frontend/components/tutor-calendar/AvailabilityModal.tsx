@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Plus, Trash2, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Calendar, Clock, Plus, Trash2, Check, User } from 'lucide-react';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import type { DateAvailabilitySlot } from '../../types/tutor-calendar';
+import { CalendarPicker } from './CalendarPicker';
 
 const AvailabilityModal: React.FC = () => {
   const {
@@ -13,35 +14,61 @@ const AvailabilityModal: React.FC = () => {
     closeAvailabilityModal,
     markSlotsAvailable,
     removeAvailability,
-    refreshData
+    refreshData,
+    userRole
   } = useTutorCalendar();
 
-  // Get current user's tutor profile
-  const currentTutor = tutors.find(t => t.tutorId === currentUserId);
-  const tutorName = currentTutor?.tutorName || 'Your';
+  const isAdminOrManager = userRole === 'admin' || userRole === 'manager';
+  
+  // State for selected tutor (for admins/managers)
+  const [selectedTutorId, setSelectedTutorId] = useState<string | null>(null);
+  
+  // Get the tutor to manage (selected tutor for admins/managers, current user for tutors)
+  const managingTutorId = isAdminOrManager ? selectedTutorId : currentUserId;
+  const managingTutor = tutors.find(t => t.tutorId === managingTutorId);
+  const tutorName = managingTutor?.tutorName || 'Your';
 
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedHours, setSelectedHours] = useState<Set<number>>(new Set());
   const [existingSlots, setExistingSlots] = useState<DateAvailabilitySlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize with today's date
+  // Initialize selected tutor for admins/managers
   useEffect(() => {
-    if (isAvailabilityModalOpen && !selectedDate) {
-      const today = new Date();
-      setSelectedDate(today.toISOString().split('T')[0]);
+    if (isAvailabilityModalOpen && isAdminOrManager && !selectedTutorId && tutors.length > 0) {
+      setSelectedTutorId(tutors[0].tutorId);
     }
-  }, [isAvailabilityModalOpen]);
+  }, [isAvailabilityModalOpen, isAdminOrManager, selectedTutorId, tutors]);
+
+  // Handle click outside to close date picker
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+        setShowDatePicker(false);
+      }
+    };
+
+    if (showDatePicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDatePicker]);
 
   // Load existing availability for selected date
   useEffect(() => {
-    if (isAvailabilityModalOpen && selectedDate && currentTutor) {
-      const slots = currentTutor.schedule[selectedDate] || [];
+    if (isAvailabilityModalOpen && managingTutor) {
+      const dateString = selectedDate.toISOString().split('T')[0];
+      const slots = managingTutor.schedule[dateString] || [];
       const dateSlots: DateAvailabilitySlot[] = slots
         .filter(s => s.type === 'available')
         .map(s => ({
           id: s.id,
-          date: selectedDate,
+          date: dateString,
           hour_start: parseInt(s.startTime.split(':')[0], 10),
           hour_end: parseInt(s.endTime.split(':')[0], 10),
           isExisting: true
@@ -50,7 +77,7 @@ const AvailabilityModal: React.FC = () => {
     } else {
       setExistingSlots([]);
     }
-  }, [isAvailabilityModalOpen, selectedDate, currentTutor]);
+  }, [isAvailabilityModalOpen, selectedDate, managingTutor]);
 
   const hours: number[] = Array.from({ length: 13 }, (_, i) => i + 9); // 9 AM to 9 PM
 
@@ -78,16 +105,18 @@ const AvailabilityModal: React.FC = () => {
   };
 
   const handleAddAvailability = async (): Promise<void> => {
-    if (!currentUserId || !selectedDate || selectedHours.size === 0) {
+    if (!managingTutorId || selectedHours.size === 0) {
       alert('Please select at least one hour to add availability.');
       return;
     }
 
+    const dateString = selectedDate.toISOString().split('T')[0];
+
     setIsLoading(true);
     try {
       const slotsToAdd = Array.from(selectedHours).map(hour => ({
-        tutorId: currentUserId,
-        date: selectedDate,
+        tutorId: managingTutorId,
+        date: dateString,
         time: `${String(hour).padStart(2, '0')}:00`
       }));
 
@@ -106,7 +135,7 @@ const AvailabilityModal: React.FC = () => {
   };
 
   const handleRemoveSlot = async (slot: DateAvailabilitySlot): Promise<void> => {
-    if (!slot.id || !currentUserId) return;
+    if (!slot.id || !managingTutorId) return;
 
     if (!confirm(`Remove availability for ${formatHour(slot.hour_start)}?`)) {
       return;
@@ -114,7 +143,7 @@ const AvailabilityModal: React.FC = () => {
 
     setIsLoading(true);
     try {
-      await removeAvailability([{ tutorId: currentUserId, slotId: slot.id }]);
+      await removeAvailability([{ tutorId: managingTutorId, slotId: slot.id }]);
       
       // Refresh to get updated data
       await refreshData();
@@ -150,14 +179,14 @@ const AvailabilityModal: React.FC = () => {
 
   if (!isAvailabilityModalOpen) return null;
 
-  if (!currentUserId || !currentTutor) {
+  if (!managingTutorId || !managingTutor) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20">
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={closeAvailabilityModal}></div>
           <div className="inline-block bg-white rounded-lg p-6 shadow-xl max-w-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Authentication Required</h3>
-            <p className="text-gray-600 mb-4">You must be signed in as a tutor to manage availability.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{isAdminOrManager ? 'No Tutor Selected' : 'Authentication Required'}</h3>
+            <p className="text-gray-600 mb-4">{isAdminOrManager ? 'Please select a tutor to manage their availability.' : 'You must be signed in as a tutor to manage availability.'}</p>
             <button
               onClick={closeAvailabilityModal}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -183,9 +212,30 @@ const AvailabilityModal: React.FC = () => {
         <div className="inline-block align-bottom bg-white rounded-lg px-6 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">Manage Your Availability</h3>
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold text-gray-900">Manage {isAdminOrManager ? 'Tutor' : 'Your'} Availability</h3>
               <p className="text-sm text-gray-500 mt-1">{tutorName}'s Schedule</p>
+              
+              {/* Tutor Selector for Admins/Managers */}
+              {isAdminOrManager && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <User className="w-4 h-4 inline mr-1" />
+                    Select Tutor
+                  </label>
+                  <select
+                    value={selectedTutorId || ''}
+                    onChange={(e) => setSelectedTutorId(e.target.value)}
+                    className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {tutors.map((tutor) => (
+                      <option key={tutor.tutorId} value={tutor.tutorId}>
+                        {tutor.tutorName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             <button
               onClick={closeAvailabilityModal}
@@ -205,18 +255,40 @@ const AvailabilityModal: React.FC = () => {
 
               <div className="space-y-4">
                 {/* Date Picker */}
-                <div>
+                <div className="relative" ref={datePickerRef}>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <Calendar className="w-4 h-4 inline mr-1" />
                     Select Date
                   </label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                  <button
+                    onClick={() => setShowDatePicker(!showDatePicker)}
+                    type="button"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-between"
+                  >
+                    <span className="text-sm font-medium text-gray-900">
+                      {selectedDate.toLocaleDateString('en-GB', { 
+                        weekday: 'short',
+                        day: 'numeric', 
+                        month: 'long',
+                        year: 'numeric' 
+                      })}
+                    </span>
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                  </button>
+                  
+                  {/* Calendar Picker Dropdown */}
+                  {showDatePicker && (
+                    <div className="absolute mt-2 z-50 min-w-[280px]">
+                      <CalendarPicker
+                        selectedDate={selectedDate}
+                        onDateChange={(date) => {
+                          setSelectedDate(date);
+                          setShowDatePicker(false);
+                        }}
+                        minDate={new Date()}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Quick Select Buttons */}
@@ -309,15 +381,13 @@ const AvailabilityModal: React.FC = () => {
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-green-600" />
                 Current Availability
-                {selectedDate && (
-                  <span className="text-sm font-normal text-gray-600">
-                    ({new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-GB', { 
-                      weekday: 'short', 
-                      day: 'numeric', 
-                      month: 'short' 
-                    })})
-                  </span>
-                )}
+                <span className="text-sm font-normal text-gray-600">
+                  ({selectedDate.toLocaleDateString('en-GB', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short' 
+                  })})
+                </span>
               </h4>
 
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
