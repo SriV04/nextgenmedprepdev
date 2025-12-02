@@ -52,7 +52,7 @@ const teamMembers: TeamMember[] = [
   // Support Team
   {
     name: 'Srihasha Vitta',
-    role: 'Support Team',
+    role: 'Manager',
     bio: 'Srihasha ensures our students have the best possible experience with NextGen Med Prep. Managing our operational processes and student support systems, he is dedicated to helping each student succeed.',
     image: '/headshots/[NGMP] Sriharsha.png', 
     section: 'support'
@@ -292,7 +292,7 @@ export default function AboutPage() {
               variants={fadeInUp}
             >
               <ChatBubbleLeftRightIcon className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Operations Team</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Management Team</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Meet the people who ensure your journey with us is smooth and successful
               </p>
