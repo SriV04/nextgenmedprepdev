@@ -47,19 +47,19 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       setLoading(true);
       setError(null);
 
-      // Calculate date range (current week)
+      // Calculate date range - fetch from start of current week to 3 months ahead
       const today = new Date();
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - today.getDay());
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 13); // 2 weeks
+      const endDate = new Date(today);
+      endDate.setMonth(today.getMonth() + 3); // 3 months ahead
 
       const startDate = startOfWeek.toISOString().split('T')[0];
-      const endDate = endOfWeek.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
 
       // Fetch tutors with availability
       const tutorsRes = await fetch(
-        `${backendUrl}/api/v1/tutors/with-availability?start_date=${startDate}&end_date=${endDate}`
+        `${backendUrl}/api/v1/tutors/with-availability?start_date=${startDate}&end_date=${endDateStr}`
       );
       const tutorsData = await tutorsRes.json();
 
