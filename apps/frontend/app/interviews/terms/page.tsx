@@ -26,186 +26,193 @@ export default function InterviewTermsPage() {
           
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
+            <p className="text-gray-700 mb-2">
+              These Terms and Conditions ("Terms") apply to all mock interview services provided by NextGen Med Prep ("we", "us", "our").
+            </p>
             <p className="text-gray-700 mb-4">
-              These Terms and Conditions ("Terms") govern your use of NextGen Med Prep's mock interview services. 
-              By booking a mock interview session, you agree to be bound by these Terms.
+              By booking a mock interview, you confirm that you have read and agreed to these Terms.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Booking and Payment</h2>
-            <p className="text-gray-700 mb-2">2.1. All mock interview bookings must be paid in full at the time of booking.</p>
-            <p className="text-gray-700 mb-2">2.2. Payment confirms your acceptance of these Terms and secures your interview slot.</p>
-            <p className="text-gray-700 mb-4">2.3. Prices are subject to change, but confirmed bookings will honor the price paid at the time of booking.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Booking & Payment</h2>
+            <p className="text-gray-700 mb-2">2.1. All mock interview sessions must be paid for in full at the time of booking.</p>
+            <p className="text-gray-700 mb-2">2.2. Payment confirms your interview slot and acceptance of these Terms.</p>
+            <p className="text-gray-700 mb-4">2.3. Pricing may change, but confirmed bookings always remain at the price paid.</p>
           </section>
 
           <section className="mb-8 bg-red-50 border-l-4 border-red-500 p-6 rounded">
-            <h2 className="text-2xl font-bold text-red-900 mb-4">3. No Refund Policy</h2>
-            <p className="text-red-900 font-semibold mb-4">
-              3.1. All sales are final. No refunds will be issued under any circumstances, including but not limited to:
+            <h2 className="text-2xl font-bold text-red-900 mb-4">3. Refund Policy</h2>
+            <p className="text-red-900 font-semibold mb-2">
+              3.1. Mock interview bookings are non-refundable.
+            </p>
+            <p className="text-red-900 mb-2">This includes circumstances such as:</p>
+            <ul className="list-disc pl-6 text-red-900 mb-4 space-y-1">
+              <li>change of mind</li>
+              <li>timetable changes</li>
+              <li>personal emergencies</li>
+              <li>technical issues on the student's side</li>
+              <li>dissatisfaction with the session</li>
+              <li>failure to attend</li>
+            </ul>
+            <p className="text-red-900 mb-2">
+              3.2. If we need to cancel due to tutor illness, emergencies, or technical issues on our side, you may choose either:
             </p>
             <ul className="list-disc pl-6 text-red-900 mb-4 space-y-1">
-              <li>Change of mind</li>
-              <li>Schedule conflicts</li>
-              <li>Personal emergencies</li>
-              <li>Technical difficulties on the student's end</li>
-              <li>Dissatisfaction with the service</li>
-              <li>Failure to attend the scheduled interview</li>
+              <li>a full refund, or</li>
+              <li>a free reschedule</li>
             </ul>
             <p className="text-red-900">
-              3.2. In the event that NextGen Med Prep cancels a session due to tutor unavailability or technical issues on our end, 
-              a full refund or reschedule will be offered at the student's discretion.
+              3.3. In exceptional circumstances (e.g., bereavement), we may review cases individually at our discretion.
             </p>
           </section>
 
           <section className="mb-8 bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded">
             <h2 className="text-2xl font-bold text-yellow-900 mb-4">4. Rescheduling Policy</h2>
             <p className="text-yellow-900 font-semibold mb-4">
-              4.1. No rescheduling is permitted within 24 hours of the scheduled interview time.
+              4.1. Rescheduling is permitted only with at least 24 hours' notice (a full 24 hours).
             </p>
             <p className="text-yellow-900 mb-2">
-              4.2. Requests to reschedule must be submitted at least 24 hours (full 24 hours) before your scheduled interview time.
+              4.2. All requests must be made via email or direct message to a tutor.
             </p>
             <p className="text-yellow-900 mb-2">
-              4.3. Rescheduling requests made with appropriate notice (24+ hours in advance) will be accommodated subject to tutor availability.
+              4.3. Rescheduling is subject to tutor availability.
             </p>
             <p className="text-yellow-900 mb-2">
-              4.4. Only one reschedule per booking is permitted. Subsequent reschedule requests may be denied.
+              4.4. Only one reschedule is allowed per mock.
             </p>
             <p className="text-yellow-900 mb-2">
-              4.5. Rescheduling requests must be submitted via email or direct communication with a tutor.
+              4.5. Requests made within 24 hours of the scheduled time cannot be accommodated.
             </p>
             <p className="text-yellow-900">
-              4.6. Late arrivals or no-shows will not be eligible for rescheduling or refunds.
+              4.6. No-shows are not eligible for rescheduling or refunds.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Cancellation Policy</h2>
-            <p className="text-gray-700 mb-2">5.1. If you need to cancel your mock interview, you must provide notice at least 24 hours in advance.</p>
-            <p className="text-gray-700 mb-2 font-semibold">
-              5.2. Cancellations made within 24 hours of the scheduled time will result in forfeiture of the full payment with no refund.
-            </p>
-            <p className="text-gray-700 mb-4">
-              5.3. Cancellations made with appropriate notice (24+ hours) will not receive a refund but may be eligible for one reschedule attempt.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Attendance and Punctuality</h2>
-            <p className="text-gray-700 mb-2">6.1. Students are expected to arrive on time for their scheduled mock interview.</p>
-            <p className="text-gray-700 mb-2">6.2. Late arrivals will not receive additional time, and the session will end at the originally scheduled time.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Cancellations</h2>
             <p className="text-gray-700 mb-2">
-              6.3. If a student is more than 15 minutes late, the session may be cancelled with no refund or reschedule option.
+              5.1. Cancellations made with 24+ hours' notice will not be refunded but may use their one reschedule.
+            </p>
+            <p className="text-gray-700 mb-4 font-semibold">
+              5.2. Cancellations with less than 24 hours' notice result in full forfeiture of payment.
+            </p>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Attendance & Punctuality</h2>
+            <p className="text-gray-700 mb-2">
+              6.1. Students should join the session on time using the correct meeting link.
+            </p>
+            <p className="text-gray-700 mb-2">
+              6.2. Sessions will finish at the scheduled end time, even if the student arrives late.
+            </p>
+            <p className="text-gray-700 mb-2">
+              6.3. Students arriving more than 15 minutes late may have their session cancelled with no refund or reschedule.
             </p>
             <p className="text-gray-700 mb-4">
-              6.4. Students are responsible for ensuring they have the correct meeting link and technical setup prior to the session.
+              6.4. We recommend joining 5–10 minutes early to test your setup.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Technical Requirements</h2>
-            <p className="text-gray-700 mb-2">
-              7.1. Students are responsible for having a stable internet connection, functioning camera, and microphone.
-            </p>
-            <p className="text-gray-700 mb-2">
-              7.2. Technical issues on the student's end (internet connectivity, hardware problems, etc.) do not qualify for refunds or rescheduling.
-            </p>
             <p className="text-gray-700 mb-4">
-              7.3. It is recommended that students test their equipment at least 30 minutes before the scheduled interview time.
+              7.1. Students are responsible for having a stable internet connection and working camera/microphone.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Session Conduct</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Conduct During Sessions</h2>
             <p className="text-gray-700 mb-2">
-              8.1. Mock interviews are conducted professionally and students are expected to treat tutors with respect.
+              8.1. Our tutors provide sessions in a respectful and professional manner.
             </p>
             <p className="text-gray-700 mb-2">
-              8.2. NextGen Med Prep reserves the right to terminate a session if a student engages in inappropriate, abusive, or disrespectful behavior.
+              8.2. Students must behave respectfully towards tutors.
             </p>
             <p className="text-gray-700 mb-4">
-              8.3. Terminated sessions due to student misconduct will not be eligible for refunds or rescheduling.
+              8.3. Inappropriate, abusive, or disruptive behaviour may result in immediate termination of the session with no refund.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Confidentiality and Recording</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Recording & Confidentiality</h2>
             <p className="text-gray-700 mb-2">
-              9.1. All mock interview sessions may be recorded for quality assurance and training purposes.
+              9.1. Some sessions may be recorded for training and quality assurance.
             </p>
             <p className="text-gray-700 mb-2">
-              9.2. Students may not record sessions without prior written consent from NextGen Med Prep.
+              9.2. By booking, you give clear consent for these recordings.
+            </p>
+            <p className="text-gray-700 mb-2">
+              9.3. Students may not record sessions without written permission from NextGen Med Prep.
             </p>
             <p className="text-gray-700 mb-4">
-              9.3. All information shared during sessions is confidential and will not be shared with third parties except as required by law.
+              9.4. All session content is confidential and will not be shared outside NextGen Med Prep except as required by law.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Feedback and Evaluation</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Feedback</h2>
             <p className="text-gray-700 mb-2">
-              10.1. Tutors will provide constructive feedback during and/or after the mock interview session.
+              10.1. Tutors provide verbal or written feedback as guidance for improvement.
             </p>
             <p className="text-gray-700 mb-2">
-              10.2. Feedback is provided as guidance only and does not guarantee specific outcomes in actual interviews.
+              10.2. Feedback does not guarantee performance in real interviews.
             </p>
             <p className="text-gray-700 mb-4">
-              10.3. Students may request written feedback within 48 hours of their session, subject to tutor availability.
+              10.3. Written feedback can be requested within 48 hours of the session and will be provided subject to tutor availability.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Limitation of Liability</h2>
             <p className="text-gray-700 mb-2">
-              11.1. NextGen Med Prep provides mock interview services for educational and preparatory purposes only.
+              11.1. Our mock interview service is educational and preparatory in nature.
             </p>
             <p className="text-gray-700 mb-2">
-              11.2. We do not guarantee admission to any institution or success in actual interviews.
+              11.2. We do not guarantee admission to any university or a specific interview outcome.
             </p>
             <p className="text-gray-700 mb-4">
-              11.3. Our liability is limited to the amount paid for the specific mock interview service.
+              11.3. Our total liability is limited to the amount paid for that specific session.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Force Majeure</h2>
             <p className="text-gray-700 mb-2">
-              12.1. NextGen Med Prep is not liable for failure to perform services due to circumstances beyond our reasonable control, 
-              including but not limited to natural disasters, power outages, or internet service disruptions.
+              12.1. We are not responsible for delays or cancellations due to reasons beyond our control (e.g., power outages, severe weather, network failures).
             </p>
             <p className="text-gray-700 mb-4">
-              12.2. In such cases, we will make reasonable efforts to reschedule the session or provide a refund at our discretion.
+              12.2. In such cases, we will offer a reschedule or refund at our discretion.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Modifications to Terms</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Changes to These Terms</h2>
             <p className="text-gray-700 mb-2">
-              13.1. NextGen Med Prep reserves the right to modify these Terms at any time.
+              13.1. We may update these Terms from time to time.
             </p>
             <p className="text-gray-700 mb-2">
-              13.2. Changes will be effective immediately upon posting to our website.
+              13.2. Changes become effective as soon as they are posted on our website.
             </p>
             <p className="text-gray-700 mb-4">
-              13.3. Continued use of our services after changes constitutes acceptance of the modified Terms.
+              13.3. Continued use of our service means you accept the updated Terms.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Contact Information</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Contact Us</h2>
             <p className="text-gray-700 mb-2">
-              For questions regarding these Terms and Conditions, please contact:
+              For questions or help with your booking:
             </p>
-            <p className="text-gray-700 font-semibold">NextGen Med Prep</p>
             <p className="text-gray-700">Email: contact@nextgenmedprep.com</p>
-            <p className="text-gray-700 mb-4">Website: https://www.nextgenmedprep.com</p>
+            <p className="text-gray-700 mb-4">Website: nextgenmedprep.com</p>
           </section>
 
           <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded mt-8">
             <p className="text-blue-900 font-semibold">
               By booking a mock interview with NextGen Med Prep, you acknowledge that you have read, understood, 
-              and agree to be bound by these Terms and Conditions, including the no refund policy and 24-hour rescheduling restriction.
+              and agree to be bound by these Terms and Conditions, including the non-refundable policy and 24-hour rescheduling requirement.
             </p>
           </div>
         </div>
