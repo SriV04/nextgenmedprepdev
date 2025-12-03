@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import { createSupabaseClient } from '../../supabase/config';
 
 // Load environment variables from the root .env file
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
@@ -68,9 +69,6 @@ class ZoomService {
     { email: 'tutor@nextgenmedprep.com', userId: 'tutor@nextgenmedprep.com' },
     { email: 'contact@nextgenmedprep.com', userId: 'contact@nextgenmedprep.com' },
   ];
-  
-  // Track which host is handling which time slot
-  private hostSchedule: Map<string, Set<string>> = new Map();
 
   constructor() {
     this.accountId = process.env.ZOOM_ACCOUNT_ID || '';
@@ -85,11 +83,6 @@ class ZoomService {
         ZOOM_CLIENT_SECRET: !!this.clientSecret
       });
     }
-    
-    // Initialize schedule tracking for each host
-    this.zoomHosts.forEach(host => {
-      this.hostSchedule.set(host.email, new Set());
-    });
     
     console.log(`Zoom service initialized with ${this.zoomHosts.length} licensed hosts:`, 
       this.zoomHosts.map(h => h.email).join(', '));
@@ -138,49 +131,47 @@ class ZoomService {
   }
 
   /**
-   * Get available host for a given time slot
-   * Implements round-robin load balancing
+   * Get available host for a given time slot by checking database
+   * Throws error if no hosts are available
    */
-  private getAvailableHost(startTime: Date): ZoomHost {
-    const timeKey = startTime.toISOString();
+  private async getAvailableHost(startTime: Date): Promise<ZoomHost> {
+    const supabase = createSupabaseClient();
     
-    // Find a host that doesn't have a meeting at this time
+    // Calculate time window (1 hour before and after to account for overlapping meetings)
+    const startWindow = new Date(startTime.getTime() - 60 * 60 * 1000); // 1 hour before
+    const endWindow = new Date(startTime.getTime() + 60 * 60 * 1000);   // 1 hour after
+    
+    console.log(`Checking host availability for ${startTime.toISOString()}`);
+    
+    // Find a host that doesn't have a meeting in this time window
     for (const host of this.zoomHosts) {
-      const hostSchedule = this.hostSchedule.get(host.email);
-      if (hostSchedule && !hostSchedule.has(timeKey)) {
-        console.log(`Assigning meeting to host: ${host.email}`);
+      // Query database for any interviews assigned to this host during the time window
+      const { data: conflicts, error } = await supabase
+        .from('interviews')
+        .select('id, scheduled_at, zoom_host_email')
+        .eq('zoom_host_email', host.email)
+        .gte('scheduled_at', startWindow.toISOString())
+        .lte('scheduled_at', endWindow.toISOString())
+        .not('completed', 'is', true); // Exclude completed interviews
+      
+      if (error) {
+        console.error(`Error checking availability for ${host.email}:`, error);
+        continue; // Skip this host if there's an error
+      }
+      
+      if (!conflicts || conflicts.length === 0) {
+        console.log(`✓ Host ${host.email} is available at ${startTime.toISOString()}`);
         return host;
+      } else {
+        console.log(`✗ Host ${host.email} has ${conflicts.length} conflicting meeting(s) at this time`);
       }
     }
     
-    // If all hosts are busy, use round-robin (first available)
-    console.warn(`All hosts busy at ${timeKey}, using round-robin assignment`);
-    return this.zoomHosts[0];
+    // If all hosts are busy, throw an error
+    throw new Error(`All Zoom hosts are busy at ${startTime.toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Please select a different time slot or contact support.`);
   }
 
-  /**
-   * Mark a time slot as occupied for a host
-   */
-  private markTimeSlot(hostEmail: string, startTime: Date): void {
-    const timeKey = startTime.toISOString();
-    const hostSchedule = this.hostSchedule.get(hostEmail);
-    if (hostSchedule) {
-      hostSchedule.add(timeKey);
-      console.log(`Marked ${timeKey} as occupied for ${hostEmail}`);
-    }
-  }
 
-  /**
-   * Clear a time slot for a host
-   */
-  private clearTimeSlot(hostEmail: string, startTime: Date): void {
-    const timeKey = startTime.toISOString();
-    const hostSchedule = this.hostSchedule.get(hostEmail);
-    if (hostSchedule) {
-      hostSchedule.delete(timeKey);
-      console.log(`Cleared ${timeKey} for ${hostEmail}`);
-    }
-  }
 
   /**
    * Create a Zoom meeting with automatic host selection
@@ -197,7 +188,7 @@ class ZoomService {
       const token = await this.getAccessToken();
 
       // Get available host for this time slot
-      const host = this.getAvailableHost(params.startTime);
+      const host = await this.getAvailableHost(params.startTime);
 
       // Format start time in ISO 8601
       const startTimeISO = params.startTime.toISOString();
@@ -236,9 +227,6 @@ class ZoomService {
       }
 
       const meeting = await response.json() as ZoomMeetingResponse;
-      
-      // Mark this time slot as occupied for this host
-      this.markTimeSlot(host.email, params.startTime);
       
       console.log('Successfully created Zoom meeting:', {
         id: meeting.id,
@@ -348,11 +336,6 @@ class ZoomService {
         throw new Error(`Failed to delete Zoom meeting: ${response.status} - ${errorText}`);
       }
 
-      // Clear the time slot for this host
-      if (meeting.host_email && meeting.start_time) {
-        this.clearTimeSlot(meeting.host_email, new Date(meeting.start_time));
-      }
-
       console.log('Successfully deleted Zoom meeting:', meetingId);
     } catch (error) {
       console.error('Error deleting Zoom meeting:', error);
@@ -398,11 +381,24 @@ class ZoomService {
   }
 
   /**
-   * Get schedule for a specific host
+   * Get schedule for a specific host from database
    */
-  getHostSchedule(hostEmail: string): string[] {
-    const schedule = this.hostSchedule.get(hostEmail);
-    return schedule ? Array.from(schedule) : [];
+  async getHostSchedule(hostEmail: string): Promise<Array<{ id: string; scheduled_at: string; zoom_meeting_id?: string }>> {
+    const supabase = createSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('interviews')
+      .select('id, scheduled_at, zoom_meeting_id')
+      .eq('zoom_host_email', hostEmail)
+      .not('completed', 'is', true)
+      .order('scheduled_at', { ascending: true });
+    
+    if (error) {
+      console.error(`Error getting schedule for ${hostEmail}:`, error);
+      return [];
+    }
+    
+    return data || [];
   }
 
   /**
