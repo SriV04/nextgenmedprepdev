@@ -13,6 +13,11 @@ router.get('/bookings/stats',
   asyncHandler(bookingController.getBookingStats.bind(bookingController))
 );
 
+// Create booking (admin use)
+router.post('/bookings', 
+  asyncHandler(bookingController.createBooking.bind(bookingController))
+);
+
 // Career consultation booking routes
 router.post('/bookings/career-consultation', 
   asyncHandler(bookingController.createCareerConsultation.bind(bookingController))

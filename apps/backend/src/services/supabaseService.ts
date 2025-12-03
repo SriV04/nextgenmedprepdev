@@ -147,6 +147,20 @@ class SupabaseService {
     return data;
   }
 
+  async getUserById(id: string): Promise<User | null> {
+    const { data, error } = await this.supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Failed to get user: ${error.message}`);
+    }
+
+    return data;
+  }
+
   async createUser(user: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
     const { data, error } = await this.supabase
       .from('users')

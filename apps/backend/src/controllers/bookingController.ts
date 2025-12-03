@@ -436,6 +436,66 @@ export class BookingController {
       });
     }
   }
+
+  /**
+   * Create a booking directly (admin use)
+   */
+  async createBooking(req: Request, res: Response): Promise<void> {
+    try {
+      console.log('=== Creating Booking (Admin) ===');
+      console.log('Request body:', req.body);
+
+      const {
+        user_id,
+        email,
+        package: packageName,
+        universities,
+        field,
+        phone,
+        notes,
+        payment_status,
+        amount
+      } = req.body;
+
+      // Basic validation
+      if (!user_id || !email) {
+        res.status(400).json({
+          success: false,
+          error: 'user_id and email are required'
+        });
+        return;
+      }
+
+      // Create booking
+      const booking = await supabaseService.createBooking({
+        user_id,
+        email,
+        package: packageName,
+        universities,
+        field,
+        phone,
+        notes,
+        payment_status: payment_status || 'paid',
+        amount: amount || 0,
+      });
+
+      console.log('Booking created successfully:', booking.id);
+
+      res.status(201).json({
+        success: true,
+        message: 'Booking created successfully',
+        data: booking
+      });
+    } catch (error: any) {
+      console.error('=== Create Booking Error ===');
+      console.error('Error details:', error);
+      
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Internal server error'
+      });
+    }
+  }
 }
 
 export const bookingController = new BookingController();

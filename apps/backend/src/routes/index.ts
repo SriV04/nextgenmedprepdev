@@ -10,6 +10,7 @@ import tutorRoutes from './tutors';
 import interviewRoutes from './interviews';
 import studentRoutes from './students';
 import universityRoutes from './universities';
+import userRoutes from './users';
 
 const router = Router();
 
@@ -35,5 +36,6 @@ router.use('/api/v1', tutorRoutes);
 router.use('/api/v1', interviewRoutes);
 router.use('/api/v1', studentRoutes);
 router.use('/api/v1', universityRoutes);
+router.use('/api/v1', userRoutes);
 
 export default router;
