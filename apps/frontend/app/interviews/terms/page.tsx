@@ -37,16 +37,16 @@ export default function InterviewTermsPage() {
           <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Attendance & Punctuality</h2>
             <p className="text-gray-700 mb-2">
-              6.1. Students should join the session on time using the correct meeting link.
+              2.1. Students should join the session on time using the correct meeting link.
             </p>
             <p className="text-gray-700 mb-2">
-              6.2. Sessions will finish at the scheduled end time, even if the student arrives late.
+              2.2. Sessions will finish at the scheduled end time, even if the student arrives late.
             </p>
             <p className="text-gray-700 mb-2">
-              6.3. Students arriving more than 15 minutes late may have their session cancelled with no refund or reschedule.
+              2.3. Students arriving more than 15 minutes late may have their session cancelled with no refund or reschedule.
             </p>
             <p className="text-gray-700 mb-4">
-              6.4. We recommend joining 5–10 minutes early to test your setup.
+              2.4. We recommend joining 5–10 minutes early to test your setup.
             </p>
           </section>
 
