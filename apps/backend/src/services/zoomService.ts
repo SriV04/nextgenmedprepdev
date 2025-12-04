@@ -138,8 +138,8 @@ class ZoomService {
     const supabase = createSupabaseClient();
     
     // Calculate time window (45 minutes before and after to account for overlapping meetings)
-    const startWindow = new Date(startTime.getTime() - 45 * 60 * 1000); // 45 minutes before
-    const endWindow = new Date(startTime.getTime() + 45 * 60 * 1000);   // 45 minutes after
+    const startWindow = new Date(startTime.getTime() - 75 * 60 * 1000); // 75 minutes before
+    const endWindow = new Date(startTime.getTime() + 75 * 60 * 1000);   // 75 minutes after
     
     console.log(`Checking host availability for ${startTime.toISOString()}`);
     
