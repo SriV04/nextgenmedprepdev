@@ -1230,7 +1230,8 @@ Booking ID: ${data.bookingId}
     studentEmail: string,
     studentName: string,
     scheduledAt: string | undefined,
-    universities: string
+    universities: string,
+    cancellationNotes?: string
   ): Promise<void> {
     let dateStr = 'Not yet scheduled';
     let timeStr = '';
@@ -1256,7 +1257,8 @@ Booking ID: ${data.bookingId}
       tutorName || 'your tutor',
       dateStr,
       timeStr,
-      universities
+      universities,
+      cancellationNotes
     );
 
     await this.transporter.sendMail({
@@ -1371,11 +1373,14 @@ Booking ID: ${data.bookingId}
     tutorName: string,
     dateStr: string,
     timeStr: string,
-    universities: string
+    universities: string,
+    cancellationNotes?: string
   ): EmailTemplate {
+    const notesSection = cancellationNotes ? `\n\nCancellation Reason:\n${cancellationNotes}\n` : '';
+    
     return {
       subject: `📅 Interview Rescheduling - NextGen MedPrep`,
-      text: `Hi ${studentName},\n\nWe're writing to inform you that your scheduled interview has been cancelled and will be rescheduled.\n\n${tutorName !== 'your tutor' ? `Tutor: ${tutorName}\n` : ''}${dateStr !== 'Not yet scheduled' ? `Original Date: ${dateStr}\n` : ''}${timeStr ? `Original Time: ${timeStr}\n` : ''}University: ${universities}\n\nWhat happens next:\n• Our team will reach out within 24 hours to reschedule your interview\n• We'll work with you to find a new time that suits your schedule\n• All your preparation materials remain valid\n\nWe apologize for any inconvenience caused. If you have any urgent questions, please contact us at contact@nextgenmedprep.com.\n\nBest regards,\nThe NextGen MedPrep Team`,
+      text: `Hi ${studentName},\n\nWe're writing to inform you that your scheduled interview has been cancelled and will be rescheduled.\n\n${tutorName !== 'your tutor' ? `Tutor: ${tutorName}\n` : ''}${dateStr !== 'Not yet scheduled' ? `Original Date: ${dateStr}\n` : ''}${timeStr ? `Original Time: ${timeStr}\n` : ''}University: ${universities}${notesSection}\n\nWhat happens next:\n• Our team will reach out within 24 hours to reschedule your interview\n• We'll work with you to find a new time that suits your schedule\n• All your preparation materials remain valid\n\nWe apologize for any inconvenience caused. If you have any urgent questions, please contact us at contact@nextgenmedprep.com.\n\nBest regards,\nThe NextGen MedPrep Team`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -1464,6 +1469,22 @@ Booking ID: ${data.bookingId}
                           </td>
                         </tr>
                       </table>
+
+                      ${cancellationNotes ? `
+                      <!-- Cancellation Reason -->
+                      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef3c7; border-radius: 12px; border-left: 4px solid #f59e0b; margin: 0 0 30px 0;">
+                        <tr>
+                          <td style="padding: 25px;">
+                            <h2 style="margin: 0 0 15px 0; color: #92400e; font-size: 18px; font-weight: 600;">
+                              📝 Cancellation Reason
+                            </h2>
+                            <p style="margin: 0; color: #78350f; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">
+                              ${cancellationNotes}
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                      ` : ''}
 
                       <!-- What's Next -->
                       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 8px; margin: 0 0 25px 0;">

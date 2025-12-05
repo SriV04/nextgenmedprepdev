@@ -146,7 +146,7 @@ export interface TutorCalendarContextType {
   setSelectedDate: (date: Date) => void;
   assignInterview: (tutorId: string, date: string, time: string, interviewId: string) => Promise<void>;
   createInterview: (data: { booking_id: string; student_id: string; university: string; scheduled_at: string; notes?: string }) => Promise<void>;
-  cancelInterview: (interviewId: string) => Promise<void>;
+  cancelInterview: (interviewId: string, cancellationNotes?: string) => Promise<void>;
   deleteInterview: (interviewId: string) => Promise<void>;
   markSlotsAvailable: (slots: { tutorId: string; date: string; time: string }[]) => Promise<void>;
   removeAvailability: (slots: { tutorId: string; slotId: string }[]) => Promise<void>;

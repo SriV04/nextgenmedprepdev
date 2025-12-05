@@ -597,12 +597,18 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
-  const cancelInterview = async (interviewId: string) => {
+  const cancelInterview = async (interviewId: string, cancellationNotes?: string) => {
     try {
       setLoading(true);
       
       const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}/cancel`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cancellation_notes: cancellationNotes || undefined,
+        }),
       });
 
       const result = await response.json();

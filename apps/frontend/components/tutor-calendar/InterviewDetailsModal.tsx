@@ -43,6 +43,10 @@ const InterviewDetailsModal: React.FC = () => {
   const [customTime, setCustomTime] = useState('09:00');
   const [customTutorId, setCustomTutorId] = useState('');
 
+  // Cancellation state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancellationNotes, setCancellationNotes] = useState('');
+
   // Find matching tutors for each student availability slot
   const availabilityMatches = useMemo<AvailabilityMatch[]>(() => {
     if (!selectedInterviewDetails?.studentAvailability || selectedInterviewDetails.studentAvailability.length === 0) {
@@ -174,12 +178,10 @@ const InterviewDetailsModal: React.FC = () => {
 
   // Handle cancel (unassign)
   const handleCancelInterview = async () => {
-    if (!confirm('Are you sure you want to cancel this interview? This will unassign the tutor, remove the Zoom meeting, and return the interview to unassigned status.')) {
-      return;
-    }
-
     try {
-      await cancelInterview(selectedInterviewDetails.id);
+      await cancelInterview(selectedInterviewDetails.id, cancellationNotes);
+      setShowCancelModal(false);
+      setCancellationNotes('');
       closeInterviewDetailsModal();
     } catch (error) {
       console.error('Error cancelling interview:', error);
@@ -316,7 +318,7 @@ const InterviewDetailsModal: React.FC = () => {
               
               <div className="mt-4 pt-3 border-t border-green-200 flex gap-2">
                 <button
-                  onClick={handleCancelInterview}
+                  onClick={() => setShowCancelModal(true)}
                   className="flex items-center gap-2 px-4 py-2 text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
                 >
                   <XCircle className="w-4 h-4" />
@@ -756,6 +758,81 @@ const InterviewDetailsModal: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Cancellation Modal */}
+      {showCancelModal && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50 rounded-xl">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+            <div className="bg-orange-600 text-white p-4 rounded-t-lg">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <XCircle className="w-6 h-6" />
+                Cancel Interview
+              </h3>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <p className="text-sm text-orange-800 mb-2">
+                  <strong>Warning:</strong> This will:
+                </p>
+                <ul className="text-sm text-orange-700 space-y-1 ml-4 list-disc">
+                  <li>Unassign the tutor from this interview</li>
+                  <li>Remove the Zoom meeting</li>
+                  <li>Send cancellation emails to the student and tutor</li>
+                  <li>Return the interview to unassigned status</li>
+                </ul>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <FileText className="w-4 h-4 inline mr-1" />
+                  Cancellation Notes (Optional)
+                </label>
+                <textarea
+                  value={cancellationNotes}
+                  onChange={(e) => setCancellationNotes(e.target.value)}
+                  placeholder="Provide a reason for cancellation (will be included in the email to the student)..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  These notes will be included in the cancellation email sent to the student.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 p-6 pt-0">
+              <button
+                onClick={handleCancelInterview}
+                disabled={isBooking}
+                className="flex-1 bg-orange-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              >
+                {isBooking ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Cancelling...
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="w-5 h-5" />
+                    Confirm Cancellation
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setCancellationNotes('');
+                }}
+                disabled={isBooking}
+                className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

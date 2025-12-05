@@ -546,6 +546,7 @@ export const cancelInterview = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    const { cancellation_notes } = req.body;
     const supabase = createSupabaseClient();
 
     // Get interview with full details including tutor and booking info
@@ -635,7 +636,8 @@ export const cancelInterview = async (
           studentEmail,
           studentName,
           interview.scheduled_at,
-          universities
+          universities,
+          cancellation_notes
         );
         console.log('Sent cancellation emails successfully');
       } catch (emailError) {

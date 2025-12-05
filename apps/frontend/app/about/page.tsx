@@ -48,6 +48,13 @@ const teamMembers: TeamMember[] = [
     image: '/headshots/[NGMP] Lucinda.png', 
     section: 'tutors'
   },
+  {
+    name: 'Cameron Mencia',
+    role: 'Expert Tutor',
+    bio: 'Cameron is a 4th-year medical student at Imperial College London with a strong passion for medical education. With over five years of tutoring experience, he has supported students across a range of subjects and abilities, helping them build confidence and achieve their academic goals. During his time at university, Cameron has been actively involved in teaching by hosting tutorials for Imperial’s Surgical Society. He has also demonstrated leadership and effective communication as Secretary of the Orthopaedic Society and as a student representative for his intercalated BSc, giving him valuable skills to support students through the medical school application process.',
+    image: '/headshots/[NGMP] Cameron.jpeg', 
+    section: 'tutors'
+  },
   
   // Support Team
   {
@@ -238,7 +245,7 @@ export default function AboutPage() {
           </div>
           
           <motion.div 
-            className="grid md:grid-cols-2 gap-8"
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
@@ -249,31 +256,29 @@ export default function AboutPage() {
               .map((tutor, index) => (
                 <motion.div 
                   key={index}
-                  className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-md overflow-hidden border border-gray-100"
+                  className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100 flex flex-col"
                   variants={fadeInUp}
                 >
-                  <div className="p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-blue-500 mr-4">
-                        {tutor.image ? (
-                          <Image 
-                            src={tutor.image} 
-                            alt={tutor.name} 
-                            fill 
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold">
-                            {tutor.name.charAt(0)}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-800">{tutor.name}</h3>
-                        <p className="text-blue-600">{tutor.role}</p>
-                      </div>
+                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 flex items-center justify-center">
+                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md">
+                      {tutor.image ? (
+                        <Image 
+                          src={tutor.image} 
+                          alt={tutor.name} 
+                          fill 
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+                          {tutor.name.charAt(0)}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-gray-600">{tutor.bio}</p>
+                  </div>
+                  <div className="p-6 flex-grow">
+                    <h3 className="text-xl font-bold text-gray-800 mb-1">{tutor.name}</h3>
+                    <p className="text-blue-600 font-semibold mb-4">{tutor.role}</p>
+                    <p className="text-gray-600 text-sm leading-relaxed">{tutor.bio}</p>
                   </div>
                 </motion.div>
               ))}
