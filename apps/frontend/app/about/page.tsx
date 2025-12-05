@@ -10,6 +10,7 @@ import { AcademicCapIcon, UserGroupIcon, ChatBubbleLeftRightIcon, RocketLaunchIc
 type TeamMember = {
   name: string;
   role: string;
+  title?: string; // Optional title for tutors
   bio: string;
   image?: string;
   section: 'founders' | 'tutors' | 'support';
@@ -37,6 +38,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Matthew Cranfield',
     role: 'Expert Tutor',
+    title: 'Scottish University Lead',
     bio: 'Matthew is a medical student at the University of Glasgow with a strong commitment to academic excellence and student development. At medical school, Matthew has built a reputation for diligence and academic success. He helps aspiring medical and dental students approach the application process with confidence through his constructive teaching style and structured guidance. Having served as Head Boy at his school, Matthew brings proven communication and leadership skills to his teaching.',
     image: '/headshots/[NGMP] Matthew.png',
     section: 'tutors'
@@ -44,6 +46,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Lucinda Slack',
     role: 'Expert Tutor',
+    title: 'Southern University Lead',
     bio: 'Lucinda Slack is a medical student at the University of Exeter, originally from London. She has regularly placed within the top ten percent of students in her cohort and has received awards for outstanding academic performance, including recognition for best overall results in applied medical knowledge. With her consistent record of excellence and clear, supportive teaching style, Lucinda helps students build the skills and confidence needed to succeed.',
     image: '/headshots/[NGMP] Lucinda.png', 
     section: 'tutors'
@@ -51,6 +54,7 @@ const teamMembers: TeamMember[] = [
   {
     name: 'Cameron Mencia',
     role: 'Expert Tutor',
+    title: 'London University Lead',
     bio: 'Cameron is a 4th-year medical student at Imperial College London with a strong passion for medical education. With over five years of tutoring experience, he has supported students across a range of subjects and abilities, helping them build confidence and achieve their academic goals. During his time at university, Cameron has been actively involved in teaching by hosting tutorials for Imperial’s Surgical Society. He has also demonstrated leadership and effective communication as Secretary of the Orthopaedic Society and as a student representative for his intercalated BSc, giving him valuable skills to support students through the medical school application process.',
     image: '/headshots/[NGMP] Cameron.jpeg', 
     section: 'tutors'
@@ -277,7 +281,7 @@ export default function AboutPage() {
                   </div>
                   <div className="p-6 flex-grow">
                     <h3 className="text-xl font-bold text-gray-800 mb-1">{tutor.name}</h3>
-                    <p className="text-blue-600 font-semibold mb-4">{tutor.role}</p>
+                    <p className="text-blue-600 font-semibold mb-4">{tutor.title}</p>
                     <p className="text-gray-600 text-sm leading-relaxed">{tutor.bio}</p>
                   </div>
                 </motion.div>
