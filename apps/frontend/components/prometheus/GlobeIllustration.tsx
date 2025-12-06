@@ -11,7 +11,7 @@ const pulseTransition = {
   duration: 4,
   repeat: Infinity,
   repeatType: 'reverse' as const,
-  ease: 'easeInOut',
+  ease: 'easeInOut' as const,
 };
 
 export default function GlobeIllustration({ className }: GlobeIllustrationProps) {
