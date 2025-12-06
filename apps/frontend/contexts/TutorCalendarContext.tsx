@@ -420,6 +420,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
         tutorEmail: interview.tutor?.email,
         scheduledAt: interview.scheduled_at,
         zoomJoinUrl: interview.zoom_join_url,
+        zoomHostEmail: interview.zoom_host_email,
       };
 
       setSelectedInterviewDetails(details);

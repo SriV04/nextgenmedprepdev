@@ -82,6 +82,7 @@ export interface InterviewDetails {
   tutorEmail?: string;
   scheduledAt?: string;
   zoomJoinUrl?: string;
+  zoomHostEmail?: string;
 }
 
 // ============================================================================
@@ -215,6 +216,7 @@ export interface BackendInterviewData {
   scheduled_at?: string;
   zoom_join_url?: string;
   zoom_meeting_id?: string;
+  zoom_host_email?: string;
   completed?: boolean;
   student_feedback?: string;
   tutor?: {

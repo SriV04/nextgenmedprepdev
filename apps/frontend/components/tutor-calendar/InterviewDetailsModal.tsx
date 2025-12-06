@@ -313,6 +313,11 @@ const InterviewDetailsModal: React.FC = () => {
                   >
                     {selectedInterviewDetails.zoomJoinUrl}
                   </a>
+                  {selectedInterviewDetails.zoomHostEmail && (
+                    <div className="mt-2 text-xs text-gray-600">
+                      <span className="font-medium">Host Account:</span> {selectedInterviewDetails.zoomHostEmail}
+                    </div>
+                  )}
                 </div>
               )}
               
