@@ -38,13 +38,21 @@
     "medical-school",
     "dental-school",
     "tutoring",
-    "education"
+    "education", 
+    "applications"
   ],
   "author": "NextGen MedPrep",
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.49.9",
     "dotenv": "^16.5.0",
-    "turbo": "^2.5.8"
+    "turbo": "^2.5.8",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   }
 }
