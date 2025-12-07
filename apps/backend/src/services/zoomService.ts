@@ -68,6 +68,7 @@ class ZoomService {
   private zoomHosts: ZoomHost[] = [
     { email: 'tutor@nextgenmedprep.com', userId: 'tutor@nextgenmedprep.com' },
     { email: 'contact@nextgenmedprep.com', userId: 'contact@nextgenmedprep.com' },
+    { email: 'sri@nextgenmedprep.com', userId: 'sri@nextgenmedprep.com' }
   ];
 
   constructor() {
