@@ -9,7 +9,7 @@ import emailService from './src/services/emailService';
 const BOOKING_ID = '1cc37c33-2681-4ba8-ba5b-512f3bdaf0f6';
 
 const bookingDetails = {
-  email: 'serafeim.frosynos@gmail.com', // Customer email
+  email: 'sriharsha.vitta@hotmail.com', // Customer email
   name: 'Konstantinos Serafeim Frosynos',
   packageType: 'core',
   serviceType: 'live',

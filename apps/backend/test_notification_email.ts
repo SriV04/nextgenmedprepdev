@@ -8,7 +8,7 @@ import emailService from './src/services/emailService';
 
 const testBookingDetails = {
   bookingId: 'test-booking-' + Date.now(),
-  customerEmail: 'sriharsha.vitta@gmail.com',
+  customerEmail: 'sriharsha.vitta@outlook.com',
   customerName: 'Test Student',
   packageType: 'essentials', // One interview package
   serviceType: 'live',

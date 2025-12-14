@@ -2,51 +2,180 @@ import nodemailer from 'nodemailer';
 import { EmailTemplate } from '@nextgenmedprep/common-types';
 import dotenv from 'dotenv';
 import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
 // Load environment variables from the root .env file
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 
+interface EmailLog {
+  id?: string;
+  recipient: string;
+  subject: string;
+  email_type: string;
+  status: 'sent' | 'failed' | 'pending' | 'bounced';
+  message_id?: string;
+  response?: string;
+  error_message?: string;
+  sent_at?: string;
+  recipient_domain?: string;
+  created_at?: string;
+}
+
 class EmailService {
   private transporter: nodemailer.Transporter;
+  private supabase;
 
   constructor() {
     const port = parseInt(process.env.EMAIL_PORT || '587');
     this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
+      host: process.env.EMAIL_HOST || '',
       port: port,
       secure: port === 465,  // SSL for port 465 or 587 
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER || '',
+        pass: process.env.EMAIL_PASS || '',
       },
       // additional options for better compatibility
       requireTLS: port !== 465,
       tls: {
         rejectUnauthorized: false // Allow self-signed certificates (adjust for production)
+      },
+      // Request delivery status notifications
+      dsn: {
+        id: process.env.EMAIL_USER || 'no-reply@nextgenmedprep.com',
+        return: 'headers',
+        notify: ['failure', 'delay'],
+        recipient: process.env.EMAIL_USER || process.env.EMAIL_FROM
       }
+    } as nodemailer.TransportOptions);
+
+    // Initialize Supabase client for logging
+    this.supabase = createClient(
+      process.env.SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_KEY || ''
+    );
+
+    // Setup event listeners for email transporter
+    this.setupTransporterEvents();
+  }
+
+  private setupTransporterEvents(): void {
+    // This will be called for each email sent
+    this.transporter.on('idle', () => {
+      console.log('Email transporter is idle and ready to send emails');
     });
   }
 
-  async sendWelcomeEmail(email: string, subscriptionTier: string): Promise<void> {
-    console.log("environment variables:", {
-      EMAIL_HOST: process.env.EMAIL_HOST,
-      EMAIL_PORT: process.env.EMAIL_PORT,
-      EMAIL_USER: !!process.env.EMAIL_USER, // Log if the user is set
-      EMAIL_PASS: !!process.env.EMAIL_PASS, // Log if the password is set
-      EMAIL_FROM: process.env.EMAIL_FROM,
-    });
+  private async logEmailDelivery(log: EmailLog): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('email_logs')
+        .insert({
+          recipient: log.recipient,
+          subject: log.subject,
+          email_type: log.email_type,
+          status: log.status,
+          message_id: log.message_id,
+          response: log.response,
+          error_message: log.error_message,
+          sent_at: log.sent_at || new Date().toISOString(),
+          recipient_domain: log.recipient_domain || log.recipient.split('@')[1],
+          created_at: new Date().toISOString()
+        });
 
-    const template = this.getWelcomeEmailTemplate(subscriptionTier);
+      if (error) {
+        console.error('Failed to log email delivery:', error);
+      }
+    } catch (error) {
+      console.error('Error logging email to database:', error);
+    }
+  }
 
-    console.log("Sending welcome email to:", email, "with template:", template);
+  private extractDomain(email: string): string {
+    return email.split('@')[1] || 'unknown';
+  }
+
+  private async sendMailWithTracking(
+    mailOptions: nodemailer.SendMailOptions,
+    emailType: string
+  ): Promise<void> {
+    let recipient = 'unknown';
+    if (typeof mailOptions.to === 'string') {
+      recipient = mailOptions.to;
+    } else if (Array.isArray(mailOptions.to) && mailOptions.to.length > 0) {
+      const firstRecipient = mailOptions.to[0];
+      recipient = typeof firstRecipient === 'string' ? firstRecipient : (firstRecipient as any).address || 'unknown';
+    }
+    const recipientDomain = this.extractDomain(recipient);
     
-    await this.transporter.sendMail({
+    console.log(`📧 Attempting to send ${emailType} email to: ${recipient} (${recipientDomain})`);
+    
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      
+      console.log(`✅ Email sent successfully to ${recipient}`);
+      console.log(`📨 Message ID: ${info.messageId}`);
+      console.log(`📬 Response: ${info.response}`);
+      console.log(`✉️ Accepted: ${info.accepted?.join(', ') || 'N/A'}`);
+      console.log(`⚠️ Rejected: ${info.rejected?.join(', ') || 'None'}`);
+      
+      // Check if email was rejected
+      if (info.rejected && info.rejected.length > 0) {
+        await this.logEmailDelivery({
+          recipient,
+          subject: mailOptions.subject || 'No subject',
+          email_type: emailType,
+          status: 'failed',
+          message_id: info.messageId,
+          response: `Rejected by server: ${info.rejected.join(', ')}`,
+          error_message: 'Email rejected by recipient server',
+          recipient_domain: recipientDomain
+        });
+      } else {
+        await this.logEmailDelivery({
+          recipient,
+          subject: mailOptions.subject || 'No subject',
+          email_type: emailType,
+          status: 'sent',
+          message_id: info.messageId,
+          response: info.response,
+          recipient_domain: recipientDomain
+        });
+      }
+    } catch (error: any) {
+      console.error(`❌ Failed to send ${emailType} email to ${recipient}:`, error);
+      console.error(`🔍 Error details:`, {
+        message: error.message,
+        code: error.code,
+        command: error.command,
+        response: error.response,
+        responseCode: error.responseCode
+      });
+      
+      await this.logEmailDelivery({
+        recipient,
+        subject: mailOptions.subject || 'No subject',
+        email_type: emailType,
+        status: 'failed',
+        error_message: error.message,
+        response: error.response || error.code,
+        recipient_domain: recipientDomain
+      });
+      
+      throw error;
+    }
+  }
+
+  async sendWelcomeEmail(email: string, subscriptionTier: string): Promise<void> {
+    const template = this.getWelcomeEmailTemplate(subscriptionTier);
+    
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'welcome');
   }
 
   async sendNewsletterEmail(
@@ -66,56 +195,56 @@ class EmailService {
       mailOptions.attachments = attachments;
     }
 
-    await this.transporter.sendMail(mailOptions);
+    await this.sendMailWithTracking(mailOptions, 'newsletter');
   }
 
   async sendUnsubscribeConfirmation(email: string): Promise<void> {
     const template = this.getUnsubscribeTemplate();
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'unsubscribe_confirmation');
   }
 
   async sendSubscriptionUpgradeEmail(email: string, newTier: string): Promise<void> {
     const template = this.getUpgradeEmailTemplate(newTier);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'subscription_upgrade');
   }
 
   async sendNewJoinerConfirmationEmail(email: string, fullName: string): Promise<void> {
     const template = this.getNewJoinerConfirmationTemplate(fullName);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'new_joiner_confirmation');
   }
 
   async sendNewJoinerNotificationEmail(newJoiner: any): Promise<void> {
     const template = this.getNewJoinerNotificationTemplate(newJoiner);
     const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: adminEmail,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'new_joiner_notification');
   }
 
   async sendBookingConfirmationEmail(
@@ -133,13 +262,13 @@ class EmailService {
   ): Promise<void> {
     const template = this.getBookingConfirmationTemplate(bookingDetails);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'booking_confirmation');
   }
 
   async sendUCATConfirmationEmail(
@@ -154,13 +283,13 @@ class EmailService {
   ): Promise<void> {
     const template = this.getUCATConfirmationTemplate(ucatDetails);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'ucat_confirmation');
   }
 
   private getWelcomeEmailTemplate(subscriptionTier: string): EmailTemplate {
@@ -473,17 +602,15 @@ class EmailService {
     userName: string;
     statementType: string;
   }): Promise<void> {
-    console.log('Sending personal statement confirmation email to:', email);
-
     const template = this.getPersonalStatementConfirmationTemplate(data);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'personal_statement_confirmation');
   }
 
   async sendPersonalStatementReviewNotificationEmail(data: {
@@ -494,17 +621,16 @@ class EmailService {
     filePath: string;
   }): Promise<void> {
     const reviewEmail = process.env.REVIEW_TEAM_EMAIL || 'contact@nextgenmedprep.com';
-    console.log('Sending personal statement review notification to:', reviewEmail);
 
     const template = this.getPersonalStatementReviewNotificationTemplate(data);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: reviewEmail,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'personal_statement_review_notification');
   }
 
   private getPersonalStatementConfirmationTemplate(data: {
@@ -672,17 +798,15 @@ The NextGen MedPrep Team
     preferredDate?: string;
     startTime?: string;
   }): Promise<void> {
-    console.log('Sending career consultation confirmation email to:', email);
-
     const template = this.getCareerConsultationConfirmationTemplate(data);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'career_consultation_confirmation');
   }
   
   async sendEventBookingConfirmationEmail(email: string, data: {
@@ -692,17 +816,15 @@ The NextGen MedPrep Team
     eventName: string;
     numberOfTickets?: number;
   }): Promise<void> {
-    console.log('Sending event booking confirmation email to:', email);
-
     const template = this.getEventBookingConfirmationTemplate(data);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'event_booking_confirmation');
   }
   
   private getCareerConsultationConfirmationTemplate(data: {
@@ -882,17 +1004,15 @@ The NextGen MedPrep Team
     preferredDate?: string;
     notes?: string;
   }): Promise<void> {
-    console.log('Sending interview booking confirmation email to:', email);
-
     const template = this.getInterviewBookingConfirmationTemplate(data);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: email,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'interview_booking_confirmation');
   }
 
   async sendInterviewBookingNotificationEmail(data: {
@@ -910,17 +1030,16 @@ The NextGen MedPrep Team
     availability?: Array<{ date: string; timeSlot: string }>;
   }): Promise<void> {
     const adminEmail = process.env.REVIEW_TEAM_EMAIL || 'contact@nextgenmedprep.com';
-    console.log('Sending interview booking notification to:', adminEmail);
 
     const template = this.getInterviewBookingNotificationTemplate(data);
     
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: adminEmail,
       subject: template.subject,
       text: template.text,
       html: template.html,
-    });
+    }, 'interview_booking_notification');
   }
 
   private getInterviewBookingConfirmationTemplate(data: {
@@ -1261,15 +1380,13 @@ Booking ID: ${data.bookingId}
       cancellationNotes
     );
 
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: studentEmail,
       subject: studentTemplate.subject,
       text: studentTemplate.text,
       html: studentTemplate.html,
-    });
-
-    console.log(`Sent interview cancellation email to student: ${studentEmail}`);
+    }, 'interview_cancellation_student');
 
     // Email to tutor (only if tutor was assigned)
     if (tutorEmail && tutorName) {
@@ -1281,15 +1398,13 @@ Booking ID: ${data.bookingId}
         universities
       );
 
-      await this.transporter.sendMail({
+      await this.sendMailWithTracking({
         from: process.env.EMAIL_FROM,
         to: tutorEmail,
         subject: tutorTemplate.subject,
         text: tutorTemplate.text,
         html: tutorTemplate.html,
-      });
-
-      console.log(`Sent interview cancellation email to tutor: ${tutorEmail}`);
+      }, 'interview_cancellation_tutor');
     }
   }
 
@@ -1339,13 +1454,13 @@ Booking ID: ${data.bookingId}
       universities
     );
 
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: tutorEmail,
       subject: tutorTemplate.subject,
       text: tutorTemplate.text,
       html: tutorTemplate.html,
-    });
+    }, 'interview_confirmation_tutor');
 
     // Email to student
     const studentTemplate = this.getInterviewConfirmationTemplateStudent(
@@ -1357,15 +1472,13 @@ Booking ID: ${data.bookingId}
       universities
     );
 
-    await this.transporter.sendMail({
+    await this.sendMailWithTracking({
       from: process.env.EMAIL_FROM,
       to: studentEmail,
       subject: studentTemplate.subject,
       text: studentTemplate.text,
       html: studentTemplate.html,
-    });
-
-    console.log(`Sent interview confirmation emails to ${tutorEmail} and ${studentEmail}`);
+    }, 'interview_confirmation_student');
   }
 
   private getInterviewCancellationTemplateStudent(
