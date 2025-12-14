@@ -42,23 +42,60 @@ const interviewBookingSchema = z.object({
       return [];
     }
   })),
-  availability: z.array(z.object({
-    date: z.string(),
-    timeSlot: z.string()
-  })).optional().or(z.string().transform((val) => {
-    try {
-      const parsed = JSON.parse(val);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  })),
+  availability: z.union([
+    z.string(),
+    z.array(z.object({
+      date: z.string(),
+      timeSlot: z.string()
+    }))
+  ]).optional(),
   notes: z.string().optional(),
   amount: z.number().positive('Amount must be positive').or(z.string().transform((val) => parseFloat(val))),
   preferredDate: z.string().optional(),
 });
 
 export class InterviewBookingController {
+  /**
+   * Condense availability array to compact string format (max 500 chars)
+   * Format: date1|startHour-endHour;date2|startHour-endHour;...
+   */
+  private condenseAvailability(availability: Array<{ date: string; timeSlot: string }>): string {
+    if (!availability || availability.length === 0) return '';
+    
+    return availability.map(slot => {
+      // Parse timeSlot format "HH:mm - HH:mm" to extract hours
+      const [startTime, endTime] = slot.timeSlot.split(' - ');
+      const hourStart = startTime.split(':')[0].padStart(2, '0');
+      const hourEnd = endTime.split(':')[0].padStart(2, '0');
+      
+      // Format: YYYY-MM-DD|HH-HH
+      return `${slot.date}|${hourStart}-${hourEnd}`;
+    }).join(';').substring(0, 500); // Ensure max 500 chars
+  }
+
+  /**
+   * Parse condensed availability string back to array format
+   * Format: date1|startHour-endHour;date2|startHour-endHour;...
+   */
+  private parseCondensedAvailability(condensed: string): Array<{ date: string; timeSlot: string }> {
+    if (!condensed || condensed.trim() === '') return [];
+    
+    try {
+      return condensed.split(';').map(entry => {
+        const [date, hours] = entry.split('|');
+        const [hourStart, hourEnd] = hours.split('-');
+        
+        return {
+          date: date,
+          timeSlot: `${hourStart}:00 - ${hourEnd}:00`
+        };
+      });
+    } catch (error) {
+      console.error('Error parsing condensed availability:', error);
+      return [];
+    }
+  }
+
   /**
    * Create an interview booking with personal statement upload
    */
@@ -71,6 +108,8 @@ export class InterviewBookingController {
       // Validate request data
       const validatedData = interviewBookingSchema.parse(req.body);
       console.log('Validated data:', validatedData);
+      console.log('Availability type:', typeof validatedData.availability);
+      console.log('Availability value:', validatedData.availability);
 
       // Upload personal statement to Supabase storage if provided
       let filePath: string | null = null;
@@ -116,7 +155,21 @@ export class InterviewBookingController {
           package_identifier: packageIdentifier,
           universities: universitiesArray.join(','),
           interview_dates: validatedData.interviewDates ? JSON.stringify(validatedData.interviewDates) : '',
-          availability: validatedData.availability ? JSON.stringify(validatedData.availability) : '',
+          availability: (() => {
+            // If it's already a string (condensed format), use it directly
+            if (typeof validatedData.availability === 'string') {
+              console.log('Using availability string directly:', validatedData.availability);
+              return validatedData.availability;
+            }
+            // If it's an array, condense it
+            if (Array.isArray(validatedData.availability)) {
+              const condensed = this.condenseAvailability(validatedData.availability);
+              console.log('Condensed availability array:', condensed);
+              return condensed;
+            }
+            // Otherwise empty
+            return '';
+          })(),
           file_path: filePath || '',
           first_name: validatedData.firstName,
           last_name: validatedData.lastName,
@@ -242,10 +295,11 @@ export class InterviewBookingController {
       // Parse and create student availability if provided
       if (metadata.availability && metadata.availability !== '') {
         try {
-          const availabilitySlots = JSON.parse(metadata.availability);
+          // Parse condensed availability format: date1|HH-HH;date2|HH-HH;...
+          const availabilitySlots = this.parseCondensedAvailability(metadata.availability);
           console.log('Parsed availability slots:', availabilitySlots);
           
-          if (Array.isArray(availabilitySlots) && availabilitySlots.length > 0) {
+          if (availabilitySlots.length > 0) {
             const availabilityRecords = availabilitySlots.map((slot: { date: string; timeSlot: string }) => {
               // Parse timeSlot format "HH:mm - HH:mm" to extract hours
               const [startTime, endTime] = slot.timeSlot.split(' - ');
@@ -336,11 +390,12 @@ export class InterviewBookingController {
       // Send notification email to admin
       console.log('Sending notification email to admin...');
       
-      // Parse availability if provided
+      // Parse condensed availability format for email
       let availabilitySlots: Array<{ date: string; timeSlot: string }> | undefined;
       if (metadata.availability && metadata.availability !== '') {
         try {
-          availabilitySlots = JSON.parse(metadata.availability);
+          // Use the parseCondensedAvailability method to convert back to array format
+          availabilitySlots = this.parseCondensedAvailability(metadata.availability);
         } catch (error) {
           console.error('Error parsing availability for email:', error);
         }

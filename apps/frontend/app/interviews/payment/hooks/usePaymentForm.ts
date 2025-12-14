@@ -16,6 +16,22 @@ export interface AvailabilitySlot {
   timeSlot: string;
 }
 
+// Condense availability to under 500 characters
+// Format: date1|startHour-endHour;date2|startHour-endHour;...
+function condenseAvailability(availability: AvailabilitySlot[]): string {
+  if (!availability || availability.length === 0) return '';
+  
+  return availability.map(slot => {
+    // Parse timeSlot format "HH:mm - HH:mm" to extract hours
+    const [startTime, endTime] = slot.timeSlot.split(' - ');
+    const hourStart = startTime.split(':')[0].padStart(2, '0');
+    const hourEnd = endTime.split(':')[0].padStart(2, '0');
+    
+    // Format: YYYY-MM-DD|HH-HH
+    return `${slot.date}|${hourStart}-${hourEnd}`;
+  }).join(';').substring(0, 500); // Ensure max 500 chars
+}
+
 export function usePaymentForm() {
   // Flattened state for better predictability
   const [serviceType, setServiceType] = useState<'generated' | 'live' | ''>('');
@@ -171,9 +187,10 @@ export function usePaymentForm() {
       formData.append('universities', JSON.stringify(universities));
       formData.append('amount', calculatePrice().toString());
       
-      // Add availability for live sessions
+      // Add availability for live sessions (condensed format)
       if (serviceType === 'live' && availability.length > 0) {
-        formData.append('availability', JSON.stringify(availability));
+        const condensedAvailability = condenseAvailability(availability);
+        formData.append('availability', condensedAvailability);
       }
       
       // Add optional fields
