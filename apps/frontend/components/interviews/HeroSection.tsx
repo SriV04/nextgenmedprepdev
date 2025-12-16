@@ -19,7 +19,7 @@ export default function HeroSection() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 border border-slate-200 shadow-sm backdrop-blur-md mb-8 hover:bg-slate-900/10 hover:border-slate-300 transition-all duration-200"
         >
-           <span className="text-sm font-semibold text-slate-700 tracking-wide">Trusted by 300+ Medical Students</span>
+           <span className="text-sm font-semibold text-slate-700 tracking-wide">Trusted by 500+ Medical Students</span>
            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
            </svg>
@@ -62,7 +62,7 @@ export default function HeroSection() {
           </div>
           <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>
           <div className="text-center">
-            <p className="text-3xl font-bold text-slate-900">300+</p>
+            <p className="text-3xl font-bold text-slate-900">500+</p>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Students</p>
           </div>
           <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>

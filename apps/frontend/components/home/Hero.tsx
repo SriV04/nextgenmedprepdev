@@ -40,7 +40,7 @@ const Hero: React.FC = () => {
             rel="noopener noreferrer"
             className="text-sm font-semibold text-gray-800 hover:text-blue-600 transition-colors"
           >
-            Trusted by 300+ students
+            Trusted by 500+ students
           </a>
         </div>
 
