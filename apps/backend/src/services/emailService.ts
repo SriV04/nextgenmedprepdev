@@ -1003,6 +1003,7 @@ The NextGen MedPrep Team
     amount: number;
     preferredDate?: string;
     notes?: string;
+    studentId?: string; // Added for dashboard link
   }): Promise<void> {
     const template = this.getInterviewBookingConfirmationTemplate(data);
     
@@ -1051,10 +1052,17 @@ The NextGen MedPrep Team
     amount: number;
     preferredDate?: string;
     notes?: string;
+    studentId?: string;
   }): EmailTemplate {
     const packageLabel = data.packageType === 'single' ? 'Single Session' : 'Package Deal';
     const serviceLabel = data.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
     const universitiesStr = data.universities.join(', ');
+    
+    // Generate dashboard link
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const dashboardLink = data.studentId 
+      ? `${frontendUrl}/student-dashboard?student_id=${data.studentId}` 
+      : `${frontendUrl}/student-dashboard`;
     
     const subject = 'Interview Preparation Booking Confirmed - NextGen MedPrep';
     
@@ -1074,8 +1082,19 @@ Booking Details:
 ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
 ${data.notes ? `- Notes: ${data.notes}` : ''}
 
+🎓 YOUR STUDENT DASHBOARD:
+We've created a personal dashboard for you to:
+• Submit your availability for interview sessions
+• View your upcoming and past sessions
+• Access session materials and Zoom links
+• Track your progress
+
+Access your dashboard here: ${dashboardLink}
+
 What happens next:
 • Our team will review your personal statement and university choices
+• We'll contact you within 24 hours to schedule your session
+• You'll receive preparation materials tailored to your universities
 • Our expert tutors will help you excel in your interviews
 
 Our interview tutors are current medical students who have successfully gained places at top UK medical schools.
@@ -1138,6 +1157,20 @@ The NextGen MedPrep Team
             <p style="margin: 0; color: #78350f;">${data.notes}</p>
           </div>
           ` : ''}
+
+          <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb; text-align: center;">
+            <h3 style="margin-top: 0; color: #1e40af;">🎓 Your Student Dashboard</h3>
+            <p style="color: #374151; margin-bottom: 15px;">We've created a personal dashboard for you to manage your interview preparation:</p>
+            <ul style="color: #374151; text-align: left; margin: 15px 0; padding-left: 20px;">
+              <li>Submit your availability for interview sessions</li>
+              <li>View your upcoming and past sessions</li>
+              <li>Access session materials and Zoom links</li>
+              <li>Track your preparation progress</li>
+            </ul>
+            <a href="${dashboardLink}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+              Access Your Dashboard →
+            </a>
+          </div>
 
           <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
             <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
