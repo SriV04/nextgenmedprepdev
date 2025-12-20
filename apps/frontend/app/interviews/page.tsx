@@ -7,13 +7,17 @@ import ServicesSection from '@/components/interviews/ServicesSection';
 import GeneratedMocks from '@/components/interviews/GeneratedMocks';
 import HeroSection from '@/components/interviews/HeroSection';
 import CTASection from '@/components/interviews/CTAsection';
+import ChristmasHeroSection from '@/components/christmas/ChristmasHeroSection';
+import ChristmasBanner from '@/components/christmas/ChristmasBanner';
+import ChristmasCTA from '@/components/christmas/ChristmasCTA';
 
 
 export default function InterviewsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <HeroSection />
+      <ChristmasBanner />
+      <ChristmasHeroSection />
 
       <ServicesSection />
 
@@ -160,7 +164,7 @@ export default function InterviewsPage() {
       <FreeResourcesCarousel />
 
       {/* CTA Section with slight BF tweak */}
-      <CTASection />
+      <ChristmasCTA />
     </div>
   );
 }

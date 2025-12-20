@@ -92,7 +92,7 @@ export default function Step2Package({ serviceType, packageId, onPackageSelect }
                     </div>
                   </div>
                   <div className="text-xs text-red-400 font-semibold mt-1">
-                    Black Friday Sale
+                    Christmas Sale!
                   </div>
                 </>
               ) : (
