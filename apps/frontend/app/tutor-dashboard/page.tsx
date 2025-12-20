@@ -87,7 +87,7 @@ function DashboardContent() {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/auth/login?redirectTo=/tutor-dashboard');
+        router.push('/auth/login?redirectTo=/tutor-dashboard&role=tutor');
       } else {
         setUser(user);
         // Set the current user ID in the calendar context
@@ -107,10 +107,10 @@ function DashboardContent() {
           console.log('Tutor role:', tutorData.role);
         } else {
           console.error('Error fetching tutor role:', tutorError);
-          // Default to regular tutor if role not found
-          setUserRole('tutor');
-          setIsAdmin(false);
-          setIsManager(false);
+          await supabase.auth.signOut();
+          const message = encodeURIComponent('Tutor access not found. Please sign in with a tutor account.');
+          router.push(`/auth/login?redirectTo=/tutor-dashboard&role=tutor&error=not_authorized&message=${message}`);
+          return;
         }
       }
     };
@@ -119,7 +119,7 @@ function DashboardContent() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/auth/login');
+    router.push('/auth/login?role=tutor');
   };
 
   const handleBookingsTabClick = () => {

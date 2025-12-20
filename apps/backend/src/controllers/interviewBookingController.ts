@@ -293,40 +293,6 @@ export class InterviewBookingController {
 
       console.log('Booking created:', booking);
 
-      // Create or update student profile (auto-creation)
-      console.log('Creating/updating student profile...');
-      try {
-        const { data: existingProfile } = await supabaseService.supabase
-          .from('student_profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (!existingProfile) {
-          // Create new student profile linked to this booking
-          const { data: newProfile, error: profileError } = await supabaseService.supabase
-            .from('student_profiles')
-            .insert({
-              user_id: user.id,
-              created_from_booking_id: booking.id,
-              timezone: 'UTC', // Default, can be updated by student
-            })
-            .select()
-            .single();
-
-          if (profileError) {
-            console.error('Error creating student profile:', profileError);
-          } else {
-            console.log('Student profile created:', newProfile.id);
-          }
-        } else {
-          console.log('Student profile already exists:', existingProfile.id);
-        }
-      } catch (error) {
-        console.error('Error handling student profile:', error);
-        // Continue even if profile creation fails
-      }
-
       // Parse and create student availability if provided
       if (metadata.availability && metadata.availability !== '') {
         try {
