@@ -40,7 +40,7 @@ export const interviewPackages: ExtendedPackage[] = [
     description: 'Perfect for individual interview practice',
     interviews: 1,
     generatedPrice: 7,
-    blackFridayPrice: 40,
+    // blackFridayPrice: 40,
     tutorPrice: 45,
     features: [
       'A mock interview with Prometheus-powered university-specific questions',
@@ -69,7 +69,7 @@ export const interviewPackages: ExtendedPackage[] = [
     interviews: 3,
     generatedPrice: 10,
     originalGeneratedPrice: 14,
-    blackFridayPrice: 115,
+    // blackFridayPrice: 115,
     tutorPrice: 125,
     originalPrice: 150,
     popular: true,
@@ -103,7 +103,7 @@ export const interviewPackages: ExtendedPackage[] = [
     interviews: 4,
     generatedPrice: 15,
     originalGeneratedPrice: 21,
-    blackFridayPrice: 200,
+    // blackFridayPrice: 200,
     tutorPrice: 250,
     originalPrice: 275,
     features: [

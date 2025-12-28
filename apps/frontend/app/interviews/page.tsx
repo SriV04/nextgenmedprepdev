@@ -16,9 +16,7 @@ export default function InterviewsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <ChristmasBanner />
-      <ChristmasHeroSection />
-
+      <HeroSection />
       <ServicesSection />
 
       <section id="interview-packages" className="py-16 px-4 bg-white">
@@ -164,7 +162,7 @@ export default function InterviewsPage() {
       <FreeResourcesCarousel />
 
       {/* CTA Section with slight BF tweak */}
-      <ChristmasCTA />
+      <CTASection />
     </div>
   );
 }

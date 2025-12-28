@@ -92,7 +92,7 @@ export function usePaymentForm() {
     if (!selectedPackage || !serviceType) return 0;
     return serviceType === 'generated' 
       ? selectedPackage.generatedPrice 
-      : selectedPackage.blackFridayPrice;
+      : selectedPackage.tutorPrice;
   };
 
   const handleServiceTypeChange = (newServiceType: 'generated' | 'live') => {
