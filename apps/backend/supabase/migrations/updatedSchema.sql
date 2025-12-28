@@ -1,5 +1,3 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.bookings (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -26,6 +24,21 @@ CREATE TABLE public.bookings (
   CONSTRAINT bookings_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.users(id),
   CONSTRAINT bookings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
+CREATE TABLE public.email_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  recipient text NOT NULL,
+  recipient_domain text,
+  subject text NOT NULL,
+  email_type text NOT NULL,
+  status text NOT NULL CHECK (status = ANY (ARRAY['sent'::text, 'failed'::text, 'pending'::text, 'bounced'::text])),
+  message_id text,
+  response text,
+  error_message text,
+  sent_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT email_logs_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.follow_up_questions (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   main_question_id uuid NOT NULL,
@@ -48,21 +61,23 @@ CREATE TABLE public.interview_questions (
 );
 CREATE TABLE public.interviews (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  university_id uuid,
   student_id uuid,
   tutor_id uuid,
   booking_id uuid,
-  scheduled_at timestamp with time zone NOT NULL,
+  scheduled_at timestamp with time zone,
   completed boolean NOT NULL DEFAULT false,
   student_feedback text,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   notes text,
+  university USER-DEFINED,
+  zoom_join_url text,
+  zoom_host_email text,
+  zoom_meeting_id text,
   CONSTRAINT interviews_pkey PRIMARY KEY (id),
-  CONSTRAINT interviews_university_id_fkey FOREIGN KEY (university_id) REFERENCES public.universities(id),
   CONSTRAINT interviews_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.users(id),
-  CONSTRAINT interviews_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.users(id),
-  CONSTRAINT interviews_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES public.bookings(id)
+  CONSTRAINT interviews_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES public.bookings(id),
+  CONSTRAINT interviews_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutors(id)
 );
 CREATE TABLE public.mark_schemes (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -131,6 +146,18 @@ CREATE TABLE public.resources (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT resources_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.student_availability (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  student_id uuid,
+  date date NOT NULL,
+  day_of_week integer DEFAULT EXTRACT(dow FROM date),
+  hour_start integer CHECK (hour_start >= 0 AND hour_start <= 23),
+  hour_end integer,
+  created_at timestamp with time zone DEFAULT now(),
+  type USER-DEFINED,
+  CONSTRAINT student_availability_pkey PRIMARY KEY (id),
+  CONSTRAINT student_availability_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.users(id)
+);
 CREATE TABLE public.subscriptions (
   email text NOT NULL CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text),
   user_id uuid,
@@ -152,6 +179,29 @@ CREATE TABLE public.tags (
   tag_name text NOT NULL UNIQUE,
   CONSTRAINT tags_pkey PRIMARY KEY (id)
 );
+CREATE TABLE public.tutor_availability (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  tutor_id uuid,
+  date date NOT NULL,
+  day_of_week integer DEFAULT EXTRACT(dow FROM date),
+  hour_start integer CHECK (hour_start >= 0 AND hour_start <= 23),
+  hour_end integer,
+  created_at timestamp with time zone DEFAULT now(),
+  type USER-DEFINED,
+  interview_id uuid,
+  CONSTRAINT tutor_availability_pkey PRIMARY KEY (id),
+  CONSTRAINT tutor_availability_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutors(id),
+  CONSTRAINT tutor_availability_interview_id_fkey FOREIGN KEY (interview_id) REFERENCES public.interviews(id)
+);
+CREATE TABLE public.tutors (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL UNIQUE,
+  subjects ARRAY NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  role text,
+  CONSTRAINT tutors_pkey PRIMARY KEY (id)
+);
 CREATE TABLE public.universities (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
@@ -159,11 +209,10 @@ CREATE TABLE public.universities (
 );
 CREATE TABLE public.university_configurations (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  university_id uuid NOT NULL,
   total_questions integer NOT NULL DEFAULT 0,
   custom_configs text,
-  CONSTRAINT university_configurations_pkey PRIMARY KEY (id),
-  CONSTRAINT university_configurations_university_id_fkey FOREIGN KEY (university_id) REFERENCES public.universities(id)
+  university USER-DEFINED,
+  CONSTRAINT university_configurations_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.university_tag_configs (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
