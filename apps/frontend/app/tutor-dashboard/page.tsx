@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, UserPlus, LogOut, User } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, UserPlus, LogOut, User, HomeIcon } from 'lucide-react';
 import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
 import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
 import InterviewDetailsModal from '../../components/tutor-calendar/InterviewDetailsModal';
 import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
 import CommitChangesBar from '../../components/tutor-calendar/CommitChangesBar';
+import TutorHome from '../../components/tutor-dashboard/TutorHome';
 import { TutorCalendarProvider, useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import { createClient } from '../../utils/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -58,7 +59,7 @@ function DashboardContent() {
   const [isManager, setIsManager] = useState(false);
 
   // Tab management
-  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar'>('calendar');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'home'>('home');
   const [isBookingsUnlocked, setIsBookingsUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
@@ -479,6 +480,17 @@ function DashboardContent() {
 
         {/* Tab Navigation */}
         <div className="flex border-b border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
+              activeTab === 'home'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            Home
+          </button>
           <button
             onClick={() => setActiveTab('calendar')}
             className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
@@ -924,6 +936,14 @@ function DashboardContent() {
               onSchedule={handleScheduleInterview}
             />
           </>
+        )}
+
+        {/* Home Tab Content */}
+        {activeTab === 'home' && user && (
+          <TutorHome 
+            tutorId={user.id} 
+            tutorName={user.user_metadata?.name || user.email?.split('@')[0]}
+          />
         )}
 
         {/* Calendar Tab Content */}

@@ -9,6 +9,8 @@ import {
   getAllTutorsWithAvailability,
   addBulkAvailability,
   deleteAvailability,
+  getTutorUpcomingSessions,
+  getTutorSessionStats,
 } from '../controllers/tutorController';
 
 const router = Router();
@@ -19,6 +21,10 @@ router.get('/tutors/with-availability', getAllTutorsWithAvailability); // Must b
 router.get('/tutors', getAllTutors);
 router.get('/tutor', getTutor); // Query by id or email
 router.put('/tutors/:id', updateTutor);
+
+// Tutor dashboard routes
+router.get('/tutors/:tutorId/upcoming-sessions', getTutorUpcomingSessions);
+router.get('/tutors/:tutorId/session-stats', getTutorSessionStats);
 
 // Availability management routes
 router.post('/tutors/:tutorId/availability', addAvailability);

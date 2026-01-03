@@ -107,7 +107,7 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
     };
     
     fetchAvailabilities();
-  }, [unassignedInterviews, fetchedStudentIds]);
+  }, [unassignedInterviews]);
   
   const handleDragStart = (e: React.DragEvent, interviewId: string): void => {
     e.dataTransfer.setData('interviewId', interviewId);

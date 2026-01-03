@@ -527,3 +527,135 @@ export const deleteAvailability = async (
     next(error);
   }
 };
+
+/**
+ * Get tutor's upcoming sessions
+ */
+export const getTutorUpcomingSessions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { tutorId } = req.params;
+    const supabase = createSupabaseClient();
+
+    // Get upcoming interviews for this tutor (not completed, with scheduled_at in the future)
+    const { data: interviews, error } = await supabase
+      .from('interviews')
+      .select(`
+        id,
+        scheduled_at,
+        completed,
+        notes,
+        zoom_join_url,
+        zoom_host_email,
+        student_id,
+        booking_id,
+        bookings (
+          email,
+          package,
+          universities,
+          field,
+          notes
+        ),
+        users (
+          full_name,
+          email
+        )
+      `)
+      .eq('tutor_id', tutorId)
+      .eq('completed', false)
+      .not('scheduled_at', 'is', null)
+      .gte('scheduled_at', new Date().toISOString())
+      .order('scheduled_at', { ascending: true });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Transform data
+    const sessions = interviews?.map((interview: any) => ({
+      id: interview.id,
+      scheduled_at: interview.scheduled_at,
+      studentName: interview.students?.name || interview.bookings?.email?.split('@')[0] || 'Unknown',
+      studentEmail: interview.students?.email || interview.bookings?.email || 'No email',
+      universities: interview.bookings?.universities,
+      package: interview.bookings?.package || 'Unknown package',
+      zoom_join_url: interview.zoom_join_url,
+      notes: interview.notes || interview.bookings?.notes,
+    })) || [];
+
+    res.json({
+      success: true,
+      data: sessions,
+    });
+  } catch (error: any) {
+    console.error('Error in getTutorUpcomingSessions:', error);
+    next(error);
+  }
+};
+
+/**
+ * Get tutor's session statistics
+ */
+export const getTutorSessionStats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { tutorId } = req.params;
+    const supabase = createSupabaseClient();
+
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Get all completed interviews
+    const { data: completedInterviews, error: completedError } = await supabase
+      .from('interviews')
+      .select('id, scheduled_at')
+      .eq('tutor_id', tutorId)
+      .eq('completed', true);
+
+    if (completedError) {
+      throw new Error(completedError.message);
+    }
+
+    // Get upcoming interviews count
+    const { count: upcomingCount, error: upcomingError } = await supabase
+      .from('interviews')
+      .select('*', { count: 'exact', head: true })
+      .eq('tutor_id', tutorId)
+      .eq('completed', false)
+      .not('scheduled_at', 'is', null)
+      .gte('scheduled_at', now.toISOString());
+
+    if (upcomingError) {
+      throw new Error(upcomingError.message);
+    }
+
+    // Calculate stats
+    const totalCompleted = completedInterviews?.length || 0;
+    const thisWeekCompleted = completedInterviews?.filter((interview: any) => 
+      new Date(interview.scheduled_at) >= oneWeekAgo
+    ).length || 0;
+    const thisMonthCompleted = completedInterviews?.filter((interview: any) => 
+      new Date(interview.scheduled_at) >= oneMonthAgo
+    ).length || 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalCompleted,
+        totalUpcoming: upcomingCount || 0,
+        thisWeekCompleted,
+        thisMonthCompleted,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error in getTutorSessionStats:', error);
+    next(error);
+  }
+};
