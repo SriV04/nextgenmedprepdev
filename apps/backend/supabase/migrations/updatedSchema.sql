@@ -1,4 +1,3 @@
-
 CREATE TABLE public.bookings (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   user_id uuid NOT NULL,
@@ -44,20 +43,7 @@ CREATE TABLE public.follow_up_questions (
   main_question_id uuid NOT NULL,
   follow_up_text text NOT NULL,
   CONSTRAINT follow_up_questions_pkey PRIMARY KEY (id),
-  CONSTRAINT follow_up_questions_main_question_id_fkey FOREIGN KEY (main_question_id) REFERENCES public.questions(id)
-);
-CREATE TABLE public.interview_questions (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  interview_id uuid NOT NULL,
-  question_id uuid,
-  tutor_feedback text,
-  student_response text,
-  score integer CHECK (score >= 0 AND score <= 10),
-  created_at timestamp with time zone DEFAULT now(),
-  notes text,
-  CONSTRAINT interview_questions_pkey PRIMARY KEY (id),
-  CONSTRAINT interview_questions_interview_id_fkey FOREIGN KEY (interview_id) REFERENCES public.interviews(id),
-  CONSTRAINT interview_questions_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+  CONSTRAINT follow_up_questions_main_question_id_fkey FOREIGN KEY (main_question_id) REFERENCES prometheus.questions(id)
 );
 CREATE TABLE public.interviews (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -74,17 +60,11 @@ CREATE TABLE public.interviews (
   zoom_join_url text,
   zoom_host_email text,
   zoom_meeting_id text,
+  Type text,
   CONSTRAINT interviews_pkey PRIMARY KEY (id),
   CONSTRAINT interviews_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.users(id),
   CONSTRAINT interviews_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES public.bookings(id),
   CONSTRAINT interviews_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutors(id)
-);
-CREATE TABLE public.mark_schemes (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  main_question_id uuid NOT NULL,
-  mark_scheme_text text NOT NULL,
-  CONSTRAINT mark_schemes_pkey PRIMARY KEY (id),
-  CONSTRAINT mark_schemes_main_question_id_fkey FOREIGN KEY (main_question_id) REFERENCES public.questions(id)
 );
 CREATE TABLE public.new_joiners (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -121,19 +101,6 @@ CREATE TABLE public.personal_statements (
   feedback_url text,
   feedback_file_path text,
   CONSTRAINT personal_statements_pkey PRIMARY KEY (id)
-);
-CREATE TABLE public.question_tags (
-  question_id uuid NOT NULL,
-  tag_id uuid NOT NULL,
-  CONSTRAINT question_tags_pkey PRIMARY KEY (question_id, tag_id),
-  CONSTRAINT question_tags_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id),
-  CONSTRAINT question_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id)
-);
-CREATE TABLE public.questions (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  question_text text NOT NULL,
-  interview_type text,
-  CONSTRAINT questions_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.resources (
   id text NOT NULL,
@@ -174,11 +141,6 @@ CREATE TABLE public.subscriptions (
   CONSTRAINT subscriptions_pkey PRIMARY KEY (email),
   CONSTRAINT subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
-CREATE TABLE public.tags (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  tag_name text NOT NULL UNIQUE,
-  CONSTRAINT tags_pkey PRIMARY KEY (id)
-);
 CREATE TABLE public.tutor_availability (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   tutor_id uuid,
@@ -207,22 +169,6 @@ CREATE TABLE public.universities (
   name text NOT NULL UNIQUE,
   CONSTRAINT universities_pkey PRIMARY KEY (id)
 );
-CREATE TABLE public.university_configurations (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  total_questions integer NOT NULL DEFAULT 0,
-  custom_configs text,
-  university USER-DEFINED,
-  CONSTRAINT university_configurations_pkey PRIMARY KEY (id)
-);
-CREATE TABLE public.university_tag_configs (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  university_config_id uuid NOT NULL,
-  tag_id uuid,
-  num_questions integer NOT NULL DEFAULT 0,
-  CONSTRAINT university_tag_configs_pkey PRIMARY KEY (id),
-  CONSTRAINT university_tag_configs_university_config_id_fkey FOREIGN KEY (university_config_id) REFERENCES public.university_configurations(id),
-  CONSTRAINT university_tag_configs_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id)
-);
 CREATE TABLE public.users (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   email text NOT NULL UNIQUE CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text),
@@ -234,4 +180,88 @@ CREATE TABLE public.users (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   phone_number text,
   CONSTRAINT users_pkey PRIMARY KEY (id)
+);
+
+
+CREATE TABLE prometheus.interview_question_skill_marks (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  interview_question_id uuid NOT NULL,
+  criterion_id uuid NOT NULL,
+  marks_awarded integer NOT NULL CHECK (marks_awarded >= 0),
+  examiner_comment text,
+  CONSTRAINT interview_question_skill_marks_pkey PRIMARY KEY (id),
+  CONSTRAINT interview_question_skill_marks_interview_question_id_fkey FOREIGN KEY (interview_question_id) REFERENCES prometheus.interview_questions(id),
+  CONSTRAINT interview_question_skill_marks_criterion_id_fkey FOREIGN KEY (criterion_id) REFERENCES prometheus.question_skill_criteria(id)
+);
+CREATE TABLE prometheus.interview_questions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  interview_id uuid NOT NULL,
+  question_id uuid,
+  general_feedback text,
+  student_response text,
+  score integer CHECK (score >= 0 AND score <= 10),
+  created_at timestamp with time zone DEFAULT now(),
+  notes text,
+  CONSTRAINT interview_questions_pkey PRIMARY KEY (id),
+  CONSTRAINT interview_questions_interview_id_fkey FOREIGN KEY (interview_id) REFERENCES public.interviews(id),
+  CONSTRAINT interview_questions_question_id_fkey FOREIGN KEY (question_id) REFERENCES prometheus.questions(id)
+);
+CREATE TABLE prometheus.question_skill_criteria (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  question_id uuid NOT NULL,
+  skill_group text NOT NULL CHECK (skill_group = ANY (ARRAY['core'::text, 'extra'::text])),
+  max_marks integer NOT NULL DEFAULT 2 CHECK (max_marks >= 0 AND max_marks <= 10),
+  guidance text,
+  display_order integer NOT NULL DEFAULT 0,
+  skill_code text NOT NULL,
+  CONSTRAINT question_skill_criteria_pkey PRIMARY KEY (id),
+  CONSTRAINT question_skill_criteria_question_id_fkey FOREIGN KEY (question_id) REFERENCES prometheus.questions(id),
+  CONSTRAINT question_skill_criteria_skill_code_fkey FOREIGN KEY (skill_code) REFERENCES prometheus.skill_definitions(skill_code)
+);
+CREATE TABLE prometheus.question_tags (
+  question_id uuid NOT NULL,
+  tag_id uuid NOT NULL,
+  CONSTRAINT question_tags_pkey PRIMARY KEY (question_id, tag_id),
+  CONSTRAINT question_tags_question_id_fkey FOREIGN KEY (question_id) REFERENCES prometheus.questions(id),
+  CONSTRAINT question_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES prometheus.tags(id)
+);
+CREATE TABLE prometheus.questions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  question_text text NOT NULL,
+  interview_type text,
+  title text,
+  category text,
+  difficulty text,
+  is_active boolean NOT NULL DEFAULT true,
+  follow_up_questions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  notes text,
+  CONSTRAINT questions_pkey PRIMARY KEY (id)
+);
+CREATE TABLE prometheus.skill_definitions (
+  skill_code text NOT NULL,
+  display_name text NOT NULL,
+  is_active boolean NOT NULL DEFAULT true,
+  sort_order integer NOT NULL DEFAULT 0,
+  CONSTRAINT skill_definitions_pkey PRIMARY KEY (skill_code)
+);
+CREATE TABLE prometheus.tags (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  tag_name text NOT NULL UNIQUE,
+  CONSTRAINT tags_pkey PRIMARY KEY (id)
+);
+CREATE TABLE prometheus.university_configurations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  total_questions integer NOT NULL DEFAULT 0,
+  custom_configs text,
+  university USER-DEFINED,
+  CONSTRAINT university_configurations_pkey PRIMARY KEY (id)
+);
+CREATE TABLE prometheus.university_tag_configs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  university_config_id uuid NOT NULL,
+  tag_id uuid,
+  num_questions integer NOT NULL DEFAULT 0,
+  CONSTRAINT university_tag_configs_pkey PRIMARY KEY (id),
+  CONSTRAINT university_tag_configs_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES prometheus.tags(id),
+  CONSTRAINT university_tag_configs_university_config_id_fkey FOREIGN KEY (university_config_id) REFERENCES prometheus.university_configurations(id)
 );
