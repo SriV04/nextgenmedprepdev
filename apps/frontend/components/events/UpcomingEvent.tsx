@@ -264,7 +264,7 @@ const UpcomingEvent: React.FC<UpcomingEventProps> = ({ event }) => {
               </div>
               
               {/* Social Proof */}
-              <div className="bg-gradient-to-b from-slate-900/50 to-black/50 rounded-2xl p-8 border border-slate-800 backdrop-blur-sm">
+              <div className="bg-gradient-to-b from-slate-900/50 to-black/50 rounded-2xl p-8 border border-slate-800 backdrop-blur-sm mb-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="flex -space-x-3">
                     {[1,2,3,4].map((i) => (
@@ -278,6 +278,62 @@ const UpcomingEvent: React.FC<UpcomingEventProps> = ({ event }) => {
                 </div>
                 <div className="text-white/70 text-sm text-center italic">
                   &quot;The live format made all the difference. Highly recommend!&quot;
+                </div>
+              </div>
+
+              {/* Career Consultation Card */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
+                <div className="relative bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-8 border border-indigo-800/50 shadow-2xl overflow-hidden">
+                  {/* Background decoration */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full blur-3xl"></div>
+                  
+                  {/* Badge */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600/30 to-purple-600/30 rounded-full text-sm font-bold text-indigo-200 mb-6 border border-indigo-500/30">
+                    <Zap className="w-4 h-4" />
+                    <span>Personalized Guidance</span>
+                  </div>
+                  
+                  <h3 className="text-2xl font-black text-white mb-3">
+                    1-on-1 Career Consultation
+                  </h3>
+                  
+                  <p className="text-white/80 text-sm mb-6 leading-relaxed">
+                    Get personalized advice from medical professionals about your medical career path. Perfect for those who need individual guidance.
+                  </p>
+                  
+                  {/* Features */}
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                      <span className="text-white/90 text-sm">30-minute private session</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                      <span className="text-white/90 text-sm">Expert medical career advice</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-indigo-400 flex-shrink-0" />
+                      <span className="text-white/90 text-sm">Tailored action plan</span>
+                    </div>
+                  </div>
+                  
+                  {/* Price and CTA */}
+                  <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                    <div>
+                      <div className="text-3xl font-black bg-gradient-to-r from-indigo-200 to-purple-200 bg-clip-text text-transparent">
+                        £30
+                      </div>
+                      <div className="text-white/60 text-xs">per session</div>
+                    </div>
+                    <a 
+                      href="/career-consultation-pay"
+                      className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-500 hover:to-purple-500 transition-all duration-300 hover:scale-105 shadow-lg shadow-indigo-500/20 flex items-center gap-2 text-sm"
+                    >
+                      Book Now
+                      <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

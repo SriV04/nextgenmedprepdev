@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { trackPurchase } from '@/components/MetaPixel';
 
 interface PaymentStatus {
   order_id: string;
@@ -40,6 +41,17 @@ function PaymentSuccessContent() {
 
       if (data.success) {
         setPaymentStatus(data.data);
+        
+        // Track Purchase event with Meta Pixel if payment is approved
+        if (data.data.status === 'approved') {
+          const amount = parseInt(data.data.amount) / 100;
+          trackPurchase(
+            amount,
+            data.data.currency || 'GBP',
+            'Event Ticket Purchase',
+            data.data.order_id
+          );
+        }
       } else {
         setError(data.error || 'Failed to fetch payment status');
       }

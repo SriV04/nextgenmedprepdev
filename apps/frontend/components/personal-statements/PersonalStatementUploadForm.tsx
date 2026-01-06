@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { trackInitiateCheckout } from '@/components/MetaPixel';
 
 interface PersonalStatementUploadFormProps {
   onSuccess: () => void;
@@ -62,6 +63,14 @@ const PersonalStatementUploadForm: React.FC<PersonalStatementUploadFormProps> = 
     }
 
     setIsLoading(true);
+    
+    // Track InitiateCheckout for personal statement review
+    const price = formData.statementType === 'medicine' ? 50 : 50; // Adjust if prices differ
+    trackInitiateCheckout(
+      price,
+      'GBP',
+      `Personal Statement Review - ${formData.statementType}`
+    );
     
     try {
       const formDataToSend = new FormData();

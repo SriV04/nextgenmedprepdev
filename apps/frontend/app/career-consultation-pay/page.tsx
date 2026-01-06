@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeftIcon, UserIcon, ClockIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 import PaymentForm from '../../components/payment/PaymentForm';
+import { trackViewContent } from '@/components/MetaPixel';
 
 export default function CareerConsultationPaymentPage() {
   const consultationPackage = {
@@ -13,6 +14,15 @@ export default function CareerConsultationPaymentPage() {
     currency: 'GBP',
     description: 'One-to-one career consultation with a medical professional to discuss your medical career path.'
   };
+
+  // Track ViewContent when user lands on career consultation page
+  useEffect(() => {
+    trackViewContent(
+      consultationPackage.name,
+      consultationPackage.price,
+      consultationPackage.currency
+    );
+  }, []);
 
   const handlePaymentSuccess = (data: any) => {
     // Handle successful payment

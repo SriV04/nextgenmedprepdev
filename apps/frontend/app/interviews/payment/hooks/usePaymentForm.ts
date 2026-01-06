@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ExtendedPackage, interviewPackages } from '../../../../data/packages';
+import { trackInitiateCheckout } from '@/components/MetaPixel';
 
 export interface ContactDetails {
   firstName: string;
@@ -166,6 +167,15 @@ export function usePaymentForm() {
     }
 
     try {
+      const price = calculatePrice();
+      
+      // Track InitiateCheckout event for interview booking
+      trackInitiateCheckout(
+        price,
+        'GBP',
+        `${selectedPackage.name} - ${serviceType === 'live' ? 'Live' : 'Generated'} Interview`
+      );
+      
       // Create FormData for multipart upload
       const formData = new FormData();
       

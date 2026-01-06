@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon, AcademicCapIcon, CheckIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import PaymentForm from '../../../components/payment/PaymentForm';
+import { trackInitiateCheckout, trackViewContent } from '@/components/MetaPixel';
 
 interface UCATPackage {
   id: string;
@@ -86,9 +87,20 @@ function UCATPaymentContent() {
     const packageId = searchParams.get('package');
     if (packageId && ucatPackages[packageId]) {
       setSelectedPackage(ucatPackages[packageId]);
+      // Track ViewContent for UCAT package
+      trackViewContent(
+        ucatPackages[packageId].name,
+        ucatPackages[packageId].price,
+        ucatPackages[packageId].currency
+      );
     } else {
       // Default to kickstart if no package specified
       setSelectedPackage(ucatPackages['ucat_kickstart']);
+      trackViewContent(
+        ucatPackages['ucat_kickstart'].name,
+        ucatPackages['ucat_kickstart'].price,
+        ucatPackages['ucat_kickstart'].currency
+      );
     }
   }, [searchParams]);
 
@@ -121,6 +133,13 @@ function UCATPaymentContent() {
 
   const handleProceedToPayment = () => {
     if (isCustomerDetailsValid() && selectedPackage) {
+      // Track InitiateCheckout for UCAT package
+      trackInitiateCheckout(
+        selectedPackage.price,
+        selectedPackage.currency,
+        selectedPackage.name
+      );
+      
       // Store booking details in session storage
       const bookingData = {
         package: selectedPackage,

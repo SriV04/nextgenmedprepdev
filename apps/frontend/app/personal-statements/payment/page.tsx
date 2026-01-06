@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeftIcon, DocumentTextIcon, UserIcon, ClockIcon } from '@heroicons/react/24/outline';
 import PaymentCard from '../../../components/payment/PaymentCard';
 import PaymentForm from '../../../components/payment/PaymentForm';
+import { trackViewContent } from '@/components/MetaPixel';
 
 interface PaymentPackage {
   id: string;
@@ -96,6 +97,8 @@ export default function PersonalStatementPaymentPage() {
 
   const handlePackageSelect = (pkg: PaymentPackage) => {
     setSelectedPackage(pkg);
+    // Track ViewContent when user selects a personal statement package
+    trackViewContent(pkg.name, pkg.price, pkg.currency);
   };
 
   const handleProceedToPayment = () => {

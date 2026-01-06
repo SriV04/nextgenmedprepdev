@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon, CalendarIcon, UserGroupIcon, TicketIcon } from '@heroicons/react/24/outline';
 import PaymentForm from '../../components/payment/PaymentForm';
+import { trackViewContent, trackInitiateCheckout } from '@/components/MetaPixel';
 
 // Separate component for search params logic
 function EventPaymentContent() {
@@ -30,6 +31,9 @@ function EventPaymentContent() {
       date: eventDate,
       price: eventPrice
     });
+    
+    // Track ViewContent event for event page view
+    trackViewContent(eventName, eventPrice, 'GBP');
   }, [searchParams]);
 
   const eventPackage = {

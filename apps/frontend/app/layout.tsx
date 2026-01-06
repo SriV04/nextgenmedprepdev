@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Karla } from "next/font/google";
 import "@/styles/globals.css";
 import Link from "next/link";
+import Script from "next/script";
 import MegaMenu from "@/components/home/MegaMenu";
 import MobileMenu from "@/components/home/MobileMenu";
+import MetaPixel from "@/components/MetaPixel";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from '@vercel/analytics/react';
 
@@ -101,8 +103,38 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${karla.variable} font-sans`}>
+      <head>
+        <Script
+          id="meta-pixel"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window,document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
+              fbq('track', 'PageView');
+            `,
+          }}
+        />
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+      </head>
       {/* Apply custom background and text colors, and font family */}
       <body className="bg-background-primary text-text-primary font-sans overflow-x-hidden">
+        <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID || ''} />
         <header className="w-full bg-background-secondary border-b border-border-accent fixed top-0 z-[100]">
           <div className="w-full px-3 sm:px-4 py-3 mx-auto">
             <div className="flex items-center justify-between min-w-0 max-w-full">

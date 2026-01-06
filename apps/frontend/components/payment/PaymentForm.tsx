@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ShieldCheckIcon, CreditCardIcon } from '@heroicons/react/24/outline';
+import { trackInitiateCheckout } from '@/components/MetaPixel';
 
 interface PaymentResponse {
   success: boolean;
@@ -64,6 +65,13 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
       setError('Invalid package selected');
       return;
     }
+    
+    // Track InitiateCheckout event
+    trackInitiateCheckout(
+      selectedPackage.price,
+      selectedPackage.currency,
+      selectedPackage.name
+    );
     
     setLoading(true);
     setError('');
