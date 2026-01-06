@@ -31,29 +31,32 @@ export interface UpcomingEvent extends Omit<Event, 'id'> {
  * Note: id is a string for payment URLs
  */
 export const upcomingEvent: UpcomingEvent = {
-    id: "Ethics_and_Hot_Topics_For_Med_Interview_Conference_2025_01_04",
-    title: "All The Ethics & Hot Topics You Need for the Med Interview",
-    date: "2025-01-04",
-    time: "10:00 AM - 11:00 AM",
-    type: "interview" as const,
-    description: "Master medical ethics and current hot topics for your interview!",
-    spots: 30,
+    id: "Pathways_to_Medicine_Conference_2026_02_18",
+    title: "Pathways to Medicine",
+    date: "18th February 2026",
+    time: "10:00 AM - 12:00 PM",
+    type: "pathways" as const,
+    description: "Everything You Need to Know to Get into Medical School",
+    spots: 50,
     price: 15,
-    details: "This focused conference will equip you with all the ethical frameworks and knowledge you need to confidently tackle medical ethics questions in your interview, plus guidance on current hot topics. Learn the core principles, how to apply them, and how to demonstrate ethical reasoning that impresses interviewers.",
+    details: "Your complete roadmap to becoming a doctor — from GCSE choices to UCAT, interviews and beyond. This interactive conference breaks down the entire journey into medicine in a way schools never teach. Whether you're in Year 8 just starting to think about medicine or in Year 12 preparing your application, you'll leave knowing exactly what to do next.",
     benefits: [
-        "Master the '4 Pillars': A deep dive into Autonomy, Beneficence, Non-maleficence, and Justice.",
-        "Fail-Safe Structure: Learn a universal framework to answer any ethics question without rambling.",
-        "Legal & GMC Context: Understand the Mental Capacity Act and key guidelines needed for high marks.",
-        "Confidence in Grey Areas & Hot Topics: How to tackle controversial issues like organ donation, resource allocation, and other current debates."
+        "Choosing the Right Subjects: Which GCSEs & A-levels matter — and which don't.",
+        "How to Revise Like a Top Medical Applicant: Proven study systems used by high-scoring medical students.",
+        "UCAT Made Simple: What it is, when to take it, how to prepare, and how to avoid the biggest mistakes.",
+        "Personal Statement & Work Experience: What medical schools actually care about (and how to stand out).",
+        "Interview Preparation: What interviewers look for — explained by students who just got in.",
+        "Timeline to Medicine: A clear step-by-step plan from Year 8 → Medical School."
     ],
     whatToExpect: [
-        "Deconstruction of common ethical scenarios found in past interviews.",
-        "Live model answers demonstrating the perfect balance of empathy and logic.",
-        "Interactive 'Hot Seat' dilemmas to practice thinking on your feet.",
-        "A dedicated Q&A segment to clarify specific ethical doubts or concepts."
+        "Live Q&A with Medical Students & Admissions Experts: Ask anything — no awkward school assembly answers.",
+        "Real strategies that successful applicants use — not vague advice, but real systems, real examples, and real answers.",
+        "Interactive session designed for Years 8–12 students considering medicine and parents who want to understand the admissions process.",
+        "Perfect for students who feel overwhelmed and don't know where to start."
     ],
     auxiliaryInfo: [
-        "£10 Voucher towards a mock interview!"
+        "🎁 Bonus: All attendees receive a free Medicine Application Starter Pack including revision templates, UCAT resources, and application timeline checklist.",
+        "🚀 Limited spaces available - Don't leave your future to guesswork. Start your journey to medicine today."
     ]
 };
 
@@ -63,6 +66,16 @@ export const upcomingEvent: UpcomingEvent = {
  * Add new previous events to the TOP of this array
  */
 export const previousEvents: Event[] = [
+  {
+    id: 0,
+    title: "All The Ethics & Hot Topics You Need for the Med Interview",
+    date: "2025-01-04",
+    time: "10:00 AM - 11:00 AM",
+    type: "interview",
+    description: "Master medical ethics and current hot topics for your interview!",
+    spots: 30,
+    price: 15
+  },
   {
     id: 1,
     title: "Interview Question Approaches",

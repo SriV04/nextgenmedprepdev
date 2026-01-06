@@ -181,22 +181,22 @@ export default function PaymentForm({ selectedPackage, initialData, onSuccess, o
         <div className="bg-purple-500/10 dark:bg-purple-500/10 p-5 rounded-lg border border-purple-500/30 dark:border-purple-500/30 shadow-sm">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Amount
               </label>
-              <div className="text-2xl font-bold text-white dark:text-white">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 £{selectedPackage.price}
               </div>
-              <div className="text-sm text-gray-400 dark:text-gray-400 mt-1">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 {selectedPackage.currency} - British Pound
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Service Description
               </label>
-              <div className="text-white dark:text-white font-medium">
+              <div className="text-gray-900 dark:text-white font-medium">
                 {selectedPackage.description}
               </div>
             </div>
