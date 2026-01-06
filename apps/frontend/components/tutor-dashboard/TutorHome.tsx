@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus } from 'lucide-react';
 import SessionFeedbackModal from './SessionFeedbackModal';
+import AddQuestionModal from './AddQuestionModal';
 
 interface UpcomingSession {
   id: string;
@@ -34,6 +35,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
@@ -128,12 +130,23 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-          Welcome back{tutorName ? `, ${tutorName}` : ''}! 👋
-        </h1>
-        <p className="text-blue-100 text-sm sm:text-base">
-          Here's an overview of your tutoring sessions
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+              Welcome back{tutorName ? `, ${tutorName}` : ''}! 👋
+            </h1>
+            <p className="text-blue-100 text-sm sm:text-base">
+              Here's an overview of your tutoring sessions
+            </p>
+          </div>
+          <button
+            onClick={() => setIsAddQuestionModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium shadow-md"
+          >
+            <Plus className="w-5 h-5" />
+            Add Question
+          </button>
+        </div>
       </div>
 
       {/* Statistics Cards */}
@@ -301,6 +314,16 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
         isOpen={isFeedbackModalOpen}
         onClose={handleCloseFeedbackModal}
         session={selectedSession}
+      />
+
+      {/* Add Question Modal */}
+      <AddQuestionModal
+        isOpen={isAddQuestionModalOpen}
+        onClose={() => setIsAddQuestionModalOpen(false)}
+        userId={tutorId}
+        onSuccess={() => {
+          console.log('Question created successfully');
+        }}
       />
 
       {error && (

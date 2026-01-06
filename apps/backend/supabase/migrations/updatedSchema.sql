@@ -183,6 +183,9 @@ CREATE TABLE public.users (
 );
 
 
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
 CREATE TABLE prometheus.interview_question_skill_marks (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   interview_question_id uuid NOT NULL,
@@ -235,6 +238,8 @@ CREATE TABLE prometheus.questions (
   is_active boolean NOT NULL DEFAULT true,
   follow_up_questions jsonb NOT NULL DEFAULT '[]'::jsonb,
   notes text,
+  oxbridge boolean,
+  resources jsonb,
   CONSTRAINT questions_pkey PRIMARY KEY (id)
 );
 CREATE TABLE prometheus.skill_definitions (
