@@ -33,7 +33,7 @@ export interface UpcomingEvent extends Omit<Event, 'id'> {
 export const upcomingEvent: UpcomingEvent = {
     id: "Pathways_to_Medicine_Conference_2026_02_18",
     title: "Pathways to Medicine",
-    date: "18th February 2026",
+    date: "2026-02-15",
     time: "10:00 AM - 12:00 PM",
     type: "pathways" as const,
     description: "Everything You Need to Know to Get into Medical School",
