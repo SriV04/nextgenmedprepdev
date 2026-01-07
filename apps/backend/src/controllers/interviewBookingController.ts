@@ -409,6 +409,7 @@ export class InterviewBookingController {
         serviceType: metadata.service_type,
         universities: universitiesArray,
         amount: amount,
+        field: metadata.field as 'medicine' | 'dentistry',
         filePath: metadata.file_path,
         downloadUrl: downloadUrl,
         notes: metadata.notes,

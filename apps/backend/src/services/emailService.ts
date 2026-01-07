@@ -927,14 +927,27 @@ Hi ${data.userName},
 Thank you for booking ${ticketCount > 1 ? ticketCount + ' tickets' : 'a ticket'} for ${data.eventName}!
 
 Booking Details:
-- Event: ${data.eventName}
+- Event: Pathways To Medicine Conference: The guide to achieving medical school
 - Number of Tickets: ${ticketCount}
 - Amount: £${data.amount}
 - Booking ID: ${data.id}
 
-What happens next:
-• You'll receive a confirmation email with event details closer to the Event 
-• Your will be able to join the event via zoom 
+Event Details:
+- Date & Time: Feb 15, 2026 10:00 AM London
+- Duration: Full day conference
+- Format: Virtual (Zoom)
+
+Join Zoom Meeting:
+https://us06web.zoom.us/j/81834671171?pwd=OnpWWm7Cb19nFbl46KHPyUFczqVNSb.1
+
+Meeting ID: 818 3467 1171
+Passcode: 437299
+
+What to Expect:
+• Comprehensive guide to achieving medical school admission
+• Expert insights on the application process
+• Interactive Q&A sessions
+• Networking opportunities with aspiring medical students
 • Bring your questions and energy!
 
 If you have any questions about the event, please contact us at contact@nextgenmedprep.com.
@@ -960,26 +973,52 @@ The NextGen MedPrep Team
           <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #1f2937;">Booking Details</h3>
             <ul style="margin: 0; padding-left: 20px; color: #374151;">
-              <li><strong>Event:</strong> ${data.eventName}</li>
+              <li><strong>Event:</strong> Pathways To Medicine Conference: The guide to achieving medical school</li>
               <li><strong>Number of Tickets:</strong> ${ticketCount}</li>
               <li><strong>Amount:</strong> £${data.amount}</li>
               <li><strong>Booking ID:</strong> ${data.id}</li>
             </ul>
           </div>
 
-          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
-            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+          <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">📅 Event Information</h3>
             <ul style="color: #374151; margin: 0; padding-left: 20px;">
-              <li>You'll receive a confirmation email with event details within <strong>48 hours</strong></li>
-              <li>Your ticket(s) will be emailed to you <strong>1 week</strong> before the event</li>
-              <li>Please arrive <strong>15 minutes</strong> before the event starts for registration</li>
-              <li>Bring your ticket (digital or printed) for entry</li>
+              <li><strong>Date & Time:</strong> Feb 15, 2026 10:00 AM London</li>
+              <li><strong>Duration:</strong> Full day conference</li>
+              <li><strong>Format:</strong> Virtual (Zoom)</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">🎥 Join the Conference</h3>
+            <div style="background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0;">
+              <p style="margin: 0 0 10px 0; color: #374151;"><strong>Zoom Meeting Link:</strong></p>
+              <a href="https://us06web.zoom.us/j/81834671171?pwd=OnpWWm7Cb19nFbl46KHPyUFczqVNSb.1" 
+                 style="color: #2563eb; text-decoration: none; word-break: break-all; font-size: 14px;">
+                https://us06web.zoom.us/j/81834671171?pwd=OnpWWm7Cb19nFbl46KHPyUFczqVNSb.1
+              </a>
+              <p style="margin: 15px 0 5px 0; color: #374151;"><strong>Meeting ID:</strong> 818 3467 1171</p>
+              <p style="margin: 5px 0 0 0; color: #374151;"><strong>Passcode:</strong> 437299</p>
+            </div>
+            <p style="margin: 15px 0 0 0; color: #374151; font-size: 14px;">
+              💡 <strong>Tip:</strong> We recommend joining 10 minutes early to test your audio and video.
+            </p>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="margin-top: 0; color: #92400e;">What to Expect</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px;">
+              <li>Comprehensive guide to achieving medical school admission</li>
+              <li>Expert insights on the application process</li>
+              <li>Interactive Q&A sessions</li>
+              <li>Networking opportunities with aspiring medical students</li>
+              <li>Bring your questions and energy!</li>
             </ul>
           </div>
 
           <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <p style="margin: 0; font-size: 14px; color: #92400e;">
-              <strong>📝 Have questions?</strong> Contact us at contact@nextgenmedprep.com for any event-related inquiries.
+              <strong>📝 Questions?</strong> Contact us at contact@nextgenmedprep.com for any event-related inquiries.
             </p>
           </div>
 
@@ -1023,6 +1062,7 @@ The NextGen MedPrep Team
     serviceType: string;
     universities: string[];
     amount: number;
+    field?: 'medicine' | 'dentistry';
     filePath?: string;
     downloadUrl?: string;
     notes?: string;
@@ -1173,15 +1213,18 @@ The NextGen MedPrep Team
     serviceType: string;
     universities: string[];
     amount: number;
+    field?: 'medicine' | 'dentistry';
     filePath?: string;
     downloadUrl?: string;
     notes?: string;
     preferredDate?: string;
     availability?: Array<{ date: string; timeSlot: string }>;
   }): EmailTemplate {
-    const packageLabel = data.packageType === 'single' ? 'Single Session' : 'Package Deal';
+    // Format package type: essentials -> Essentials, core -> Core, premium -> Premium
+    const packageLabel = data.packageType.charAt(0).toUpperCase() + data.packageType.slice(1);
     const serviceLabel = data.serviceType === 'generated' ? 'AI-Generated Mock Questions' : 'Live Tutor Session';
     const universitiesStr = data.universities.join(', ');
+    const fieldLabel = data.field ? data.field.charAt(0).toUpperCase() + data.field.slice(1) : 'Not specified';
     
     const subject = `New Interview Booking: ${data.customerName} - ${packageLabel}`;
     
@@ -1196,6 +1239,7 @@ Customer Details:
 Booking Details:
 - Package: ${packageLabel}
 - Service: ${serviceLabel}
+- Field: ${fieldLabel}
 - Universities: ${universitiesStr}
 - Amount: £${data.amount}
 ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
@@ -1246,6 +1290,10 @@ Booking ID: ${data.bookingId}
               <tr>
                 <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Service:</td>
                 <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${serviceLabel}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Field:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${fieldLabel}</td>
               </tr>
               <tr>
                 <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Universities:</td>
