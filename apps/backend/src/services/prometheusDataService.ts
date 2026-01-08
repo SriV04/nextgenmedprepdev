@@ -177,7 +177,7 @@ export const getAllTags = async () => {
     .schema('prometheus')
     .from('tags')
     .select('*')
-    .order('tag_name', { ascending: true });
+    .order('tag', { ascending: true });
   
   if (error) throw error;
   return data;
@@ -213,7 +213,7 @@ export const createTag = async (tagName: string) => {
   const { data, error } = await supabase
     .schema('prometheus')
     .from('tags')
-    .insert({ tag_name: tagName })
+    .insert({ tag: tagName })
     .select()
     .single();
   
@@ -330,18 +330,9 @@ export const createQuestion = async (questionData: CreateQuestionData) => {
   if (questionData.tags && questionData.tags.length > 0) {
     console.log('Adding tags:', questionData.tags);
     
-    const tagIds: string[] = [];
-    
-    for (const tagName of questionData.tags) {
-      console.log('Creating/getting tag:', tagName);
-      const tag = await createTag(tagName); // Creates or gets existing
-      console.log('Tag result:', tag);
-      tagIds.push(tag.id);
-    }
-    
-    const questionTagsToInsert = tagIds.map(tagId => ({
+    const questionTagsToInsert = questionData.tags.map(tag => ({
       question_id: question.id,
-      tag_id: tagId
+      tag: tag
     }));
     
     console.log('Question tags to insert:', JSON.stringify(questionTagsToInsert, null, 2));
@@ -396,10 +387,7 @@ export const getQuestionById = async (questionId: string) => {
         )
       ),
       question_tags (
-        tags (
-          id,
-          tag_name
-        )
+        tag
       )
     `)
     .eq('id', questionId)
@@ -439,10 +427,7 @@ export const getQuestions = async (filters?: {
         )
       ),
       question_tags (
-        tags (
-          id,
-          tag_name
-        )
+        tag
       )
     `);
   
@@ -868,10 +853,7 @@ export const getQuestionsByTag = async (tagName: string) => {
         )
       ),
       question_tags (
-        tags (
-          id,
-          tag_name
-        )
+        tag
       )
     `)
     .in('id', questionIds);

@@ -223,15 +223,15 @@ CREATE TABLE prometheus.question_skill_criteria (
 );
 CREATE TABLE prometheus.question_tags (
   question_id uuid NOT NULL,
-  tag_id uuid NOT NULL,
-  CONSTRAINT question_tags_pkey PRIMARY KEY (question_id, tag_id),
+  tag text NOT NULL,
+  CONSTRAINT question_tags_pkey PRIMARY KEY (question_id, tag),
   CONSTRAINT question_tags_question_id_fkey FOREIGN KEY (question_id) REFERENCES prometheus.questions(id),
-  CONSTRAINT question_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES prometheus.tags(id)
+  CONSTRAINT question_tags_tag_fkey FOREIGN KEY (tag) REFERENCES prometheus.tags(tag)
 );
 CREATE TABLE prometheus.questions (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   question_text text NOT NULL,
-  interview_type text,
+  interview_types text,
   title text,
   category text,
   difficulty text,
@@ -240,7 +240,9 @@ CREATE TABLE prometheus.questions (
   notes text,
   oxbridge boolean,
   resources jsonb,
-  CONSTRAINT questions_pkey PRIMARY KEY (id)
+  contributor_id uuid,
+  CONSTRAINT questions_pkey PRIMARY KEY (id),
+  CONSTRAINT questions_contributor_id_fkey FOREIGN KEY (contributor_id) REFERENCES public.tutors(id)
 );
 CREATE TABLE prometheus.skill_definitions (
   skill_code text NOT NULL,
@@ -250,9 +252,8 @@ CREATE TABLE prometheus.skill_definitions (
   CONSTRAINT skill_definitions_pkey PRIMARY KEY (skill_code)
 );
 CREATE TABLE prometheus.tags (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  tag_name text NOT NULL UNIQUE,
-  CONSTRAINT tags_pkey PRIMARY KEY (id)
+  tag text NOT NULL,
+  CONSTRAINT tags_pkey PRIMARY KEY (tag)
 );
 CREATE TABLE prometheus.university_configurations (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -264,9 +265,9 @@ CREATE TABLE prometheus.university_configurations (
 CREATE TABLE prometheus.university_tag_configs (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   university_config_id uuid NOT NULL,
-  tag_id uuid,
+  tag text NOT NULL,
   num_questions integer NOT NULL DEFAULT 0,
   CONSTRAINT university_tag_configs_pkey PRIMARY KEY (id),
-  CONSTRAINT university_tag_configs_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES prometheus.tags(id),
-  CONSTRAINT university_tag_configs_university_config_id_fkey FOREIGN KEY (university_config_id) REFERENCES prometheus.university_configurations(id)
+  CONSTRAINT university_tag_configs_university_config_id_fkey FOREIGN KEY (university_config_id) REFERENCES prometheus.university_configurations(id),
+  CONSTRAINT university_tag_configs_tag_fkey FOREIGN KEY (tag) REFERENCES prometheus.tags(tag)
 );

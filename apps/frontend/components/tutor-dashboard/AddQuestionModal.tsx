@@ -30,22 +30,27 @@ interface AvailableSkill {
   sort_order: number;
 }
 
+interface AvailableTag {
+  tag: string;
+}
+
 const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, onSuccess, userId }) => {
   // Form state
   const [questionText, setQuestionText] = useState('');
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [interviewTypes, setInterviewTypes] = useState<('MMI' | 'Oxbridge' | 'Group Task')[]>([]);
   const [notes, setNotes] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[]>([]);
   const [coreSkills, setCoreSkills] = useState<SkillCriterion[]>([]);
   const [extraSkills, setExtraSkills] = useState<SkillCriterion[]>([]);
   
   // UI state
   const [availableSkills, setAvailableSkills] = useState<AvailableSkill[]>([]);
+  const [availableTags, setAvailableTags] = useState<AvailableTag[]>([]);
+  const [tagSearch, setTagSearch] = useState('');
+  const [showTagSelector, setShowTagSelector] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -60,6 +65,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
   useEffect(() => {
     if (isOpen) {
       fetchAvailableSkills();
+      fetchAvailableTags();
       resetForm();
     }
   }, [isOpen]);
@@ -78,15 +84,29 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     }
   };
 
+  const fetchAvailableTags = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/v1/prometheus/tags`);
+      const result = await response.json();
+      if (result.success) {
+        setAvailableTags(result.data);
+      } else {
+        console.error('Failed to fetch tags:', result.message);
+      }
+    } catch (err) {
+      console.error('Error fetching tags:', err);
+    }
+  };
+
   const resetForm = () => {
     setQuestionText('');
     setTitle('');
-    setCategory('');
     setDifficulty('medium');
     setInterviewTypes([]);
     setNotes('');
-    setTags([]);
-    setTagInput('');
+    setSelectedTags([]);
+    setTagSearch('');
+    setShowTagSelector(false);
     setFollowUpQuestions([]);
     setCoreSkills([]);
     setExtraSkills([]);
@@ -98,15 +118,12 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     setNewSkillDescription('');
   };
 
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove));
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
 
   const addFollowUpQuestion = () => {
@@ -268,7 +285,6 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
       const payload = {
         question_text: questionText,
         title,
-        category: category || undefined,
         difficulty,
         interview_types: interviewTypes,
         notes: notes || undefined,
@@ -281,7 +297,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
           guidance: s.guidance || undefined,
           display_order: s.displayOrder
         })),
-        tags: tags.length > 0 ? tags : undefined
+        tags: selectedTags.length > 0 ? selectedTags : undefined
       };
 
       const response = await fetch(`${backendUrl}/api/v1/prometheus/questions`, {
@@ -372,19 +388,6 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., Difficult interaction in healthcare"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  placeholder="e.g., staple, ethical, scenario"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
@@ -497,36 +500,66 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
           </div>
 
           {/* Tags */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-gray-900">Tags</h3>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                placeholder="Add tag (press Enter)"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
+          <div className="space-y-3 border-2 border-purple-200 rounded-lg p-4 bg-purple-50">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-purple-900">Question Tags</h3>
               <button
                 type="button"
-                onClick={addTag}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                onClick={() => setShowTagSelector(!showTagSelector)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
+                {showTagSelector ? 'Hide Tags' : 'Add Tags'}
               </button>
             </div>
-            {tags.length > 0 && (
+
+            {showTagSelector && (
+              <div className="bg-white border border-purple-300 rounded-lg p-3">
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    placeholder="Search tags..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                <p className="text-sm font-medium text-gray-700 mb-2">Select tags:</p>
+                <div className="grid grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+                  {availableTags
+                    .filter(t => !tagSearch || t.tag.toLowerCase().includes(tagSearch.toLowerCase()))
+                    .map(tag => (
+                      <button
+                        key={tag.tag}
+                        type="button"
+                        onClick={() => toggleTag(tag.tag)}
+                        className={`px-3 py-2 rounded-lg transition-colors text-sm text-left ${
+                          selectedTags.includes(tag.tag)
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                        }`}
+                      >
+                        {tag.tag}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {selectedTags.length === 0 ? (
+              <p className="text-sm text-purple-700 italic">No tags selected yet (optional)</p>
+            ) : (
               <div className="flex flex-wrap gap-2">
-                {tags.map(tag => (
+                {selectedTags.map(tag => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm"
+                    className="inline-flex items-center gap-1 bg-white border border-purple-300 text-purple-900 px-3 py-1 rounded-full text-sm font-medium"
                   >
                     {tag}
                     <button
-                      onClick={() => removeTag(tag)}
-                      className="hover:text-purple-900"
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className="hover:text-purple-700"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -535,8 +568,6 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
               </div>
             )}
           </div>
-
-          
 
           {/* Core Skills */}
           <div className="space-y-3 border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
