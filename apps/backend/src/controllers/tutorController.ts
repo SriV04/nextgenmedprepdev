@@ -72,6 +72,7 @@ export const createTutor = async (
         email: validatedData.email,
         subjects: validatedData.subjects,
         role: validatedData.role, // Defaults to 'tutor' from schema
+        approval_status: 'pending', // New tutors require approval
       })
       .select()
       .single();
@@ -656,6 +657,112 @@ export const getTutorSessionStats = async (
     });
   } catch (error: any) {
     console.error('Error in getTutorSessionStats:', error);
+    next(error);
+  }
+};
+
+/**
+ * Get all pending tutors (admin only)
+ */
+export const getPendingTutors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const supabase = createSupabaseClient();
+
+    const { data: tutors, error } = await supabase
+      .from('tutors')
+      .select('*')
+      .eq('approval_status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    res.json({
+      success: true,
+      data: tutors,
+    });
+  } catch (error: any) {
+    console.error('Error in getPendingTutors:', error);
+    next(error);
+  }
+};
+
+/**
+ * Approve a tutor (admin only)
+ */
+export const approveTutor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { tutorId } = req.params;
+    const { approved_by } = req.body; // Admin user ID
+    const supabase = createSupabaseClient();
+
+    const { data: tutor, error } = await supabase
+      .from('tutors')
+      .update({
+        approval_status: 'approved',
+        approved_at: new Date().toISOString(),
+        approved_by: approved_by || null,
+      })
+      .eq('id', tutorId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Tutor approved successfully',
+      data: tutor,
+    });
+  } catch (error: any) {
+    console.error('Error in approveTutor:', error);
+    next(error);
+  }
+};
+
+/**
+ * Reject a tutor (admin only)
+ */
+export const rejectTutor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { tutorId } = req.params;
+    const supabase = createSupabaseClient();
+
+    const { data: tutor, error } = await supabase
+      .from('tutors')
+      .update({
+        approval_status: 'rejected',
+      })
+      .eq('id', tutorId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Tutor rejected',
+      data: tutor,
+    });
+  } catch (error: any) {
+    console.error('Error in rejectTutor:', error);
     next(error);
   }
 };

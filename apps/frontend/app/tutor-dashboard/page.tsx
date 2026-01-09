@@ -97,11 +97,24 @@ function DashboardContent() {
         // Fetch user role from the tutors table
         const { data: tutorData, error: tutorError } = await supabase
           .from('tutors')
-          .select('role')
+          .select('role, approval_status')
           .eq('id', user.id)
           .single();
         
         if (tutorData && !tutorError) {
+          // Check approval status
+          if (tutorData.approval_status === 'pending') {
+            router.push('/tutor-dashboard/pending-approval');
+            return;
+          }
+          
+          if (tutorData.approval_status === 'rejected') {
+            await supabase.auth.signOut();
+            const message = encodeURIComponent('Your tutor application has been rejected. Please contact support for more information.');
+            router.push(`/auth/login?redirectTo=/tutor-dashboard&role=tutor&error=rejected&message=${message}`);
+            return;
+          }
+          
           setUserRole(tutorData.role);
           setIsAdmin(tutorData.role === 'admin');
           setIsManager(tutorData.role === 'manager');
