@@ -10,6 +10,7 @@ import {
   cancelInterview,
   deleteInterview,
   confirmInterview,
+  getInterviewsByStudentEmail,
 } from '../controllers/interviewController';
 
 const router = Router();
@@ -18,6 +19,7 @@ const router = Router();
 router.post('/interviews', createInterview);
 router.get('/interviews', getAllInterviews);
 router.get('/interviews/unassigned', getUnassignedInterviews);
+router.get('/interviews/student/email/:email', getInterviewsByStudentEmail);
 router.get('/interviews/:id', getInterview);
 router.put('/interviews/:id', updateInterview);
 router.post('/interviews/:id/assign', assignInterviewToTutor);

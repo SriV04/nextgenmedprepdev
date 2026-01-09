@@ -8,9 +8,10 @@ import bookingRoutes from './bookings';
 import interviewBookingRoutes from './interviewBookings';
 import tutorRoutes from './tutors';
 import interviewRoutes from './interviews';
-import studentRoutes from './students';
 import universityRoutes from './universities';
 import userRoutes from './users';
+import studentRoutes from './students';
+import prometheusRoutes from './prometheus';
 
 const router = Router();
 
@@ -34,8 +35,9 @@ router.use('/api/v1', bookingRoutes);
 router.use('/api/v1', interviewBookingRoutes);
 router.use('/api/v1', tutorRoutes);
 router.use('/api/v1', interviewRoutes);
-router.use('/api/v1', studentRoutes);
 router.use('/api/v1', universityRoutes);
 router.use('/api/v1', userRoutes);
+router.use('/api/v1', studentRoutes);
+router.use('/api/v1/prometheus', prometheusRoutes);
 
 export default router;

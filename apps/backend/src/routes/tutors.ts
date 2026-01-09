@@ -9,6 +9,11 @@ import {
   getAllTutorsWithAvailability,
   addBulkAvailability,
   deleteAvailability,
+  getTutorUpcomingSessions,
+  getTutorSessionStats,
+  getPendingTutors,
+  approveTutor,
+  rejectTutor,
 } from '../controllers/tutorController';
 
 const router = Router();
@@ -16,9 +21,18 @@ const router = Router();
 // Tutor management routes
 router.post('/tutors', createTutor);
 router.get('/tutors/with-availability', getAllTutorsWithAvailability); // Must be before /tutors/:id
+router.get('/tutors/pending', getPendingTutors); // Get pending approval tutors (admin only)
 router.get('/tutors', getAllTutors);
 router.get('/tutor', getTutor); // Query by id or email
 router.put('/tutors/:id', updateTutor);
+
+// Tutor approval routes (admin only)
+router.patch('/tutors/:tutorId/approve', approveTutor);
+router.patch('/tutors/:tutorId/reject', rejectTutor);
+
+// Tutor dashboard routes
+router.get('/tutors/:tutorId/upcoming-sessions', getTutorUpcomingSessions);
+router.get('/tutors/:tutorId/session-stats', getTutorSessionStats);
 
 // Availability management routes
 router.post('/tutors/:tutorId/availability', addAvailability);

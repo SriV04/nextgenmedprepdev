@@ -38,5 +38,31 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Check tutor approval status for tutor dashboard
+  if (request.nextUrl.pathname.startsWith('/tutor-dashboard') && user && 
+      !request.nextUrl.pathname.includes('/pending-approval')) {
+    const { data: tutorData } = await supabase
+      .from('tutors')
+      .select('approval_status')
+      .eq('id', user.id)
+      .single();
+    
+    if (tutorData?.approval_status === 'pending') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/tutor-dashboard/pending-approval';
+      return NextResponse.redirect(url);
+    }
+    
+    if (tutorData?.approval_status === 'rejected') {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/login';
+      url.searchParams.set('redirectTo', '/tutor-dashboard');
+      url.searchParams.set('error', 'rejected');
+      url.searchParams.set('message', 'Your tutor application has been rejected.');
+      return NextResponse.redirect(url);
+    }
+  }
+
   return supabaseResponse;
 }

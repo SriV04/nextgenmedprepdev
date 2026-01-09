@@ -1,86 +1,25 @@
-import { Router, Request, Response, NextFunction } from 'express';
-import { createSupabaseClient } from '../../supabase/config';
+import { Router } from 'express';
+import {
+  getStudentDashboard,
+  updateStudentProfile,
+  submitStudentAvailability,
+  updateBookingUniversity,
+} from '@/controllers/studentController';
 
+import { asyncHandler } from '../middleware/errorHandler';
 
 const router = Router();
 
-/**
- * Search students by email
- */
-router.get('/students', async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { search } = req.query;
-    const supabase = createSupabaseClient();
+// Get student dashboard data by email (profile, bookings, interviews, availability)
+router.get('/students/email/:email/dashboard', asyncHandler(getStudentDashboard));
 
-    if (!search || typeof search !== 'string') {
-      res.json({
-        success: true,
-        data: [],
-      });
-      return;
-    }
+// Update student profile
+router.put('/students/:userId/profile', asyncHandler(updateStudentProfile));
 
-    const { data: students, error } = await supabase
-      .from('bookings')
-      .select('id, email, package')
-      .ilike('email', `%${search}%`)
-      .limit(10);
+// Submit student availability
+router.post('/students/:userId/availability', asyncHandler(submitStudentAvailability));
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // Transform to student format
-    const studentList = students?.map(s => ({
-      id: s.id,
-      email: s.email,
-      name: s.email.split('@')[0], // Extract name from email
-    })) || [];
-
-    res.json({
-      success: true,
-      data: studentList,
-    });
-  } catch (error: any) {
-    console.error('Error searching students:', error);
-    next(error);
-  }
-});
-
-/**
- * Get student availability by student ID
- */
-router.get('/students/:studentId/availability', async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { studentId } = req.params;
-    const supabase = createSupabaseClient();
-
-    const { data: availability, error } = await supabase
-      .from('student_availability')
-      .select('*')
-      .eq('student_id', studentId)
-      .order('date', { ascending: true });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    res.json({
-      success: true,
-      data: availability || [],
-    });
-  } catch (error: any) {
-    console.error('Error fetching student availability:', error);
-    next(error);
-  }
-});
+// Update university preference on a booking
+router.put('/students/bookings/:bookingId/university', asyncHandler(updateBookingUniversity));
 
 export default router;

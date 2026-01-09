@@ -270,6 +270,7 @@ export class InterviewBookingController {
           role: 'student',
           phone_number: metadata.phone || undefined
         });
+        console.log('New user created:', user.id);
       }
 
       // Create booking record
@@ -369,6 +370,7 @@ export class InterviewBookingController {
           amount: amount,
           preferredDate: metadata.preferred_date,
           notes: metadata.notes,
+          studentId: user.id, // Include student ID for dashboard link
         }
       );
 

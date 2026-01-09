@@ -9,16 +9,74 @@ export async function GET(request: Request) {
   const type = searchParams.get('type');
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
-  const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
+  const roleParam = searchParams.get('role');
+  const authRole = roleParam === 'student' ? 'student' : 'tutor';
+  const fallbackRedirect = authRole === 'student' ? '/student-dashboard' : '/tutor-dashboard';
+  const redirectTo = searchParams.get('redirectTo') || fallbackRedirect;
 
   // Determine the correct origin (Vercel or localhost)
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 
                  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : requestUrl.origin);
 
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+  const buildLoginRedirect = (errorCode: string, message: string) => {
+    const loginUrl = new URL(`${origin}/auth/login`);
+    loginUrl.searchParams.set('error', errorCode);
+    loginUrl.searchParams.set('message', message);
+    loginUrl.searchParams.set('role', authRole);
+    loginUrl.searchParams.set('redirectTo', redirectTo);
+    return loginUrl.toString();
+  };
+
+  const syncRoleProfile = async (user: { id: string; email?: string | null; user_metadata?: Record<string, any> }) => {
+    if (!user.email) return;
+    const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+
+    if (authRole === 'student') {
+      const response = await fetch(`${backendUrl}/api/v1/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          full_name: displayName,
+          role: 'student',
+        }),
+      });
+
+      if (!response.ok && response.status !== 409) {
+        throw new Error('Failed to sync student profile');
+      }
+      return;
+    }
+
+    const response = await fetch(`${backendUrl}/api/v1/tutors`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        name: displayName,
+        email: user.email,
+        subjects: ['Interviews', 'UCAT', 'Personal Statement'],
+        role: 'tutor',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to sync tutor profile');
+    }
+  };
+
   // Check for OAuth errors
   if (error) {
     console.error('OAuth error:', error, errorDescription);
-    return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(error)}&message=${encodeURIComponent(errorDescription || 'Authentication failed')}`);
+    return NextResponse.redirect(buildLoginRedirect(
+      error,
+      errorDescription || 'Authentication failed'
+    ));
   }
 
   const supabase = await createClient();
@@ -34,39 +92,16 @@ export async function GET(request: Request) {
 
     if (verifyError) {
       console.error('Error verifying email:', verifyError);
-      return NextResponse.redirect(`${origin}/auth/login?error=verification_failed&message=${encodeURIComponent(verifyError.message)}`);
+      return NextResponse.redirect(buildLoginRedirect('verification_failed', verifyError.message));
     }
 
     if (data.user) {
       console.log('Email verified successfully:', data.user.email);
       
-      // Create tutor account in backend
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
-        
-        const response = await fetch(`${backendUrl}/api/v1/tutors`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: data.user.id,
-            name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Tutor',
-            email: data.user.email,
-            subjects: ['Interviews', 'UCAT', 'Personal Statement'],
-            role: 'tutor',
-          }),
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          console.log('Tutor account created/verified:', result.data);
-        } else {
-          console.error('Failed to create tutor account:', result);
-        }
+        await syncRoleProfile(data.user);
       } catch (backendError) {
-        console.error('Error calling backend to create tutor:', backendError);
+        console.error('Error syncing profile:', backendError);
         // Continue anyway - user is authenticated
       }
 
@@ -82,39 +117,16 @@ export async function GET(request: Request) {
     
     if (exchangeError) {
       console.error('Error exchanging code for session:', exchangeError);
-      return NextResponse.redirect(`${origin}/auth/login?error=session_error&message=${encodeURIComponent(exchangeError.message)}`);
+      return NextResponse.redirect(buildLoginRedirect('session_error', exchangeError.message));
     }
     
     if (data.user) {
       console.log('User authenticated successfully:', data.user.email);
       
-      // Create tutor account in backend
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
-        
-        const response = await fetch(`${backendUrl}/api/v1/tutors`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: data.user.id,
-            name: data.user.user_metadata?.full_name || data.user.email?.split('@')[0] || 'Tutor',
-            email: data.user.email,
-            subjects: ['Interviews', 'UCAT', 'Personal Statement'],
-            role: 'tutor',
-          }),
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          console.log('Tutor account created/verified:', result.data);
-        } else {
-          console.error('Failed to create tutor account:', result);
-        }
+        await syncRoleProfile(data.user);
       } catch (backendError) {
-        console.error('Error calling backend to create tutor:', backendError);
+        console.error('Error syncing profile:', backendError);
         // Continue anyway - user is authenticated
       }
       
@@ -126,5 +138,5 @@ export async function GET(request: Request) {
 
   // Return the user to an error page with instructions
   console.error('No code, token_hash, or user found in callback');
-  return NextResponse.redirect(`${origin}/auth/login?error=auth_failed&message=${encodeURIComponent('No authentication code received')}`);
+  return NextResponse.redirect(buildLoginRedirect('auth_failed', 'No authentication code received'));
 }

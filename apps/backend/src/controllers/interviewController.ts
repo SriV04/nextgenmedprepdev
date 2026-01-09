@@ -863,3 +863,65 @@ export const confirmInterview = async (
     next(error);
   }
 };
+
+/**
+ * Get interviews by student email
+ * Flow: email -> users table -> student_id -> interviews with that student_id
+ */
+export const getInterviewsByStudentEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
+      return;
+    }
+
+    const supabase = createSupabaseClient();
+
+    // Get user by email
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', decodeURIComponent(email))
+      .single();
+
+    if (userError || !user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    // Get interviews for this student
+    const { data: interviews, error: interviewsError } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        tutor:tutors!interviews_tutor_id_fkey(id, name, email),
+        booking:bookings(id, email, package, universities, field, phone)
+      `)
+      .eq('student_id', user.id)
+      .order('scheduled_at', { ascending: true });
+
+    if (interviewsError) {
+      throw new Error(interviewsError.message);
+    }
+
+    res.json({
+      success: true,
+      data: interviews || [],
+    });
+  } catch (error: any) {
+    console.error('Error in getInterviewsByStudentEmail:', error);
+    next(error);
+  }
+};

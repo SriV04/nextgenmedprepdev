@@ -14,6 +14,8 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const authRole = searchParams.get('role') === 'student' ? 'student' : 'tutor';
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
   useEffect(() => {
     // Check for error messages from callback
@@ -27,12 +29,56 @@ export default function LoginForm() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
+        const fallbackRedirect = authRole === 'student' ? '/student-dashboard' : '/tutor-dashboard';
+        const redirectTo = searchParams.get('redirectTo') || fallbackRedirect;
         router.push(redirectTo);
       }
     };
     checkUser();
-  }, [router, searchParams, supabase]);
+  }, [authRole, router, searchParams, supabase]);
+
+  const handleRoleChange = (role: 'student' | 'tutor') => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('role', role);
+    params.set('redirectTo', role === 'student' ? '/student-dashboard' : '/tutor-dashboard');
+    router.replace(`/auth/login?${params.toString()}`);
+  };
+
+  const syncRoleProfile = async (userId: string, userEmail: string, fullName?: string) => {
+    const displayName = fullName || userEmail.split('@')[0];
+    if (authRole === 'student') {
+      const response = await fetch(`${backendUrl}/api/v1/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail,
+          full_name: displayName,
+          role: 'student',
+        }),
+      });
+
+      if (!response.ok && response.status !== 409) {
+        throw new Error('Failed to sync student profile');
+      }
+      return;
+    }
+
+    const response = await fetch(`${backendUrl}/api/v1/tutors`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        name: displayName,
+        email: userEmail,
+        subjects: ['Interviews', 'UCAT', 'Personal Statement'],
+        role: 'tutor',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to sync tutor profile');
+    }
+  };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +86,8 @@ export default function LoginForm() {
       setLoading(true);
       setError(null);
 
-      const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
+      const fallbackRedirect = authRole === 'student' ? '/student-dashboard' : '/tutor-dashboard';
+      const redirectTo = searchParams.get('redirectTo') || fallbackRedirect;
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
       if (isSignUp) {
@@ -52,7 +99,7 @@ export default function LoginForm() {
             data: {
               full_name: name,
             },
-            emailRedirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+            emailRedirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}&role=${authRole}`,
           },
         });
 
@@ -67,28 +114,19 @@ export default function LoginForm() {
             return;
           }
 
-          // Create tutor account
-          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
-          try {
-            await fetch(`${backendUrl}/api/v1/tutors`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                user_id: data.user.id,
-                name: name || email.split('@')[0],
-                email: email,
-                subjects: ['Interviews', 'UCAT', 'Personal Statement'],
-                role: 'tutor',
-              }),
-            });
-          } catch (backendError) {
-            console.error('Error creating tutor account:', backendError);
-            // Continue anyway
-          }
-
           // Check if email confirmation is required
           if (data.session) {
             // User is auto-confirmed (email confirmation disabled)
+            try {
+              await syncRoleProfile(
+                data.user.id,
+                email,
+                name || data.user.user_metadata?.full_name
+              );
+            } catch (backendError) {
+              console.error('Error syncing profile:', backendError);
+              // Continue anyway
+            }
             router.push(redirectTo);
           } else {
             // Email confirmation required
@@ -101,12 +139,24 @@ export default function LoginForm() {
         }
       } else {
         // Sign in
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (error) throw error;
+        if (data.user) {
+          try {
+            await syncRoleProfile(
+              data.user.id,
+              data.user.email || email,
+              data.user.user_metadata?.full_name
+            );
+          } catch (backendError) {
+            console.error('Error syncing profile:', backendError);
+            // Continue anyway
+          }
+        }
         router.push(redirectTo);
       }
     } catch (err: any) {
@@ -121,7 +171,8 @@ export default function LoginForm() {
       setLoading(true);
       setError(null);
 
-      const redirectTo = searchParams.get('redirectTo') || '/tutor-dashboard';
+      const fallbackRedirect = authRole === 'student' ? '/student-dashboard' : '/tutor-dashboard';
+      const redirectTo = searchParams.get('redirectTo') || fallbackRedirect;
       
       // Get the current origin, prioritizing window.location for client-side
       let origin = '';
@@ -132,7 +183,7 @@ export default function LoginForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+          redirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}&role=${authRole}`,
         },
       });
 
@@ -147,18 +198,83 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isSignUp ? 'Create Account' : 'Tutor Dashboard Login'}
+    <div className={`min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 ${
+      authRole === 'student'
+        ? 'bg-gradient-to-br from-amber-50 via-white to-teal-50'
+        : 'bg-gradient-to-br from-blue-50 via-white to-amber-50'
+    }`}>
+      <div className="max-w-5xl w-full grid gap-8 lg:grid-cols-[1.05fr_0.95fr] items-stretch">
+        <div className="rounded-2xl border border-white/60 bg-white/80 shadow-lg backdrop-blur px-6 py-8 sm:px-8 sm:py-10">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+              NextGen MedPrep
+            </span>
+            <div className="flex gap-2 rounded-full bg-gray-100 p-1">
+              <button
+                type="button"
+                onClick={() => handleRoleChange('student')}
+                className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                  authRole === 'student'
+                    ? 'bg-white text-emerald-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRoleChange('tutor')}
+                className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
+                  authRole === 'tutor'
+                    ? 'bg-white text-blue-700 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Tutor
+              </button>
+            </div>
+          </div>
+
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            {authRole === 'student' ? 'Student Portal' : 'Tutor Workspace'}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {isSignUp ? 'Sign up to access the dashboard' : 'Sign in to access the dashboard'}
+          <p className="mt-3 text-sm text-gray-600">
+            {authRole === 'student'
+              ? 'Track your interviews, manage bookings, and keep everything in one place.'
+              : 'Manage interviews, calendars, and student requests with clarity.'}
           </p>
+
+          <div className="mt-8 space-y-4 text-sm text-gray-600">
+            <div className="flex items-start gap-3">
+              <span className="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>
+              <p>{authRole === 'student' ? 'Book sessions faster with saved preferences.' : 'See your weekly availability at a glance.'}</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-1 h-2 w-2 rounded-full bg-blue-500"></span>
+              <p>{authRole === 'student' ? 'Review tutor feedback and session notes.' : 'Coordinate with the team on upcoming interviews.'}</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="mt-1 h-2 w-2 rounded-full bg-amber-500"></span>
+              <p>{authRole === 'student' ? 'Keep your prep timeline and resources aligned.' : 'Stay up to date on assigned students and bookings.'}</p>
+            </div>
+          </div>
+
+          <div className="mt-10 text-sm text-gray-500">
+            Not sure which one you need? Use the dashboard links on the homepage.
+          </div>
         </div>
 
-        <div className="mt-8 bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
+        <div className="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10">
+          <div className="mb-6">
+            <h3 className="text-2xl font-semibold text-gray-900">
+              {isSignUp ? 'Create your account' : 'Welcome back'}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {isSignUp
+                ? `Set up your ${authRole === 'student' ? 'student' : 'tutor'} access in minutes.`
+                : `Sign in to continue to your ${authRole === 'student' ? 'student' : 'tutor'} dashboard.`}
+            </p>
+          </div>
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
               <p className="text-sm font-medium">Error</p>
@@ -231,7 +347,7 @@ export default function LoginForm() {
                     <span>{isSignUp ? 'Creating account...' : 'Signing in...'}</span>
                   </>
                 ) : (
-                  <span>{isSignUp ? 'Sign Up' : 'Sign In'}</span>
+                  <span>{isSignUp ? 'Create account' : 'Sign in'}</span>
                 )}
               </button>
             </form>
