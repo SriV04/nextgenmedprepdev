@@ -6,17 +6,17 @@
 
 import emailService from './src/services/emailService';
 
-const BOOKING_ID = '1cc37c33-2681-4ba8-ba5b-512f3bdaf0f6';
+const BOOKING_ID = 'TEST-' + Date.now();
 
 const bookingDetails = {
-  email: 'sriharsha.vitta@hotmail.com', // Customer email
-  name: 'Konstantinos Serafeim Frosynos',
-  packageType: 'core',
+  email: 'sriharsha.vitta@gmail.com', // Customer email
+  name: 'Test User',
+  packageType: 'single',
   serviceType: 'live',
-  universities: ['sunderland'],
-  amount: 125,
-  notes: 'I would also like to share the interview selection tool that I submitted to Sunderland.',
-  filePath: 'statements/serafeim_frosynos_gmail_com_1763685990166.pdf'
+  universities: ['Oxford', 'Cambridge', 'Imperial'],
+  amount: 75,
+  notes: 'This is a test confirmation email to verify the updated template without student dashboard link.',
+  filePath: 'statements/test_user_1234567890.pdf'
 };
 
 async function main() {

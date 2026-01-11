@@ -1099,10 +1099,10 @@ The NextGen MedPrep Team
     const universitiesStr = data.universities.join(', ');
     
     // Generate dashboard link
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const dashboardLink = data.studentId 
-      ? `${frontendUrl}/student-dashboard?student_id=${data.studentId}` 
-      : `${frontendUrl}/student-dashboard`;
+    // const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // const dashboardLink = data.studentId 
+    //   ? `${frontendUrl}/student-dashboard?student_id=${data.studentId}` 
+    //   : `${frontendUrl}/student-dashboard`;
     
     const subject = 'Interview Preparation Booking Confirmed - NextGen MedPrep';
     
@@ -1122,14 +1122,14 @@ Booking Details:
 ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
 ${data.notes ? `- Notes: ${data.notes}` : ''}
 
-🎓 YOUR STUDENT DASHBOARD:
-We've created a personal dashboard for you to:
-• Submit your availability for interview sessions
-• View your upcoming and past sessions
-• Access session materials and Zoom links
-• Track your progress
-
-Access your dashboard here: ${dashboardLink}
+// 🎓 YOUR STUDENT DASHBOARD:
+// We've created a personal dashboard for you to:
+// • Submit your availability for interview sessions
+// • View your upcoming and past sessions
+// • Access session materials and Zoom links
+// • Track your progress
+//
+// Access your dashboard here: [LINK]
 
 What happens next:
 • Our team will review your personal statement and university choices
@@ -1198,6 +1198,7 @@ The NextGen MedPrep Team
           </div>
           ` : ''}
 
+          <!-- Student Dashboard section commented out
           <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb; text-align: center;">
             <h3 style="margin-top: 0; color: #1e40af;">🎓 Your Student Dashboard</h3>
             <p style="color: #374151; margin-bottom: 15px;">We've created a personal dashboard for you to manage your interview preparation:</p>
@@ -1207,10 +1208,11 @@ The NextGen MedPrep Team
               <li>Access session materials and Zoom links</li>
               <li>Track your preparation progress</li>
             </ul>
-            <a href="${dashboardLink}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+            <a href="[DASHBOARD_LINK]" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
               Access Your Dashboard →
             </a>
           </div>
+          -->
 
           <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
             <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
