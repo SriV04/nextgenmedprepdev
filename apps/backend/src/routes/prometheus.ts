@@ -28,6 +28,20 @@ router.post('/tags', prometheusController.createTag);
 // DELETE /api/v1/prometheus/tags/:tagId - Delete tag
 router.delete('/tags/:tagId', prometheusController.deleteTag);
 
+// ==================== University Stations & Tag Configs ====================
+
+// GET /api/v1/prometheus/university-stations - Get university stations (optionally filtered by university)
+router.get('/university-stations', prometheusController.getUniversityStations);
+
+// POST /api/v1/prometheus/university-stations - Create university station
+router.post('/university-stations', prometheusController.createUniversityStation);
+
+// DELETE /api/v1/prometheus/university-stations/:stationId - Delete university station
+router.delete('/university-stations/:stationId', prometheusController.deleteUniversityStation);
+
+// PUT /api/v1/prometheus/university-stations/:stationId/tags - Set station tags
+router.put('/university-stations/:stationId/tags', prometheusController.setUniversityStationTags);
+
 // ==================== Questions Routes ====================
 
 // POST /api/v1/prometheus/questions - Create new question

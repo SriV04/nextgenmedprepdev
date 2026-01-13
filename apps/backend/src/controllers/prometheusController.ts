@@ -174,6 +174,118 @@ export const deleteTag = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+// ==================== University Stations & Tag Configs ====================
+
+export const getUniversityStations = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const university = req.query.university as string | undefined;
+    const stations = await prometheusService.getUniversityStations(university);
+
+    res.json({
+      success: true,
+      data: stations,
+    });
+  } catch (error: any) {
+    console.error('Error fetching university stations:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch university stations',
+    });
+  }
+};
+
+export const createUniversityStation = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      question_type,
+      station_index,
+      station_name,
+      duration_minutes,
+      notes,
+      is_active,
+      university,
+    } = req.body;
+
+    if (!question_type || station_index === undefined || !university) {
+      res.status(400).json({
+        success: false,
+        message: 'question_type, station_index, and university are required',
+      });
+      return;
+    }
+
+    const station = await prometheusService.createUniversityStation({
+      question_type,
+      station_index,
+      station_name,
+      duration_minutes,
+      notes,
+      is_active,
+      university,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: station,
+    });
+  } catch (error: any) {
+    console.error('Error creating university station:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create university station',
+    });
+  }
+};
+
+export const deleteUniversityStation = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { stationId } = req.params;
+
+    await prometheusService.deleteUniversityStation(stationId);
+
+    res.json({
+      success: true,
+      message: 'University station deleted successfully',
+    });
+  } catch (error: any) {
+    console.error('Error deleting university station:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete university station',
+    });
+  }
+};
+
+export const setUniversityStationTags = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { stationId } = req.params;
+    const { tags } = req.body as {
+      tags: Array<{ tag: string; notes?: Record<string, unknown> | null }>;
+    };
+
+    if (!Array.isArray(tags)) {
+      res.status(400).json({
+        success: false,
+        message: 'tags array is required',
+      });
+      return;
+    }
+
+    const updated = await prometheusService.setUniversityStationTags(stationId, tags);
+
+    res.json({
+      success: true,
+      data: updated,
+    });
+  } catch (error: any) {
+    console.error('Error setting university station tags:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to update university station tags',
+    });
+  }
+};
+
 // ==================== Questions ====================
 
 export const createQuestion = async (req: Request, res: Response): Promise<void> => {

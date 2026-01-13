@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, UserPlus, LogOut, User, HomeIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, LogOut, User, HomeIcon, Tag as TagIcon } from 'lucide-react';
 import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
 import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
@@ -9,6 +9,7 @@ import InterviewDetailsModal from '../../components/tutor-calendar/InterviewDeta
 import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
 import CommitChangesBar from '../../components/tutor-calendar/CommitChangesBar';
 import TutorHome from '../../components/tutor-dashboard/TutorHome';
+import UniversityConfigManager from '../../components/tutor-dashboard/UniversityConfigManager';
 import { TutorCalendarProvider, useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import { createClient } from '../../utils/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -59,7 +60,7 @@ function DashboardContent() {
   const [isManager, setIsManager] = useState(false);
 
   // Tab management
-  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'home'>('home');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'home' | 'university'>('home');
   const [isBookingsUnlocked, setIsBookingsUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
@@ -515,6 +516,21 @@ function DashboardContent() {
             <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Calendar
           </button>
+          
+          {(isAdmin || isManager) && (
+            <button
+              onClick={() => setActiveTab('university')}
+              className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
+                activeTab === 'university'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <TagIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              University Configs
+            </button>
+          )}
+
           <button
             onClick={handleBookingsTabClick}
             className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
@@ -978,6 +994,11 @@ function DashboardContent() {
               isAdmin={isAdmin || isManager}
             />
           </div>
+        )}
+
+        {/* University Configs Tab Content */}
+        {activeTab === 'university' && (isAdmin || isManager) && (
+          <UniversityConfigManager backendUrl={backendUrl} />
         )}
 
         {/* Availability Modal */}

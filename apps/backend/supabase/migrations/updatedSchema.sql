@@ -186,6 +186,9 @@ CREATE TABLE public.users (
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
 CREATE TABLE prometheus.interview_question_skill_marks (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   interview_question_id uuid NOT NULL,
@@ -255,19 +258,23 @@ CREATE TABLE prometheus.tags (
   tag text NOT NULL,
   CONSTRAINT tags_pkey PRIMARY KEY (tag)
 );
-CREATE TABLE prometheus.university_configurations (
+CREATE TABLE prometheus.university_stations (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  total_questions integer NOT NULL DEFAULT 0,
-  custom_configs text,
-  university USER-DEFINED,
-  CONSTRAINT university_configurations_pkey PRIMARY KEY (id)
+  question_type text NOT NULL,
+  station_index integer NOT NULL,
+  station_name text,
+  duration_minutes integer,
+  is_active boolean NOT NULL DEFAULT true,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone NOT NULL DEFAULT now(),
+  university USER-DEFINED NOT NULL,
+  CONSTRAINT university_stations_pkey PRIMARY KEY (id)
 );
 CREATE TABLE prometheus.university_tag_configs (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  university_config_id uuid NOT NULL,
+  university_station uuid NOT NULL,
   tag text NOT NULL,
-  num_questions integer NOT NULL DEFAULT 0,
-  CONSTRAINT university_tag_configs_pkey PRIMARY KEY (id),
-  CONSTRAINT university_tag_configs_university_config_id_fkey FOREIGN KEY (university_config_id) REFERENCES prometheus.university_configurations(id),
-  CONSTRAINT university_tag_configs_tag_fkey FOREIGN KEY (tag) REFERENCES prometheus.tags(tag)
+  notes jsonb,
+  CONSTRAINT university_tag_configs_pkey PRIMARY KEY (tag, university_station),
+  CONSTRAINT university_tag_configs_tag_fkey FOREIGN KEY (tag) REFERENCES prometheus.tags(tag),
+  CONSTRAINT university_tag_configs_university_station_fkey FOREIGN KEY (university_station) REFERENCES prometheus.university_stations(id)
 );

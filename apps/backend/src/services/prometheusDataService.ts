@@ -17,6 +17,25 @@ export interface Tag {
   tag_name: string;
 }
 
+export interface UniversityStation {
+  id: string;
+  question_type: string;
+  station_index: number;
+  station_name?: string | null;
+  duration_minutes?: number | null;
+  notes?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  university: string;
+}
+
+export interface UniversityTagConfig {
+  university_station: string;
+  tag: string;
+  notes?: Record<string, unknown> | null;
+}
+
 export interface FollowUpQuestion {
   order: number;
   text: string;
@@ -242,6 +261,140 @@ export const deleteTag = async (tagId: string) => {
     .eq('id', tagId);
   
   if (error) throw error;
+};
+
+// ============================================================================
+// University Stations & Tag Configs
+// ============================================================================
+
+export const getUniversityStations = async (university?: string) => {
+  const supabase = createSupabaseClient();
+
+  let query = supabase
+    .schema('prometheus')
+    .from('university_stations')
+    .select(`
+      *,
+      university_tag_configs (
+        tag,
+        notes
+      )
+    `)
+    .order('station_index', { ascending: true });
+
+  if (university) {
+    query = query.eq('university', university);
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+  return data;
+};
+
+export const createUniversityStation = async (station: {
+  question_type: string;
+  station_index: number;
+  station_name?: string | null;
+  duration_minutes?: number | null;
+  notes?: string | null;
+  is_active?: boolean;
+  university: string;
+}) => {
+  const supabase = createSupabaseClient();
+
+  const { data, error } = await supabase
+    .schema('prometheus')
+    .from('university_stations')
+    .insert({
+      question_type: station.question_type,
+      station_index: station.station_index,
+      station_name: station.station_name ?? null,
+      duration_minutes: station.duration_minutes ?? null,
+      notes: station.notes ?? null,
+      is_active: station.is_active ?? true,
+      university: station.university,
+    })
+    .select(`
+      *,
+      university_tag_configs (
+        tag,
+        notes
+      )
+    `)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const deleteUniversityStation = async (stationId: string) => {
+  const supabase = createSupabaseClient();
+
+  const { error: tagError } = await supabase
+    .schema('prometheus')
+    .from('university_tag_configs')
+    .delete()
+    .eq('university_station', stationId);
+
+  if (tagError) throw tagError;
+
+  const { error } = await supabase
+    .schema('prometheus')
+    .from('university_stations')
+    .delete()
+    .eq('id', stationId);
+
+  if (error) throw error;
+};
+
+export const setUniversityStationTags = async (
+  stationId: string,
+  tagConfigs: Array<{
+    tag: string;
+    notes?: Record<string, unknown> | null;
+  }>
+) => {
+  const supabase = createSupabaseClient();
+
+  const { error: deleteError } = await supabase
+    .schema('prometheus')
+    .from('university_tag_configs')
+    .delete()
+    .eq('university_station', stationId);
+
+  if (deleteError) throw deleteError;
+
+  if (tagConfigs.length > 0) {
+    const { error: insertError } = await supabase
+      .schema('prometheus')
+      .from('university_tag_configs')
+      .insert(
+        tagConfigs.map((config) => ({
+          university_station: stationId,
+          tag: config.tag,
+          notes: config.notes ?? null,
+        }))
+      );
+
+    if (insertError) throw insertError;
+  }
+
+  const { data, error } = await supabase
+    .schema('prometheus')
+    .from('university_stations')
+    .select(`
+      *,
+      university_tag_configs (
+        tag,
+        notes
+      )
+    `)
+    .eq('id', stationId)
+    .single();
+
+  if (error) throw error;
+  return data;
 };
 
 // ============================================================================
