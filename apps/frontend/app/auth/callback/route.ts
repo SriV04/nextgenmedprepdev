@@ -10,9 +10,17 @@ export async function GET(request: Request) {
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
   const roleParam = searchParams.get('role');
-  const authRole = roleParam === 'student' ? 'student' : 'tutor';
+  const redirectToParam = searchParams.get('redirectTo');
+  const inferredRole = redirectToParam?.includes('/student-dashboard')
+    ? 'student'
+    : redirectToParam?.includes('/tutor-dashboard')
+      ? 'tutor'
+      : null;
+  const authRole = roleParam === 'student' || roleParam === 'tutor'
+    ? roleParam
+    : inferredRole || 'student';
   const fallbackRedirect = authRole === 'student' ? '/student-dashboard' : '/tutor-dashboard';
-  const redirectTo = searchParams.get('redirectTo') || fallbackRedirect;
+  const redirectTo = redirectToParam || fallbackRedirect;
 
   // Determine the correct origin (Vercel or localhost)
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 

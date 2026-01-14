@@ -520,14 +520,14 @@ function DashboardContent() {
           {(isAdmin || isManager) && (
             <button
               onClick={() => setActiveTab('university')}
-              className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
+              className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 font-semibold transition-all whitespace-nowrap text-sm sm:text-base ${
                 activeTab === 'university'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full shadow-sm'
+                  : 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-80'
               }`}
             >
               <TagIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              University Configs
+              Prometheus
             </button>
           )}
 

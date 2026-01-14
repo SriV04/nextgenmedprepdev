@@ -39,21 +39,32 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Check tutor approval status for tutor dashboard
-  if (request.nextUrl.pathname.startsWith('/tutor-dashboard') && user && 
-      !request.nextUrl.pathname.includes('/pending-approval')) {
-    const { data: tutorData } = await supabase
+  if (request.nextUrl.pathname.startsWith('/tutor-dashboard') && user) {
+    const { data: tutorData, error: tutorError } = await supabase
       .from('tutors')
       .select('approval_status')
       .eq('id', user.id)
       .single();
+
+    if (tutorError || !tutorData) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/login';
+      url.searchParams.set('redirectTo', '/tutor-dashboard');
+      url.searchParams.set('role', 'tutor');
+      url.searchParams.set('error', 'not_authorized');
+      url.searchParams.set('message', 'Tutor access not found. Please sign in with a tutor account.');
+      return NextResponse.redirect(url);
+    }
     
-    if (tutorData?.approval_status === 'pending') {
+    if (tutorData.approval_status === 'pending' &&
+        !request.nextUrl.pathname.includes('/pending-approval')) {
       const url = request.nextUrl.clone();
       url.pathname = '/tutor-dashboard/pending-approval';
       return NextResponse.redirect(url);
     }
     
-    if (tutorData?.approval_status === 'rejected') {
+    if (tutorData.approval_status === 'rejected') {
       await supabase.auth.signOut();
       const url = request.nextUrl.clone();
       url.pathname = '/auth/login';

@@ -140,7 +140,7 @@ function StudentDashboardContent() {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push('/auth/login?redirectTo=/student-dashboard');
+        router.push('/auth/login?redirectTo=/student-dashboard&role=student');
       } else {
         setUser(user);
         await fetchUserData(user.email!);
@@ -151,7 +151,7 @@ function StudentDashboardContent() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push('/auth/login');
+    router.push('/auth/login?role=student');
   };
 
   const handleOpenInterviewModal = (interview: Interview) => {

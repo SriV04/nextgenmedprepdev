@@ -56,6 +56,7 @@ export interface CreateQuestionData {
   difficulty?: string;
   interview_types?: string[];
   notes?: string;
+  status?: string;
   contributor_id?: string;
   follow_up_questions?: FollowUpQuestion[];
   skill_criteria?: QuestionSkillCriterion[];
@@ -419,6 +420,7 @@ export const createQuestion = async (questionData: CreateQuestionData) => {
     contributor_id: questionData.contributor_id,
     follow_up_questions: questionData.follow_up_questions || [],
     notes: questionData.notes,
+    status: questionData.status ?? 'pending',
     is_active: true
   };
   
@@ -558,6 +560,8 @@ export const getQuestions = async (filters?: {
   difficulty?: string;
   interview_type?: string;
   is_active?: boolean;
+  status?: string;
+  contributor_id?: string;
   tags?: string[];
 }) => {
   const supabase = createSupabaseClient();
@@ -599,6 +603,14 @@ export const getQuestions = async (filters?: {
   if (filters?.is_active !== undefined) {
     query = query.eq('is_active', filters.is_active);
   }
+
+  if (filters?.status) {
+    query = query.eq('status', filters.status);
+  }
+
+  if (filters?.contributor_id) {
+    query = query.eq('contributor_id', filters.contributor_id);
+  }
   
   const { data, error } = await query;
   
@@ -630,6 +642,7 @@ export const updateQuestion = async (questionId: string, updates: Partial<Create
   if (updates.interview_types !== undefined) questionUpdates.interview_type = updates.interview_types;
   if (updates.notes !== undefined) questionUpdates.notes = updates.notes;
   if (updates.follow_up_questions !== undefined) questionUpdates.follow_up_questions = updates.follow_up_questions;
+  if (updates.status !== undefined) questionUpdates.status = updates.status;
   
   if (Object.keys(questionUpdates).length > 0) {
     const { error } = await supabase

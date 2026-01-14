@@ -377,6 +377,12 @@ export const getQuestions = async (req: Request, res: Response): Promise<void> =
     if (req.query.active !== undefined) {
       filters.is_active = req.query.active === 'true';
     }
+    if (req.query.status) {
+      filters.status = req.query.status as string;
+    }
+    if (req.query.contributor_id) {
+      filters.contributor_id = req.query.contributor_id as string;
+    }
 
     const questions = await prometheusService.getQuestions(filters);
 
@@ -389,6 +395,42 @@ export const getQuestions = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch questions',
+    });
+  }
+};
+
+export const updateQuestionStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { questionId } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      res.status(400).json({
+        success: false,
+        message: 'status is required',
+      });
+      return;
+    }
+
+    const question = await prometheusService.updateQuestion(questionId, { status });
+
+    if (!question) {
+      res.status(404).json({
+        success: false,
+        message: 'Question not found',
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: question,
+    });
+  } catch (error: any) {
+    console.error('Error updating question status:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to update question status',
     });
   }
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus, ClipboardList } from 'lucide-react';
 import SessionFeedbackModal from './SessionFeedbackModal';
 import AddQuestionModal from './AddQuestionModal';
 
@@ -23,6 +23,14 @@ interface SessionStats {
   thisMonthCompleted: number;
 }
 
+interface QuestionSubmission {
+  id: string;
+  title?: string | null;
+  question_text: string;
+  status?: string | null;
+  created_at?: string;
+}
+
 interface TutorHomeProps {
   tutorId: string;
   tutorName?: string;
@@ -36,6 +44,8 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
+  const [questionSubmissions, setQuestionSubmissions] = useState<QuestionSubmission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
@@ -67,11 +77,33 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
           setStats(statsData.data);
         }
       }
+
+      await fetchQuestionSubmissions();
     } catch (err: any) {
       console.error('Error fetching tutor data:', err);
       setError(err.message || 'Failed to load dashboard data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchQuestionSubmissions = async () => {
+    try {
+      setSubmissionsLoading(true);
+      const response = await fetch(
+        `${backendUrl}/api/v1/prometheus/questions?contributor_id=${encodeURIComponent(tutorId)}`
+      );
+      if (!response.ok) {
+        throw new Error('Failed to load question submissions');
+      }
+      const result = await response.json();
+      if (result.success) {
+        setQuestionSubmissions(result.data);
+      }
+    } catch (err: any) {
+      console.error('Error fetching question submissions:', err);
+    } finally {
+      setSubmissionsLoading(false);
     }
   };
 
@@ -125,6 +157,17 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
       </div>
     );
   }
+
+  const getStatusBadgeStyles = (status?: string | null) => {
+    const normalizedStatus = status || 'pending';
+    if (normalizedStatus === 'approved') {
+      return 'bg-emerald-100 text-emerald-700';
+    }
+    if (normalizedStatus === 'rejected') {
+      return 'bg-red-100 text-red-700';
+    }
+    return 'bg-amber-100 text-amber-700';
+  };
 
   return (
     <div className="space-y-6">
@@ -189,6 +232,62 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
           </div>
         </div>
       )}
+
+      {/* Question Submissions */}
+      <div className="bg-white rounded-xl shadow-md">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 text-blue-600" />
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Question Submissions</h2>
+            </div>
+            <span className="text-xs sm:text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
+              {questionSubmissions.length} submission{questionSubmissions.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
+
+        <div className="divide-y divide-gray-200">
+          {submissionsLoading ? (
+            <div className="p-6 text-sm text-gray-500">Loading submissions...</div>
+          ) : questionSubmissions.length === 0 ? (
+            <div className="p-8 text-center">
+              <ClipboardList className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500">No question submissions yet</p>
+              <p className="text-sm text-gray-400 mt-1">Submit a question to see its status here</p>
+            </div>
+          ) : (
+            questionSubmissions.map((submission) => (
+              <div key={submission.id} className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold text-gray-900">
+                        {submission.title || 'Untitled question'}
+                      </h3>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeStyles(
+                          submission.status
+                        )}`}
+                      >
+                        {submission.status || 'pending'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                      {submission.question_text}
+                    </p>
+                  </div>
+                  {submission.created_at && (
+                    <div className="text-xs text-gray-500">
+                      Submitted {formatDate(submission.created_at)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
 
       {/* Upcoming Sessions */}
       <div className="bg-white rounded-xl shadow-md">
@@ -322,7 +421,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
         onClose={() => setIsAddQuestionModalOpen(false)}
         userId={tutorId}
         onSuccess={() => {
-          console.log('Question created successfully');
+          fetchQuestionSubmissions();
         }}
       />
 

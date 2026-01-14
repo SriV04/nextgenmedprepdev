@@ -56,6 +56,9 @@ router.get('/questions/:questionId', prometheusController.getQuestion);
 // PUT /api/v1/prometheus/questions/:questionId - Update question
 router.put('/questions/:questionId', prometheusController.updateQuestion);
 
+// PATCH /api/v1/prometheus/questions/:questionId/status - Update question status
+router.patch('/questions/:questionId/status', prometheusController.updateQuestionStatus);
+
 // PATCH /api/v1/prometheus/questions/:questionId/deactivate - Deactivate question
 router.patch('/questions/:questionId/deactivate', prometheusController.deactivateQuestion);
 
