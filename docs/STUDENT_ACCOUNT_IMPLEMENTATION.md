@@ -116,7 +116,7 @@ Features:
 
 Enhanced `sendInterviewBookingConfirmationEmail`:
 - Added `studentId` parameter
-- Generates personalized dashboard link
+- Generates personalised dashboard link
 - New section highlighting dashboard features:
   - Submit availability
   - View sessions

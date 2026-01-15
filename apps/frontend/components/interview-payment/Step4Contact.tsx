@@ -194,7 +194,7 @@ export default function Step4Contact({
                   PDF, DOC, or DOCX (Max 10MB)
                 </p>
                 <p className="text-xs text-indigo-400 mt-2">
-                  Optional - helps us provide more personalized preparation
+                  Optional - helps us provide more personalised preparation
                 </p>
               </div>
             )}

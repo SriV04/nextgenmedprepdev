@@ -291,7 +291,7 @@ const UpcomingEvent: React.FC<UpcomingEventProps> = ({ event }) => {
                   {/* Badge */}
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600/30 to-purple-600/30 rounded-full text-sm font-bold text-indigo-200 mb-6 border border-indigo-500/30">
                     <Zap className="w-4 h-4" />
-                    <span>Personalized Guidance</span>
+                    <span>Personalised Guidance</span>
                   </div>
                   
                   <h3 className="text-2xl font-black text-white mb-3">
@@ -299,7 +299,7 @@ const UpcomingEvent: React.FC<UpcomingEventProps> = ({ event }) => {
                   </h3>
                   
                   <p className="text-white/80 text-sm mb-6 leading-relaxed">
-                    Get personalized advice from medical professionals about your medical career path. Perfect for those who need individual guidance.
+                    Get personalised advice from medical professionals about your medical career path. Perfect for those who need individual guidance.
                   </p>
                   
                   {/* Features */}

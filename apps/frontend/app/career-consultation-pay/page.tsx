@@ -71,7 +71,7 @@ export default function CareerConsultationPaymentPage() {
               30-Minute Career Consultation
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Book a personalized one-to-one consultation with a medical professional to discuss your career path, 
+              Book a personalised one-to-one consultation with a medical professional to discuss your career path, 
               options, and receive guidance tailored to your specific situation.
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function CareerConsultationPaymentPage() {
             </div>
             <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
               <BriefcaseIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Personalized Plan</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Personalised Plan</h3>
               <p className="text-gray-600 text-sm">
                 Tailored career advice for your specific situation
               </p>
@@ -109,7 +109,7 @@ export default function CareerConsultationPaymentPage() {
             </div>
             
             <p className="text-gray-700 mb-6">
-              Get personalized career guidance from a medical professional who understands the unique challenges
+              Get personalised career guidance from a medical professional who understands the unique challenges
               and opportunities in the medical field.
             </p>
             
@@ -126,7 +126,7 @@ export default function CareerConsultationPaymentPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 font-bold">✓</span>
-                  <span className="text-gray-700">Personalized advice and recommendations</span>
+                  <span className="text-gray-700">Personalised advice and recommendations</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 font-bold">✓</span>

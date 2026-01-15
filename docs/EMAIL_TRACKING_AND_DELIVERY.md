@@ -208,7 +208,7 @@ Microsoft filters aggressively. Avoid:
 **Good practices:**
 - Balanced text-to-image ratio
 - Clear unsubscribe link
-- Personalized content
+- Personalised content
 - Professional formatting
 - Valid reply-to address
 

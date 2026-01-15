@@ -1,8 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { SparklesIcon, BoltIcon, ClockIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
+import { interviewPackages } from '../../data/packages';
 
 export default function GeneratedMocks() {
+  const essentials = interviewPackages.find(pkg => pkg.id === 'essentials');
+  const core = interviewPackages.find(pkg => pkg.id === 'core');
+  const premium = interviewPackages.find(pkg => pkg.id === 'premium');
   return (
     <section className="py-16 px-4 bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 text-white relative overflow-hidden">
       {/* Background effects */}
@@ -34,7 +38,7 @@ export default function GeneratedMocks() {
             </div>
             <h3 className="text-xl font-bold mb-2">Same Day Access</h3>
             <p className="text-purple-200">
-              Receive your personalized mock interview questions same day of purchase. No waiting for tutor availability.
+              Receive your personalised mock interview questions same day of purchase. No waiting for tutor availability.
             </p>
           </div>
 
@@ -65,8 +69,8 @@ export default function GeneratedMocks() {
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white/10 backdrop-blur-md border border-white/30 rounded-xl p-6 text-center hover:transform hover:scale-105 transition-all duration-300">
             <h4 className="text-lg font-semibold mb-2">Essentials</h4>
-            <div className="text-4xl font-bold mb-2">£7</div>
-            <p className="text-purple-200 text-sm mb-4">1 complete mock interview set</p>
+            <div className="text-4xl font-bold mb-2">£{essentials?.generatedPrice}</div>
+            <p className="text-purple-200 text-sm mb-4">{essentials?.interviews} complete mock interview set</p>
             <Link href="/interviews/payment?service=generated&package=essentials" className="block w-full bg-white text-purple-900 py-3 rounded-lg font-semibold hover:bg-purple-100 transition-colors">
               Get Started
             </Link>
@@ -78,10 +82,12 @@ export default function GeneratedMocks() {
             </div>
             <h4 className="text-lg font-semibold mb-2">Core</h4>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-2xl text-gray-300 line-through">£14</span>
-              <span className="text-4xl font-bold text-yellow-400">£10</span>
+              {core?.originalGeneratedPrice && (
+                <span className="text-2xl text-gray-300 line-through">£{core.originalGeneratedPrice}</span>
+              )}
+              <span className="text-4xl font-bold text-yellow-400">£{core?.generatedPrice}</span>
             </div>
-            <p className="text-purple-200 text-sm mb-4">3 complete mock interview sets</p>
+            <p className="text-purple-200 text-sm mb-4">{core?.interviews} complete mock interview sets</p>
             <Link href="/interviews/payment?service=generated&package=core" className="block w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 py-3 rounded-lg font-semibold hover:shadow-lg transition-all">
               Best Value
             </Link>
@@ -90,10 +96,12 @@ export default function GeneratedMocks() {
           <div className="bg-white/10 backdrop-blur-md border border-white/30 rounded-xl p-6 text-center hover:transform hover:scale-105 transition-all duration-300">
             <h4 className="text-lg font-semibold mb-2">Premium</h4>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="text-2xl text-gray-300 line-through">£21</span>
-              <span className="text-4xl font-bold">£15</span>
+              {premium?.originalGeneratedPrice && (
+                <span className="text-2xl text-gray-300 line-through">£{premium.originalGeneratedPrice}</span>
+              )}
+              <span className="text-4xl font-bold">£{premium?.generatedPrice}</span>
             </div>
-            <p className="text-purple-200 text-sm mb-4">4 complete mock interview sets</p>
+            <p className="text-purple-200 text-sm mb-4">{premium?.interviews} complete mock interview sets</p>
             <Link href="/interviews/payment?service=generated&package=premium" className="block w-full bg-white text-purple-900 py-3 rounded-lg font-semibold hover:bg-purple-100 transition-colors">
               Go Premium
             </Link>

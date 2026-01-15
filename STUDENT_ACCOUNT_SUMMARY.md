@@ -27,7 +27,7 @@ Successfully implemented a complete student account auto-creation and dashboard 
 **File:** `apps/backend/src/services/emailService.ts`
 - Updated confirmation email template
 - Added prominent dashboard section with call-to-action button
-- Includes personalized dashboard link with student_id
+- Includes personalised dashboard link with student_id
 
 ### 🎨 Frontend Dashboard
 **Location:** `apps/frontend/app/student-dashboard/`
@@ -48,7 +48,7 @@ Successfully implemented a complete student account auto-creation and dashboard 
 
 ### ✨ For Students
 - **Automatic Account Creation** when booking an interview
-- **Personalized Dashboard** accessible via email link
+- **Personalised Dashboard** accessible via email link
 - **Availability Submission** with timezone support
 - **Session Management** - view upcoming and past sessions
 - **Zoom Integration** - join sessions directly from dashboard

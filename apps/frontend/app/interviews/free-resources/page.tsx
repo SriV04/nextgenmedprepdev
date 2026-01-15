@@ -234,7 +234,7 @@ export default function FreeInterviewResourcesPage() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Take Your Preparation Further?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Get personalized feedback and practice with our mock interview packages
+            Get personalised feedback and practice with our mock interview packages
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
