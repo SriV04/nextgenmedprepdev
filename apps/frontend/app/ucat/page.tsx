@@ -165,7 +165,7 @@ export default function UCATPage() {
               </Link>
 
               <Link 
-                  href="/ucat/free-test" 
+                  href="/interviews/free-resources" 
                   className="group px-8 py-4 bg-white text-slate-600 border border-slate-200 rounded-full font-semibold hover:border-violet-200 hover:text-violet-600 hover:bg-violet-50 transition-all duration-300 flex items-center gap-2"
               >
                   Free Resources
