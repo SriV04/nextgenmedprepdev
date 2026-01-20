@@ -309,7 +309,7 @@ export default function UCATPage() {
                 <h3 className="text-xl font-bold text-gray-900 mb-4">All packages include:</h3>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <li className="flex items-center text-gray-700">
-                    <span className="text-green-500 mr-2">✓</span> Tutors scored in the top 1% internationally
+                    <span className="text-green-500 mr-2">✓</span> Tutors scored in the top 5% internationally
                   </li>
                   <li className="flex items-center text-gray-700">
                     <span className="text-green-500 mr-2">✓</span> Continuous updated question bank with worked examples

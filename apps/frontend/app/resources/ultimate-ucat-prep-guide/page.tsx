@@ -2,19 +2,20 @@ import React from 'react';
 import FreeResourceHero from '@/components/free-resources/FreeResourceHero';
 import WhyGetThisGuide from '@/components/free-resources/WhyGetThisGuide';
 import ResourcePageWrapper from '@/components/free-resources/ResourcePageWrapper';
+import CTAButton from '@/components/free-resources/CTAButton';
 
 export default function UCATFreeResourcesPage() {
   return (
     <ResourcePageWrapper
-      resourceId="ucat-guide"
-      guideName="UCAT Preparation Guide"
-      source="ucat_page"
+      resourceId="ultimate-ucat-guide"
+      guideName="Ultimate UCAT Guide"
+      source="ucat_download"
     >
       <div className="min-h-screen bg-gray-50">
         <FreeResourceHero 
           title="Ultimate UCAT Preparation Guide"
           subtitle="Boost your UCAT score with proven strategies and expert tips"
-          imagePath="/guides/UCAT-guide.png"
+          imagePath="/guides/UCAT-guide.jpeg"
           imageAlt="UCAT Preparation Guide Cover"
           benefits={[
             "Comprehensive breakdown of all four UCAT subtests",

@@ -146,7 +146,7 @@ export const ucatPackages: UCATPackage[] = [
       '24/7 access to our Business Line – ask questions anytime, send in tricky problems, and receive step-by-step video solutions',
       'Tracked quantitative performance – every question you complete feeds into our analytics',
       'Personalised content plan – weekly text messages guide your revision using performance data',
-      'After one session all our students thus far saw a 15% or more increase in score across all areas',
+      'After four sessions all our students thus far saw a 15% or more increase in score across all areas',
       'Data-driven intervention on weak areas begins from day one'
     ]
   },
@@ -162,20 +162,20 @@ export const ucatPackages: UCATPackage[] = [
       '24/7 Business Line access',
       'Tracked quantitative performance',
       'Personalised content plan',
-      '15%+ score increase guarantee'
     ],
     advancedFeatures: [
-      '8 hours of targeted question-specific perfection sessions',
+      '+4 hours of targeted question-specific perfection sessions',
       'Deep-dives into the exact areas the data shows you\'re weakest in',
       'Smart drills and focused practice to convert weaknesses into strengths'
+
     ],
     features: [
-      '4 hours of essential background knowledge',
+      '8 hours of essential background knowledge',
       '24/7 Business Line access',
       'Tracked quantitative performance',
       'Personalised content plan',
       '15%+ score increase guarantee',
-      '8 hours of targeted question-specific perfection sessions',
+      '4 hours of targeted question-specific perfection sessions',
       'Deep-dives into the exact areas the data shows you\'re weakest in',
       'Smart drills and focused practice to convert weaknesses into strengths'
     ]
@@ -192,13 +192,12 @@ export const ucatPackages: UCATPackage[] = [
       '4 hours of essential background knowledge',
       'Tracked quantitative performance',
       'Personalised content plan',
-      '15%+ score increase guarantee',
-      '8 hours of targeted perfection sessions',
+      '4 hours of targeted perfection sessions',
       'Deep-dive weakness analysis',
       'Smart drills and focused practice'
     ],
     advancedFeatures: [
-      '12 hours of high-intensity question-perfection sessions based on your data',
+      '+4 hours of high-intensity question-perfection sessions based on your data',
       'Double the time, double the refinement – a laser-focused approach to peak performance',
       'Designed to bring students to test-day readiness with total confidence',
       'Priority support and accelerated response times',
@@ -206,13 +205,12 @@ export const ucatPackages: UCATPackage[] = [
     ],
     features: [
       '4 hours of essential background knowledge',
+      '4 hours of high-intensity question-perfection sessions based on your data',
+      '+4 hours of targeted perfection sessions',
       'Tracked quantitative performance',
       'Personalised content plan',
-      '15%+ score increase guarantee',
-      '8 hours of targeted perfection sessions',
       'Deep-dive weakness analysis',
       'Smart drills and focused practice',
-      '12 hours of high-intensity question-perfection sessions based on your data',
       'Double the time, double the refinement – a laser-focused approach to peak performance',
       'Designed to bring students to test-day readiness with total confidence',
       'Priority support and accelerated response times',
