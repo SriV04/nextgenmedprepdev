@@ -2228,6 +2228,231 @@ u                        <strong style="color: #10b981;">The NextGen MedPrep Tea
       `
     };
   }
+
+  async sendRevisionPlanConfirmationEmail(email: string, data: {
+    id: string;
+    amount: number;
+    userName?: string;
+    weeks: number;
+    intensity: string;
+    platform: string;
+  }): Promise<void> {
+    const template = this.getRevisionPlanConfirmationTemplate(data);
+    
+    await this.sendMailWithTracking({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    }, 'revision_plan_confirmation');
+  }
+
+  async sendRevisionPlanTutorNotificationEmail(tutorEmail: string, data: {
+    bookingId: string;
+    customerEmail: string;
+    customerName: string;
+    weeks: number;
+    intensity: string;
+    platform: string;
+    amount: number;
+  }): Promise<void> {
+    const template = this.getRevisionPlanTutorNotificationTemplate(data);
+    
+    await this.sendMailWithTracking({
+      from: process.env.EMAIL_FROM,
+      to: tutorEmail,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    }, 'revision_plan_tutor_notification');
+  }
+
+  private getRevisionPlanConfirmationTemplate(data: {
+    id: string;
+    amount: number;
+    userName?: string;
+    weeks: number;
+    intensity: string;
+    platform: string;
+  }): EmailTemplate {
+    const userName = data.userName || 'there';
+    
+    const intensityDescriptions: { [key: string]: string } = {
+      'low': '1-2 hours per day - Perfect for balancing with other commitments',
+      'medium': '2-3 hours per day - Our most popular and balanced approach',
+      'high': '4-5 hours per day - Intensive preparation for maximum results'
+    };
+
+    const intensityDescription = intensityDescriptions[data.intensity] || data.intensity;
+
+    return {
+      subject: 'Your Personalised UCAT Revision Plan - NextGen MedPrep',
+      text: `Hi ${userName},\n\nThank you for purchasing your Personalised UCAT Revision Plan!\n\nYour Plan Details:\nBooking ID: ${data.id}\nDuration: ${data.weeks} weeks\nIntensity: ${intensityDescription}\nPlatform: ${data.platform.charAt(0).toUpperCase() + data.platform.slice(1)}\nAmount: £${data.amount}\n\nWhat happens next:\n• Your personalised revision plan will be created by our UCAT experts\n• You'll receive your complete plan within 24 hours via email\n• The plan will include daily study targets, practice schedules, and mock exam timings\n• All resources will be tailored to ${data.platform} platform\n\nYour plan will include:\n- Week-by-week breakdown of all UCAT sections\n- Daily practice targets customized to your ${data.intensity} intensity level\n- Mock exam schedule and timing strategies\n- Progress tracking milestones\n- ${data.platform}-specific resource recommendations\n- Rest and recovery periods to prevent burnout\n\nIf you have any questions while waiting for your plan, feel free to reach out to us at contact@nextgenmedprep.com.\n\nThank you for choosing NextGen MedPrep!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #7c3aed;">Your Personalised UCAT Plan is On Its Way! 📚</h1>
+          <p>Hi ${userName},</p>
+          <p>Thank you for purchasing your <strong>Personalised UCAT Revision Plan</strong>!</p>
+          
+          <div style="background-color: #f5f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
+            <h3 style="margin-top: 0; color: #5b21b6;">Your Plan Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${data.id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Duration:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>${data.weeks} weeks</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Intensity:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-transform: capitalize;"><strong>${data.intensity}</strong><br><span style="font-size: 12px; color: #6b7280;">${intensityDescription}</span></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Platform:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-transform: capitalize;"><strong>${data.platform}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${data.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
+              <li>Your <strong>personalised revision plan</strong> will be created by our UCAT experts who scored 3000+</li>
+              <li>You'll receive your <strong>complete plan within 24 hours</strong> via email</li>
+              <li>The plan will include <strong>daily study targets</strong>, practice schedules, and mock exam timings</li>
+              <li>All resources will be <strong>tailored to ${data.platform}</strong> platform</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #374151;">Your Plan Will Include:</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
+              <li><strong>Week-by-week breakdown</strong> of all UCAT sections (VR, DM, QR, AR, SJT)</li>
+              <li><strong>Daily practice targets</strong> customized to your ${data.intensity} intensity level</li>
+              <li><strong>Mock exam schedule</strong> and timing strategies</li>
+              <li><strong>Progress tracking milestones</strong> for each week</li>
+              <li><strong>${data.platform}-specific</strong> resource recommendations and question allocations</li>
+              <li><strong>Rest and recovery</strong> periods to prevent burnout</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e;">
+              <strong>✨ Questions while waiting?</strong> Feel free to reach out at contact@nextgenmedprep.com
+            </p>
+          </div>
+
+          <div style="background-color: #ddd6fe; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0; font-size: 20px;">🎯</p>
+            <p style="margin: 5px 0 0 0; color: #5b21b6; font-size: 15px; font-weight: 600; font-style: italic;">
+              "Success is where preparation and opportunity meet. Let's get you prepared!"
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Thank you for choosing NextGen MedPrep!</p>
+          <p>Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      `
+    };
+  }
+
+  private getRevisionPlanTutorNotificationTemplate(data: {
+    bookingId: string;
+    customerEmail: string;
+    customerName: string;
+    weeks: number;
+    intensity: string;
+    platform: string;
+    amount: number;
+  }): EmailTemplate {
+    return {
+      subject: `New Personalised Revision Plan Order - ${data.customerName}`,
+      text: `New Personalised UCAT Revision Plan Order\n\nStudent Details:\nName: ${data.customerName}\nEmail: ${data.customerEmail}\n\nPlan Details:\nBooking ID: ${data.bookingId}\nDuration: ${data.weeks} weeks\nIntensity: ${data.intensity}\nPlatform: ${data.platform}\nAmount: £${data.amount}\n\nAction Required:\nPlease create the personalised revision plan based on these specifications and send it to the student within 24 hours.\n\nPlan Requirements:\n- Customize for ${data.weeks}-week timeline\n- Adjust daily targets for ${data.intensity} intensity level\n- Include ${data.platform}-specific resource recommendations\n- Provide week-by-week breakdown for all UCAT sections\n- Include mock exam schedule\n- Add progress tracking milestones\n\nStudent contact: ${data.customerEmail}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #7c3aed;">New Personalised Revision Plan Order 📋</h1>
+          
+          <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <p style="margin: 0; font-size: 15px; color: #92400e; font-weight: bold;">
+              ⚠️ Action Required: Create and send plan within 24 hours
+            </p>
+          </div>
+
+          <div style="background-color: #f5f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
+            <h3 style="margin-top: 0; color: #5b21b6;">Student Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Name:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${data.customerName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Email:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><a href="mailto:${data.customerEmail}" style="color: #7c3aed;">${data.customerEmail}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Booking ID:</td>
+                <td style="padding: 8px; font-family: monospace;">${data.bookingId}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+            <h3 style="margin-top: 0; color: #1e40af;">Plan Specifications:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Duration:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>${data.weeks} weeks</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Intensity:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-transform: capitalize;"><strong>${data.intensity}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Platform:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-transform: capitalize;"><strong>${data.platform}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount Paid:</td>
+                <td style="padding: 8px; font-size: 16px; font-weight: bold; color: #059669;">£${data.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #374151;">Plan Requirements:</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
+              <li>Customize for <strong>${data.weeks}-week timeline</strong></li>
+              <li>Adjust daily targets for <strong>${data.intensity} intensity</strong> level</li>
+              <li>Include <strong>${data.platform}-specific</strong> resource recommendations</li>
+              <li>Provide <strong>week-by-week breakdown</strong> for all UCAT sections (VR, DM, QR, AR, SJT)</li>
+              <li>Include <strong>mock exam schedule</strong> and timing strategies</li>
+              <li>Add <strong>progress tracking milestones</strong> for each week</li>
+              <li>Include <strong>rest days</strong> to prevent burnout</li>
+            </ul>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">Delivery Instructions:</h3>
+            <p style="margin: 0; color: #374151; line-height: 1.6;">
+              1. Create the personalised plan as a <strong>PDF document</strong><br>
+              2. Ensure all sections are clearly labeled and formatted<br>
+              3. Send the plan to <a href="mailto:${data.customerEmail}" style="color: #059669; font-weight: bold;">${data.customerEmail}</a> within 24 hours<br>
+              4. CC contact@nextgenmedprep.com for record keeping
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Best regards,<br><strong>NextGen MedPrep System</strong></p>
+        </div>
+      `
+    };
+  }
 }
 
 export default new EmailService();

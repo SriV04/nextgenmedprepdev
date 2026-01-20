@@ -14,6 +14,42 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function UCATPage() {
+  const highlightHours = (text: string) => {
+    const parts = text.split(/(\+?\d+\s*hours?)/i);
+    return parts.map((part, index) => {
+      if (!part) {
+        return null;
+      }
+      if (/^\+?\d+\s*hours?$/i.test(part)) {
+        return (
+          <span key={`${part}-${index}`} className="font-semibold text-gray-900">
+            {part}
+          </span>
+        );
+      }
+      return <span key={`${part}-${index}`}>{part}</span>;
+    });
+  };
+
+  const getTotalTeachingHours = (pkg: {
+    baseFeatures?: string[];
+    advancedFeatures?: string[];
+    features: string[];
+  }) => {
+    const featuresSource =
+      pkg.baseFeatures || pkg.advancedFeatures
+        ? [...(pkg.baseFeatures ?? []), ...(pkg.advancedFeatures ?? [])]
+        : pkg.features;
+    const hoursMatches = featuresSource
+      .flatMap((feature) => feature.match(/\+?\d+\s*hours?/gi) ?? [])
+      .map((match) => parseInt(match.replace(/[^\d]/g, ''), 10))
+      .filter((value) => Number.isFinite(value));
+    if (!hoursMatches.length) {
+      return null;
+    }
+    const total = hoursMatches.reduce((sum, value) => sum + value, 0);
+    return total;
+  };
 
   const services = [
     {
@@ -336,18 +372,26 @@ export default function UCATPage() {
                 <div className={`${pkg.color} p-6 text-white`}>
                   <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
                   <p className="opacity-90">{pkg.description}</p>
+                  {getTotalTeachingHours(pkg) !== null && (
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
+                      <span className="uppercase tracking-wide text-white/80">Total teaching</span>
+                      <span className="text-white">
+                        {getTotalTeachingHours(pkg)} hours
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   {pkg.baseFeatures && (
                     <div className="mb-4">
-                      <h4 className="font-semibold text-gray-700 mb-3">
-                        {pkg.id === 'ucat_advance' ? 'Everything in Kickstart:' : 'Everything in Kickstart & Advance:'}
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        {pkg.id === 'ucat_advance' ? 'Includes everything in Kickstart:' : 'Includes everything in Kickstart & Advance:'}
                       </h4>
                       <ul className="space-y-2 text-sm">
                         {pkg.baseFeatures.map((feature, idx) => (
                           <li key={idx} className="flex items-start">
                             <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                            <span className="text-gray-600">{feature}</span>
+                            <span className="text-gray-600">{highlightHours(feature)}</span>
                           </li>
                         ))}
                       </ul>
@@ -356,14 +400,19 @@ export default function UCATPage() {
                   
                   {pkg.advancedFeatures && (
                     <div className="border-t border-gray-200 pt-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">
-                        {pkg.id === 'ucat_advance' ? 'Plus these advanced features:' : 'Plus these mastery features:'}
+                      <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-full bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white">
+                          Added on top
+                        </span>
+                        <span>
+                          {pkg.id === 'ucat_advance' ? 'Extra advanced features:' : 'Extra mastery features:'}
+                        </span>
                       </h4>
                       <ul className="space-y-3 mb-8">
                         {pkg.advancedFeatures.map((feature, idx) => (
                           <li key={idx} className="flex items-start">
                             <span className="text-green-500 mr-2 mt-1">✓</span>
-                            <span>{feature}</span>
+                            <span>{highlightHours(feature)}</span>
                           </li>
                         ))}
                       </ul>
@@ -375,7 +424,7 @@ export default function UCATPage() {
                       {pkg.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start">
                           <span className="text-green-500 mr-2 mt-1">✓</span>
-                          <span>{feature}</span>
+                          <span>{highlightHours(feature)}</span>
                         </li>
                       ))}
                     </ul>

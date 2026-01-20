@@ -236,7 +236,6 @@ export interface Booking {
   user_id: string;
   tutor_id?: string;
   start_time: string;
-  end_time: string;
   status: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
   created_at: string;
   updated_at: string;
@@ -261,7 +260,6 @@ export interface CreateBookingRequest {
   user_id: string;
   tutor_id?: string;
   start_time?: string;
-  end_time?: string;
   package?: string;
   amount?: number;
   preferred_time?: string;
@@ -277,7 +275,6 @@ export interface CreateBookingRequest {
 export interface UpdateBookingRequest {
   tutor_id?: string;
   start_time?: string;
-  end_time?: string;
   status?: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
   payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
   amount?: number;

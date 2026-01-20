@@ -340,13 +340,14 @@ export class StripeService {
       } else {
         console.log(`One-time payment completed: ${session.payment_intent}`);
         
-        // For bookings (interview, UCAT, personal statement, career consultation, or event), get the payment intent and handle it
+        // For bookings (interview, UCAT, personal statement, career consultation, event, or revision plan), get the payment intent and handle it
         if (session.payment_intent && (
           session.metadata?.type === 'interview_booking' || 
           session.metadata?.type === 'ucat_tutoring' ||
           session.metadata?.type === 'personal_statement_review' ||
           session.metadata?.type === 'career_consultation' ||
-          session.metadata?.type === 'event_booking'
+          session.metadata?.type === 'event_booking' ||
+          session.metadata?.type === 'revision_plan'
         )) {
           console.log('Processing payment for type:', session.metadata?.type);
           
@@ -418,6 +419,9 @@ export class StripeService {
           break;
         case 'event_booking':
           await this.handleEventBookingPayment(paymentIntent);
+          break;
+        case 'revision_plan':
+          await this.handleRevisionPlanPayment(paymentIntent);
           break;
         default:
           console.log('Unknown booking type, using default interview booking handler');
@@ -679,7 +683,6 @@ export class StripeService {
       const bookingData = {
         user_id: user.id,
         start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
         package: 'personal_statement_review',
         amount: amount,
         email: customerEmail,
@@ -823,7 +826,6 @@ export class StripeService {
       const bookingData = {
         user_id: user.id,
         start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
         package: 'career_consultation_30min',
         amount: amount,
         email: customerEmail,
@@ -1014,6 +1016,152 @@ export class StripeService {
       console.log('=== Event Booking Payment Handler Completed Successfully ===');
     } catch (error) {
       console.error('=== Event Booking Payment Handler Error ===');
+      console.error('Error:', error);
+      console.error('Error stack:', (error as Error).stack);
+      // Don't throw error to avoid webhook retry loops
+    }
+  }
+
+  private async handleRevisionPlanPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    console.log('=== Revision Plan Payment Handler Started ===');
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Payment Intent Metadata:', paymentIntent.metadata);
+    
+    try {
+      // Import services here to avoid circular dependencies
+      const supabaseService = (await import('./supabaseService')).default;
+      const emailService = (await import('./emailService')).default;
+      
+      // Get payment metadata
+      const metadata = paymentIntent.metadata;
+      const customerEmail = metadata.customer_email;
+      const customerName = metadata.customer_name;
+      const weeks = metadata.weeks;
+      const intensity = metadata.intensity;
+      const platform = metadata.platform;
+      const amount = paymentIntent.amount / 100; // Convert from cents
+      
+      console.log('Extracted metadata:', {
+        customerEmail,
+        customerName,
+        weeks,
+        intensity,
+        platform,
+        amount
+      });
+      
+      if (!customerEmail) {
+        console.error('No customer email found in payment metadata');
+        return;
+      }
+      
+      console.log('Processing revision plan payment for:', {
+        customerEmail,
+        customerName,
+        weeks,
+        intensity,
+        platform,
+        amount
+      });
+      
+      // 1. Check if user exists, create if not
+      console.log('Step 1: Checking if user exists...');
+      let user = await supabaseService.getUserByEmail(customerEmail);
+      
+      if (!user) {
+        console.log('Creating new user for email:', customerEmail);
+        user = await supabaseService.createUser({
+          email: customerEmail,
+          full_name: customerName || '',
+          role: 'student',
+          stripe_customer_id: paymentIntent.customer as string || undefined
+        });
+        console.log('Created user:', user.id);
+      } else {
+        console.log('Found existing user:', user.id);
+      }
+      
+      // 2. Check for subscription, create free subscription if not exists
+      console.log('Step 2: Checking subscription...');
+      let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+      
+      if (!subscription) {
+        console.log('Creating free subscription for email:', customerEmail);
+        subscription = await supabaseService.createSubscription({
+          email: customerEmail,
+          user_id: user.id,
+          subscription_tier: 'free',
+          opt_in_newsletter: true
+        });
+        console.log('Created subscription for user:', user.id);
+      } else {
+        console.log('Found existing subscription:', subscription);
+        // Link subscription to user if not already linked
+        if (!subscription.user_id) {
+          console.log('Linking subscription to user...');
+          await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+          console.log('Linked subscription to user:', user.id);
+        }
+      }
+      
+      // 3. Create booking entry
+      console.log('Step 3: Creating booking entry...');
+      const now = new Date();
+      const startTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day from now
+      const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // 1 hour duration
+      
+      const planDetails = `${weeks} weeks, ${intensity} intensity, ${platform} platform`;
+      const bookingData = {
+        user_id: user.id,
+        package: 'personalised_revision_plan',
+        amount: amount,
+        email: customerEmail,
+        notes: planDetails,
+        payment_status: 'paid' as const
+      };
+      console.log('Booking data to create:', bookingData);
+      
+      const booking = await supabaseService.createBooking(bookingData);
+      
+      console.log('Created revision plan booking:', booking);
+      
+      // 4. Send confirmation email to customer
+      console.log('Step 4: Sending confirmation email to student...');
+      try {
+        await emailService.sendRevisionPlanConfirmationEmail(customerEmail, {
+          id: booking.id,
+          amount,
+          userName: customerName || 'there',
+          weeks: parseInt(weeks || '7'),
+          intensity: intensity || 'medium',
+          platform: platform || 'medify'
+        });
+        console.log('Sent revision plan confirmation email to:', customerEmail);
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+      
+      // 5. Send notification email to tutor team
+      console.log('Step 5: Sending notification email to tutor team...');
+      try {
+        const tutorEmail = process.env.TUTOR_EMAIL || process.env.ADMIN_EMAIL || 'contact@nextgenmedprep.com';
+        await emailService.sendRevisionPlanTutorNotificationEmail(tutorEmail, {
+          bookingId: booking.id,
+          customerEmail,
+          customerName: customerName || 'Student',
+          weeks: parseInt(weeks || '7'),
+          intensity: intensity || 'medium',
+          platform: platform || 'medify',
+          amount
+        });
+        console.log('Sent revision plan notification to tutor team');
+      } catch (emailError) {
+        console.error('Failed to send tutor notification email:', emailError);
+      }
+      
+      console.log('=== Revision Plan Payment Handler Completed Successfully ===');
+    } catch (error) {
+      console.error('=== Revision Plan Payment Handler Error ===');
       console.error('Error:', error);
       console.error('Error stack:', (error as Error).stack);
       // Don't throw error to avoid webhook retry loops

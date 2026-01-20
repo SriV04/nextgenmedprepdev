@@ -137,82 +137,82 @@ export const ucatPackages: UCATPackage[] = [
   {
     id: 'ucat_kickstart',
     name: 'UCAT Kickstart',
-    description: 'For those ready to build strong foundations.',
+    description: 'For students building a solid UCAT foundation.',
     price: 200,
     color: 'bg-blue-500',
     buttonColor: 'bg-blue-600 hover:bg-blue-700',
     features: [
-      '4 hours of essential background knowledge across all UCAT sections',
-      '24/7 access to our Business Line – ask questions anytime, send in tricky problems, and receive step-by-step video solutions',
-      'Tracked quantitative performance – every question you complete feeds into our analytics',
-      'Personalised content plan – weekly text messages guide your revision using performance data',
-      'After four sessions all our students thus far saw a 15% or more increase in score across all areas',
-      'Data-driven intervention on weak areas begins from day one'
+      '4 hours of core teaching across all UCAT sections',
+      '24/7 Business Line access: ask questions any time, send tricky problems, get step-by-step video solutions',
+      'Performance tracking for every question you complete',
+      'Personalised weekly revision plan sent by text, guided by your performance data',
+      'After four sessions, all students so far have seen a 15%+ score increase across all areas',
+      'Data-led support on weak areas from day one'
     ]
   },
   {
     id: 'ucat_advance',
     name: 'UCAT Advance',
-    description: 'For those who want to refine and target performance.',
+    description: 'For students who want targeted improvement.',
     price: 375,
     color: 'bg-purple-600',
     buttonColor: 'bg-purple-600 hover:bg-purple-700',
     baseFeatures: [
-      '4 hours of essential background knowledge',
+      '4 hours of core teaching',
       '24/7 Business Line access',
-      'Tracked quantitative performance',
-      'Personalised content plan',
+      'Performance tracking on every question',
+      'Personalised weekly content plan',
     ],
     advancedFeatures: [
-      '+4 hours of targeted question-specific perfection sessions',
-      'Deep-dives into the exact areas the data shows you\'re weakest in',
-      'Smart drills and focused practice to convert weaknesses into strengths'
+      '+4 hours of targeted, question-specific refinement sessions',
+      'Deep dives into the exact areas your data shows are weakest',
+      'Focused drills to turn weaknesses into strengths'
 
     ],
     features: [
-      '8 hours of essential background knowledge',
+      '8 hours of core teaching',
       '24/7 Business Line access',
-      'Tracked quantitative performance',
-      'Personalised content plan',
+      'Performance tracking on every question',
+      'Personalised weekly content plan',
       '15%+ score increase guarantee',
-      '4 hours of targeted question-specific perfection sessions',
-      'Deep-dives into the exact areas the data shows you\'re weakest in',
-      'Smart drills and focused practice to convert weaknesses into strengths'
+      '4 hours of targeted, question-specific refinement sessions',
+      'Deep dives into the exact areas your data shows are weakest',
+      'Focused drills to turn weaknesses into strengths'
     ]
   },
   {
     id: 'ucat_mastery',
     name: 'UCAT Mastery',
-    description: 'For those aiming for top 10% scores.',
+    description: 'For students aiming for top-10% scores.',
     price: 550,
     popular: true,
     color: 'bg-indigo-600',
     buttonColor: 'bg-indigo-600 hover:bg-indigo-700',
     baseFeatures: [
-      '4 hours of essential background knowledge',
-      'Tracked quantitative performance',
-      'Personalised content plan',
-      '4 hours of targeted perfection sessions',
+      '4 hours of core teaching',
+      'Performance tracking on every question',
+      'Personalised weekly content plan',
+      '4 hours of targeted refinement sessions',
       'Deep-dive weakness analysis',
       'Smart drills and focused practice'
     ],
     advancedFeatures: [
-      '+4 hours of high-intensity question-perfection sessions based on your data',
-      'Double the time, double the refinement – a laser-focused approach to peak performance',
-      'Designed to bring students to test-day readiness with total confidence',
+      '+4 hours of high-intensity, data-led refinement sessions',
+      'Double the time, double the refinement for peak performance',
+      'Built to get you test-day ready with total confidence',
       'Priority support and accelerated response times',
       'Advanced test-taking strategies for top percentile scores'
     ],
     features: [
-      '4 hours of essential background knowledge',
-      '4 hours of high-intensity question-perfection sessions based on your data',
-      '+4 hours of targeted perfection sessions',
-      'Tracked quantitative performance',
-      'Personalised content plan',
+      '4 hours of core teaching',
+      '4 hours of high-intensity, data-led refinement sessions',
+      '+4 hours of targeted refinement sessions',
+      'Performance tracking on every question',
+      'Personalised weekly content plan',
       'Deep-dive weakness analysis',
       'Smart drills and focused practice',
-      'Double the time, double the refinement – a laser-focused approach to peak performance',
-      'Designed to bring students to test-day readiness with total confidence',
+      'Double the time, double the refinement for peak performance',
+      'Built to get you test-day ready with total confidence',
       'Priority support and accelerated response times',
       'Advanced test-taking strategies for top percentile scores'
     ]

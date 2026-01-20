@@ -81,6 +81,21 @@ export default function FreeInterviewResourcesPage() {
         "Application timeline and checklist",
         "Work experience and volunteering guidance"
       ]
+    },
+    {
+      title: "Ultimate UCAT Guide",
+      description: "Comprehensive preparation guide for the UCAT exam with strategies, practice questions, and expert tips to maximize your score.",
+      image: "/guides/UCAT-guide.jpeg",
+      downloadUrl: "/resources/ultimate-ucat-prep-guide",
+      category: "UCAT Preparation",
+      pages: "65 pages",
+      features: [
+        "Complete breakdown of all UCAT subtests",
+        "Time-saving strategies to maximize score",
+        "Practice questions with detailed solutions",
+        "Expert tips from top 10% scorers",
+        "Step-by-step preparation timeline"
+      ]
     }
   ];
 

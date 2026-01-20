@@ -541,7 +541,6 @@ export class InterviewBookingController {
       const updateSchema = z.object({
         tutor_id: z.string().uuid().optional(),
         start_time: z.string().datetime().optional(),
-        end_time: z.string().datetime().optional(),
         status: z.enum(['confirmed', 'cancelled', 'completed', 'no_show']).optional(),
         notes: z.string().optional(),
         reschedule_requested: z.boolean().optional(),

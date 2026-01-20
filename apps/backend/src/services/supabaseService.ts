@@ -534,7 +534,6 @@ class SupabaseService {
   
   async updateBooking(id: string, updates: {
     start_time?: string;
-    end_time?: string;
     status?: 'confirmed' | 'cancelled' | 'completed' | 'no_show';
     payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
     tutor_id?: string;
