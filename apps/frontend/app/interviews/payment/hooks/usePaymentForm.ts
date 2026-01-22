@@ -130,6 +130,9 @@ export function usePaymentForm() {
   };
 
   const handleAvailabilityChange = (newAvailability: AvailabilitySlot[]) => {
+    console.log('=== Availability Changed ===');
+    console.log('New availability:', newAvailability);
+    console.log('Number of slots:', newAvailability.length);
     setAvailability(newAvailability);
   };
 
@@ -198,9 +201,17 @@ export function usePaymentForm() {
       formData.append('amount', calculatePrice().toString());
       
       // Add availability for live sessions (condensed format)
+      console.log('=== Availability Debug ===');
+      console.log('Service Type:', serviceType);
+      console.log('Availability:', availability);
+      console.log('Availability Length:', availability.length);
+      
       if (serviceType === 'live' && availability.length > 0) {
         const condensedAvailability = condenseAvailability(availability);
+        console.log('Condensed Availability:', condensedAvailability);
         formData.append('availability', condensedAvailability);
+      } else {
+        console.log('Availability NOT being sent - serviceType:', serviceType, 'length:', availability.length);
       }
       
       // Add optional fields

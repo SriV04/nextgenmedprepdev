@@ -2,6 +2,49 @@ import { Request, Response } from 'express';
 import supabaseService from '@/services/supabaseService';
 
 /**
+ * Get student availability by student ID
+ * Fetches all future availability slots for a student
+ */
+export async function getStudentAvailability(req: Request, res: Response): Promise<void> {
+  try {
+    const { studentId } = req.params;
+
+    if (!studentId) {
+      res.status(400).json({
+        success: false,
+        message: 'Student ID is required',
+      });
+      return;
+    }
+
+    // Fetch availability for this student
+    const { data: availabilityData, error: availabilityError } = await supabaseService.supabase
+      .from('student_availability')
+      .select('*')
+      .eq('student_id', studentId)
+      .gte('date', new Date().toISOString().split('T')[0])
+      .order('date', { ascending: true })
+      .order('hour_start', { ascending: true });
+
+    if (availabilityError) {
+      console.error('Error fetching student availability:', availabilityError);
+      throw new Error(`Failed to fetch availability: ${availabilityError.message}`);
+    }
+
+    res.json({
+      success: true,
+      data: availabilityData || [],
+    });
+  } catch (error: any) {
+    console.error('Get student availability error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch student availability',
+    });
+  }
+}
+
+/**
  * Get student dashboard data by email
  * Fetches user, bookings, interviews, and availability for a student
  * Flow: email -> user -> bookings/interviews/availability by user_id
