@@ -767,6 +767,7 @@ export const confirmInterview = async (
     const { data: interview } = await supabase
       .from('interviews')
       .select(`
+        university,
         zoom_meeting_id, 
         zoom_join_url, 
         zoom_host_email,
@@ -832,9 +833,12 @@ export const confirmInterview = async (
 
     // Get university information
     const bookingData = interview?.booking as any;
-    const universities = Array.isArray(bookingData) && bookingData.length > 0 
-      ? bookingData[0].universities 
-      : bookingData?.universities || 'Not specified';
+    let university = interview?.university;
+    if (!university && bookingData) {
+      university = Array.isArray(bookingData) && bookingData.length > 0 
+        ? bookingData[0].universities?.split(',')[0] 
+        : bookingData?.universities?.split(',')[0];
+    }
 
     // Send confirmation emails
     await emailService.sendInterviewConfirmationEmail(
@@ -846,7 +850,7 @@ export const confirmInterview = async (
       id,
       zoomJoinUrl,
       zoomHostEmail || 'Not specified',
-      universities
+      university || 'Not specified'
     );
 
     res.json({
