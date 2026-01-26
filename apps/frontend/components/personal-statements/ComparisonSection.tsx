@@ -198,7 +198,7 @@ const ComparisonSection: React.FC = () => {
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="py-4 px-4 font-medium text-gray-700">Career Path</td>
                   <td className="py-4 px-4 text-gray-600">NHS, private practice, research, academia</td>
-                  <td className="py-4 px-4 text-gray-600">Private practice, NHS, specialization</td>
+                  <td className="py-4 px-4 text-gray-600">Private practice, NHS, specialisation</td>
                 </tr>
                 <tr className="hover:bg-gray-50 transition-colors">
                   <td className="py-4 px-4 font-medium text-gray-700">Statement Length</td>

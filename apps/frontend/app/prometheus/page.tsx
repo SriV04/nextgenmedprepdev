@@ -423,7 +423,7 @@ export default function PrometheusPage() {
               },
               {
                 question: "Is it suitable for both medicine and dentistry?",
-                answer: "Yes, Prometheus includes specialized content for both medical and dental school applications, with questions tailored to the specific requirements of each field."
+                answer: "Yes, Prometheus includes specialised content for both medical and dental school applications, with questions tailored to the specific requirements of each field."
               },
               {
                 question: "How often is the content updated?",

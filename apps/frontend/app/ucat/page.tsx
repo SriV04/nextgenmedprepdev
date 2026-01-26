@@ -74,7 +74,7 @@ export default function UCATPage() {
     },
     {
       title: "Personalised Revision Plan", // payment screen with info email, phone number - 20 quid text every week hours a day target score and intensity. 
-      description: "Tailored study plan to maximize your strengths and address weaknesses.",
+      description: "Tailored study plan to maximise your strengths and address weaknesses.",
       features: ["Personalised Reminders", "Weekly Check-ins", "Progress Tracking"],
       icon: CalculatorIcon,
       color: "bg-purple-50 border-purple-200",
@@ -283,7 +283,7 @@ export default function UCATPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our UCAT Preparation Services</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Comprehensive courses designed to maximize your UCAT score
+              Comprehensive courses designed to maximise your UCAT score
             </p>
           </div>
           

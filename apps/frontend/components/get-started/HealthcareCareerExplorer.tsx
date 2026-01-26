@@ -34,7 +34,7 @@ const careerPaths = [
     id: 'dentistry',
     title: 'Dentistry',
     icon: SparklesIcon,
-    description: 'Specialize in oral health, dental surgery, and cosmetic procedures with excellent work-life balance and entrepreneurial opportunities',
+    description: 'Specialise in oral health, dental surgery, and cosmetic procedures with excellent work-life balance and entrepreneurial opportunities',
     gradient: 'from-purple-500 to-pink-500',
     keyPoints: [
       '5 years dental degree (BDS/BChD)',
@@ -138,7 +138,7 @@ const services = {
     },
     {
       name: 'UCAT Personal Revision Plan',
-      description: 'Tailored study plan to maximize your strengths and address weaknesses.',   
+      description: 'Tailored study plan to maximise your strengths and address weaknesses.',   
       path: '/resources/ucat-personal-revision-plan',
       badge: 'Personalised',
       color: 'green' as const

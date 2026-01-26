@@ -59,7 +59,7 @@ export default function UltimateGuideApplicationMedicinePage() {
         </svg>
       ),
       title: "Complete Action Plan",
-      description: "Get detailed timelines, checklists, and templates that break down exactly what you need to do each year to maximize your chances."
+      description: "Get detailed timelines, checklists, and templates that break down exactly what you need to do each year to maximise your chances."
     },
     {
       icon: (
@@ -76,7 +76,7 @@ export default function UltimateGuideApplicationMedicinePage() {
     {
       name: "Sarah M.",
       university: "Oxford Medical School",
-      quote: "This guide was a game-changer! The step-by-step approach helped me stay organized and confident throughout my application. I couldn't have done it without these insights.",
+      quote: "This guide was a game-changer! The step-by-step approach helped me stay organised and confident throughout my application. I couldn't have done it without these insights.",
       achievement: "5 Offers Received"
     },
     {
@@ -187,7 +187,7 @@ export default function UltimateGuideApplicationMedicinePage() {
                 <span className="text-2xl">🏥</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">Work Experience Guide</h3>
-              <p className="text-gray-600">How to find, secure, and maximize healthcare work experience and volunteering opportunities.</p>
+              <p className="text-gray-600">How to find, secure, and maximise healthcare work experience and volunteering opportunities.</p>
             </div>
           </div>
         </div>
