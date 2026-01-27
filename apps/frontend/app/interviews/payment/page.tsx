@@ -153,6 +153,7 @@ export default function InterviewsPaymentPage() {
           {/* Step 3.5: Interview Dates Selection (Live sessions only) */}
           {currentStep === 3.5 && serviceType === 'live' && canProceedToInterviewDates() && (
             <Step3_5InterviewDates
+              mode="checkout"
               selectedUniversities={universities}
               selectedPackage={selectedPackage}
               availability={availability}
