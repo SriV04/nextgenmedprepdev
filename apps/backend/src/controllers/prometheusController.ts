@@ -310,6 +310,14 @@ export const createQuestion = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    if (!Array.isArray(questionData.field) || questionData.field.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'At least one field is required',
+      });
+      return;
+    }
+
     const question = await prometheusService.createQuestion(questionData);
 
     res.status(201).json({

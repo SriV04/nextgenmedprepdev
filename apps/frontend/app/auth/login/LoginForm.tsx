@@ -13,6 +13,7 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [fieldsCanTutor, setFieldsCanTutor] = useState<string[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -57,9 +58,15 @@ export default function LoginForm() {
     setIsSignUp(false);
     setError(null);
     setInfo(null);
+    setFieldsCanTutor([]);
   };
 
-  const syncRoleProfile = async (userId: string, userEmail: string, fullName?: string) => {
+  const syncRoleProfile = async (
+    userId: string,
+    userEmail: string,
+    fullName?: string,
+    tutorFields?: string[]
+  ) => {
     const displayName = fullName || userEmail.split('@')[0];
     if (authRole === 'student') {
       const response = await fetch(`${backendUrl}/api/v1/users`, {
@@ -86,6 +93,7 @@ export default function LoginForm() {
         name: displayName,
         email: userEmail,
         subjects: ['Interviews', 'UCAT', 'Personal Statement'],
+        field: tutorFields,
         role: 'tutor',
       }),
     });
@@ -108,12 +116,18 @@ export default function LoginForm() {
 
       if (isSignUp) {
         // Sign up
+        if (authRole === 'tutor' && fieldsCanTutor.length === 0) {
+          setError('Please select at least one field you can tutor.');
+          setLoading(false);
+          return;
+        }
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
               full_name: name,
+              field: authRole === 'tutor' ? fieldsCanTutor : undefined,
             },
             emailRedirectTo: `${origin}/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}&role=${authRole}`,
           },
@@ -137,7 +151,8 @@ export default function LoginForm() {
               await syncRoleProfile(
                 data.user.id,
                 email,
-                name || data.user.user_metadata?.full_name
+                name || data.user.user_metadata?.full_name,
+                authRole === 'tutor' ? fieldsCanTutor : undefined
               );
             } catch (backendError) {
               console.error('Error syncing profile:', backendError);
@@ -151,6 +166,7 @@ export default function LoginForm() {
             setEmail('');
             setPassword('');
             setName('');
+            setFieldsCanTutor([]);
           }
         }
       } else {
@@ -386,6 +402,33 @@ export default function LoginForm() {
                 </div>
               )}
 
+              {isSignUp && authRole === 'tutor' && !isReset && (
+                <div>
+                  <p className="block text-sm font-medium text-gray-700 mb-2">
+                    Fields you can tutor <span className="text-red-500">*</span>
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['medicine', 'dentistry'].map((field) => (
+                      <label key={field} className="flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          value={field}
+                          checked={fieldsCanTutor.includes(field)}
+                          onChange={(e) => {
+                            const { checked, value } = e.target;
+                            setFieldsCanTutor((prev) =>
+                              checked ? [...prev, value] : prev.filter((item) => item !== value)
+                            );
+                          }}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="capitalize">{field}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
@@ -429,6 +472,7 @@ export default function LoginForm() {
                     setEmail('');
                     setPassword('');
                     setName('');
+                    setFieldsCanTutor([]);
                   }}
                   className="text-sm text-blue-600 hover:text-blue-500 font-medium"
                 >
@@ -437,7 +481,7 @@ export default function LoginForm() {
               )}
             </div>
 
-            {!isReset && (
+            {!isReset && !isSignUp && (
               <>
                 <button
                   type="button"

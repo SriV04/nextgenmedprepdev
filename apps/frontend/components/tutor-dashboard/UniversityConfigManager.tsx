@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, ClipboardCheck, Loader2, Plus, RefreshCw, Save, Search, Tag, Trash2, X } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Loader2, Plus, RefreshCw, Save, Search, Tag, Trash2, X } from 'lucide-react';
 import { UK_MEDICAL_SCHOOLS } from '../../data/universities';
 
 interface UniversityTagConfig {
@@ -49,14 +49,20 @@ const createEmptyDraft = (): TagDraft => ({
   notesByTag: {},
 });
 
-interface PendingQuestion {
-  id: string;
-  title?: string | null;
-  question_text: string;
-  category?: string | null;
-  difficulty?: string | null;
-  status?: string | null;
-  question_tags?: Array<{ tag: string }>;
+interface QuestionSkillCriterion {
+  skill_group: 'core' | 'extra';
+  skill_code: string;
+  max_marks: number;
+  guidance?: string | null;
+  display_order?: number | null;
+  skill_definitions?: {
+    display_name?: string | null;
+  } | null;
+}
+
+interface FollowUpQuestion {
+  order: number;
+  text: string;
 }
 
 interface PrometheusQuestion {
@@ -66,7 +72,10 @@ interface PrometheusQuestion {
   category?: string | null;
   difficulty?: string | null;
   status?: string | null;
+  notes?: string | null;
+  follow_up_questions?: FollowUpQuestion[];
   question_tags?: Array<{ tag: string }>;
+  question_skill_criteria?: QuestionSkillCriterion[];
 }
 
 export default function UniversityConfigManager({ backendUrl }: { backendUrl: string }) {
@@ -80,20 +89,21 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
   const [creatingStation, setCreatingStation] = useState(false);
   const [savingTags, setSavingTags] = useState<Record<string, boolean>>({});
   const [tagDrafts, setTagDrafts] = useState<Record<string, TagDraft>>({});
-  const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [pendingQuestions, setPendingQuestions] = useState<PendingQuestion[]>([]);
-  const [pendingLoading, setPendingLoading] = useState(false);
-  const [pendingError, setPendingError] = useState<string | null>(null);
   const [updatingQuestionId, setUpdatingQuestionId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<PrometheusQuestion[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [questionsError, setQuestionsError] = useState<string | null>(null);
   const [questionFilters, setQuestionFilters] = useState({
-    status: 'all',
+    status: 'pending',
     difficulty: 'all',
     category: 'all',
     search: '',
   });
+  const [questionTagsFilter, setQuestionTagsFilter] = useState<string[]>([]);
+  const [questionCoreSkillsFilter, setQuestionCoreSkillsFilter] = useState<string[]>([]);
+  const [selectedQuestion, setSelectedQuestion] = useState<PrometheusQuestion | null>(null);
+  const [questionDraft, setQuestionDraft] = useState<PrometheusQuestion | null>(null);
+  const [savingQuestionId, setSavingQuestionId] = useState<string | null>(null);
   const [questionViewerExpanded, setQuestionViewerExpanded] = useState(true);
   const [stationForm, setStationForm] = useState({
     question_type: '',
@@ -181,29 +191,6 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
     };
     loadStations();
   }, [backendUrl, selectedUniversity]);
-
-  useEffect(() => {
-    if (!showApprovalModal) return;
-    const loadPendingQuestions = async () => {
-      try {
-        setPendingLoading(true);
-        setPendingError(null);
-        const response = await fetch(`${backendUrl}/api/v1/prometheus/questions?status=pending`);
-        if (!response.ok) throw new Error('Failed to load pending questions');
-        const result = await response.json();
-        if (result.success) {
-          setPendingQuestions(result.data as PendingQuestion[]);
-        } else {
-          setPendingError(result.message || 'Failed to load pending questions');
-        }
-      } catch (error: any) {
-        setPendingError(error.message || 'Failed to load pending questions');
-      } finally {
-        setPendingLoading(false);
-      }
-    };
-    loadPendingQuestions();
-  }, [backendUrl, showApprovalModal]);
 
   useEffect(() => {
     const loadQuestions = async () => {
@@ -372,10 +359,28 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
     }
   };
 
+  useEffect(() => {
+    if (!selectedQuestion) {
+      setQuestionDraft(null);
+      return;
+    }
+    setQuestionDraft({
+      ...selectedQuestion,
+      follow_up_questions: selectedQuestion.follow_up_questions
+        ? [...selectedQuestion.follow_up_questions].sort((a, b) => a.order - b.order)
+        : [],
+      question_skill_criteria: selectedQuestion.question_skill_criteria
+        ? [...selectedQuestion.question_skill_criteria].sort(
+            (a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)
+          )
+        : [],
+    });
+  }, [selectedQuestion]);
+
   const updateQuestionStatus = async (questionId: string, status: 'approved' | 'rejected') => {
     try {
       setUpdatingQuestionId(questionId);
-      setPendingError(null);
+      setQuestionsError(null);
       const response = await fetch(
         `${backendUrl}/api/v1/prometheus/questions/${questionId}/status`,
         {
@@ -387,19 +392,75 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
       if (!response.ok) throw new Error('Failed to update question status');
       const result = await response.json();
       if (result.success) {
-        setPendingQuestions((prev) => prev.filter((item) => item.id !== questionId));
         setQuestions((prev) =>
           prev.map((item) =>
             item.id === questionId ? { ...item, status } : item
           )
         );
+        setSelectedQuestion((prev) =>
+          prev && prev.id === questionId ? { ...prev, status } : prev
+        );
       } else {
-        setPendingError(result.message || 'Failed to update question status');
+        setQuestionsError(result.message || 'Failed to update question status');
       }
     } catch (error: any) {
-      setPendingError(error.message || 'Failed to update question status');
+      setQuestionsError(error.message || 'Failed to update question status');
     } finally {
       setUpdatingQuestionId(null);
+    }
+  };
+
+  const saveQuestionEdits = async () => {
+    if (!questionDraft) return;
+    try {
+      setSavingQuestionId(questionDraft.id);
+      setQuestionsError(null);
+
+      const followUps = (questionDraft.follow_up_questions || [])
+        .map((item, index) => ({
+          order: index + 1,
+          text: item.text.trim(),
+        }))
+        .filter((item) => item.text.length > 0);
+
+      const skillCriteria = (questionDraft.question_skill_criteria || []).map((skill, index) => ({
+        skill_code: skill.skill_code,
+        skill_group: skill.skill_group,
+        max_marks: Number(skill.max_marks) || 0,
+        guidance: skill.guidance || undefined,
+        display_order: skill.display_order ?? index + 1,
+      }));
+
+      const payload = {
+        title: questionDraft.title || undefined,
+        question_text: questionDraft.question_text,
+        category: questionDraft.category || undefined,
+        difficulty: questionDraft.difficulty || undefined,
+        notes: questionDraft.notes || undefined,
+        follow_up_questions: followUps,
+        skill_criteria: skillCriteria,
+      };
+
+      const response = await fetch(`${backendUrl}/api/v1/prometheus/questions/${questionDraft.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to update question');
+      const result = await response.json();
+      if (result.success) {
+        setQuestions((prev) =>
+          prev.map((item) => (item.id === questionDraft.id ? result.data : item))
+        );
+        setSelectedQuestion(result.data);
+      } else {
+        setQuestionsError(result.message || 'Failed to update question');
+      }
+    } catch (error: any) {
+      setQuestionsError(error.message || 'Failed to update question');
+    } finally {
+      setSavingQuestionId(null);
     }
   };
 
@@ -415,19 +476,61 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
     ) as string[];
   }, [questions]);
 
-  const pendingCount = useMemo(() => {
-    return questions.filter((question) => question.status === 'pending').length;
+  const questionStatusCounts = useMemo(() => {
+    return questions.reduce(
+      (acc, question) => {
+        const status = (question.status || 'pending').toLowerCase();
+        if (status === 'approved') acc.approved += 1;
+        else if (status === 'rejected') acc.rejected += 1;
+        else acc.pending += 1;
+        return acc;
+      },
+      { pending: 0, approved: 0, rejected: 0 }
+    );
   }, [questions]);
 
   const filteredQuestions = useMemo(() => {
     const search = questionFilters.search.trim().toLowerCase();
-    if (!search) return questions;
+    const statusFilter = questionFilters.status;
     return questions.filter((question) => {
+      const normalizedStatus = (question.status || 'pending').toLowerCase();
+      if (statusFilter !== 'all' && normalizedStatus !== statusFilter) {
+        return false;
+      }
+      if (questionTagsFilter.length > 0) {
+        const questionTags = (question.question_tags || []).map((tag) => tag.tag);
+        const hasAllTags = questionTagsFilter.every((tag) => questionTags.includes(tag));
+        if (!hasAllTags) return false;
+      }
+      if (questionCoreSkillsFilter.length > 0) {
+        const coreSkills = (question.question_skill_criteria || [])
+          .filter((skill) => skill.skill_group === 'core')
+          .map((skill) => skill.skill_code);
+        const hasAllCoreSkills = questionCoreSkillsFilter.every((skill) => coreSkills.includes(skill));
+        if (!hasAllCoreSkills) return false;
+      }
+      if (!search) return true;
       const title = question.title?.toLowerCase() || '';
       const body = question.question_text?.toLowerCase() || '';
       return title.includes(search) || body.includes(search);
     });
-  }, [questions, questionFilters.search]);
+  }, [questions, questionFilters.search, questionFilters.status, questionTagsFilter, questionCoreSkillsFilter]);
+
+  const availableQuestionTags = useMemo(() => {
+    return tags.filter((tag) => tag && tag.trim().length > 0);
+  }, [tags]);
+
+  const availableCoreSkills = useMemo(() => {
+    const skills = new Map<string, string>();
+    questions.forEach((question) => {
+      question.question_skill_criteria?.forEach((skill) => {
+        if (skill.skill_group !== 'core') return;
+        const label = skill.skill_definitions?.display_name || skill.skill_code;
+        skills.set(skill.skill_code, label);
+      });
+    });
+    return Array.from(skills.entries()).map(([code, label]) => ({ code, label }));
+  }, [questions]);
 
   return (
     <>
@@ -457,28 +560,29 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
                   Total: {questions.length}
                 </span>
                 <span className="px-2 py-1 rounded-full bg-amber-50 text-amber-700">
-                  Pending: {pendingCount}
+                  Pending: {questionStatusCounts.pending}
+                </span>
+                <span className="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                  Approved: {questionStatusCounts.approved}
+                </span>
+                <span className="px-2 py-1 rounded-full bg-red-50 text-red-700">
+                  Rejected: {questionStatusCounts.rejected}
                 </span>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <button
-                onClick={() => setShowApprovalModal(true)}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white rounded-lg bg-blue-600 hover:bg-blue-700 shadow-sm"
-              >
-                <ClipboardCheck className="w-4 h-4" />
-                Review pending questions
-              </button>
-              <button
-                onClick={() =>
+                onClick={() => {
                   setQuestionFilters((prev) => ({
                     ...prev,
                     status: 'all',
                     difficulty: 'all',
                     category: 'all',
                     search: '',
-                  }))
-                }
+                  }));
+                  setQuestionTagsFilter([]);
+                  setQuestionCoreSkillsFilter([]);
+                }}
                 className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-50"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -502,18 +606,43 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
                 className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
               />
             </div>
-            <select
-              value={questionFilters.status}
-              onChange={(event) =>
-                setQuestionFilters((prev) => ({ ...prev, status: event.target.value }))
-              }
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
-            >
-              <option value="all">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
+            <div className="flex flex-wrap items-center gap-2">
+              {(['pending', 'approved', 'rejected'] as const).map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() =>
+                    setQuestionFilters((prev) => ({
+                      ...prev,
+                      status,
+                    }))
+                  }
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                    questionFilters.status === status
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="capitalize">{status}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() =>
+                  setQuestionFilters((prev) => ({
+                    ...prev,
+                    status: 'all',
+                  }))
+                }
+                className={`px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                  questionFilters.status === 'all'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                All
+              </button>
+            </div>
             <select
               value={questionFilters.category}
               onChange={(event) =>
@@ -544,6 +673,69 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
             </select>
           </div>
 
+          <div className="mt-4 grid grid-cols-1 xl:grid-cols-[1.3fr_1.7fr] gap-3">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <p className="text-xs font-semibold text-gray-600 mb-2">Filter by tags</p>
+              {availableQuestionTags.length === 0 ? (
+                <p className="text-xs text-gray-400">No tags available</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {availableQuestionTags.map((tag) => {
+                    const isSelected = questionTagsFilter.includes(tag);
+                    return (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() =>
+                          setQuestionTagsFilter((prev) =>
+                            isSelected ? prev.filter((item) => item !== tag) : [...prev, tag]
+                          )
+                        }
+                        className={`px-2 py-1 rounded-full text-xs font-medium border transition-colors ${
+                          isSelected
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <p className="text-xs font-semibold text-gray-600 mb-2">Filter by core skills</p>
+              {availableCoreSkills.length === 0 ? (
+                <p className="text-xs text-gray-400">No core skills available</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {availableCoreSkills.map((skill) => {
+                    const isSelected = questionCoreSkillsFilter.includes(skill.code);
+                    return (
+                      <button
+                        key={skill.code}
+                        type="button"
+                        onClick={() =>
+                          setQuestionCoreSkillsFilter((prev) =>
+                            isSelected ? prev.filter((item) => item !== skill.code) : [...prev, skill.code]
+                          )
+                        }
+                        className={`px-2 py-1 rounded-full text-xs font-medium border transition-colors ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        {skill.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
           {questionsError && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700 mt-4">
               {questionsError}
@@ -571,7 +763,12 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
                     ? 'bg-red-100 text-red-700'
                     : 'bg-amber-100 text-amber-700';
               return (
-                <div key={question.id} className="border border-gray-100 rounded-xl p-4 bg-white">
+                <button
+                  type="button"
+                  key={question.id}
+                  onClick={() => setSelectedQuestion(question)}
+                  className="w-full text-left border border-gray-100 rounded-xl p-4 bg-white hover:border-blue-200 hover:shadow-sm transition"
+                >
                   <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
@@ -595,38 +792,20 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
                             {question.question_tags.map((tag) => tag.tag).join(', ')}
                           </span>
                         )}
+                        {question.question_skill_criteria &&
+                          question.question_skill_criteria.some((skill) => skill.skill_group === 'core') && (
+                            <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-full">
+                              Core skills:{" "}
+                              {question.question_skill_criteria
+                                .filter((skill) => skill.skill_group === 'core')
+                                .map((skill) => skill.skill_definitions?.display_name || skill.skill_code)
+                                .join(', ')}
+                            </span>
+                          )}
                       </div>
                     </div>
-                    {status === 'pending' && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button
-                          onClick={() => updateQuestionStatus(question.id, 'approved')}
-                          disabled={updatingQuestionId === question.id}
-                          className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
-                        >
-                          {updatingQuestionId === question.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <CheckCircle2 className="w-4 h-4" />
-                          )}
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => updateQuestionStatus(question.id, 'rejected')}
-                          disabled={updatingQuestionId === question.id}
-                          className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
-                        >
-                          {updatingQuestionId === question.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <X className="w-4 h-4" />
-                          )}
-                          Disapprove
-                        </button>
-                      </div>
-                    )}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -906,87 +1085,293 @@ export default function UniversityConfigManager({ backendUrl }: { backendUrl: st
           </div>
         </div>
       </div>
-      {showApprovalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6">
+              {selectedQuestion && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+                  <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">Pending Questions</h3>
-                <p className="text-sm text-gray-500">Approve new submissions before they go live.</p>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  {selectedQuestion.title || 'Untitled question'}
+                </h3>
+                <p className="text-sm text-gray-500">Review question details and take action.</p>
               </div>
               <button
-                onClick={() => setShowApprovalModal(false)}
+                onClick={() => setSelectedQuestion(null)}
                 className="p-2 rounded-full hover:bg-gray-100"
-                aria-label="Close approval modal"
+                aria-label="Close question modal"
               >
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
-            {pendingLoading && (
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Loading pending questions...
+
+            <div className="space-y-4 max-h-[65vh] overflow-y-auto">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-gray-500">Status:</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  (selectedQuestion.status || 'pending') === 'approved'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : (selectedQuestion.status || 'pending') === 'rejected'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-amber-100 text-amber-700'
+                }`}>
+                  {selectedQuestion.status || 'pending'}
+                </span>
               </div>
-            )}
-            {pendingError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-                {pendingError}
-              </div>
-            )}
-            {!pendingLoading && !pendingError && pendingQuestions.length === 0 && (
-              <div className="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-6 text-center">
-                No pending questions at the moment.
-              </div>
-            )}
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-              {pendingQuestions.map((question) => (
-                <div key={question.id} className="border border-gray-100 rounded-xl p-4">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+
+              {questionDraft && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <h4 className="text-base font-semibold text-gray-900">
-                        {question.title || 'Untitled question'}
-                      </h4>
-                      <p className="text-sm text-gray-600 mt-1">{question.question_text}</p>
-                      <div className="flex flex-wrap gap-2 mt-3 text-xs text-gray-500">
-                        {question.category && <span className="px-2 py-1 bg-gray-100 rounded-full">{question.category}</span>}
-                        {question.difficulty && <span className="px-2 py-1 bg-gray-100 rounded-full">{question.difficulty}</span>}
-                        {question.question_tags && question.question_tags.length > 0 && (
-                          <span className="px-2 py-1 bg-gray-100 rounded-full">
-                            {question.question_tags.map((tag) => tag.tag).join(', ')}
-                          </span>
-                        )}
-                      </div>
+                      <label className="text-xs font-semibold text-gray-600">Title</label>
+                      <input
+                        type="text"
+                        value={questionDraft.title || ''}
+                        onChange={(event) =>
+                          setQuestionDraft((prev) =>
+                            prev ? { ...prev, title: event.target.value } : prev
+                          )
+                        }
+                        disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                        className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                      />
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => updateQuestionStatus(question.id, 'approved')}
-                        disabled={updatingQuestionId === question.id}
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
-                      >
-                        {updatingQuestionId === question.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <CheckCircle2 className="w-4 h-4" />
-                        )}
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => updateQuestionStatus(question.id, 'rejected')}
-                        disabled={updatingQuestionId === question.id}
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
-                      >
-                        {updatingQuestionId === question.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <X className="w-4 h-4" />
-                        )}
-                        Disapprove
-                      </button>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-600">Difficulty</label>
+                      <input
+                        type="text"
+                        value={questionDraft.difficulty || ''}
+                        onChange={(event) =>
+                          setQuestionDraft((prev) =>
+                            prev ? { ...prev, difficulty: event.target.value } : prev
+                          )
+                        }
+                        disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                        className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                      />
                     </div>
                   </div>
-                </div>
-              ))}
+
+                  <div className="text-sm text-gray-600">
+                    <p className="font-semibold text-gray-800 mb-2">Question text</p>
+                    <textarea
+                      value={questionDraft.question_text}
+                      onChange={(event) =>
+                        setQuestionDraft((prev) =>
+                          prev ? { ...prev, question_text: event.target.value } : prev
+                        )
+                      }
+                      disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none disabled:bg-gray-50"
+                      rows={4}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                {questionDraft?.category && (
+                  <span className="px-2 py-1 bg-gray-100 rounded-full">{questionDraft.category}</span>
+                )}
+                {selectedQuestion.question_tags && selectedQuestion.question_tags.length > 0 && (
+                  <span className="px-2 py-1 bg-gray-100 rounded-full">
+                    {selectedQuestion.question_tags.map((tag) => tag.tag).join(', ')}
+                  </span>
+                )}
+                {questionDraft?.question_skill_criteria &&
+                  questionDraft.question_skill_criteria.some((skill) => skill.skill_group === 'core') && (
+                    <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-full">
+                      Core skills:{' '}
+                      {questionDraft.question_skill_criteria
+                        .filter((skill) => skill.skill_group === 'core')
+                        .map((skill) => skill.skill_definitions?.display_name || skill.skill_code)
+                        .join(', ')}
+                    </span>
+                  )}
+              </div>
+
+              {questionDraft && (
+                <>
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-slate-800 mb-3">Follow-up questions</p>
+                    <div className="space-y-2">
+                      {(questionDraft.follow_up_questions || []).map((item, index) => (
+                        <div key={`${item.order}-${index}`} className="flex items-start gap-2">
+                          <span className="mt-2 text-xs font-semibold text-slate-500">#{index + 1}</span>
+                          <textarea
+                            value={item.text}
+                            onChange={(event) =>
+                              setQuestionDraft((prev) => {
+                                if (!prev) return prev;
+                                const nextFollowUps = [...(prev.follow_up_questions || [])];
+                                nextFollowUps[index] = {
+                                  ...nextFollowUps[index],
+                                  text: event.target.value,
+                                };
+                                return { ...prev, follow_up_questions: nextFollowUps };
+                              })
+                            }
+                            disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                            rows={2}
+                          />
+                          {(selectedQuestion.status || 'pending') === 'pending' && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setQuestionDraft((prev) => {
+                                  if (!prev) return prev;
+                                  const nextFollowUps = [...(prev.follow_up_questions || [])];
+                                  nextFollowUps.splice(index, 1);
+                                  return {
+                                    ...prev,
+                                    follow_up_questions: nextFollowUps.map((fq, idx) => ({
+                                      ...fq,
+                                      order: idx + 1,
+                                    })),
+                                  };
+                                })
+                              }
+                              className="mt-2 text-xs text-red-500 hover:text-red-600"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {(selectedQuestion.status || 'pending') === 'pending' && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestionDraft((prev) => {
+                              if (!prev) return prev;
+                              const nextFollowUps = [...(prev.follow_up_questions || [])];
+                              nextFollowUps.push({ order: nextFollowUps.length + 1, text: '' });
+                              return { ...prev, follow_up_questions: nextFollowUps };
+                            })
+                          }
+                          className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                        >
+                          + Add follow-up question
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-gray-800 mb-3">Mark allocations</p>
+                    <div className="space-y-3">
+                      {(questionDraft.question_skill_criteria || []).map((skill, index) => (
+                        <div key={`${skill.skill_code}-${index}`} className="border border-gray-100 rounded-lg p-3">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {skill.skill_definitions?.display_name || skill.skill_code}
+                              </p>
+                              <p className="text-xs text-gray-500">Group: {skill.skill_group}</p>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-xs text-gray-500">Max marks</span>
+                              <input
+                                type="number"
+                                min={0}
+                                max={10}
+                                value={skill.max_marks ?? 0}
+                                onChange={(event) =>
+                                  setQuestionDraft((prev) => {
+                                    if (!prev) return prev;
+                                    const nextSkills = [...(prev.question_skill_criteria || [])];
+                                    nextSkills[index] = {
+                                      ...nextSkills[index],
+                                      max_marks: Number(event.target.value),
+                                    };
+                                    return { ...prev, question_skill_criteria: nextSkills };
+                                  })
+                                }
+                                disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                                className="w-20 px-2 py-1 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                              />
+                            </div>
+                          </div>
+                          <textarea
+                            value={skill.guidance || ''}
+                            onChange={(event) =>
+                              setQuestionDraft((prev) => {
+                                if (!prev) return prev;
+                                const nextSkills = [...(prev.question_skill_criteria || [])];
+                                nextSkills[index] = {
+                                  ...nextSkills[index],
+                                  guidance: event.target.value,
+                                };
+                                return { ...prev, question_skill_criteria: nextSkills };
+                              })
+                            }
+                            disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                            className="mt-3 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                            rows={2}
+                            placeholder="Guidance or marking notes"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                    <p className="text-sm font-semibold text-slate-800 mb-3">Notes</p>
+                    <textarea
+                      value={questionDraft.notes || ''}
+                      onChange={(event) =>
+                        setQuestionDraft((prev) => (prev ? { ...prev, notes: event.target.value } : prev))
+                      }
+                      disabled={(selectedQuestion.status || 'pending') !== 'pending'}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
+                      rows={3}
+                      placeholder="Add any internal notes for this question"
+                    />
+                  </div>
+                </>
+              )}
             </div>
+
+            {(selectedQuestion.status || 'pending') === 'pending' && (
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <button
+                  onClick={saveQuestionEdits}
+                  disabled={savingQuestionId === selectedQuestion.id || !questionDraft}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-60"
+                >
+                  {savingQuestionId === selectedQuestion.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Save className="w-4 h-4" />
+                  )}
+                  Save edits
+                </button>
+                <button
+                  onClick={() => updateQuestionStatus(selectedQuestion.id, 'approved')}
+                  disabled={updatingQuestionId === selectedQuestion.id}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
+                >
+                  {updatingQuestionId === selectedQuestion.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4" />
+                  )}
+                  Approve
+                </button>
+                <button
+                  onClick={() => updateQuestionStatus(selectedQuestion.id, 'rejected')}
+                  disabled={updatingQuestionId === selectedQuestion.id}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
+                >
+                  {updatingQuestionId === selectedQuestion.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <X className="w-4 h-4" />
+                  )}
+                  Reject
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

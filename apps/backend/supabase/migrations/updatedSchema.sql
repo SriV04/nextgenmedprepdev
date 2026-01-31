@@ -160,8 +160,10 @@ CREATE TABLE public.tutors (
   name text NOT NULL,
   email text NOT NULL UNIQUE,
   subjects ARRAY NOT NULL,
+  field text[] NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   role text,
+  field text,
   CONSTRAINT tutors_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.universities (
@@ -244,6 +246,7 @@ CREATE TABLE prometheus.questions (
   oxbridge boolean,
   resources jsonb,
   contributor_id uuid,
+  field text,
   CONSTRAINT questions_pkey PRIMARY KEY (id),
   CONSTRAINT questions_contributor_id_fkey FOREIGN KEY (contributor_id) REFERENCES public.tutors(id)
 );

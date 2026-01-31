@@ -8,12 +8,14 @@ const createTutorSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   subjects: z.array(z.string()).min(1).optional().default(['General']),
+  field: z.array(z.enum(['medicine', 'dentistry'])).min(1).optional().default(['medicine']),
   role: z.string().optional().default('tutor'),
 });
 
 const updateTutorSchema = z.object({
   name: z.string().min(2).optional(),
   subjects: z.array(z.string()).min(1).optional(),
+  field: z.array(z.enum(['medicine', 'dentistry'])).min(1).optional(),
   role: z.string().optional(),
 });
 
@@ -71,6 +73,7 @@ export const createTutor = async (
         name: validatedData.name,
         email: validatedData.email,
         subjects: validatedData.subjects,
+        field: validatedData.field,
         role: validatedData.role, // Defaults to 'tutor' from schema
         approval_status: 'pending', // New tutors require approval
       })
@@ -371,11 +374,12 @@ export const getAllTutorsWithAvailability = async (
     const { start_date, end_date } = req.query;
     const supabase = createSupabaseClient();
 
-    // Get all tutors except managers (managers don't appear in calendar)
+    // Get all approved tutors except managers (managers don't appear in calendar)
     const { data: tutors, error: tutorsError } = await supabase
       .from('tutors')
       .select('*')
       .neq('role', 'manager')
+      .eq('approval_status', 'approved')
       .order('name', { ascending: true });
 
     if (tutorsError) {

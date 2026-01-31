@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus, ClipboardList } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus, ClipboardList, ChevronDown, ChevronUp } from 'lucide-react';
 import SessionFeedbackModal from './SessionFeedbackModal';
 import AddQuestionModal from './AddQuestionModal';
 
@@ -46,6 +46,8 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
   const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
   const [questionSubmissions, setQuestionSubmissions] = useState<QuestionSubmission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [submissionsTab, setSubmissionsTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [expandedSubmissionIds, setExpandedSubmissionIds] = useState<string[]>([]);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
@@ -169,26 +171,46 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
     return 'bg-amber-100 text-amber-700';
   };
 
+  const normalizeSubmissionStatus = (status?: string | null) => {
+    const normalized = (status || 'pending').toLowerCase();
+    if (normalized === 'approved' || normalized === 'rejected') {
+      return normalized;
+    }
+    return 'pending';
+  };
+
+  const submissionCounts = questionSubmissions.reduce(
+    (acc, submission) => {
+      const status = normalizeSubmissionStatus(submission.status);
+      acc[status] += 1;
+      return acc;
+    },
+    { pending: 0, approved: 0, rejected: 0 }
+  );
+
+  const filteredSubmissions = questionSubmissions.filter(
+    (submission) => normalizeSubmissionStatus(submission.status) === submissionsTab
+  );
+
+  const approvedEarnings = submissionCounts.approved;
+
+  const toggleSubmissionExpanded = (submissionId: string) => {
+    setExpandedSubmissionIds((prev) =>
+      prev.includes(submissionId) ? prev.filter((id) => id !== submissionId) : [...prev, submissionId]
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-              Welcome back{tutorName ? `, ${tutorName}` : ''}! 👋
-            </h1>
-            <p className="text-blue-100 text-sm sm:text-base">
-              Here's an overview of your tutoring sessions
-            </p>
-          </div>
-          <button
-            onClick={() => setIsAddQuestionModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium shadow-md"
-          >
-            <Plus className="w-5 h-5" />
-            Add Question
-          </button>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+            Welcome back{tutorName ? `, ${tutorName}` : ''}! 👋
+          </h1>
+          <p className="text-blue-100 text-sm sm:text-base">
+            Here's an overview of your tutoring sessions
+          </p>
         </div>
       </div>
 
@@ -236,15 +258,32 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
       {/* Question Submissions */}
       <div className="bg-white rounded-xl shadow-md">
         <div className="p-4 sm:p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Question Submissions</h2>
             </div>
-            <span className="text-xs sm:text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
-              {questionSubmissions.length} submission{questionSubmissions.length !== 1 ? 's' : ''}
-            </span>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs sm:text-sm text-emerald-700">
+                <span className="font-semibold">Earnings</span>
+                <span>£{approvedEarnings}</span>
+                <span className="text-emerald-600">({submissionCounts.approved} approved)</span>
+              </div>
+              <span className="text-xs sm:text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
+                {questionSubmissions.length} submission{questionSubmissions.length !== 1 ? 's' : ''}
+              </span>
+              <button
+                onClick={() => setIsAddQuestionModalOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                Add Question
+              </button>
+            </div>
           </div>
+          <p className="text-xs sm:text-sm text-gray-500 mt-3">
+            💡 Earn £1 for each approved question submission
+          </p>
         </div>
 
         <div className="divide-y divide-gray-200">
@@ -254,37 +293,96 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
             <div className="p-8 text-center">
               <ClipboardList className="w-12 h-12 mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500">No question submissions yet</p>
-              <p className="text-sm text-gray-400 mt-1">Submit a question to see its status here</p>
+              <p className="text-sm text-gray-400 mt-1">Submit a question to earn £1 per approval</p>
             </div>
           ) : (
-            questionSubmissions.map((submission) => (
-              <div key={submission.id} className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">
-                        {submission.title || 'Untitled question'}
-                      </h3>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeStyles(
-                          submission.status
-                        )}`}
-                      >
-                        {submission.status || 'pending'}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                      {submission.question_text}
-                    </p>
-                  </div>
-                  {submission.created_at && (
-                    <div className="text-xs text-gray-500">
-                      Submitted {formatDate(submission.created_at)}
-                    </div>
-                  )}
+            <>
+              <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div className="flex flex-wrap items-center gap-2">
+                  {(['pending', 'approved', 'rejected'] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setSubmissionsTab(tab)}
+                      className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
+                        submissionsTab === tab
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className="capitalize">{tab}</span> ({submissionCounts[tab]})
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))
+
+              {filteredSubmissions.length === 0 ? (
+                <div className="p-8 text-center">
+                  <ClipboardList className="w-10 h-10 mx-auto text-gray-300 mb-3" />
+                  <p className="text-gray-500">No {submissionsTab} submissions</p>
+                </div>
+              ) : (
+                filteredSubmissions.map((submission) => {
+                  const isExpanded = expandedSubmissionIds.includes(submission.id);
+                  return (
+                    <div key={submission.id} className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-semibold text-gray-900">
+                              {submission.title || 'Untitled question'}
+                            </h3>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeStyles(
+                                submission.status
+                              )}`}
+                            >
+                              {submission.status || 'pending'}
+                            </span>
+                          </div>
+                          <p className={`text-sm text-gray-600 mt-2 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                            {submission.question_text}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {submission.created_at && (
+                            <div className="text-xs text-gray-500">
+                              Submitted {formatDate(submission.created_at)}
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => toggleSubmissionExpanded(submission.id)}
+                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            {isExpanded ? 'Hide details' : 'View details'}
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {isExpanded && (
+                        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 space-y-2">
+                          <div>
+                            <span className="font-semibold text-gray-700">Question ID:</span> {submission.id}
+                          </div>
+                          {submission.created_at && (
+                            <div>
+                              <span className="font-semibold text-gray-700">Submitted:</span>{' '}
+                              {formatDate(submission.created_at)}
+                            </div>
+                          )}
+                          <div>
+                            <span className="font-semibold text-gray-700">Full question text:</span>
+                            <p className="mt-1 text-gray-600">{submission.question_text}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </>
           )}
         </div>
       </div>

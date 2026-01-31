@@ -55,6 +55,7 @@ export interface CreateQuestionData {
   category?: string;
   difficulty?: string;
   interview_types?: string[];
+  field?: string[] | string;
   notes?: string;
   status?: string;
   contributor_id?: string;
@@ -70,6 +71,7 @@ export interface Question {
   category?: string;
   difficulty?: string;
   interview_types?: string[];
+  field?: string;
   contributor_id?: string;
   is_active: boolean;
   follow_up_questions: FollowUpQuestion[];
@@ -417,6 +419,7 @@ export const createQuestion = async (questionData: CreateQuestionData) => {
     category: questionData.category,
     difficulty: questionData.difficulty,
     interview_types: questionData.interview_types || [],
+    field: Array.isArray(questionData.field) ? questionData.field.join(',') : questionData.field,
     contributor_id: questionData.contributor_id,
     follow_up_questions: questionData.follow_up_questions || [],
     notes: questionData.notes,
@@ -640,6 +643,9 @@ export const updateQuestion = async (questionId: string, updates: Partial<Create
   if (updates.category !== undefined) questionUpdates.category = updates.category;
   if (updates.difficulty !== undefined) questionUpdates.difficulty = updates.difficulty;
   if (updates.interview_types !== undefined) questionUpdates.interview_type = updates.interview_types;
+  if (updates.field !== undefined) {
+    questionUpdates.field = Array.isArray(updates.field) ? updates.field.join(',') : updates.field;
+  }
   if (updates.notes !== undefined) questionUpdates.notes = updates.notes;
   if (updates.follow_up_questions !== undefined) questionUpdates.follow_up_questions = updates.follow_up_questions;
   if (updates.status !== undefined) questionUpdates.status = updates.status;

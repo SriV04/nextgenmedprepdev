@@ -55,8 +55,16 @@ const teamMembers: TeamMember[] = [
     name: 'Cameron Mencia',
     role: 'Expert Tutor',
     title: 'London University Lead',
-    bio: 'Cameron is a 4th-year medical student at Imperial College London with a strong passion for medical education. With over five years of tutoring experience, he has supported students across a range of subjects and abilities, helping them build confidence and achieve their academic goals. During his time at university, Cameron has been actively involved in teaching by hosting tutorials for Imperial’s Surgical Society. He has also demonstrated leadership and effective communication as Secretary of the Orthopaedic Society and as a student representative for his intercalated BSc, giving him valuable skills to support students through the medical school application process.',
+    bio: 'Cameron is a 4th-year medical student at Imperial College London with a strong passion for medical education. With over five years of tutoring experience, he has supported students across a range of subjects and abilities, helping them build confidence and achieve their academic goals. During his time at university, Cameron has been actively involved in teaching by hosting tutorials for Imperial\'s Surgical Society. He has also demonstrated leadership and effective communication as Secretary of the Orthopaedic Society and as a student representative for his intercalated BSc, giving him valuable skills to support students through the medical school application process.',
     image: '/headshots/[NGMP] Cameron.jpeg', 
+    section: 'tutors'
+  },
+  {
+    name: 'Saif',
+    role: 'Expert Tutor',
+    title: 'Dental Lead',
+    bio: 'Saif is a fourth-year BDS student at King\'s College London who achieved a UCAT result in the top 4% nationally. With over four years of tutoring experience, he has supported students in achieving strong UCAT results, securing interview offers, and gaining admission to medical and dental schools. Having successfully navigated the application process himself, he understands the pressures applicants face and is committed to helping each student reach their full potential.',
+    image: '/headshots/[NGMP] Saif.jpeg',
     section: 'tutors'
   },
   
@@ -249,7 +257,7 @@ export default function AboutPage() {
           </div>
           
           <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}

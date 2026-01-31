@@ -39,6 +39,9 @@ export async function GET(request: Request) {
   const syncRoleProfile = async (user: { id: string; email?: string | null; user_metadata?: Record<string, any> }) => {
     if (!user.email) return;
     const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
+    const fieldsCanTutor = Array.isArray(user.user_metadata?.field)
+      ? user.user_metadata?.field
+      : undefined;
 
     if (authRole === 'student') {
       const response = await fetch(`${backendUrl}/api/v1/users`, {
@@ -69,6 +72,7 @@ export async function GET(request: Request) {
         name: displayName,
         email: user.email,
         subjects: ['Interviews', 'UCAT', 'Personal Statement'],
+        field: fieldsCanTutor,
         role: 'tutor',
       }),
     });

@@ -37,6 +37,18 @@ function formatDateTime(value?: string | null) {
   };
 }
 
+function formatPackageName(raw?: string) {
+  if (!raw) return 'Interview Session';
+  const key = raw.toLowerCase().trim();
+  if (key.includes('core_live')) return 'Core Mock Interview Package';
+  if (key.includes('premium_live')) return 'Premium Mock Interview Package';
+  if (key.includes('essentials_live')) return 'Essentials Mock Interview Package';
+  if (key.includes('core_generated')) return 'Core Generated Package';
+  if (key.includes('premium_generated')) return 'Premium Generated Package';
+  if (key.includes('essentials_generated')) return 'Essentials Generated Package';
+  return raw;
+}
+
 export default function StudentDashboard() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -46,6 +58,7 @@ export default function StudentDashboard() {
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState(false);
+  const [activeTab, setActiveTab] = useState<'home' | 'feedback' | 'resources' | 'profile'>('home');
 
   const router = useRouter();
   const supabase = createClient();
@@ -244,6 +257,30 @@ export default function StudentDashboard() {
         nextSession={nextSession}
         primaryCTA={primaryCTA}
       />
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex gap-2 py-3">
+            {[
+              { key: 'home', label: 'Home' },
+              { key: 'feedback', label: 'Feedback' },
+              { key: 'resources', label: 'Resources' },
+              { key: 'profile', label: 'Profile' },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -251,6 +288,16 @@ export default function StudentDashboard() {
           </div>
         )}
 
+        {activeTab !== 'home' && (
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-600">
+            {activeTab === 'feedback' && 'Feedback content coming soon.'}
+            {activeTab === 'resources' && 'Resources content coming soon.'}
+            {activeTab === 'profile' && 'Profile content coming soon.'}
+          </section>
+        )}
+
+        {activeTab === 'home' && (
+          <>
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
@@ -311,10 +358,10 @@ export default function StudentDashboard() {
                   >
                     <div className="space-y-1">
                       <div className="text-sm font-semibold text-indigo-700">
-                        {getSessionType(interview)} • {interview.booking?.package || 'Interview Session'}
+                        {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
                       </div>
-                      {interview.booking?.universities && (
-                        <p className="text-sm text-gray-600">Universities: {interview.booking.universities}</p>
+                      {interview.university && (
+                        <p className="text-sm text-gray-600">University: {interview.university}</p>
                       )}
                       <div className="text-sm text-gray-600">
                         Tutor: {interview.tutor?.name || 'Assigned'}
@@ -348,10 +395,10 @@ export default function StudentDashboard() {
                 >
                   <div className="space-y-1">
                     <div className="text-sm font-semibold text-amber-700">
-                      {getSessionType(interview)} • {interview.booking?.package || 'Interview Session'}
+                      {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
                     </div>
-                    {interview.booking?.universities && (
-                      <p className="text-sm text-gray-600">Universities: {interview.booking.universities}</p>
+                    {interview.university && (
+                      <p className="text-sm text-gray-600">University: {interview.university}</p>
                     )}
                     <div className="text-sm text-gray-600">Tutor: Unassigned</div>
                   </div>
@@ -366,6 +413,23 @@ export default function StudentDashboard() {
             </div>
           )}
         </section>
+
+        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Missing interviews?</h3>
+              <p className="text-sm text-gray-600">If something looks off, we can help you sort it fast.</p>
+            </div>
+            <a
+              href="mailto:contact@nextgenmedprep.com"
+              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              Contact us
+            </a>
+          </div>
+        </section>
+          </>
+        )}
       </main>
 
       {/* Scheduling modal remains here for now, can be modularized later */}

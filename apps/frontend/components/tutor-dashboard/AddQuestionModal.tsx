@@ -40,6 +40,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [interviewTypes, setInterviewTypes] = useState<('MMI' | 'Oxbridge' | 'Group Task')[]>([]);
+  const [questionFields, setQuestionFields] = useState<('medicine' | 'dentistry')[]>([]);
   const [notes, setNotes] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [followUpQuestions, setFollowUpQuestions] = useState<FollowUpQuestion[]>([]);
@@ -103,6 +104,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     setTitle('');
     setDifficulty('medium');
     setInterviewTypes([]);
+    setQuestionFields([]);
     setNotes('');
     setSelectedTags([]);
     setTagSearch('');
@@ -196,6 +198,14 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     );
   };
 
+  const toggleQuestionField = (field: 'medicine' | 'dentistry') => {
+    setQuestionFields(prev =>
+      prev.includes(field)
+        ? prev.filter(f => f !== field)
+        : [...prev, field]
+    );
+  };
+
   const addSkill = (skillCode: string, group: 'core' | 'extra') => {
     const skill = availableSkills.find(s => s.skill_code === skillCode);
     if (!skill) return;
@@ -278,6 +288,10 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
       setError('At least one interview type is required');
       return;
     }
+    if (questionFields.length === 0) {
+      setError('Select at least one field (medicine or dentistry)');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -287,6 +301,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
         title,
         difficulty,
         interview_types: interviewTypes,
+        field: questionFields,
         notes: notes || undefined,
         contributor_id: userId,
         follow_up_questions: followUpQuestions.filter(fq => fq.text.trim()),
@@ -428,6 +443,28 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
                   ))}
                 </div>
               </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Field * (Select all that apply)
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {(['medicine', 'dentistry'] as const).map((field) => (
+                    <label
+                      key={field}
+                      className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={questionFields.includes(field)}
+                        onChange={() => toggleQuestionField(field)}
+                        className="w-4 h-4 text-purple-600 focus:ring-2 focus:ring-purple-500"
+                      />
+                      <span className="text-sm font-medium capitalize">{field}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div>
@@ -547,7 +584,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
             )}
 
             {selectedTags.length === 0 ? (
-              <p className="text-sm text-purple-700 italic">No tags selected yet (optional)</p>
+              <p className="text-sm text-purple-700 italic">No tags selected yet (required)</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {selectedTags.map(tag => (
@@ -569,6 +606,8 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
             )}
           </div>
 
+          {/* Marking Criteria Header */}
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Marking Criteria</h2>
           {/* Core Skills */}
           <div className="space-y-3 border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
             <div className="flex items-center justify-between">
@@ -577,24 +616,24 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
                 <button
                   type="button"
                   onClick={() => {
-                    setShowNewSkillForm(!showNewSkillForm);
-                    setShowSkillSelector(null);
+                    setShowSkillSelector(showSkillSelector === 'core' ? null : 'core');
+                    setShowNewSkillForm(false);
                   }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                 >
                   <Plus className="w-4 h-4" />
-                  New Skill
+                  Add Core Skill
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    setShowSkillSelector(showSkillSelector === 'core' ? null : 'core');
-                    setShowNewSkillForm(false);
+                    setShowNewSkillForm(!showNewSkillForm);
+                    setShowSkillSelector(null);
                   }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
                 >
                   <Plus className="w-4 h-4" />
-                  Add Core Skill
+                  Create New Skill
                 </button>
               </div>
             </div>
