@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Info, Save, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
+const INTERVIEW_TYPES = ['MMI', 'Group Task', 'Oxbridge', 'Panel'] as const;
+
 interface FollowUpQuestion {
   order: number;
   text: string;
@@ -39,7 +41,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
   const [questionText, setQuestionText] = useState('');
   const [title, setTitle] = useState('');
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [interviewTypes, setInterviewTypes] = useState<('MMI' | 'Oxbridge' | 'Group Task')[]>([]);
+  const [interviewTypes, setInterviewTypes] = useState<typeof INTERVIEW_TYPES[number][]>([]);
   const [questionFields, setQuestionFields] = useState<('medicine' | 'dentistry')[]>([]);
   const [notes, setNotes] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -190,7 +192,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     }
   };
 
-  const toggleInterviewType = (type: 'MMI' | 'Oxbridge' | 'Group Task') => {
+  const toggleInterviewType = (type: typeof INTERVIEW_TYPES[number]) => {
     setInterviewTypes(prev => 
       prev.includes(type) 
         ? prev.filter(t => t !== type)
@@ -427,7 +429,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
                   Interview Types * (Select all that apply)
                 </label>
                 <div className="flex flex-wrap gap-3">
-                  {(['MMI', 'Group Task', 'Oxbridge'] as const).map((type) => (
+                  {INTERVIEW_TYPES.map((type) => (
                     <label
                       key={type}
                       className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"

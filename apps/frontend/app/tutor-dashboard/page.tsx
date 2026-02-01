@@ -997,7 +997,7 @@ function DashboardContent() {
 
         {/* University Configs Tab Content */}
         {activeTab === 'university' && (isAdmin || isManager) && (
-          <UniversityConfigManager backendUrl={backendUrl} />
+          <UniversityConfigManager backendUrl={backendUrl} userId={user?.id ?? ''} />
         )}
 
         {/* Availability Modal */}

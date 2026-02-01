@@ -247,6 +247,8 @@ CREATE TABLE prometheus.questions (
   resources jsonb,
   contributor_id uuid,
   field text,
+  rejection_reason text,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT questions_pkey PRIMARY KEY (id),
   CONSTRAINT questions_contributor_id_fkey FOREIGN KEY (contributor_id) REFERENCES public.tutors(id)
 );

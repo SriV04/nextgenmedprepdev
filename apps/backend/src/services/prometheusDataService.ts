@@ -58,6 +58,7 @@ export interface CreateQuestionData {
   field?: string[] | string;
   notes?: string;
   status?: string;
+  rejection_reason?: string;
   contributor_id?: string;
   follow_up_questions?: FollowUpQuestion[];
   skill_criteria?: QuestionSkillCriterion[];
@@ -424,6 +425,7 @@ export const createQuestion = async (questionData: CreateQuestionData) => {
     follow_up_questions: questionData.follow_up_questions || [],
     notes: questionData.notes,
     status: questionData.status ?? 'pending',
+    rejection_reason: questionData.rejection_reason ?? null,
     is_active: true
   };
   
@@ -649,6 +651,7 @@ export const updateQuestion = async (questionId: string, updates: Partial<Create
   if (updates.notes !== undefined) questionUpdates.notes = updates.notes;
   if (updates.follow_up_questions !== undefined) questionUpdates.follow_up_questions = updates.follow_up_questions;
   if (updates.status !== undefined) questionUpdates.status = updates.status;
+  if (updates.rejection_reason !== undefined) questionUpdates.rejection_reason = updates.rejection_reason;
   
   if (Object.keys(questionUpdates).length > 0) {
     const { error } = await supabase

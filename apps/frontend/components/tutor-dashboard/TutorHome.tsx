@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus, ClipboardList, ChevronDown, ChevronUp } from 'lucide-react';
 import SessionFeedbackModal from './SessionFeedbackModal';
 import AddQuestionModal from './AddQuestionModal';
+import QuestionViewModal from './QuestionViewModal';
 
 interface UpcomingSession {
   id: string;
@@ -29,6 +30,7 @@ interface QuestionSubmission {
   question_text: string;
   status?: string | null;
   created_at?: string;
+  rejection_reason?: string | null;
 }
 
 interface TutorHomeProps {
@@ -48,6 +50,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [submissionsTab, setSubmissionsTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [expandedSubmissionIds, setExpandedSubmissionIds] = useState<string[]>([]);
+  const [selectedSubmission, setSelectedSubmission] = useState<QuestionSubmission | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
@@ -200,6 +203,13 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
     );
   };
 
+  const handleQuestionUpdated = (updatedQuestion: QuestionSubmission) => {
+    setQuestionSubmissions((prev) =>
+      prev.map((item) => (item.id === updatedQuestion.id ? updatedQuestion : item))
+    );
+    setSelectedSubmission(updatedQuestion);
+  };
+
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -323,11 +333,10 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
                 </div>
               ) : (
                 filteredSubmissions.map((submission) => {
-                  const isExpanded = expandedSubmissionIds.includes(submission.id);
                   return (
                     <div key={submission.id} className="p-4 sm:p-6">
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                        <div>
+                        <div className="flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-semibold text-gray-900">
                               {submission.title || 'Untitled question'}
@@ -340,44 +349,32 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
                               {submission.status || 'pending'}
                             </span>
                           </div>
-                          <p className={`text-sm text-gray-600 mt-2 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                          <p className="text-sm text-gray-600 mt-2 line-clamp-2">
                             {submission.question_text}
                           </p>
-                        </div>
-                        <div className="flex items-center gap-3">
                           {submission.created_at && (
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 mt-2">
                               Submitted {formatDate(submission.created_at)}
                             </div>
                           )}
+                          {normalizeSubmissionStatus(submission.status) === 'rejected' &&
+                            submission.rejection_reason && (
+                            <div className="mt-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
+                              <span className="font-semibold text-red-800">Rejection reason:</span>{' '}
+                              {submission.rejection_reason}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => toggleSubmissionExpanded(submission.id)}
-                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                            onClick={() => setSelectedSubmission(submission as any)}
+                            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                           >
-                            {isExpanded ? 'Hide details' : 'View details'}
-                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            View Full Details
                           </button>
                         </div>
                       </div>
-
-                      {isExpanded && (
-                        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 space-y-2">
-                          <div>
-                            <span className="font-semibold text-gray-700">Question ID:</span> {submission.id}
-                          </div>
-                          {submission.created_at && (
-                            <div>
-                              <span className="font-semibold text-gray-700">Submitted:</span>{' '}
-                              {formatDate(submission.created_at)}
-                            </div>
-                          )}
-                          <div>
-                            <span className="font-semibold text-gray-700">Full question text:</span>
-                            <p className="mt-1 text-gray-600">{submission.question_text}</p>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 })
@@ -521,6 +518,17 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
         onSuccess={() => {
           fetchQuestionSubmissions();
         }}
+      />
+
+      {/* Question View Modal */}
+      <QuestionViewModal
+        isOpen={!!selectedSubmission}
+        onClose={() => setSelectedSubmission(null)}
+        question={selectedSubmission as any}
+        backendUrl={backendUrl}
+        onQuestionUpdated={handleQuestionUpdated as any}
+        allowEditing={false}
+        allowStatusChange={false}
       />
 
       {error && (
