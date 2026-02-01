@@ -1134,7 +1134,6 @@ ${data.notes ? `- Notes: ${data.notes}` : ''}
 What happens next:
 • Our team will review your personal statement and university choices
 • We'll contact you within 24 hours to schedule your session
-• You'll receive preparation materials tailored to your universities
 • Our expert tutors will help you excel in your interviews
 
 Our interview tutors are current medical students who have successfully gained places at top UK medical schools.
@@ -1219,7 +1218,6 @@ The NextGen MedPrep Team
             <ul style="color: #374151; margin: 0; padding-left: 20px;">
               <li>Our team will review your personal statement and university choices</li>
               <li>We'll contact you within <strong>24 hours</strong> to schedule your session</li>
-              <li>You'll receive preparation materials tailored to your universities</li>
               <li>Our expert tutors will help you excel in your interviews</li>
             </ul>
           </div>

@@ -9,12 +9,12 @@ import emailService from './src/services/emailService';
 const BOOKING_ID = 'TEST-' + Date.now();
 
 const bookingDetails = {
-  email: 'sriharsha.vitta@gmail.com', // Customer email
+  email: 'contact@nextgenmedprep.com', // Customer email
   name: 'Test User',
   packageType: 'single',
   serviceType: 'live',
   universities: ['Oxford', 'Cambridge', 'Imperial'],
-  amount: 75,
+  amount: 125,
   notes: 'This is a test confirmation email to verify the updated template without student dashboard link.',
   filePath: 'statements/test_user_1234567890.pdf'
 };

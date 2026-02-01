@@ -38,7 +38,7 @@ const EMAIL_CONFIG = {
   // Recipients - can be a single email or array of emails
   // This is used for 'direct' method or 'api' method when packageType is null
   recipients: [
-    "hv222@ic.ac.uk"
+    "contact@nextgenmedprep.com"
   ],
   
   // Email subject

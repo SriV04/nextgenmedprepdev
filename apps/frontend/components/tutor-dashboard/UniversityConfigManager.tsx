@@ -76,6 +76,7 @@ interface PrometheusQuestion {
   status?: string | null;
   notes?: string | null;
   rejection_reason?: string | null;
+  field?: string[] | null;
   follow_up_questions?: FollowUpQuestion[];
   question_tags?: Array<{ tag: string }>;
   question_skill_criteria?: QuestionSkillCriterion[];
@@ -99,6 +100,7 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
     status: 'pending',
     difficulty: 'all',
     category: 'all',
+    field: 'all',
     search: '',
   });
   const [questionTagsFilter, setQuestionTagsFilter] = useState<string[]>([]);
@@ -397,10 +399,17 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
   const filteredQuestions = useMemo(() => {
     const search = questionFilters.search.trim().toLowerCase();
     const statusFilter = questionFilters.status;
+    const fieldFilter = questionFilters.field;
     return questions.filter((question) => {
       const normalizedStatus = (question.status || 'pending').toLowerCase();
       if (statusFilter !== 'all' && normalizedStatus !== statusFilter) {
         return false;
+      }
+      if (fieldFilter !== 'all') {
+        const questionFields = question.field || [];
+        if (!questionFields.includes(fieldFilter)) {
+          return false;
+        }
       }
       if (questionTagsFilter.length > 0) {
         const questionTags = (question.question_tags || []).map((tag) => tag.tag);
@@ -419,7 +428,7 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
       const body = question.question_text?.toLowerCase() || '';
       return title.includes(search) || body.includes(search);
     });
-  }, [questions, questionFilters.search, questionFilters.status, questionTagsFilter, questionCoreSkillsFilter]);
+  }, [questions, questionFilters.search, questionFilters.status, questionFilters.field, questionTagsFilter, questionCoreSkillsFilter]);
 
   const availableQuestionTags = useMemo(() => {
     return tags.filter((tag) => tag && tag.trim().length > 0);
@@ -483,6 +492,7 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
                     status: 'all',
                     difficulty: 'all',
                     category: 'all',
+                    field: 'all',
                     search: '',
                   }));
                   setQuestionTagsFilter([]);
@@ -583,6 +593,17 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
                   {difficulty}
                 </option>
               ))}
+            </select>
+            <select
+              value={questionFilters.field}
+              onChange={(event) =>
+                setQuestionFilters((prev) => ({ ...prev, field: event.target.value }))
+              }
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+            >
+              <option value="all">All fields</option>
+              <option value="medicine">Medicine</option>
+              <option value="dentistry">Dentistry</option>
             </select>
           </div>
 
