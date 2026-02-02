@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Save, CheckCircle2, Loader2, Trash2, RotateCcw } from 'lucide-react';
 
 interface FollowUpQuestion {
   order: number;
@@ -39,8 +39,10 @@ interface QuestionViewModalProps {
   question: PrometheusQuestion | null;
   backendUrl: string;
   onQuestionUpdated?: (updatedQuestion: PrometheusQuestion) => void;
+  onQuestionDeleted?: (questionId: string) => void;
   allowEditing?: boolean;
   allowStatusChange?: boolean;
+  allowDelete?: boolean;
 }
 
 const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
@@ -49,13 +51,17 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
   question,
   backendUrl,
   onQuestionUpdated,
+  onQuestionDeleted,
   allowEditing = false,
   allowStatusChange = false,
+  allowDelete = false,
 }) => {
   const [questionDraft, setQuestionDraft] = useState<PrometheusQuestion | null>(null);
   const [rejectionReasonDraft, setRejectionReasonDraft] = useState('');
   const [savingQuestionId, setSavingQuestionId] = useState<string | null>(null);
   const [updatingQuestionId, setUpdatingQuestionId] = useState<string | null>(null);
+  const [deletingQuestionId, setDeletingQuestionId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,6 +69,7 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
       setQuestionDraft(null);
       setRejectionReasonDraft('');
       setError(null);
+      setShowDeleteConfirm(false);
       return;
     }
     setQuestionDraft({
@@ -81,7 +88,7 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
 
   const updateQuestionStatus = async (
     questionId: string,
-    status: 'approved' | 'rejected',
+    status: 'approved' | 'rejected' | 'pending',
     rejectionReason?: string
   ) => {
     try {
@@ -165,13 +172,41 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
     }
   };
 
+  const deleteQuestion = async () => {
+    if (!question) return;
+    try {
+      setDeletingQuestionId(question.id);
+      setError(null);
+      const response = await fetch(`${backendUrl}/api/v1/prometheus/questions/${question.id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Failed to delete question');
+      const result = await response.json();
+      if (result.success) {
+        onQuestionDeleted?.(question.id);
+        onClose();
+      } else {
+        setError(result.message || 'Failed to delete question');
+      }
+    } catch (err: any) {
+      console.error('Error deleting question:', err);
+      setError(err.message || 'Failed to delete question');
+    } finally {
+      setDeletingQuestionId(null);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   if (!isOpen || !question) return null;
 
   const isPending = (question.status || 'pending') === 'pending';
   const isApproved = (question.status || 'pending') === 'approved';
   const isRejected = (question.status || 'pending') === 'rejected';
-  const canEdit = allowEditing && (isPending || isApproved);
-  const canChangeStatus = allowStatusChange && (isPending || isApproved);
+  
+  // Allow editing and status changes for all question types
+  const canEdit = allowEditing;
+  const canChangeStatus = allowStatusChange;
+  const canDelete = allowDelete;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 p-4">
@@ -456,8 +491,42 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
           </div>
         )}
 
-        {(canEdit || canChangeStatus) && (
+        {/* Delete Confirmation Dialog */}
+        {showDeleteConfirm && (
+          <div className="mt-4 bg-red-50 border-2 border-red-200 rounded-lg p-4">
+            <p className="text-sm font-semibold text-red-900 mb-2">
+              ⚠️ Are you sure you want to delete this question?
+            </p>
+            <p className="text-xs text-red-700 mb-3">
+              This action cannot be undone. The question will be permanently removed from the database.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={deleteQuestion}
+                disabled={deletingQuestionId === question.id}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
+              >
+                {deletingQuestionId === question.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Yes, delete permanently
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deletingQuestionId === question.id}
+                className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {(canEdit || canChangeStatus || canDelete) && (
           <div className="mt-6 flex flex-wrap items-center gap-3">
+            {/* Save Edits Button */}
             {canEdit && (
               <button
                 onClick={saveQuestionEdits}
@@ -472,33 +541,70 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
                 Save edits
               </button>
             )}
+            
+            {/* Status Change Buttons */}
             {canChangeStatus && (
               <>
-                <button
-                  onClick={() => updateQuestionStatus(question.id, 'approved')}
-                  disabled={updatingQuestionId === question.id}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
-                >
-                  {updatingQuestionId === question.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4" />
-                  )}
-                  Approve
-                </button>
-                <button
-                  onClick={() => updateQuestionStatus(question.id, 'rejected', rejectionReasonDraft)}
-                  disabled={updatingQuestionId === question.id}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
-                >
-                  {updatingQuestionId === question.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <X className="w-4 h-4" />
-                  )}
-                  Reject
-                </button>
+                {/* Show Approve button for pending and rejected */}
+                {(isPending || isRejected) && (
+                  <button
+                    onClick={() => updateQuestionStatus(question.id, 'approved')}
+                    disabled={updatingQuestionId === question.id}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
+                  >
+                    {updatingQuestionId === question.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    {isRejected ? 'Revert to Approved' : 'Approve'}
+                  </button>
+                )}
+                
+                {/* Show Reject button for pending and approved */}
+                {(isPending || isApproved) && (
+                  <button
+                    onClick={() => updateQuestionStatus(question.id, 'rejected', rejectionReasonDraft)}
+                    disabled={updatingQuestionId === question.id}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
+                  >
+                    {updatingQuestionId === question.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                    {isApproved ? 'Revert to Rejected' : 'Reject'}
+                  </button>
+                )}
+                
+                {/* Show Reset to Pending button for approved and rejected */}
+                {(isApproved || isRejected) && (
+                  <button
+                    onClick={() => updateQuestionStatus(question.id, 'pending')}
+                    disabled={updatingQuestionId === question.id}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-60"
+                  >
+                    {updatingQuestionId === question.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RotateCcw className="w-4 h-4" />
+                    )}
+                    Reset to Pending
+                  </button>
+                )}
               </>
+            )}
+
+            {/* Delete Button */}
+            {canDelete && !showDeleteConfirm && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deletingQuestionId === question.id}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 disabled:opacity-60 ml-auto"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Question
+              </button>
             )}
           </div>
         )}

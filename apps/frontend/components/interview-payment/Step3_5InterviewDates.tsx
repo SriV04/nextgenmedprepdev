@@ -30,9 +30,10 @@ interface Step3_5InterviewDatesProps {
   tutorAvailability?: TutorAvailabilitySlot[];
   onConfirm?: (selection: {
     scheduledAt: string;
-    tutorId: string;
-    availabilitySlotId: string;
+    tutorId?: string;
+    availabilitySlotId?: string;
     tutorName?: string;
+    availableTutorCount: number;
   }) => void;
 }
 
@@ -374,9 +375,9 @@ function AvailabilityCalendar({
                         <Check className="w-5 h-5 text-white" />
                       </motion.div>
                     )}
-                    {!isSelected && isDashboard && isAvailable && (
-                      <div className="text-[10px] text-blue-600/80">
-                        {availabilityCount} tutor{availabilityCount > 1 ? 's' : ''}
+                    {!isSelected && !isPast && (!isDashboard || isAvailable) && (
+                      <div className="text-[10px] text-gray-400">
+                        Available
                       </div>
                     )}
                   </motion.button>
@@ -404,7 +405,7 @@ function AvailabilityCalendar({
             </div>
           </div>
           <div className={isDashboard ? 'text-gray-500' : 'text-gray-500'}>
-            {isDashboard ? '💡 Select a highlighted slot to confirm' : '💡 Click and drag to select multiple slots at once'}
+            {isDashboard ? '💡 Select a highlighted slot to confirm or request' : '💡 Click and drag to select multiple slots at once'}
           </div>
         </div>
       </div>
@@ -425,7 +426,7 @@ export default function Step3_5InterviewDates({
 }: Step3_5InterviewDatesProps) {
   const isDashboard = mode === 'dashboard';
   const [weekOffset, setWeekOffset] = useState(0);
-  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedCell, setSelectedCell] = useState<CellKey | null>(null);
 
   // Time slots for the grid (9 AM to 8 PM)
   const timeSlots = [
@@ -498,9 +499,7 @@ export default function Step3_5InterviewDates({
   // Check if a specific date-time slot is selected
   const isCellSelected = (date: Date, time: string): boolean => {
     if (isDashboard) {
-      const key = `${formatDate(date)}-${time}`;
-      const slots = availabilityByCell.get(key) || [];
-      return slots.some((slot) => slot.id === selectedSlotId);
+      return !!selectedCell && selectedCell.date === formatDate(date) && selectedCell.time === time;
     }
 
     const dateStr = formatDate(date);
@@ -520,14 +519,7 @@ export default function Step3_5InterviewDates({
       const key = `${formatDate(date)}-${time}`;
       const slots = availabilityByCell.get(key) || [];
       if (slots.length === 0) return;
-
-      const sortedSlots = [...slots].sort((a, b) => {
-        const nameCompare = (a.tutorName || '').localeCompare(b.tutorName || '');
-        if (nameCompare !== 0) return nameCompare;
-        return a.id.localeCompare(b.id);
-      });
-
-      setSelectedSlotId(sortedSlots[0].id);
+      setSelectedCell({ date: formatDate(date), time });
       return;
     }
 
@@ -599,20 +591,28 @@ export default function Step3_5InterviewDates({
     onProceedToNext?.();
   };
 
-  const selectedSlot = isDashboard
-    ? allTutorAvailability.find((slot) => slot.id === selectedSlotId)
-    : null;
+  const selectedCellKey = selectedCell ? `${selectedCell.date}-${selectedCell.time}` : null;
+  const selectedCellSlots = isDashboard && selectedCellKey
+    ? availabilityByCell.get(selectedCellKey) || []
+    : [];
 
   const handleConfirmSelection = () => {
-    if (!selectedSlot || !onConfirm) return;
-    const hourString = String(selectedSlot.hourStart).padStart(2, '0');
-    const scheduledAt = new Date(`${selectedSlot.date}T${hourString}:00`).toISOString();
+    if (!selectedCell || !onConfirm || selectedCellSlots.length === 0) return;
+    const scheduledAt = new Date(`${selectedCell.date}T${selectedCell.time}:00`).toISOString();
+    const sortedSlots = [...selectedCellSlots].sort((a, b) => {
+      const nameCompare = (a.tutorName || '').localeCompare(b.tutorName || '');
+      if (nameCompare !== 0) return nameCompare;
+      return a.id.localeCompare(b.id);
+    });
+    const primarySlot = sortedSlots[0];
+    const isConfirmed = selectedCellSlots.length === 1;
 
     onConfirm({
       scheduledAt,
-      tutorId: selectedSlot.tutorId,
-      availabilitySlotId: selectedSlot.id,
-      tutorName: selectedSlot.tutorName,
+      tutorId: isConfirmed ? primarySlot.tutorId : undefined,
+      availabilitySlotId: isConfirmed ? primarySlot.id : undefined,
+      tutorName: isConfirmed ? primarySlot.tutorName : undefined,
+      availableTutorCount: selectedCellSlots.length,
     });
   };
 
@@ -685,14 +685,14 @@ export default function Step3_5InterviewDates({
           <motion.button
             key="confirm-button"
             onClick={handleConfirmSelection}
-            disabled={!selectedSlot}
+            disabled={!selectedCell || selectedCellSlots.length === 0}
             className="px-12 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-600 transition-all shadow-xl shadow-indigo-500/25 disabled:opacity-40 disabled:cursor-not-allowed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={selectedSlot ? { scale: 1.05 } : {}}
-            whileTap={selectedSlot ? { scale: 0.98 } : {}}
+            whileHover={selectedCell && selectedCellSlots.length > 0 ? { scale: 1.05 } : {}}
+            whileTap={selectedCell && selectedCellSlots.length > 0 ? { scale: 0.98 } : {}}
           >
-            Confirm Time
+            {selectedCellSlots.length > 1 ? 'Request Time' : 'Confirm Time'}
           </motion.button>
         </div>
       ) : (

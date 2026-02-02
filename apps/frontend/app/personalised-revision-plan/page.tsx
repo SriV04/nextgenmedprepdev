@@ -107,7 +107,7 @@ function PersonalisedRevisionPlanPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Personalised UCAT Revision Plan</h1>
-                <p className="text-gray-600">Get a customized study schedule tailored to your needs</p>
+                <p className="text-gray-600">Get a customised study schedule tailored to your needs</p>
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@ function PersonalisedRevisionPlanPage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
                 <h2 className="text-3xl font-bold mb-2">Personalised Revision Plan</h2>
-                <p className="text-xl opacity-90">Customized study schedule designed for your success</p>
+                <p className="text-xl opacity-90">Customised study schedule designed for your success</p>
                 <div className="mt-4 flex items-baseline">
                   <span className="text-4xl font-bold">£{price}</span>
                   <span className="ml-2 text-lg opacity-80">one-time payment</span>
@@ -136,7 +136,7 @@ function PersonalisedRevisionPlanPage() {
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">Customized weekly study schedule based on your timeline</span>
+                  <span className="text-gray-700">Customised weekly study schedule based on your timeline</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -218,7 +218,7 @@ function PersonalisedRevisionPlanPage() {
               <>
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Customize Your Plan
+                    Customise Your Plan
                   </h2>
                   <p className="text-gray-600">
                     Select your preferences to create the perfect revision schedule for you.

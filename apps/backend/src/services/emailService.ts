@@ -2286,7 +2286,7 @@ u                        <strong style="color: #10b981;">The NextGen MedPrep Tea
 
     return {
       subject: 'Your Personalised UCAT Revision Plan - NextGen MedPrep',
-      text: `Hi ${userName},\n\nThank you for purchasing your Personalised UCAT Revision Plan!\n\nYour Plan Details:\nBooking ID: ${data.id}\nDuration: ${data.weeks} weeks\nIntensity: ${intensityDescription}\nPlatform: ${data.platform.charAt(0).toUpperCase() + data.platform.slice(1)}\nAmount: £${data.amount}\n\nWhat happens next:\n• Your personalised revision plan will be created by our UCAT experts\n• You'll receive your complete plan within 24 hours via email\n• The plan will include daily study targets, practice schedules, and mock exam timings\n• All resources will be tailored to ${data.platform} platform\n\nYour plan will include:\n- Week-by-week breakdown of all UCAT sections\n- Daily practice targets customized to your ${data.intensity} intensity level\n- Mock exam schedule and timing strategies\n- Progress tracking milestones\n- ${data.platform}-specific resource recommendations\n- Rest and recovery periods to prevent burnout\n\nIf you have any questions while waiting for your plan, feel free to reach out to us at contact@nextgenmedprep.com.\n\nThank you for choosing NextGen MedPrep!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      text: `Hi ${userName},\n\nThank you for purchasing your Personalised UCAT Revision Plan!\n\nYour Plan Details:\nBooking ID: ${data.id}\nDuration: ${data.weeks} weeks\nIntensity: ${intensityDescription}\nPlatform: ${data.platform.charAt(0).toUpperCase() + data.platform.slice(1)}\nAmount: £${data.amount}\n\nWhat happens next:\n• Your personalised revision plan will be created by our UCAT experts\n• You'll receive your complete plan within 24 hours via email\n• The plan will include daily study targets, practice schedules, and mock exam timings\n• All resources will be tailored to ${data.platform} platform\n\nYour plan will include:\n- Week-by-week breakdown of all UCAT sections\n- Daily practice targets customised to your ${data.intensity} intensity level\n- Mock exam schedule and timing strategies\n- Progress tracking milestones\n- ${data.platform}-specific resource recommendations\n- Rest and recovery periods to prevent burnout\n\nIf you have any questions while waiting for your plan, feel free to reach out to us at contact@nextgenmedprep.com.\n\nThank you for choosing NextGen MedPrep!\n\nBest regards,\nThe NextGen MedPrep Team`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #7c3aed;">Your Personalised UCAT Plan is On Its Way! 📚</h1>
@@ -2333,7 +2333,7 @@ u                        <strong style="color: #10b981;">The NextGen MedPrep Tea
             <h3 style="margin-top: 0; color: #374151;">Your Plan Will Include:</h3>
             <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
               <li><strong>Week-by-week breakdown</strong> of all UCAT sections (VR, DM, QR, AR, SJT)</li>
-              <li><strong>Daily practice targets</strong> customized to your ${data.intensity} intensity level</li>
+              <li><strong>Daily practice targets</strong> customised to your ${data.intensity} intensity level</li>
               <li><strong>Mock exam schedule</strong> and timing strategies</li>
               <li><strong>Progress tracking milestones</strong> for each week</li>
               <li><strong>${data.platform}-specific</strong> resource recommendations and question allocations</li>
@@ -2372,7 +2372,7 @@ u                        <strong style="color: #10b981;">The NextGen MedPrep Tea
   }): EmailTemplate {
     return {
       subject: `New Personalised Revision Plan Order - ${data.customerName}`,
-      text: `New Personalised UCAT Revision Plan Order\n\nStudent Details:\nName: ${data.customerName}\nEmail: ${data.customerEmail}\n\nPlan Details:\nBooking ID: ${data.bookingId}\nDuration: ${data.weeks} weeks\nIntensity: ${data.intensity}\nPlatform: ${data.platform}\nAmount: £${data.amount}\n\nAction Required:\nPlease create the personalised revision plan based on these specifications and send it to the student within 24 hours.\n\nPlan Requirements:\n- Customize for ${data.weeks}-week timeline\n- Adjust daily targets for ${data.intensity} intensity level\n- Include ${data.platform}-specific resource recommendations\n- Provide week-by-week breakdown for all UCAT sections\n- Include mock exam schedule\n- Add progress tracking milestones\n\nStudent contact: ${data.customerEmail}`,
+      text: `New Personalised UCAT Revision Plan Order\n\nStudent Details:\nName: ${data.customerName}\nEmail: ${data.customerEmail}\n\nPlan Details:\nBooking ID: ${data.bookingId}\nDuration: ${data.weeks} weeks\nIntensity: ${data.intensity}\nPlatform: ${data.platform}\nAmount: £${data.amount}\n\nAction Required:\nPlease create the personalised revision plan based on these specifications and send it to the student within 24 hours.\n\nPlan Requirements:\n- Customise for ${data.weeks}-week timeline\n- Adjust daily targets for ${data.intensity} intensity level\n- Include ${data.platform}-specific resource recommendations\n- Provide week-by-week breakdown for all UCAT sections\n- Include mock exam schedule\n- Add progress tracking milestones\n\nStudent contact: ${data.customerEmail}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #7c3aed;">New Personalised Revision Plan Order 📋</h1>
@@ -2426,7 +2426,7 @@ u                        <strong style="color: #10b981;">The NextGen MedPrep Tea
           <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0; color: #374151;">Plan Requirements:</h3>
             <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
-              <li>Customize for <strong>${data.weeks}-week timeline</strong></li>
+              <li>Customise for <strong>${data.weeks}-week timeline</strong></li>
               <li>Adjust daily targets for <strong>${data.intensity} intensity</strong> level</li>
               <li>Include <strong>${data.platform}-specific</strong> resource recommendations</li>
               <li>Provide <strong>week-by-week breakdown</strong> for all UCAT sections (VR, DM, QR, AR, SJT)</li>

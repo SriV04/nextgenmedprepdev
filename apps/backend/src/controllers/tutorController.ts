@@ -371,16 +371,23 @@ export const getAllTutorsWithAvailability = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { start_date, end_date } = req.query;
+    const { start_date, end_date, field } = req.query;
     const supabase = createSupabaseClient();
 
     // Get all approved tutors except managers (managers don't appear in calendar)
-    const { data: tutors, error: tutorsError } = await supabase
+    let tutorQuery = supabase
       .from('tutors')
       .select('*')
       .neq('role', 'manager')
       .eq('approval_status', 'approved')
       .order('name', { ascending: true });
+
+    // Filter by field if provided (medicine or dentistry)
+    if (field) {
+      tutorQuery = tutorQuery.eq('field', field as string);
+    }
+
+    const { data: tutors, error: tutorsError } = await tutorQuery;
 
     if (tutorsError) {
       throw new Error(tutorsError.message);

@@ -12,10 +12,14 @@ const createInterviewSchema = z.object({
   booking_id: z.string().uuid().optional(),
   scheduled_at: z.string().datetime(),
   notes: z.string().optional(),
+  field: z.enum(['medicine', 'dentistry']).optional(),
+  status: z.enum(['pending', 'confirmed', 'completed', 'cancelled']).optional().default('pending'),
+  proposed_time: z.string().datetime().optional(),
 });
 
 const updateInterviewSchema = z.object({
   university_id: z.string().uuid().optional(),
+  university: z.string().optional(),
   student_id: z.string().uuid().optional(),
   tutor_id: z.string().uuid().optional(),
   booking_id: z.string().uuid().optional(),
@@ -23,10 +27,13 @@ const updateInterviewSchema = z.object({
   completed: z.boolean().optional(),
   student_feedback: z.string().optional(),
   notes: z.string().optional(),
+  field: z.enum(['medicine', 'dentistry']).optional(),
+  status: z.enum(['pending', 'confirmed', 'completed', 'cancelled']).optional(),
+  proposed_time: z.string().datetime().optional(),
 });
 
 const assignInterviewSchema = z.object({
-  tutor_id: z.string().uuid(),
+  tutor_id: z.string().uuid().optional(),
   scheduled_at: z.string().datetime(),
   availability_slot_id: z.string().uuid().optional(),
 });
@@ -377,13 +384,16 @@ export const assignInterviewToTutor = async (
       .eq('id', id)
       .single();
 
-    // Create Zoom meeting if Zoom is configured
+    // Determine if this is a confirmed assignment (tutor selected) or a pending request (no tutor)
+    const isConfirmed = !!validatedData.tutor_id;
+
+    // Create Zoom meeting only for confirmed assignments
     let zoomMeetingId: string | undefined;
     let zoomJoinUrl: string | undefined;
     let zoomStartUrl: string | undefined;
     let zoomHostEmail: string | undefined;
 
-    if (zoomService.isConfigured()) {
+    if (isConfirmed && zoomService.isConfigured()) {
       try {
         console.log('Creating Zoom meeting for interview...');
         const scheduledDate = new Date(validatedData.scheduled_at);
@@ -413,16 +423,22 @@ export const assignInterviewToTutor = async (
         console.error('Failed to create Zoom meeting:', error);
         // Continue without Zoom meeting - it can be created manually
       }
-    } else {
+    } else if (isConfirmed) {
       console.warn('Zoom is not configured - skipping Zoom meeting creation');
     }
 
-    // Update interview with tutor, scheduled time, and Zoom details
+    // Update interview with status, proposed_time, and optionally tutor and scheduled_at
     const updateData: any = {
-      tutor_id: validatedData.tutor_id,
-      scheduled_at: validatedData.scheduled_at,
+      status: isConfirmed ? 'confirmed' : 'pending',
+      proposed_time: validatedData.scheduled_at,
       updated_at: new Date().toISOString(),
     };
+
+    // Only set tutor and scheduled_at if this is a confirmed assignment
+    if (isConfirmed) {
+      updateData.tutor_id = validatedData.tutor_id;
+      updateData.scheduled_at = validatedData.scheduled_at;
+    }
 
     if (zoomMeetingId) {
       updateData.zoom_meeting_id = zoomMeetingId;
@@ -441,8 +457,8 @@ export const assignInterviewToTutor = async (
       throw new Error(interviewError.message);
     }
 
-    // Update the availability slot to mark it as an interview
-    if (validatedData.availability_slot_id) {
+    // Update the availability slot to mark it as an interview (only if confirmed)
+    if (validatedData.availability_slot_id && isConfirmed) {
       const { error: slotError } = await supabase
         .from('tutor_availability')
         .update({
@@ -458,7 +474,9 @@ export const assignInterviewToTutor = async (
           .from('interviews')
           .update({
             tutor_id: null,
-            scheduled_at: validatedData.scheduled_at,
+            scheduled_at: null,
+            status: 'pending',
+            proposed_time: validatedData.scheduled_at,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id);
@@ -926,6 +944,225 @@ export const getInterviewsByStudentEmail = async (
     });
   } catch (error: any) {
     console.error('Error in getInterviewsByStudentEmail:', error);
+    next(error);
+  }
+};
+/**
+ * Get pending interviews with available tutors for assignment
+ */
+export const getPendingInterviewsWithAvailableTutors = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const supabase = createSupabaseClient();
+
+    // Get all pending interviews with booking details
+    const { data: pendingInterviews, error: pendingError } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        booking:bookings(
+          id,
+          email,
+          field,
+          universities
+        )
+      `)
+      .eq('status', 'pending')
+      .is('tutor_id', null)
+      .order('proposed_time', { ascending: true });
+
+    if (pendingError) {
+      throw new Error(pendingError.message);
+    }
+
+    // For each pending interview, get available tutors at the proposed time
+    const interviewsWithAvailableTutors = await Promise.all(
+      (pendingInterviews || []).map(async (interview: any) => {
+        const field = interview.booking?.field;
+        const proposedTime = new Date(interview.proposed_time);
+        const proposedDate = proposedTime.toISOString().split('T')[0];
+        const proposedHour = proposedTime.getHours();
+
+        // Get tutors available at that time for that field
+        const { data: availability, error: availError } = await supabase
+          .from('tutor_availability')
+          .select(`
+            *,
+            tutor:tutors!tutor_availability_tutor_id_fkey(id, name, email, field)
+          `)
+          .eq('date', proposedDate)
+          .lte('hour_start', proposedHour)
+          .gt('hour_end', proposedHour)
+          .eq('type', 'available')
+          .order('tutor(name)', { ascending: true });
+
+        if (availError) {
+          console.error('Error fetching availability:', availError);
+          return { ...interview, availableTutors: [] };
+        }
+
+        // Filter tutors by field if needed
+        const availableTutors = (availability || [])
+          .map((slot: any) => slot.tutor)
+          .filter((tutor: any) => !tutor || !field || tutor.field === field)
+          .filter((tutor: any, index: number, self: any[]) => 
+            index === self.findIndex((t) => t?.id === tutor?.id)
+          ); // Remove duplicates
+
+        return {
+          ...interview,
+          availableTutors,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: interviewsWithAvailableTutors,
+    });
+  } catch (error: any) {
+    console.error('Error in getPendingInterviewsWithAvailableTutors:', error);
+    next(error);
+  }
+};
+
+/**
+ * Assign tutor to pending interview
+ */
+export const assignTutorToPendingInterview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { tutor_id } = req.body;
+
+    if (!tutor_id) {
+      res.status(400).json({
+        success: false,
+        message: 'Tutor ID is required',
+      });
+      return;
+    }
+
+    const tutorSchema = z.object({
+      tutor_id: z.string().uuid(),
+    });
+
+    tutorSchema.parse(req.body);
+    const supabase = createSupabaseClient();
+
+    // Get interview details
+    const { data: interview, error: interviewError } = await supabase
+      .from('interviews')
+      .select(`
+        *,
+        booking:bookings(
+          id,
+          email,
+          universities
+        )
+      `)
+      .eq('id', id)
+      .single();
+
+    if (interviewError || !interview) {
+      res.status(404).json({
+        success: false,
+        message: 'Interview not found',
+      });
+      return;
+    }
+
+    // Verify tutor exists
+    const { data: tutor, error: tutorError } = await supabase
+      .from('tutors')
+      .select('id, name, email')
+      .eq('id', tutor_id)
+      .single();
+
+    if (tutorError || !tutor) {
+      res.status(404).json({
+        success: false,
+        message: 'Tutor not found',
+      });
+      return;
+    }
+
+    // Create Zoom meeting if configured
+    let zoomMeetingId: string | undefined;
+    let zoomJoinUrl: string | undefined;
+    let zoomHostEmail: string | undefined;
+
+    if (zoomService.isConfigured()) {
+      try {
+        console.log('Creating Zoom meeting for pending interview...');
+        const scheduledDate = new Date(interview.proposed_time);
+
+        const studentName = interview.booking?.email?.split('@')[0] || 'Student';
+        const universityName = interview.university || interview.booking?.universities?.split(',')[0] || undefined;
+
+        const zoomMeeting = await zoomService.createInterviewMeeting({
+          studentName,
+          universityName,
+          startTime: scheduledDate,
+          duration: 60,
+        });
+
+        zoomMeetingId = zoomMeeting.meetingId;
+        zoomJoinUrl = zoomMeeting.joinUrl;
+        zoomHostEmail = zoomMeeting.hostEmail;
+
+        console.log('Zoom meeting created for pending interview');
+      } catch (error) {
+        console.error('Failed to create Zoom meeting:', error);
+      }
+    }
+
+    // Update interview with tutor and change status to confirmed
+    const updateData: any = {
+      tutor_id: tutor_id,
+      scheduled_at: interview.proposed_time,
+      status: 'confirmed',
+      updated_at: new Date().toISOString(),
+    };
+
+    if (zoomMeetingId) {
+      updateData.zoom_meeting_id = zoomMeetingId;
+      updateData.zoom_join_url = zoomJoinUrl;
+      updateData.zoom_host_email = zoomHostEmail;
+    }
+
+    const { data: updatedInterview, error: updateError } = await supabase
+      .from('interviews')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Tutor assigned successfully',
+      data: updatedInterview,
+    });
+  } catch (error: any) {
+    console.error('Error in assignTutorToPendingInterview:', error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        success: false,
+        message: 'Validation error',
+        errors: error.errors,
+      });
+      return;
+    }
     next(error);
   }
 };

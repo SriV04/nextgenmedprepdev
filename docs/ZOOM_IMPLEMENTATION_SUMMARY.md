@@ -181,7 +181,7 @@ Delete interview record
 - Zoom meetings are only created when interviews have a scheduled time
 - If Zoom is not configured, the system logs a warning but continues normal operation
 - Token refresh is handled automatically by the service
-- Meeting duration defaults to 60 minutes but can be customized
+- Meeting duration defaults to 60 minutes but can be customised
 
 ## 🐛 Known Limitations
 

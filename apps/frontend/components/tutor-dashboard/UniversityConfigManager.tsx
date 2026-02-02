@@ -706,36 +706,42 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
                   <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-3">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-base font-semibold text-gray-900">
-                          {question.title || 'Untitled question'}
-                        </h4>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}`}>
-                          {status}
-                        </span>
+                      <h4 className="text-base font-semibold text-gray-900">
+                        {question.title || 'Untitled question'}
+                      </h4>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}`}>
+                        {status}
+                      </span>
                       </div>
                       <p className="text-sm text-gray-600 mt-2">{question.question_text}</p>
+                      {status === 'rejected' && question.rejection_reason && (
+                      <div className="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-xs font-medium text-red-700">Rejection reason:</p>
+                        <p className="text-xs text-red-600 mt-1">{question.rejection_reason}</p>
+                      </div>
+                      )}
                       <div className="flex flex-wrap gap-2 mt-3 text-xs text-gray-500">
-                        {question.category && (
-                          <span className="px-2 py-1 bg-gray-100 rounded-full">{question.category}</span>
+                      {question.category && (
+                        <span className="px-2 py-1 bg-gray-100 rounded-full">{question.category}</span>
+                      )}
+                      {question.difficulty && (
+                        <span className="px-2 py-1 bg-gray-100 rounded-full">{question.difficulty}</span>
+                      )}
+                      {question.question_tags && question.question_tags.length > 0 && (
+                        <span className="px-2 py-1 bg-gray-100 rounded-full">
+                        {question.question_tags.map((tag) => tag.tag).join(', ')}
+                        </span>
+                      )}
+                      {question.question_skill_criteria &&
+                        question.question_skill_criteria.some((skill) => skill.skill_group === 'core') && (
+                        <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-full">
+                          Core skills:{" "}
+                          {question.question_skill_criteria
+                          .filter((skill) => skill.skill_group === 'core')
+                          .map((skill) => skill.skill_definitions?.display_name || skill.skill_code)
+                          .join(', ')}
+                        </span>
                         )}
-                        {question.difficulty && (
-                          <span className="px-2 py-1 bg-gray-100 rounded-full">{question.difficulty}</span>
-                        )}
-                        {question.question_tags && question.question_tags.length > 0 && (
-                          <span className="px-2 py-1 bg-gray-100 rounded-full">
-                            {question.question_tags.map((tag) => tag.tag).join(', ')}
-                          </span>
-                        )}
-                        {question.question_skill_criteria &&
-                          question.question_skill_criteria.some((skill) => skill.skill_group === 'core') && (
-                            <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-full">
-                              Core skills:{" "}
-                              {question.question_skill_criteria
-                                .filter((skill) => skill.skill_group === 'core')
-                                .map((skill) => skill.skill_definitions?.display_name || skill.skill_code)
-                                .join(', ')}
-                            </span>
-                          )}
                       </div>
                     </div>
                   </div>
@@ -1025,8 +1031,13 @@ export default function UniversityConfigManager({ backendUrl, userId }: { backen
         question={selectedQuestion}
         backendUrl={backendUrl}
         onQuestionUpdated={handleQuestionUpdated}
+        onQuestionDeleted={(questionId) => {
+          setQuestions((prev) => prev.filter((q) => q.id !== questionId));
+          setSelectedQuestion(null);
+        }}
         allowEditing={true}
         allowStatusChange={true}
+        allowDelete={true}
       />
       <AddQuestionModal
         isOpen={isAddQuestionModalOpen}

@@ -5,6 +5,7 @@ import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, Trendin
 import SessionFeedbackModal from './SessionFeedbackModal';
 import AddQuestionModal from './AddQuestionModal';
 import QuestionViewModal from './QuestionViewModal';
+import PendingInterviewsCard from './PendingInterviewsCard';
 
 interface UpcomingSession {
   id: string;
@@ -36,9 +37,10 @@ interface QuestionSubmission {
 interface TutorHomeProps {
   tutorId: string;
   tutorName?: string;
+  onOpenInterviewModal?: (interviewId: string) => void;
 }
 
-const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
+const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, onOpenInterviewModal }) => {
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -264,6 +266,16 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName }) => {
           </div>
         </div>
       )}
+
+      {/* Pending Interviews Section */}
+      <PendingInterviewsCard
+        tutorId={tutorId}
+        backendUrl={backendUrl}
+        onInterviewClick={onOpenInterviewModal}
+        onAssignSuccess={() => {
+          fetchTutorData();
+        }}
+      />
 
       {/* Question Submissions */}
       <div className="bg-white rounded-xl shadow-md">

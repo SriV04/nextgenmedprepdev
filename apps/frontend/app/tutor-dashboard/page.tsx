@@ -971,6 +971,7 @@ function DashboardContent() {
           <TutorHome 
             tutorId={user.id} 
             tutorName={user.user_metadata?.name || user.email?.split('@')[0]}
+            onOpenInterviewModal={openInterviewDetailsModal}
           />
         )}
 

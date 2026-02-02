@@ -866,6 +866,7 @@ class SupabaseService {
     booking_id: string;
     university?: string;
     notes?: string;
+    field?: string;
   }>): Promise<any[]> {
     console.log('=== Creating Bulk Interviews ===');
     console.log('Number of interviews:', interviewDataArray.length);

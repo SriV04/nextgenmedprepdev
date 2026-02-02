@@ -9,6 +9,9 @@ export interface DashboardInterview {
   completed: boolean;
   student_feedback?: string;
   notes?: string;
+  field?: string;
+  status?: string;
+  proposed_time?: string | null;
   tutor?: {
     id: string;
     name: string;
@@ -102,6 +105,9 @@ export function useStudentDashboardData({ userEmail, backendUrl }: UseStudentDas
         student_feedback: interview.student_feedback,
         notes: interview.notes,
         university: interview.university,
+        field: interview.field,
+        status: interview.status,
+        proposed_time: interview.proposed_time,
         tutor: interview.tutor
           ? {
               id: interview.tutor.id,
@@ -140,8 +146,8 @@ export function useStudentDashboardData({ userEmail, backendUrl }: UseStudentDas
 
   const sessionStats: SessionStats = useMemo(() => {
     const completed = interviews.filter((interview) => interview.completed).length;
-    const upcoming = interviews.filter((interview) => !interview.completed && interview.scheduled_at).length;
-    const pending = interviews.filter((interview) => !interview.scheduled_at).length;
+    const upcoming = interviews.filter((interview) => !interview.completed && interview.status === 'confirmed').length;
+    const pending = interviews.filter((interview) => interview.status === 'pending').length;
     const hoursBooked = completed + upcoming;
 
     return {

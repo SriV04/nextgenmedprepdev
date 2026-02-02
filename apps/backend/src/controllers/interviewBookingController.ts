@@ -344,7 +344,8 @@ export class InterviewBookingController {
             student_id: user.id,
             booking_id: booking.id,
             university: universitiesArray[i] || undefined, // Assign university if available, undefined if not
-            notes: metadata.notes || undefined
+            notes: metadata.notes || undefined,
+            field: metadata.field || undefined
           });
         }
 

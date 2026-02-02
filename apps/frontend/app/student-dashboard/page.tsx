@@ -11,6 +11,8 @@ import {
   type DashboardInterview
 } from './hooks/useStudentDashboardData';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
+import ManageInterviewModal from '../../components/student-dashboard/ManageInterviewModal';
+import { UK_MEDICAL_SCHOOLS } from '../../data/universities';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +48,22 @@ function formatPackageName(raw?: string) {
   if (key.includes('core_generated')) return 'Core Generated Package';
   if (key.includes('premium_generated')) return 'Premium Generated Package';
   if (key.includes('essentials_generated')) return 'Essentials Generated Package';
-  return raw;
+ 
+
+function getUniversityDisplayName(universityIdOrName?: string): string {
+  if (!universityIdOrName) return '';
+  
+  // Try to find by ID first
+  const schoolById = UK_MEDICAL_SCHOOLS.find(u => u.id === universityIdOrName);
+  if (schoolById) return schoolById.displayName;
+  
+  // Try to find by displayName (for backwards compatibility)
+  const schoolByName = UK_MEDICAL_SCHOOLS.find(u => u.displayName === universityIdOrName);
+  if (schoolByName) return schoolByName.displayName;
+  
+  // Return as-is if not found
+  return universityIdOrName;
+} return raw;
 }
 
 export default function StudentDashboard() {
@@ -59,6 +76,10 @@ export default function StudentDashboard() {
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [scheduling, setScheduling] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'feedback' | 'resources' | 'profile'>('home');
+  const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [managingInterview, setManagingInterview] = useState<DashboardInterview | null>(null);
+  const [scheduleSuccess, setScheduleSuccess] = useState(false);
+  const [scheduleMessage, setScheduleMessage] = useState('');
 
   const router = useRouter();
   const supabase = createClient();
@@ -103,14 +124,71 @@ export default function StudentDashboard() {
     [interviews]
   );
 
+
+  const getUniversityDisplayName = (universityIdOrName?: string): string => {
+    if (!universityIdOrName) return '';
+    
+    // Try to find by ID first
+    const schoolById = UK_MEDICAL_SCHOOLS.find(u => u.id === universityIdOrName);
+    if (schoolById) return schoolById.displayName;
+    
+    // Try to find by displayName (for backwards compatibility)
+    const schoolByName = UK_MEDICAL_SCHOOLS.find(u => u.displayName === universityIdOrName);
+    if (schoolByName) return schoolByName.displayName;
+    
+    // Return as-is if not found
+    return universityIdOrName;
+  }
+
   const pendingInterviews = useMemo(
     () =>
       interviews.filter(
-        (interview) => (!interview.scheduled_at || !interview.tutor?.id) && !interview.completed
-      ),
+        (interview) => (!interview.scheduled_at || !interview.tutor?.id) && !interview.completed),
     [interviews]
   );
+    
 
+  const completedInterviews = useMemo(
+    () =>
+      interviews.filter(
+        (interview) => interview.completed
+      ),
+    [interviews]
+  );  
+
+  const handleOpenManage = (interview: DashboardInterview) => {
+    setManagingInterview(interview);
+    setManageModalOpen(true);
+  };
+
+  const handleCloseManage = () => {
+    setManageModalOpen(false);
+    setManagingInterview(null);
+  };
+
+  const handleSaveInterview = async (interviewId: string, updates: { university?: string; notes?: string }) => {
+    try {
+      const response = await fetch(`${backendUrl}/api/v1/interviews/${interviewId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update interview');
+      }
+
+      updateInterview(interviewId, updates);
+      refresh();
+    } catch (err: any) {
+      console.error('Error updating interview:', err);
+      throw err;
+    }
+  };
+  
   const handleOpenSchedule = (interview: DashboardInterview) => {
     setActiveInterview(interview);
     setIsScheduleModalOpen(true);
@@ -139,9 +217,16 @@ export default function StudentDashboard() {
         const startDateStr = today.toISOString().split('T')[0];
         const endDateStr = endDate.toISOString().split('T')[0];
 
-        const response = await fetch(
-          `${backendUrl}/api/v1/tutors/with-availability?start_date=${startDateStr}&end_date=${endDateStr}`
-        );
+        // Get the field from the active interview's booking
+        const interviewField = activeInterview?.booking?.field || activeInterview?.field;
+        
+        // Build URL with field parameter if available
+        let url = `${backendUrl}/api/v1/tutors/with-availability?start_date=${startDateStr}&end_date=${endDateStr}`;
+        if (interviewField) {
+          url += `&field=${interviewField}`;
+        }
+
+        const response = await fetch(url);
         const result = await response.json();
 
         if (!result.success) {
@@ -180,49 +265,81 @@ export default function StudentDashboard() {
     };
 
     fetchAvailability();
-  }, [backendUrl, isScheduleModalOpen]);
+  }, [backendUrl, isScheduleModalOpen, activeInterview]);
 
   const handleConfirmSchedule = async (selection: {
     scheduledAt: string;
-    tutorId: string;
-    availabilitySlotId: string;
+    tutorId?: string;
+    availabilitySlotId?: string;
     tutorName?: string;
+    availableTutorCount: number;
   }) => {
     if (!activeInterview) return;
 
     try {
       setScheduling(true);
+      setScheduleSuccess(false);
+      const isConfirmed =
+        selection.availableTutorCount === 1 &&
+        !!selection.tutorId &&
+        !!selection.availabilitySlotId;
+
+      const payload: {
+        scheduled_at: string;
+        tutor_id?: string;
+        availability_slot_id?: string;
+      } = {
+        scheduled_at: selection.scheduledAt,
+      };
+
+      if (isConfirmed) {
+        payload.tutor_id = selection.tutorId;
+        payload.availability_slot_id = selection.availabilitySlotId;
+      }
+
       const response = await fetch(`${backendUrl}/api/v1/interviews/${activeInterview.id}/assign`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          tutor_id: selection.tutorId,
-          scheduled_at: selection.scheduledAt,
-          availability_slot_id: selection.availabilitySlotId,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
       if (!result.success) {
-        throw new Error(result.message || 'Failed to assign interview');
+        throw new Error(result.message || 'Failed to schedule interview');
       }
 
+      // Determine if this was a pending request or confirmed assignment
+      const message = isConfirmed 
+        ? 'Interview scheduled successfully!'
+        : 'Interview request received! We\'ll match you with a tutor soon.';
+
       updateInterview(activeInterview.id, {
-        scheduled_at: selection.scheduledAt,
-        tutor: {
-          id: selection.tutorId,
-          name: selection.tutorName || 'Assigned Tutor',
-          email: '',
-        },
+        status: isConfirmed ? 'confirmed' : 'pending',
+        proposed_time: selection.scheduledAt,
+        scheduled_at: isConfirmed ? selection.scheduledAt : null,
+        tutor: isConfirmed
+          ? {
+              id: selection.tutorId as string,
+              name: selection.tutorName || 'Assigned Tutor',
+              email: '',
+            }
+          : undefined,
       });
 
-      handleCloseSchedule();
-      refresh();
+      setScheduleSuccess(true);
+      setScheduleMessage(message);
+      
+      // Auto-close modal after 3 seconds
+      setTimeout(() => {
+        handleCloseSchedule();
+        setScheduleSuccess(false);
+        refresh();
+      }, 3000);
     } catch (err: any) {
-      console.error('Error assigning interview:', err);
-      alert(err.message || 'Failed to schedule interview');
+      console.error('Error scheduling interview:', err);
+      setScheduleMessage(err.message || 'Failed to schedule interview');
     } finally {
       setScheduling(false);
     }
@@ -361,14 +478,17 @@ export default function StudentDashboard() {
                         {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
                       </div>
                       {interview.university && (
-                        <p className="text-sm text-gray-600">University: {interview.university}</p>
+                        <p className="text-sm text-gray-600">University: {getUniversityDisplayName(interview.university)}</p>
                       )}
                       <div className="text-sm text-gray-600">
                         Tutor: {interview.tutor?.name || 'Assigned'}
                         {dateTime && ` • ${dateTime.date} • ${dateTime.time}`}
                       </div>
                     </div>
-                    <button className="inline-flex items-center justify-center rounded-lg border border-indigo-200 px-4 py-2 text-sm font-semibold text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50">
+                    <button
+                      onClick={() => handleOpenManage(interview)}
+                      className="inline-flex items-center justify-center rounded-lg border border-indigo-200 px-4 py-2 text-sm font-semibold text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50"
+                    >
                       Manage
                     </button>
                   </div>
@@ -388,28 +508,92 @@ export default function StudentDashboard() {
             <div className="text-sm text-gray-600">No pending interviews to schedule.</div>
           ) : (
             <div className="space-y-3">
-              {pendingInterviews.map((interview) => (
-                <div
-                  key={interview.id}
-                  className="flex flex-col gap-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="text-sm font-semibold text-amber-700">
-                      {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
-                    </div>
-                    {interview.university && (
-                      <p className="text-sm text-gray-600">University: {interview.university}</p>
-                    )}
-                    <div className="text-sm text-gray-600">Tutor: Unassigned</div>
-                  </div>
-                  <button
-                    onClick={() => handleOpenSchedule(interview)}
-                    className="inline-flex items-center justify-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+              {pendingInterviews.map((interview) => {
+                // Determine status label based on proposed_time
+                const hasProposedTime = !!interview.proposed_time;
+                const statusLabel = hasProposedTime ? 'Time requested' : 'Pending confirmation';
+                const statusColor = hasProposedTime ? 'text-blue-700' : 'text-amber-700';
+                
+                return (
+                  <div
+                    key={interview.id}
+                    className="flex flex-col gap-4 rounded-xl border border-amber-200 bg-amber-50/50 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    Schedule interview
-                  </button>
-                </div>
-              ))}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-amber-700">
+                          {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${hasProposedTime ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                      {interview.university && (
+                        <p className="text-sm text-gray-600">University: {getUniversityDisplayName(interview.university)}</p>
+                      )}
+                      <div className="text-sm text-gray-600">
+                        Tutor: Unassigned
+                        {hasProposedTime && interview.proposed_time && (
+                          <span> • Requested: {formatDateTime(interview.proposed_time)?.date} at {formatDateTime(interview.proposed_time)?.time}</span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleOpenSchedule(interview)}
+                      className="inline-flex items-center justify-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+                    >
+                      {hasProposedTime ? 'Update time' : 'Schedule interview'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Completed sessions</h2>
+          </div>
+
+          {completedInterviews.length === 0 ? (
+            <div className="text-sm text-gray-600">No completed sessions yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {completedInterviews.map((interview) => {
+                const dateTime = formatDateTime(interview.scheduled_at || undefined);
+                return (
+                  <div
+                    key={interview.id}
+                    className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-green-50/30 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold text-green-700">
+                        {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
+                      </div>
+                      {interview.university && (
+                        <p className="text-sm text-gray-600">University: {getUniversityDisplayName(interview.university)}</p>
+                      )}
+                      <div className="text-sm text-gray-600">
+                        Tutor: {interview.tutor?.name || 'Completed'}
+                        {dateTime && ` • ${dateTime.date} • ${dateTime.time}`}
+                      </div>
+                      {interview.student_feedback && (
+                        <p className="text-sm text-gray-500 italic mt-1">
+                          "Your feedback: {interview.student_feedback.substring(0, 100)}
+                          {interview.student_feedback.length > 100 ? '...' : ''}"
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center rounded-lg bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                        ✓ Completed
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </section>
@@ -449,32 +633,58 @@ export default function StudentDashboard() {
               </button>
             </div>
             <div className="p-6">
-              {availabilityLoading ? (
-                <div className="text-center py-12 text-gray-600">
-                  Loading availability...
-                </div>
-              ) : availabilityError ? (
-                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-                  {availabilityError}
-                </div>
-              ) : tutorAvailability.length === 0 ? (
-                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg">
-                  No available time slots found. Please check back soon.
+              {scheduleSuccess ? (
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {scheduleMessage}
+                  </h3>
+                  <p className="text-gray-600">This modal will close automatically...</p>
                 </div>
               ) : (
-                <Step3_5InterviewDates
-                  mode="dashboard"
-                  bookingId={activeInterview.booking_id || activeInterview.booking?.id || ''}
-                  tutorAvailability={tutorAvailability}
-                  onConfirm={handleConfirmSchedule}
-                />
-              )}
-              {scheduling && (
-                <div className="mt-4 text-sm text-gray-600">Saving your interview time...</div>
+                <>
+                  {availabilityLoading ? (
+                    <div className="text-center py-12 text-gray-600">
+                      Loading availability...
+                    </div>
+                  ) : availabilityError ? (
+                    <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+                      {availabilityError}
+                    </div>
+                  ) : null}
+                  {!availabilityLoading && !availabilityError && tutorAvailability.length === 0 && (
+                    <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-4">
+                      No tutors currently have availability for this field, but you can still request a time below.
+                    </div>
+                  )}
+                  {!availabilityLoading && (
+                    <Step3_5InterviewDates
+                      mode="dashboard"
+                      bookingId={activeInterview.booking_id || activeInterview.booking?.id || ''}
+                      tutorAvailability={tutorAvailability}
+                      onConfirm={handleConfirmSchedule}
+                    />
+                  )}
+                  {scheduling && (
+                    <div className="mt-4 text-sm text-gray-600">Saving your interview time...</div>
+                  )}
+                </>
               )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Manage Interview Modal */}
+      {manageModalOpen && managingInterview && (
+        <ManageInterviewModal
+          interview={managingInterview}
+          isOpen={manageModalOpen}
+          onClose={handleCloseManage}
+          onSave={handleSaveInterview}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Plus, Trash2, Info, Save, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 const INTERVIEW_TYPES = ['MMI', 'Group Task', 'Oxbridge', 'Panel'] as const;
@@ -36,6 +36,111 @@ interface AvailableTag {
   tag: string;
 }
 
+interface ApprovedQuestion {
+  question_id: string;
+  title: string;
+  question_text: string;
+}
+
+// Utility function for calculating Levenshtein distance
+const levenshteinDistance = (str1: string, str2: string): number => {
+  const len1 = str1.length;
+  const len2 = str2.length;
+  const matrix: number[][] = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+
+  for (let i = 0; i <= len1; i++) matrix[i][0] = i;
+  for (let j = 0; j <= len2; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= len1; i++) {
+    for (let j = 1; j <= len2; j++) {
+      const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+
+  return matrix[len1][len2];
+};
+
+// Calculate similarity score (0-100)
+const calculateSimilarity = (str1: string, str2: string): number => {
+  const s1 = str1.toLowerCase().trim();
+  const s2 = str2.toLowerCase().trim();
+  
+  if (s1 === s2) return 100;
+  if (s1.length === 0 || s2.length === 0) return 0;
+  
+  const distance = levenshteinDistance(s1, s2);
+  const maxLength = Math.max(s1.length, s2.length);
+  const similarity = ((maxLength - distance) / maxLength) * 100;
+  
+  return Math.round(similarity);
+};
+
+// Count common words between two strings (case-insensitive)
+const countCommonWords = (str1: string, str2: string): number => {
+  const words1 = str1.toLowerCase().split(/\s+/).filter(word => word.length > 2); // Filter out short words
+  const words2 = str2.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+  
+  const set2 = new Set(words2);
+  const commonWords = words1.filter(word => set2.has(word));
+  
+  return commonWords.length;
+};
+
+// Find similar questions with scoring
+const findSimilarQuestions = (
+  newText: string, 
+  existingQuestions: ApprovedQuestion[],
+  threshold: number = 70
+): { question: ApprovedQuestion; score: number }[] => {
+  if (!newText || newText.length < 3) return [];
+  
+  const similarities = existingQuestions
+    .map(question => {
+      const titleScore = calculateSimilarity(newText, question.title);
+      const textScore = calculateSimilarity(newText, question.question_text);
+      const maxScore = Math.max(titleScore, textScore);
+      
+      // Check for common words
+      const commonWordsWithTitle = countCommonWords(newText, question.title);
+      const commonWordsWithText = countCommonWords(newText, question.question_text);
+      const maxCommonWords = Math.max(commonWordsWithTitle, commonWordsWithText);
+      
+      // Flag if score is above threshold OR if there are 3+ common words
+      const isSimilar = maxScore >= threshold || maxCommonWords >= 3;
+      
+      // If similar due to common words, ensure score is at least 60 for display
+      const finalScore = isSimilar ? Math.max(maxScore, 60) : maxScore;
+      
+      return { question, score: finalScore, isSimilar };
+    })
+    .filter(item => item.isSimilar)
+    .sort((a, b) => b.score - a.score);
+  
+  return similarities.slice(0, 3); // Return top 3 matches
+};
+
+// Debounce hook
+const useDebounce = <T,>(value: T, delay: number): T => {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, onSuccess, userId }) => {
   // Form state
   const [questionText, setQuestionText] = useState('');
@@ -63,15 +168,48 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
   const [newSkillName, setNewSkillName] = useState('');
   const [newSkillDescription, setNewSkillDescription] = useState('');
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+  const [approvedQuestions, setApprovedQuestions] = useState<ApprovedQuestion[]>([]);
+  const [similarQuestions, setSimilarQuestions] = useState<{ question: ApprovedQuestion; score: number }[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
 
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+  
+  // Debounce the title input for similarity checking
+  const debouncedTitle = useDebounce(title, 500);
+
+  // Fetch data only once when modal opens
   useEffect(() => {
     if (isOpen) {
-      fetchAvailableSkills();
-      fetchAvailableTags();
+      fetchInitialData();
       resetForm();
     }
   }, [isOpen]);
+
+  // Check for similar questions when debounced title changes
+  useEffect(() => {
+    if (debouncedTitle && debouncedTitle.length >= 3 && approvedQuestions.length > 0) {
+      const similar = findSimilarQuestions(debouncedTitle, approvedQuestions, 70);
+      setSimilarQuestions(similar);
+    } else {
+      setSimilarQuestions([]);
+    }
+  }, [debouncedTitle, approvedQuestions]);
+
+  // Fetch all initial data in parallel
+  const fetchInitialData = async () => {
+    setIsLoadingQuestions(true);
+    try {
+      await Promise.all([
+        fetchAvailableSkills(),
+        fetchAvailableTags(),
+        fetchApprovedQuestions()
+      ]);
+    } catch (err) {
+      console.error('Error fetching initial data:', err);
+    } finally {
+      setIsLoadingQuestions(false);
+    }
+  };
 
   const fetchAvailableSkills = async () => {
     try {
@@ -101,6 +239,25 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     }
   };
 
+  const fetchApprovedQuestions = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/v1/prometheus/questions?status=approved`);
+      const result = await response.json();
+      if (result.success) {
+        // Store full question data for better similarity checking
+        setApprovedQuestions(result.data.map((q: any) => ({
+          question_id: q.question_id,
+          title: q.title,
+          question_text: q.question_text
+        })));
+      } else {
+        console.error('Failed to fetch approved questions:', result.message);
+      }
+    } catch (err) {
+      console.error('Error fetching approved questions:', err);
+    }
+  };
+
   const resetForm = () => {
     setQuestionText('');
     setTitle('');
@@ -120,6 +277,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
     setNewSkillCode('');
     setNewSkillName('');
     setNewSkillDescription('');
+    setSimilarQuestions([]);
   };
 
   const toggleTag = (tag: string) => {
@@ -143,7 +301,6 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
 
   const removeFollowUpQuestion = (order: number) => {
     const filtered = followUpQuestions.filter(fq => fq.order !== order);
-    // Reorder remaining questions
     const reordered = filtered.map((fq, index) => ({ ...fq, order: index + 1 }));
     setFollowUpQuestions(reordered);
   };
@@ -175,10 +332,8 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
         throw new Error(result.message || 'Failed to create skill');
       }
 
-      // Refresh skills list
       await fetchAvailableSkills();
       
-      // Reset form
       setNewSkillCode('');
       setNewSkillName('');
       setNewSkillDescription('');
@@ -391,6 +546,37 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
             </div>
           )}
 
+          {/* Similarity Warning */}
+          {similarQuestions.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-semibold text-amber-900">Similar questions found</p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    Your question appears similar to existing approved questions:
+                  </p>
+                  <ul className="mt-2 space-y-2">
+                    {similarQuestions.map((item, index) => (
+                      <li key={item.question.question_id} className="text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-800 font-semibold text-xs">
+                            {item.score}%
+                          </span>
+                          <span className="font-medium text-amber-900">{item.question.title}</span>
+                        </div>
+                        <p className="text-amber-700 ml-8 mt-1">{item.question.question_text.substring(0, 100)}...</p>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-amber-600 mt-2">
+                    Please review these questions to avoid duplicates.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
@@ -407,6 +593,12 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
                   placeholder="e.g., Difficult interaction in healthcare"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
+                {isLoadingQuestions && title.length >= 3 && (
+                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Checking for similar questions...
+                  </p>
+                )}
               </div>
 
               <div>
@@ -586,7 +778,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
             )}
 
             {selectedTags.length === 0 ? (
-              <p className="text-sm text-purple-700 italic">No tags selected yet (required)</p>
+              <p className="text-sm text-purple-700 italic">No tags selected yet (optional)</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {selectedTags.map(tag => (
@@ -610,6 +802,7 @@ const AddQuestionModal: React.FC<AddQuestionModalProps> = ({ isOpen, onClose, on
 
           {/* Marking Criteria Header */}
           <h2 className="text-xl font-bold text-gray-900 mb-4">Marking Criteria</h2>
+          
           {/* Core Skills */}
           <div className="space-y-3 border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
             <div className="flex items-center justify-between">
