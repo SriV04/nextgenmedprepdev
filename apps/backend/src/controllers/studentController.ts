@@ -104,6 +104,39 @@ export async function getStudentDashboard(req: Request, res: Response): Promise<
       console.error('Error fetching interviews:', interviewsError);
     }
 
+    // Auto-complete past interviews
+    if (interviewsData && interviewsData.length > 0) {
+      const now = new Date();
+      const pastInterviewIds = interviewsData
+        .filter((interview: any) => 
+          interview.scheduled_at && 
+          new Date(interview.scheduled_at) < now
+        )
+        .map((interview: any) => interview.id);
+
+      if (pastInterviewIds.length > 0) {
+        console.log(`Auto-completing ${pastInterviewIds.length} past interviews`);
+        const { error: updateError } = await supabaseService.supabase
+          .from('interviews')
+          .update({ 
+            completed: true,
+            updated_at: new Date().toISOString()
+          })
+          .in('id', pastInterviewIds);
+
+        if (updateError) {
+          console.error('Error auto-completing past interviews:', updateError);
+        } else {
+          // Update the local data to reflect the change
+          interviewsData.forEach((interview: any) => {
+            if (pastInterviewIds.includes(interview.id)) {
+              interview.completed = true;
+            }
+          });
+        }
+      }
+    }
+
     // Fetch existing availability
     const { data: availabilityData, error: availabilityError } = await supabaseService.supabase
       .from('student_availability')

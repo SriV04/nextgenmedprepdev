@@ -8,6 +8,7 @@ interface AvailableTutor {
   name: string;
   email: string;
   field?: string;
+  availability_slot_id: string;
 }
 
 interface PendingInterview {
@@ -90,19 +91,34 @@ const PendingInterviewsCard: React.FC<PendingInterviewsCardProps> = ({
     setExpandedId(expandedId === interviewId ? null : interviewId);
   };
 
-  const handleAssignTutor = async (interviewId: string, tutorId: string) => {
+  const handleAssignTutor = async (interviewId: string, selectedTutorId: string) => {
     try {
       setAssignError(null);
-      setAssigning({ interviewId, tutorId });
+      setAssigning({ interviewId, tutorId: selectedTutorId });
+
+      // Find the interview and selected tutor to get the availability_slot_id and proposed_time
+      const interview = pendingInterviews.find((i) => i.id === interviewId);
+      const selectedTutor = interview?.availableTutors.find((t) => t.id === selectedTutorId);
+
+      if (!interview || !selectedTutor) {
+        throw new Error('Interview or tutor not found');
+      }
+
+      // Ensure scheduled_at is in ISO 8601 format
+      const scheduledAt = new Date(interview.proposed_time).toISOString();
 
       const response = await fetch(
-        `${backendUrl}/api/v1/interviews/${interviewId}/assign-tutor`,
+        `${backendUrl}/api/v1/interviews/${interviewId}/assign`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ tutor_id: tutorId }),
+          body: JSON.stringify({
+            tutor_id: selectedTutorId,
+            scheduled_at: scheduledAt,
+            availability_slot_id: selectedTutor.availability_slot_id,
+          }),
         }
       );
 
@@ -111,7 +127,7 @@ const PendingInterviewsCard: React.FC<PendingInterviewsCardProps> = ({
         throw new Error(result.message || 'Failed to assign tutor');
       }
 
-      setPendingInterviews((prev) => prev.filter((interview) => interview.id !== interviewId));
+      setPendingInterviews((prev) => prev.filter((i) => i.id !== interviewId));
       setSelectedTutors((prev) => {
         const next = { ...prev };
         delete next[interviewId];
@@ -295,9 +311,9 @@ const PendingInterviewsCard: React.FC<PendingInterviewsCardProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const tutorId = selectedTutors[interview.id];
-                          if (tutorId) {
-                            handleAssignTutor(interview.id, tutorId);
+                          const assignTutorId = selectedTutors[interview.id];
+                          if (assignTutorId) {
+                            handleAssignTutor(interview.id, assignTutorId);
                           }
                         }}
                         disabled={!selectedTutors[interview.id] || !!assigning}

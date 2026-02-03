@@ -983,34 +983,45 @@ export const getPendingInterviewsWithAvailableTutors = async (
       (pendingInterviews || []).map(async (interview: any) => {
         const field = interview.booking?.field;
         const proposedTime = new Date(interview.proposed_time);
+        const hourIn24 = proposedTime.getUTCHours();
         const proposedDate = proposedTime.toISOString().split('T')[0];
-        const proposedHour = proposedTime.getHours();
+        const proposedHour = proposedTime.getUTCHours();
+        const startTime = `${String(proposedHour).padStart(2, '0')}:00`;
+
+        console.log(`Finding tutors for interview ${interview.id} on ${proposedDate} at ${startTime} for field: ${field || 'any'}`);
 
         // Get tutors available at that time for that field
         const { data: availability, error: availError } = await supabase
           .from('tutor_availability')
           .select(`
-            *,
+            id,
+            date,
+            hour_start,
             tutor:tutors!tutor_availability_tutor_id_fkey(id, name, email, field)
           `)
           .eq('date', proposedDate)
-          .lte('hour_start', proposedHour)
-          .gt('hour_end', proposedHour)
+          .eq('hour_start', hourIn24)
           .eq('type', 'available')
-          .order('tutor(name)', { ascending: true });
+          .is('interview_id', null);
 
         if (availError) {
           console.error('Error fetching availability:', availError);
           return { ...interview, availableTutors: [] };
         }
 
-        // Filter tutors by field if needed
+        // Filter tutors by field if needed and include availability_slot_id
         const availableTutors = (availability || [])
-          .map((slot: any) => slot.tutor)
-          .filter((tutor: any) => !tutor || !field || tutor.field === field)
+          .filter((slot: any) => slot.tutor && (!field || slot.tutor.field === field))
+          .map((slot: any) => ({
+            id: slot.tutor.id,
+            name: slot.tutor.name,
+            email: slot.tutor.email,
+            field: slot.tutor.field,
+            availability_slot_id: slot.id,
+          }))
           .filter((tutor: any, index: number, self: any[]) => 
             index === self.findIndex((t) => t?.id === tutor?.id)
-          ); // Remove duplicates
+          ); // Remove duplicates by tutor id
 
         return {
           ...interview,
@@ -1093,6 +1104,64 @@ export const assignTutorToPendingInterview = async (
       return;
     }
 
+    // Get the scheduled time from proposed_time
+    const scheduledDate = new Date(interview.proposed_time);
+    const scheduledDateStr = scheduledDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const scheduledHour = scheduledDate.getUTCHours();
+    const startTime = `${String(scheduledHour).padStart(2, '0')}:00`;
+    const endTime = `${String(scheduledHour + 1).padStart(2, '0')}:00`;
+
+    // Try to find an existing available slot for this tutor at the scheduled time
+    const { data: existingSlot, error: slotFindError } = await supabase
+      .from('tutor_availability')
+      .select('id, type, interview_id')
+      .eq('tutor_id', tutor_id)
+      .eq('date', scheduledDateStr)
+      .eq('start_time', startTime)
+      .single();
+
+    let availabilitySlotId: string | null = null;
+
+    if (existingSlot && !slotFindError) {
+      // Slot exists - check if it's available
+      if (existingSlot.type !== 'available') {
+        res.status(400).json({
+          success: false,
+          message: `Time slot is not available. Current status: ${existingSlot.type}`,
+        });
+        return;
+      }
+      if (existingSlot.interview_id) {
+        res.status(400).json({
+          success: false,
+          message: 'Time slot is already booked for another interview',
+        });
+        return;
+      }
+      availabilitySlotId = existingSlot.id;
+    } else {
+      // No existing slot - create a new one for this tutor at this time
+      console.log(`Creating new availability slot for tutor ${tutor_id} at ${scheduledDateStr} ${startTime}`);
+      const { data: newSlot, error: createSlotError } = await supabase
+        .from('tutor_availability')
+        .insert({
+          tutor_id: tutor_id,
+          date: scheduledDateStr,
+          start_time: startTime,
+          end_time: endTime,
+          type: 'available', // Will be updated to 'interview' below
+        })
+        .select('id')
+        .single();
+
+      if (createSlotError || !newSlot) {
+        console.error('Failed to create availability slot:', createSlotError);
+        // Continue without creating slot - not a critical failure
+      } else {
+        availabilitySlotId = newSlot.id;
+      }
+    }
+
     // Create Zoom meeting if configured
     let zoomMeetingId: string | undefined;
     let zoomJoinUrl: string | undefined;
@@ -1101,7 +1170,6 @@ export const assignTutorToPendingInterview = async (
     if (zoomService.isConfigured()) {
       try {
         console.log('Creating Zoom meeting for pending interview...');
-        const scheduledDate = new Date(interview.proposed_time);
 
         const studentName = interview.booking?.email?.split('@')[0] || 'Student';
         const universityName = interview.university || interview.booking?.universities?.split(',')[0] || undefined;
@@ -1146,6 +1214,35 @@ export const assignTutorToPendingInterview = async (
 
     if (updateError) {
       throw new Error(updateError.message);
+    }
+
+    // Update the availability slot to mark it as an interview
+    if (availabilitySlotId) {
+      const { error: slotUpdateError } = await supabase
+        .from('tutor_availability')
+        .update({
+          type: 'interview',
+          interview_id: id,
+        })
+        .eq('id', availabilitySlotId);
+
+      if (slotUpdateError) {
+        console.error('Error updating availability slot:', slotUpdateError);
+        // Rollback interview assignment if slot update fails
+        await supabase
+          .from('interviews')
+          .update({
+            tutor_id: null,
+            scheduled_at: null,
+            status: 'pending',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id);
+        
+        throw new Error('Failed to update availability slot');
+      }
+
+      console.log(`Updated availability slot ${availabilitySlotId} to interview type`);
     }
 
     res.json({

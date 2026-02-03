@@ -345,6 +345,15 @@ export default function StudentDashboard() {
     }
   };
 
+  // Memoize handlers before early returns (Rules of Hooks)
+  const handleBookSession = React.useCallback(() => {
+    router.push('/interviews');
+  }, [router]);
+
+  const primaryCTA = React.useMemo(() => ({ 
+    label: 'Book a session', 
+    onClick: handleBookSession 
+  }), [handleBookSession]);
 
   if (!authChecked || !user || loading) {
     return (
@@ -357,12 +366,9 @@ export default function StudentDashboard() {
     );
   }
 
-
   const userName = userRecord?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
   const userEmail = userRecord?.email || user?.email || '';
-
   const nextSession = null;
-  const primaryCTA = { label: 'Book a session', onClick: () => {} };
 
 
   return (
@@ -501,7 +507,7 @@ export default function StudentDashboard() {
         <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <AlertCircle className="w-5 h-5 text-amber-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Tutor unassigned interviews</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Unassigned interviews</h2>
           </div>
 
           {pendingInterviews.length === 0 ? (
