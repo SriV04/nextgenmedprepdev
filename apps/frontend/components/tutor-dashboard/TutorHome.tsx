@@ -37,10 +37,11 @@ interface QuestionSubmission {
 interface TutorHomeProps {
   tutorId: string;
   tutorName?: string;
+  userRole?: 'admin' | 'manager' | 'tutor' | null;
   onOpenInterviewModal?: (interviewId: string) => void;
 }
 
-const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, onOpenInterviewModal }) => {
+const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onOpenInterviewModal }) => {
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -271,6 +272,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, onOpenIntervi
       <PendingInterviewsCard
         tutorId={tutorId}
         backendUrl={backendUrl}
+        userRole={userRole}
         onInterviewClick={onOpenInterviewModal}
         onAssignSuccess={() => {
           fetchTutorData();

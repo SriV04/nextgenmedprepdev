@@ -24,6 +24,7 @@ interface PendingInterview {
 interface PendingInterviewsCardProps {
   tutorId: string;
   backendUrl: string;
+  userRole?: 'admin' | 'manager' | 'tutor' | null;
   onInterviewClick?: (interviewId: string) => void;
   onAssignSuccess?: () => void;
 }
@@ -31,6 +32,7 @@ interface PendingInterviewsCardProps {
 const PendingInterviewsCard: React.FC<PendingInterviewsCardProps> = ({
   tutorId,
   backendUrl,
+  userRole,
   onInterviewClick,
   onAssignSuccess,
 }) => {
@@ -41,6 +43,9 @@ const PendingInterviewsCard: React.FC<PendingInterviewsCardProps> = ({
   const [assigning, setAssigning] = useState<{ interviewId: string; tutorId: string } | null>(null);
   const [assignError, setAssignError] = useState<string | null>(null);
   const [selectedTutors, setSelectedTutors] = useState<Record<string, string>>({});
+  
+  // Only Admins and Managers can assign tutors to pending interviews
+  const canAssignTutors = userRole === 'admin' || userRole === 'manager';
 
   useEffect(() => {
     fetchPendingInterviews();
@@ -249,79 +254,97 @@ const PendingInterviewsCard: React.FC<PendingInterviewsCardProps> = ({
             {/* Expanded Content */}
             {expandedId === interview.id && (
               <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 space-y-3">
-                {assignError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                    {assignError}
+                {!canAssignTutors ? (
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-sm text-amber-700 font-medium mb-1">
+                      View Only
+                    </p>
+                    <p className="text-sm text-amber-600">
+                      Only Admins and Managers can assign tutors to pending interviews.
+                    </p>
+                    {interview.availableTutors.length > 0 && (
+                      <p className="text-xs text-amber-500 mt-2">
+                        {interview.availableTutors.length} tutor{interview.availableTutors.length !== 1 ? 's' : ''} available for this time slot
+                      </p>
+                    )}
                   </div>
-                )}
-                {interview.availableTutors.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    No available tutors found for this time
-                  </p>
                 ) : (
                   <>
-                    <p className="text-sm font-semibold text-gray-900 mb-3">
-                      Available Tutors:
-                    </p>
-                    <div className="space-y-2">
-                      {interview.availableTutors.map((tutor) => (
-                        <button
-                          key={tutor.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedTutors((prev) => ({
-                              ...prev,
-                              [interview.id]: tutor.id,
-                            }));
-                          }}
-                          disabled={!!assigning}
-                          className={`w-full p-3 rounded-lg border-2 text-left transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-3 ${
-                            selectedTutors[interview.id] === tutor.id
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
-                          }`}
-                        >
-                          <div>
-                            <div className="font-medium text-gray-900">{tutor.name}</div>
-                            <div className="text-sm text-gray-600">{tutor.email}</div>
-                          </div>
-                          {selectedTutors[interview.id] === tutor.id && (
-                            <div className="text-xs font-semibold text-blue-700">Selected</div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-end gap-3 pt-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTutors((prev) => {
-                            const next = { ...prev };
-                            delete next[interview.id];
-                            return next;
-                          });
-                        }}
-                        disabled={!selectedTutors[interview.id] || !!assigning}
-                        className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Clear
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const assignTutorId = selectedTutors[interview.id];
-                          if (assignTutorId) {
-                            handleAssignTutor(interview.id, assignTutorId);
-                          }
-                        }}
-                        disabled={!selectedTutors[interview.id] || !!assigning}
-                        className="px-5 py-2 rounded-lg bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {assigning?.interviewId === interview.id ? 'Assigning...' : 'Confirm assignment'}
-                      </button>
-                    </div>
+                    {assignError && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                        {assignError}
+                      </div>
+                    )}
+                    {interview.availableTutors.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        No available tutors found for this time
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-gray-900 mb-3">
+                          Available Tutors:
+                        </p>
+                        <div className="space-y-2">
+                          {interview.availableTutors.map((tutor) => (
+                            <button
+                              key={tutor.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedTutors((prev) => ({
+                                  ...prev,
+                                  [interview.id]: tutor.id,
+                                }));
+                              }}
+                              disabled={!!assigning}
+                              className={`w-full p-3 rounded-lg border-2 text-left transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-between gap-3 ${
+                                selectedTutors[interview.id] === tutor.id
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
+                              }`}
+                            >
+                              <div>
+                                <div className="font-medium text-gray-900">{tutor.name}</div>
+                                <div className="text-sm text-gray-600">{tutor.email}</div>
+                              </div>
+                              {selectedTutors[interview.id] === tutor.id && (
+                                <div className="text-xs font-semibold text-blue-700">Selected</div>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-end gap-3 pt-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTutors((prev) => {
+                                const next = { ...prev };
+                                delete next[interview.id];
+                                return next;
+                              });
+                            }}
+                            disabled={!selectedTutors[interview.id] || !!assigning}
+                            className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Clear
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const assignTutorId = selectedTutors[interview.id];
+                              if (assignTutorId) {
+                                handleAssignTutor(interview.id, assignTutorId);
+                              }
+                            }}
+                            disabled={!selectedTutors[interview.id] || !!assigning}
+                            className="px-5 py-2 rounded-lg bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {assigning?.interviewId === interview.id ? 'Assigning...' : 'Confirm assignment'}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </>
                 )}
               </div>

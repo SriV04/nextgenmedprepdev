@@ -567,7 +567,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     }
   };
 
-  const createInterview = async (data: { booking_id: string; student_id: string; university: string; scheduled_at: string; notes?: string }) => {
+  const createInterview = async (data: { booking_id: string; student_id: string; university: string; scheduled_at?: string; notes?: string }) => {
     try {
       setLoading(true);
       

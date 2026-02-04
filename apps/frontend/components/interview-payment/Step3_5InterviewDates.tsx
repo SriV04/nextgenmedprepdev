@@ -516,9 +516,8 @@ export default function Step3_5InterviewDates({
     if (isPastDate(date)) return;
 
     if (isDashboard) {
-      const key = `${formatDate(date)}-${time}`;
-      const slots = availabilityByCell.get(key) || [];
-      if (slots.length === 0) return;
+      // Allow any time to be selected - students can request any time
+      // Even if no tutors are available, we still accept the request
       setSelectedCell({ date: formatDate(date), time });
       return;
     }
@@ -597,26 +596,25 @@ export default function Step3_5InterviewDates({
     : [];
 
   const handleConfirmSelection = () => {
-    if (!selectedCell || !onConfirm || selectedCellSlots.length === 0) return;
+    // Allow confirmation even if no tutors are available
+    // All requests become pending interviews for Admin/Manager assignment
+    if (!selectedCell || !onConfirm) return;
     const scheduledAt = new Date(`${selectedCell.date}T${selectedCell.time}:00`).toISOString();
-    const sortedSlots = [...selectedCellSlots].sort((a, b) => {
-      const nameCompare = (a.tutorName || '').localeCompare(b.tutorName || '');
-      if (nameCompare !== 0) return nameCompare;
-      return a.id.localeCompare(b.id);
-    });
-    const primarySlot = sortedSlots[0];
-    const isConfirmed = selectedCellSlots.length === 1;
-
+    
+    // Always create a pending request - never auto-assign
+    // Tutor assignment is handled by Admins/Managers in the tutor dashboard
     onConfirm({
       scheduledAt,
-      tutorId: isConfirmed ? primarySlot.tutorId : undefined,
-      availabilitySlotId: isConfirmed ? primarySlot.id : undefined,
-      tutorName: isConfirmed ? primarySlot.tutorName : undefined,
+      tutorId: undefined,
+      availabilitySlotId: undefined,
+      tutorName: undefined,
       availableTutorCount: selectedCellSlots.length,
     });
   };
 
   const getDateSlotCount = (date: Date) => {
+    // In dashboard mode, count tutors with availability (informational only)
+    // All slots are selectable regardless of tutor availability
     return isDashboard
       ? timeSlots.filter((time) => availabilityByCell.has(`${formatDate(date)}-${time}`)).length
       : selectedAvailability.filter(slot => slot.date === formatDate(date)).length;
@@ -629,9 +627,10 @@ export default function Step3_5InterviewDates({
   };
 
   const isCellAvailable = (date: Date, time: string) => {
+    // In dashboard mode, allow any future time slot to be selected
+    // Students can request any time - tutor matching is handled by Admin/Manager
     if (!isDashboard) return true;
-    const key = `${formatDate(date)}-${time}`;
-    return (availabilityByCell.get(key)?.length || 0) > 0;
+    return true; // All slots are available for selection
   };
 
   return (
@@ -685,14 +684,14 @@ export default function Step3_5InterviewDates({
           <motion.button
             key="confirm-button"
             onClick={handleConfirmSelection}
-            disabled={!selectedCell || selectedCellSlots.length === 0}
+            disabled={!selectedCell}
             className="px-12 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-600 transition-all shadow-xl shadow-indigo-500/25 disabled:opacity-40 disabled:cursor-not-allowed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={selectedCell && selectedCellSlots.length > 0 ? { scale: 1.05 } : {}}
-            whileTap={selectedCell && selectedCellSlots.length > 0 ? { scale: 0.98 } : {}}
+            whileHover={selectedCell ? { scale: 1.05 } : {}}
+            whileTap={selectedCell ? { scale: 0.98 } : {}}
           >
-            {selectedCellSlots.length > 1 ? 'Request Time' : 'Confirm Time'}
+            Request Time
           </motion.button>
         </div>
       ) : (

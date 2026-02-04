@@ -1,7 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Search, GraduationCap } from 'lucide-react';
+
+interface University {
+  id: string;
+  name: string;
+}
 
 interface ManageInterviewModalProps {
   interview: {
@@ -33,6 +38,30 @@ export default function ManageInterviewModal({
   const [notes, setNotes] = useState(interview.notes || '');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [universitySearchQuery, setUniversitySearchQuery] = useState('');
+  const [showUniversityDropdown, setShowUniversityDropdown] = useState(false);
+
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+
+  // Fetch universities on mount
+  useEffect(() => {
+    if (isOpen) {
+      fetchUniversities();
+    }
+  }, [isOpen]);
+
+  const fetchUniversities = async () => {
+    try {
+      const response = await fetch(`${backendUrl}/api/v1/universities`);
+      const data = await response.json();
+      if (data.success) {
+        setUniversities(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching universities:', error);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -69,6 +98,10 @@ export default function ManageInterviewModal({
         minute: '2-digit',
       })
     : '';
+
+  const filteredUniversities = universities.filter((uni) =>
+    uni.name.toLowerCase().includes(universitySearchQuery.toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
@@ -118,23 +151,75 @@ export default function ManageInterviewModal({
 
           {/* University Field */}
           <div>
-            <label
-              htmlFor="university"
-              className="block text-sm font-semibold text-gray-900 mb-2"
-            >
-              University / Focus
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <GraduationCap className="w-4 h-4 inline mr-1" />
+              University
             </label>
-            <input
-              type="text"
-              id="university"
-              value={university}
-              onChange={(e) => setUniversity(e.target.value)}
-              placeholder="e.g., Oxford, Cambridge, Imperial"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={isSaving}
-            />
+            <div className="relative">
+              <div
+                onClick={() => setShowUniversityDropdown(!showUniversityDropdown)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent cursor-pointer bg-white"
+              >
+                {university ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-900">{university}</span>
+                    <X
+                      className="w-4 h-4 text-gray-400 hover:text-gray-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUniversity('');
+                        setUniversitySearchQuery('');
+                        setShowUniversityDropdown(false);
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <span className="text-gray-500">Select a university...</span>
+                )}
+              </div>
+
+              {showUniversityDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                  <div className="p-3 border-b border-gray-200">
+                    <div className="relative">
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={universitySearchQuery}
+                        onChange={(e) => setUniversitySearchQuery(e.target.value)}
+                        placeholder="Search universities..."
+                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {filteredUniversities.length === 0 ? (
+                      <p className="p-3 text-sm text-gray-500 text-center">No universities found</p>
+                    ) : (
+                      filteredUniversities.map((uni) => (
+                        <button
+                          key={uni.id}
+                          type="button"
+                          onClick={() => {
+                            setUniversity(uni.name);
+                            setShowUniversityDropdown(false);
+                            setUniversitySearchQuery('');
+                          }}
+                          className={`w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors ${
+                            university === uni.name ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                          }`}
+                        >
+                          <span className="text-sm text-gray-900">{uni.name}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <p className="mt-1 text-sm text-gray-500">
-              Specify which university or area you'd like to focus on during this interview.
+              Specify which university you'd like to focus on during this interview.
             </p>
           </div>
 

@@ -13,7 +13,7 @@ const createInterviewSchema = z.object({
   scheduled_at: z.string().datetime(),
   notes: z.string().optional(),
   field: z.enum(['medicine', 'dentistry']).optional(),
-  status: z.enum(['pending', 'confirmed', 'completed', 'cancelled']).optional().default('pending'),
+  status: z.enum(['time_requested', 'pending', 'confirmed', 'completed', 'cancelled']).optional().default('pending'),
   proposed_time: z.string().datetime().optional(),
 });
 
@@ -28,7 +28,7 @@ const updateInterviewSchema = z.object({
   student_feedback: z.string().optional(),
   notes: z.string().optional(),
   field: z.enum(['medicine', 'dentistry']).optional(),
-  status: z.enum(['pending', 'confirmed', 'completed', 'cancelled']).optional(),
+  status: z.enum(['time_requested', 'pending', 'confirmed', 'completed', 'cancelled']).optional(),
   proposed_time: z.string().datetime().optional(),
 });
 
@@ -429,7 +429,7 @@ export const assignInterviewToTutor = async (
 
     // Update interview with status, proposed_time, and optionally tutor and scheduled_at
     const updateData: any = {
-      status: isConfirmed ? 'confirmed' : 'pending',
+      status: isConfirmed ? 'confirmed' : 'time_requested',
       proposed_time: validatedData.scheduled_at,
       updated_at: new Date().toISOString(),
     };
@@ -970,7 +970,7 @@ export const getPendingInterviewsWithAvailableTutors = async (
           universities
         )
       `)
-      .eq('status', 'pending')
+      .eq('status', 'time_requested')
       .is('tutor_id', null)
       .order('proposed_time', { ascending: true });
 
@@ -1234,7 +1234,7 @@ export const assignTutorToPendingInterview = async (
           .update({
             tutor_id: null,
             scheduled_at: null,
-            status: 'pending',
+            status: 'time_requested',
             updated_at: new Date().toISOString(),
           })
           .eq('id', id);

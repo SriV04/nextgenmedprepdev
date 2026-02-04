@@ -12,6 +12,7 @@ import {
 } from './hooks/useStudentDashboardData';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ManageInterviewModal from '../../components/student-dashboard/ManageInterviewModal';
+import StudentAvailabilityModal from '../../components/student-dashboard/StudentAvailabilityModal';
 import { UK_MEDICAL_SCHOOLS } from '../../data/universities';
 
 export const dynamic = 'force-dynamic';
@@ -81,8 +82,6 @@ export default function StudentDashboard() {
   const [scheduleSuccess, setScheduleSuccess] = useState(false);
   const [scheduleMessage, setScheduleMessage] = useState('');
   const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
-  const [availabilitySubmitting, setAvailabilitySubmitting] = useState(false);
-  const [availabilitySuccess, setAvailabilitySuccess] = useState(false);
 
   const router = useRouter();
   const supabase = createClient();
@@ -91,6 +90,7 @@ export default function StudentDashboard() {
   const {
     userRecord,
     interviews,
+    availability,
     sessionStats,
     loading,
     error,
@@ -206,55 +206,39 @@ export default function StudentDashboard() {
 
   const handleOpenAvailability = () => {
     setIsAvailabilityModalOpen(true);
-    setAvailabilitySuccess(false);
   };
 
   const handleCloseAvailability = () => {
     setIsAvailabilityModalOpen(false);
   };
 
-  const handleSubmitAvailability = async (selection: {
-    scheduledAt: string;
-  }) => {
+  const handleSubmitAvailability = async (slots: Array<{ date: string; hour_start: number; hour_end: number }>) => {
     if (!userRecord?.id) return;
 
     try {
-      setAvailabilitySubmitting(true);
-      
-      const scheduledDate = new Date(selection.scheduledAt);
-      const date = scheduledDate.toISOString().split('T')[0];
-      const hour = scheduledDate.getUTCHours();
+      // Submit all slots
+      for (const slot of slots) {
+        const response = await fetch(`${backendUrl}/api/v1/users/${userRecord.id}/availability`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(slot),
+        });
 
-      const response = await fetch(`${backendUrl}/api/v1/users/${userRecord.id}/availability`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date,
-          hour_start: hour,
-          hour_end: hour + 1,
-        }),
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.message || 'Failed to submit availability');
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to submit availability');
+        }
       }
 
-      setAvailabilitySuccess(true);
-      
-      // Auto-close modal after 2 seconds
+      // Refresh the dashboard data
       setTimeout(() => {
-        handleCloseAvailability();
-        setAvailabilitySuccess(false);
         refresh();
-      }, 2000);
+      }, 500);
     } catch (err: any) {
       console.error('Error submitting availability:', err);
-      alert(err.message || 'Failed to submit availability');
-    } finally {
-      setAvailabilitySubmitting(false);
+      throw err;
     }
   };
 
@@ -336,10 +320,9 @@ export default function StudentDashboard() {
     try {
       setScheduling(true);
       setScheduleSuccess(false);
-      const isConfirmed =
-        selection.availableTutorCount === 1 &&
-        !!selection.tutorId &&
-        !!selection.availabilitySlotId;
+      // Always create a pending interview - never auto-assign tutors
+      // Tutor assignment is handled by Admins/Managers in the tutor dashboard
+      const isConfirmed = false;
 
       const payload: {
         scheduled_at: string;
@@ -349,10 +332,7 @@ export default function StudentDashboard() {
         scheduled_at: selection.scheduledAt,
       };
 
-      if (isConfirmed) {
-        payload.tutor_id = selection.tutorId;
-        payload.availability_slot_id = selection.availabilitySlotId;
-      }
+      // Never include tutor_id or availability_slot_id - all requests go to pending
 
       const response = await fetch(`${backendUrl}/api/v1/interviews/${activeInterview.id}/assign`, {
         method: 'POST',
@@ -367,22 +347,14 @@ export default function StudentDashboard() {
         throw new Error(result.message || 'Failed to schedule interview');
       }
 
-      // Determine if this was a pending request or confirmed assignment
-      const message = isConfirmed 
-        ? 'Interview scheduled successfully!'
-        : 'Interview request received! We\'ll match you with a tutor soon.';
+      // All student requests create pending interviews for Admin/Manager assignment
+      const message = 'Interview request received! We\'ll match you with a tutor soon.';
 
       updateInterview(activeInterview.id, {
-        status: isConfirmed ? 'confirmed' : 'pending',
+        status: 'time_requested',
         proposed_time: selection.scheduledAt,
-        scheduled_at: isConfirmed ? selection.scheduledAt : null,
-        tutor: isConfirmed
-          ? {
-              id: selection.tutorId as string,
-              name: selection.tutorName || 'Assigned Tutor',
-              email: '',
-            }
-          : undefined,
+        scheduled_at: null,
+        tutor: undefined,
       });
 
       setScheduleSuccess(true);
@@ -661,7 +633,7 @@ export default function StudentDashboard() {
           )}
         </section>
 
-        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        {/* <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-6">
             <Calendar className="w-5 h-5 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">Manage Your Availability</h2>
@@ -675,7 +647,7 @@ export default function StudentDashboard() {
           >
             Submit Availability
           </button>
-        </section>
+        </section> */}
 
         <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
@@ -765,56 +737,13 @@ export default function StudentDashboard() {
           onSave={handleSaveInterview}
         />
       )}
-
-      {/* Availability Submission Modal */}
-      {isAvailabilityModalOpen && (
-        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900">Submit Your Availability</h3>
-                <p className="text-sm text-gray-600">Select times when you're available for interviews.</p>
-              </div>
-              <button
-                onClick={handleCloseAvailability}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                Close
-              </button>
-            </div>
-            <div className="p-6">
-              {availabilitySuccess ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                    <CheckCircle className="w-8 h-8 text-green-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    Availability submitted successfully!
-                  </h3>
-                  <p className="text-gray-600">This modal will close automatically...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-4">
-                    <p className="text-sm">
-                      <strong>Tip:</strong> Select multiple time slots to increase your chances of getting matched with a tutor quickly.
-                    </p>
-                  </div>
-                  <Step3_5InterviewDates
-                    mode="dashboard"
-                    bookingId=""
-                    tutorAvailability={[]}
-                    onConfirm={handleSubmitAvailability}
-                  />
-                  {availabilitySubmitting && (
-                    <div className="mt-4 text-sm text-gray-600">Submitting your availability...</div>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Availability Submission Modal
+      <StudentAvailabilityModal
+        isOpen={isAvailabilityModalOpen}
+        onClose={handleCloseAvailability}
+        onSave={handleSubmitAvailability}
+        existingAvailability={availability}
+      /> */}
     </div>
   );
 }

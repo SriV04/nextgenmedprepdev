@@ -26,7 +26,6 @@ interface CreateInterviewModalProps {
     booking_id: string;
     student_id: string;
     university: string;
-    scheduled_at: string;
     notes?: string;
   }) => Promise<void>;
 }
@@ -197,7 +196,6 @@ export const CreateInterviewModal: React.FC<CreateInterviewModalProps> = ({
   // Helper function to create interviews
   const createInterviews = async (bookingId: string, studentId: string) => {
     const { selectedUniversities, interviewCount, notes } = newBookingForm;
-    const scheduled_at = new Date().toISOString();
     
     const interviewPromises = [];
     for (let i = 0; i < Math.min(interviewCount, selectedUniversities.length); i++) {
@@ -206,7 +204,6 @@ export const CreateInterviewModal: React.FC<CreateInterviewModalProps> = ({
           booking_id: bookingId,
           student_id: studentId,
           university: selectedUniversities[i].name,
-          scheduled_at,
           notes: notes.trim() || undefined,
         })
       );
@@ -223,14 +220,11 @@ export const CreateInterviewModal: React.FC<CreateInterviewModalProps> = ({
       alert('Please fill in all required fields');
       return;
     }
-
-    const scheduled_at = new Date().toISOString();
     
     await onCreateInterview({
       booking_id: selectedBooking.id,
       student_id: selectedBooking.user_id,
       university: selectedUniversity.name,
-      scheduled_at,
       notes: notes.trim() || undefined,
     });
   };

@@ -179,6 +179,11 @@ export const useCalendarInteractions = () => {
     setDragOverSlot(null);
     setDraggedStudentAvailability([]);
     
+    // Permission check: only admins and managers can assign interviews
+    if (userRole !== 'admin' && userRole !== 'manager') {
+      return;
+    }
+    
     // Try to get interview ID from dataTransfer (from UnassignedInterviews)
     const interviewId = e.dataTransfer.getData('interviewId');
     

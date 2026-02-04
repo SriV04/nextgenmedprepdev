@@ -29,8 +29,12 @@ const InterviewDetailsModal: React.FC = () => {
     tutors,
     assignInterview,
     cancelInterview,
-    deleteInterview
+    deleteInterview,
+    userRole
   } = useTutorCalendar();
+  
+  // Only Admins and Managers can assign tutors to pending interviews
+  const canAssignTutors = userRole === 'admin' || userRole === 'manager';
   
   const [selectedSlot, setSelectedSlot] = useState<AvailabilityMatch | null>(null);
   const [selectedTutor, setSelectedTutor] = useState<TutorMatch | null>(null);
@@ -139,13 +143,14 @@ const InterviewDetailsModal: React.FC = () => {
 
   // Handle tutor selection
   const handleTutorSelect = (tutor: TutorMatch) => {
+    if (!canAssignTutors) return;
     setSelectedTutor(tutor);
     setShowConfirmation(true);
   };
 
   // Handle booking confirmation
   const handleConfirmBooking = async () => {
-    if (!selectedSlot || !selectedTutor) return;
+    if (!selectedSlot || !selectedTutor || !canAssignTutors) return;
     
     setIsBooking(true);
     try {
@@ -204,6 +209,7 @@ const InterviewDetailsModal: React.FC = () => {
 
   // Handle custom booking
   const handleCustomBooking = async () => {
+    if (!canAssignTutors) return;
     if (!customDate || !customTime || !customTutorId) {
       alert('Please fill in all custom booking fields');
       return;
