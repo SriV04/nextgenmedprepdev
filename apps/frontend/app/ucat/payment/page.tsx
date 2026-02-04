@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeftIcon, AcademicCapIcon, CheckIcon, UserIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CheckIcon, ClockIcon } from '@heroicons/react/24/outline';
 import PaymentForm from '../../../components/payment/PaymentForm';
 import { trackInitiateCheckout, trackViewContent } from '@/components/MetaPixel';
 
@@ -13,8 +13,9 @@ interface UCATPackage {
   price: number;
   currency: string;
   description: string;
+  hours: number;
   features: string[];
-  color: string;
+  popular?: boolean;
 }
 
 interface CustomerDetails {
@@ -27,47 +28,66 @@ interface CustomerDetails {
 const ucatPackages: { [key: string]: UCATPackage } = {
   'ucat_kickstart': {
     id: 'ucat_kickstart',
-    name: 'UCAT Kickstart',
+    name: 'Kickstart',
     price: 200,
     currency: 'GBP',
-    description: 'For those ready to build strong foundations.',
-    color: 'bg-blue-500',
+    hours: 4,
+    description: 'Build a solid foundation',
     features: [
-      '4 hours of essential background knowledge across all UCAT sections',
-      '24/7 access to our Business Line – ask questions anytime, send in tricky problems, and receive step-by-step video solutions',
-      'Tracked quantitative performance – every question you complete feeds into our analytics',
-      'Personalised content plan – weekly text messages guide your revision using performance data',
-      'After one session all our students thus far saw a 15% or more increase in score across all areas',
-      'Data-driven intervention on weak areas begins from day one'
+      '4 hours of core teaching across all UCAT sections',
+      'Performance tracking for every question',
+      'Personalised weekly revision plan',
+      'Data-led support on weak areas from day one',
+      '15%+ score increase after four sessions'
     ]
   },
   'ucat_advance': {
     id: 'ucat_advance',
-    name: 'UCAT Advance',
+    name: 'Advance',
     price: 375,
     currency: 'GBP',
-    description: 'For those who want to refine and target performance.',
-    color: 'bg-purple-600',
+    hours: 8,
+    description: 'Targeted improvement',
     features: [
-      'Everything in Kickstart package',
-      '8 hours of targeted question-specific perfection sessions',
-      'Deep-dives into the exact areas the data shows you\'re weakest in based on the data from our tracking system',
-      'Smart drills and focused practice to convert weaknesses into strengths',
-      'Increased data input = sharper, more accurate performance tracking'
+      'Everything in Kickstart',
+      '+4 hours of targeted refinement sessions',
+      'Deep dives into your weakest areas',
+      'Focused drills to convert weaknesses into strengths',
+      'Increased data input for sharper tracking'
     ]
   },
   'ucat_mastery': {
     id: 'ucat_mastery',
-    name: 'UCAT Mastery',
-    price: 550,
+    name: 'Mastery',
+    price: 575,
     currency: 'GBP',
-    description: 'For those aiming for top 10% scores.',
-    color: 'bg-indigo-600',
+    hours: 12,
+    description: 'Top 10% scores',
+    popular: true,
     features: [
-      'Everything in Advance package',
-      '12 hours of high-intensity question-perfection sessions based on your data',
-      'Double the time, double the refinement – a laser-focused approach to peak performance',
-      'Designed to bring students to test-day readiness with total confidence'
+      'Everything in Advance',
+      '+4 hours of high-intensity refinement',
+      'Priority support and accelerated response',
+      'Advanced test-taking strategies',
+      'Four conference tickets included (£50 value)',
+      'Test-day readiness with total confidence'
+    ]
+  },
+  'ucat_elite': {
+    id: 'ucat_elite',
+    name: 'Elite',
+    price: 800,
+    currency: 'GBP',
+    hours: 20,
+    description: 'Exceptional results',
+    features: [
+      'Everything in Mastery',
+      '20 hours comprehensive intensive teaching',
+      'Maximum contact time with expert tutors',
+      'Extended practice with live feedback',
+      'Exam day prep & mental strategies',
+      'Full mock exam analysis',
+      'Leave nothing to chance'
     ]
   }
 };
@@ -87,14 +107,12 @@ function UCATPaymentContent() {
     const packageId = searchParams.get('package');
     if (packageId && ucatPackages[packageId]) {
       setSelectedPackage(ucatPackages[packageId]);
-      // Track ViewContent for UCAT package
       trackViewContent(
         ucatPackages[packageId].name,
         ucatPackages[packageId].price,
         ucatPackages[packageId].currency
       );
     } else {
-      // Default to kickstart if no package specified
       setSelectedPackage(ucatPackages['ucat_kickstart']);
       trackViewContent(
         ucatPackages['ucat_kickstart'].name,
@@ -105,16 +123,13 @@ function UCATPaymentContent() {
   }, [searchParams]);
 
   const handlePaymentSuccess = () => {
-    console.log('UCAT payment successful');
-    // Clear stored details
     sessionStorage.removeItem('ucat_booking_details');
-    // Redirect to success page with UCAT details
     const successUrl = `/payment/success?service=ucat&package=${selectedPackage?.id}&price=${selectedPackage?.price}`;
     window.location.href = successUrl;
   };
 
   const handlePaymentError = (error: string) => {
-    console.error('UCAT payment error:', error);
+    console.error('Payment error:', error);
   };
 
   const isCustomerDetailsValid = () => {
@@ -125,22 +140,16 @@ function UCATPaymentContent() {
   };
 
   const handleCustomerDetailsChange = (field: keyof CustomerDetails, value: string) => {
-    setCustomerDetails(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setCustomerDetails(prev => ({ ...prev, [field]: value }));
   };
 
   const handleProceedToPayment = () => {
     if (isCustomerDetailsValid() && selectedPackage) {
-      // Track InitiateCheckout for UCAT package
       trackInitiateCheckout(
         selectedPackage.price,
         selectedPackage.currency,
         selectedPackage.name
       );
-      
-      // Store booking details in session storage
       const bookingData = {
         package: selectedPackage,
         customerDetails,
@@ -153,284 +162,286 @@ function UCATPaymentContent() {
 
   if (!selectedPackage) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading package details...</p>
+          <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-stone-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-5xl mx-auto px-6 py-5">
           <div className="flex items-center gap-4">
-            <Link href="/ucat" className="text-gray-500 hover:text-gray-700 transition-colors">
-              <ArrowLeftIcon className="w-6 h-6" />
+            <Link 
+              href="/ucat" 
+              className="p-2 -ml-2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <ArrowLeftIcon className="w-5 h-5" />
             </Link>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <AcademicCapIcon className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">UCAT Tutoring Package</h1>
-                <p className="text-gray-600">Complete your purchase to start your UCAT preparation journey</p>
-              </div>
+            <div>
+              <h1 className="text-lg font-semibold text-slate-900">UCAT Tutoring</h1>
+              <p className="text-sm text-slate-500">Complete your purchase</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Package Overview */}
-          <div className="space-y-8">
-            {/* Package Header */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className={`${selectedPackage.color} p-6 text-white`}>
-                <h2 className="text-3xl font-bold mb-2">{selectedPackage.name}</h2>
-                <p className="text-xl opacity-90">{selectedPackage.description}</p>
-                <div className="mt-4 flex items-baseline">
-                  <span className="text-4xl font-bold">£{selectedPackage.price}</span>
-                  <span className="ml-2 text-lg opacity-80">one-time payment</span>
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        <div className="grid lg:grid-cols-5 gap-12">
+          {/* Left Column - Package Info */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Selected Package Card */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+              <div className="bg-slate-900 p-6 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">{selectedPackage.name}</h2>
+                  {selectedPackage.popular && (
+                    <span className="bg-amber-400 text-slate-900 text-xs font-semibold px-2 py-1 rounded-full">
+                      Popular
+                    </span>
+                  )}
                 </div>
+                <p className="text-slate-400 text-sm mb-4">{selectedPackage.description}</p>
+                <div className="flex items-baseline gap-4">
+                  <span className="text-3xl font-semibold">£{selectedPackage.price}</span>
+                  <span className="flex items-center gap-1 text-slate-400 text-sm">
+                    <ClockIcon className="w-4 h-4" />
+                    {selectedPackage.hours} hours
+                  </span>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-4">
+                  What's included
+                </p>
+                <ul className="space-y-3">
+                  {selectedPackage.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-sm text-slate-600">
+                      <CheckIcon className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
 
-            {/* Package Features */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">What's Included</h3>
-              <div className="space-y-4">
-                {selectedPackage.features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <CheckIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Common Benefits */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-100">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">All Packages Include</h3>
-              <div className="grid gap-3">
-                <div className="flex items-center text-gray-700">
-                  <span className="text-green-500 mr-3">✓</span>
-                  <span>Tutors scored in the top 1% internationally</span>
-                </div>
-                <div className="flex items-center text-gray-700">
-                  <span className="text-green-500 mr-3">✓</span>
-                  <span>Continuous updated question bank with worked examples</span>
-                </div>
-                <div className="flex items-center text-gray-700">
-                  <span className="text-green-500 mr-3">✓</span>
-                  <span>Free cheat sheets for each area, including the best approaches</span>
-                </div>
-                <div className="flex items-center text-gray-700">
-                  <span className="text-green-500 mr-3">✓</span>
-                  <span>Personalised 10-week action plan tailored to your strengths and weaknesses</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Package Selection */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Want a different package?</h3>
-              <div className="grid gap-3">
+            {/* Package Selector */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6">
+              <p className="text-sm font-medium text-slate-900 mb-4">Change package</p>
+              <div className="space-y-2">
                 {Object.values(ucatPackages).map((pkg) => (
                   <button
                     key={pkg.id}
                     onClick={() => setSelectedPackage(pkg)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all duration-200 ${
+                    className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
                       selectedPackage.id === pkg.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-slate-900 bg-slate-50'
+                        : 'border-slate-100 hover:border-slate-200'
                     }`}
                   >
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-semibold text-gray-900">{pkg.name}</div>
-                        <div className="text-sm text-gray-600">{pkg.description}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-900">{pkg.name}</span>
+                          {pkg.popular && (
+                            <span className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                              Popular
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">{pkg.hours} hours</div>
                       </div>
-                      <div className="text-xl font-bold text-gray-900">£{pkg.price}</div>
+                      <span className="font-semibold text-slate-900">£{pkg.price}</span>
                     </div>
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Trust Signals */}
+            <div className="bg-slate-900 rounded-2xl p-6 text-white">
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-4">
+                Why students choose us
+              </p>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
+                  <span className="text-slate-300">92% of students improve their scores</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                  <span className="text-slate-300">Tutors scored in top 1% internationally</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-1.5 h-1.5 bg-sky-400 rounded-full" />
+                  <span className="text-slate-300">Average +450 point improvement</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Payment Form */}
-          <div className="space-y-8">
+          {/* Right Column - Form */}
+          <div className="lg:col-span-3">
             {currentStep === 1 ? (
-              <>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Your Details
-                  </h2>
-                  <p className="text-gray-600">
-                    Please provide your contact information to proceed with your UCAT package purchase.
+              <div className="bg-white rounded-2xl border border-slate-200 p-8">
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold text-slate-900 mb-2">Your details</h2>
+                  <p className="text-sm text-slate-500">
+                    Enter your contact information to proceed.
                   </p>
                 </div>
 
-                {/* Customer Details Form */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                    <UserIcon className="w-5 h-5" />
-                    Contact Information
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name *
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        First name
                       </label>
                       <input
                         type="text"
                         value={customerDetails.firstName}
                         onChange={(e) => handleCustomerDetailsChange('firstName', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your first name"
-                        required
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                        placeholder="John"
                       />
                     </div>
-                    
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name *
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Last name
                       </label>
                       <input
                         type="text"
                         value={customerDetails.lastName}
                         onChange={(e) => handleCustomerDetailsChange('lastName', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your last name"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <EnvelopeIcon className="w-4 h-4" />
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        value={customerDetails.email}
-                        onChange={(e) => handleCustomerDetailsChange('email', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your email address"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number (Optional)
-                      </label>
-                      <input
-                        type="tel"
-                        value={customerDetails.phone}
-                        onChange={(e) => handleCustomerDetailsChange('phone', e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your phone number"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                        placeholder="Smith"
                       />
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Email address
+                    </label>
+                    <input
+                      type="email"
+                      value={customerDetails.email}
+                      onChange={(e) => handleCustomerDetailsChange('email', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Phone number <span className="text-slate-400 font-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={customerDetails.phone}
+                      onChange={(e) => handleCustomerDetailsChange('phone', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all"
+                      placeholder="+44 7700 900000"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-100">
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="text-slate-600">Total</span>
+                    <span className="text-2xl font-semibold text-slate-900">£{selectedPackage.price}</span>
+                  </div>
+                  
                   <button
                     onClick={handleProceedToPayment}
                     disabled={!isCustomerDetailsValid()}
-                    className={`w-full mt-8 px-8 py-4 rounded-lg font-semibold text-white transition-all duration-200 ${
+                    className={`w-full py-4 rounded-full font-medium text-lg transition-all ${
                       isCustomerDetailsValid()
-                        ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                        : 'bg-gray-400 cursor-not-allowed'
+                        ? 'bg-slate-900 text-white hover:bg-slate-800'
+                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                     }`}
                   >
-                    Proceed to Payment - £{selectedPackage.price}
+                    Continue to payment
                   </button>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Complete Your Purchase
-                  </h2>
-                  <p className="text-gray-600">
-                    Secure checkout powered by Stripe. Start your UCAT preparation today.
-                  </p>
-                  <button
-                    onClick={() => setCurrentStep(1)}
-                    className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    ← Edit Contact Details
-                  </button>
-                </div>
-                
-                <PaymentForm
-                  key={selectedPackage.id} // Force re-render when package changes
-                  selectedPackage={{
-                    id: selectedPackage.id,
-                    name: selectedPackage.name,
-                    price: selectedPackage.price,
-                    currency: selectedPackage.currency,
-                    description: `${selectedPackage.name} - ${selectedPackage.description}`
-                  }}
-                  initialData={{
-                    customer_email: customerDetails.email,
-                    customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`.trim(),
-                    metadata: {
-                      type: 'ucat_tutoring',
-                      package_id: selectedPackage.id,
-                      package_name: selectedPackage.name,
-                      customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`.trim(),
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-200 p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-xl font-semibold text-slate-900 mb-1">Payment</h2>
+                      <p className="text-sm text-slate-500">Secure checkout powered by Stripe</p>
+                    </div>
+                    <button
+                      onClick={() => setCurrentStep(1)}
+                      className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+                    >
+                      Edit details
+                    </button>
+                  </div>
+
+                  {/* Customer Summary */}
+                  <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Booking for</span>
+                      <span className="text-slate-900 font-medium">
+                        {customerDetails.firstName} {customerDetails.lastName}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm mt-2">
+                      <span className="text-slate-500">Email</span>
+                      <span className="text-slate-900">{customerDetails.email}</span>
+                    </div>
+                  </div>
+                  
+                  <PaymentForm
+                    key={selectedPackage.id}
+                    selectedPackage={{
+                      id: selectedPackage.id,
+                      name: selectedPackage.name,
+                      price: selectedPackage.price,
+                      currency: selectedPackage.currency,
+                      description: `${selectedPackage.name} - ${selectedPackage.description}`
+                    }}
+                    initialData={{
                       customer_email: customerDetails.email,
-                      customer_phone: customerDetails.phone
-                    }
-                  }}
-                  onError={handlePaymentError}
-                />
-              </>
+                      customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`.trim(),
+                      metadata: {
+                        type: 'ucat_tutoring',
+                        package_id: selectedPackage.id,
+                        package_name: selectedPackage.name,
+                        customer_name: `${customerDetails.firstName} ${customerDetails.lastName}`.trim(),
+                        customer_email: customerDetails.email,
+                        customer_phone: customerDetails.phone
+                      }
+                    }}
+                    onError={handlePaymentError}
+                  />
+                </div>
+
+                {/* Guarantee */}
+                <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <CheckIcon className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-slate-900 mb-1">Score improvement guarantee</h4>
+                      <p className="text-sm text-slate-600">
+                        If you don't improve after following our program, we'll work with you until you do.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
-
-            {/* Trust Signals */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h4 className="font-semibold text-gray-900 mb-4">Why Choose NextGen MedPrep?</h4>
-              <div className="space-y-3 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Proven track record: 92% of students improve their scores</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Expert tutors: All scored in top 1% internationally</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>Personalised approach: Data-driven performance tracking</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span>Average improvement: +450 points across all sections</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Money Back Guarantee */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-              <div className="text-center">
-                <div className="text-2xl mb-2">🛡️</div>
-                <h4 className="font-bold text-gray-900 mb-2">Score Improvement Guarantee</h4>
-                <p className="text-sm text-gray-700">
-                  We're so confident in our methods that we guarantee you'll see improvement. 
-                  If you don't improve after following our program, we'll work with you until you do.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -441,10 +452,10 @@ function UCATPaymentContent() {
 export default function UCATPaymentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading payment page...</p>
+          <div className="w-8 h-8 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-500">Loading...</p>
         </div>
       </div>
     }>

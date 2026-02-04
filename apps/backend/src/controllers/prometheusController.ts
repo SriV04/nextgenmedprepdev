@@ -179,7 +179,8 @@ export const deleteTag = async (req: Request, res: Response): Promise<void> => {
 export const getUniversityStations = async (req: Request, res: Response): Promise<void> => {
   try {
     const university = req.query.university as string | undefined;
-    const stations = await prometheusService.getUniversityStations(university);
+    const field = req.query.field as string | undefined;
+    const stations = await prometheusService.getUniversityStations(university, field);
 
     res.json({
       success: true,
@@ -204,6 +205,7 @@ export const createUniversityStation = async (req: Request, res: Response): Prom
       notes,
       is_active,
       university,
+      field,
     } = req.body;
 
     if (!question_type || station_index === undefined || !university) {
@@ -222,6 +224,7 @@ export const createUniversityStation = async (req: Request, res: Response): Prom
       notes,
       is_active,
       university,
+      field,
     });
 
     res.status(201).json({
@@ -260,7 +263,7 @@ export const setUniversityStationTags = async (req: Request, res: Response): Pro
   try {
     const { stationId } = req.params;
     const { tags } = req.body as {
-      tags: Array<{ tag: string; notes?: Record<string, unknown> | null }>;
+      tags: Array<{ tag: string; notes?: Record<string, unknown> | null; field?: string | null }>;
     };
 
     if (!Array.isArray(tags)) {

@@ -2451,6 +2451,223 @@ u                        <strong style="color: #10b981;">The NextGen MedPrep Tea
       `
     };
   }
+
+  // UCAT Add-on Email Methods
+  async sendUCATAddonConfirmationEmail(email: string, data: {
+    id: string;
+    packageName: string;
+    packageType: string;
+    amount: number;
+    userName?: string;
+  }): Promise<void> {
+    const template = this.getUCATAddonConfirmationTemplate(data);
+    
+    await this.sendMailWithTracking({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    }, 'ucat_addon_confirmation');
+  }
+
+  async sendUCATAddonAdminNotificationEmail(adminEmail: string, data: {
+    bookingId: string;
+    customerEmail: string;
+    customerName: string;
+    packageName: string;
+    packageType: string;
+    amount: number;
+  }): Promise<void> {
+    const template = this.getUCATAddonAdminNotificationTemplate(data);
+    
+    await this.sendMailWithTracking({
+      from: process.env.EMAIL_FROM,
+      to: adminEmail,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    }, 'ucat_addon_admin_notification');
+  }
+
+  private getUCATAddonConfirmationTemplate(data: {
+    id: string;
+    packageName: string;
+    packageType: string;
+    amount: number;
+    userName?: string;
+  }): EmailTemplate {
+    const userName = data.userName || 'there';
+    
+    const packageDescriptions: { [key: string]: { title: string; benefits: string[]; nextSteps: string[] } } = {
+      'complete_ucat_conference_pack': {
+        title: 'Complete UCAT Conference Pack',
+        benefits: [
+          'Access to ALL recorded conference sessions',
+          'Comprehensive UCAT strategy workshops',
+          'Expert tips from 3000+ scorers',
+          'Downloadable study materials',
+          'Q&A session recordings'
+        ],
+        nextSteps: [
+          'You will receive access links to all conference recordings within 24 hours',
+          'Check your email (including spam folder) for the access details',
+          'Conference materials will be available for 12 months from purchase'
+        ]
+      },
+      'unlimited_support_package': {
+        title: 'Unlimited Support Package',
+        benefits: [
+          'Unlimited question submissions via email',
+          'Expert guidance from 3000+ UCAT scorers',
+          'Personalised feedback on your answers',
+          'Strategy tips for challenging questions',
+          'Support until your UCAT exam date'
+        ],
+        nextSteps: [
+          'You can start submitting questions immediately to contact@nextgenmedprep.com',
+          'Include your booking ID in all correspondence for faster responses',
+          'Expect responses within 24-48 hours during weekdays'
+        ]
+      }
+    };
+
+    const packageInfo = packageDescriptions[data.packageType] || {
+      title: data.packageName,
+      benefits: ['Full package access'],
+      nextSteps: ['Our team will be in touch within 24 hours']
+    };
+
+    return {
+      subject: `Your ${packageInfo.title} Purchase Confirmed - NextGen MedPrep`,
+      text: `Hi ${userName},\n\nThank you for purchasing the ${packageInfo.title}!\n\nYour Purchase Details:\nBooking ID: ${data.id}\nPackage: ${packageInfo.title}\nAmount: £${data.amount}\n\nWhat's Included:\n${packageInfo.benefits.map(b => `• ${b}`).join('\n')}\n\nNext Steps:\n${packageInfo.nextSteps.map(s => `• ${s}`).join('\n')}\n\nIf you have any questions, feel free to reach out to us at contact@nextgenmedprep.com.\n\nThank you for choosing NextGen MedPrep!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #7c3aed;">Thank You for Your Purchase! 🎉</h1>
+          <p>Hi ${userName},</p>
+          <p>Thank you for purchasing the <strong>${packageInfo.title}</strong>!</p>
+          
+          <div style="background-color: #f5f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
+            <h3 style="margin-top: 0; color: #5b21b6;">Your Purchase Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${data.id}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Package:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>${packageInfo.title}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${data.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #065f46;">What's Included:</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
+              ${packageInfo.benefits.map(b => `<li>${b}</li>`).join('\n              ')}
+            </ul>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="margin-top: 0; color: #92400e;">Next Steps:</h3>
+            <ul style="color: #374151; margin: 0; padding-left: 20px; line-height: 1.8;">
+              ${packageInfo.nextSteps.map(s => `<li>${s}</li>`).join('\n              ')}
+            </ul>
+          </div>
+
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0; font-size: 14px; color: #6b7280;">
+              <strong>Questions?</strong> Feel free to reach out at <a href="mailto:contact@nextgenmedprep.com" style="color: #7c3aed;">contact@nextgenmedprep.com</a>
+            </p>
+          </div>
+
+          <div style="background-color: #ddd6fe; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <p style="margin: 0; font-size: 16px; color: #5b21b6;">
+              <strong>NextGen MedPrep</strong><br>
+              <span style="font-size: 14px;">Your pathway to medical school success</span>
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      `
+    };
+  }
+
+  private getUCATAddonAdminNotificationTemplate(data: {
+    bookingId: string;
+    customerEmail: string;
+    customerName: string;
+    packageName: string;
+    packageType: string;
+    amount: number;
+  }): EmailTemplate {
+    const packageDescriptions: { [key: string]: { title: string; action: string } } = {
+      'complete_ucat_conference_pack': {
+        title: 'Complete UCAT Conference Pack',
+        action: 'Send conference access links and materials to the customer within 24 hours.'
+      },
+      'unlimited_support_package': {
+        title: 'Unlimited Support Package',
+        action: 'Customer can now submit unlimited questions to contact@nextgenmedprep.com. Ensure prompt responses.'
+      }
+    };
+
+    const packageInfo = packageDescriptions[data.packageType] || {
+      title: data.packageName,
+      action: 'Please process this order and follow up with the customer.'
+    };
+
+    return {
+      subject: `🎓 New UCAT Add-on Purchase: ${packageInfo.title}`,
+      text: `New UCAT Add-on Purchase\n\nA customer has purchased the ${packageInfo.title}.\n\nBooking Details:\nBooking ID: ${data.bookingId}\nCustomer: ${data.customerName}\nEmail: ${data.customerEmail}\nPackage: ${packageInfo.title}\nAmount: £${data.amount}\n\nRequired Action:\n${packageInfo.action}\n\n- NextGen MedPrep System`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #7c3aed;">🎓 New UCAT Add-on Purchase</h1>
+          <p>A customer has purchased the <strong>${packageInfo.title}</strong>.</p>
+          
+          <div style="background-color: #f5f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #7c3aed;">
+            <h3 style="margin-top: 0; color: #5b21b6;">Booking Details:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Booking ID:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-family: monospace;">${data.bookingId}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Customer:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>${data.customerName}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Email:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><a href="mailto:${data.customerEmail}" style="color: #7c3aed;">${data.customerEmail}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Package:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>${packageInfo.title}</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; font-weight: bold;">Amount:</td>
+                <td style="padding: 8px; font-size: 18px; font-weight: bold; color: #059669;">£${data.amount}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="margin-top: 0; color: #92400e;">⚡ Required Action:</h3>
+            <p style="margin: 0; color: #374151; line-height: 1.6;">
+              ${packageInfo.action}
+            </p>
+          </div>
+
+          <p style="margin-top: 30px;">Best regards,<br><strong>NextGen MedPrep System</strong></p>
+        </div>
+      `
+    };
+  }
 }
 
 export default new EmailService();

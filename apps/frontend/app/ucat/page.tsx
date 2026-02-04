@@ -3,26 +3,21 @@ import Link from 'next/link';
 import UCATCalculator from '../../components/ucat/UCATCalculator';
 import { ucatPackages } from '@/data/packages';
 import { 
-  PuzzlePieceIcon, 
-  ChartBarIcon, 
-  BookOpenIcon, 
-  UserGroupIcon,
   ClockIcon,
-  TrophyIcon,
+  CheckIcon,
+  ArrowRightIcon,
+  BookOpenIcon,
   AcademicCapIcon,
-  CalculatorIcon
 } from '@heroicons/react/24/outline';
 
 export default function UCATPage() {
   const highlightHours = (text: string) => {
     const parts = text.split(/(\+?\d+\s*hours?)/i);
     return parts.map((part, index) => {
-      if (!part) {
-        return null;
-      }
+      if (!part) return null;
       if (/^\+?\d+\s*hours?$/i.test(part)) {
         return (
-          <span key={`${part}-${index}`} className="font-semibold text-gray-900">
+          <span key={`${part}-${index}`} className="font-semibold text-slate-900">
             {part}
           </span>
         );
@@ -44,399 +39,244 @@ export default function UCATPage() {
       .flatMap((feature) => feature.match(/\+?\d+\s*hours?/gi) ?? [])
       .map((match) => parseInt(match.replace(/[^\d]/g, ''), 10))
       .filter((value) => Number.isFinite(value));
-    if (!hoursMatches.length) {
-      return null;
-    }
-    const total = hoursMatches.reduce((sum, value) => sum + value, 0);
-    return total;
+    if (!hoursMatches.length) return null;
+    return hoursMatches.reduce((sum, value) => sum + value, 0);
   };
 
-  const services = [
-    {
-      title: "Free ",
-      description: "Complete preparation covering all four UCAT sections with expert tutoring and proven strategies.",
-      features: ["All section coverage", "Practice tests", "Expert tutoring", "Score improvement guarantee"],
-      icon: AcademicCapIcon,
-      color: "bg-blue-50 border-blue-200",
-      buttonColor: "bg-blue-600 hover:bg-blue-700",
-      link: "resources/ultimate-ucat-prep-guide", 
-      buttonText: "Get the Guide"
-    },
-    {
-      title: "Tutoring",
-      description: "Master reading comprehension, critical thinking, and inference skills for the VR section.",
-      features: ["Speed reading techniques", "Question analysis", "Inference strategies", "Time management"],
-      icon: BookOpenIcon,
-      color: "bg-green-50 border-green-200",
-      buttonColor: "bg-green-600 hover:bg-green-700",
-      link: "#tutoring-packages",
-      buttonText: "Book Now"
-    },
-    {
-      title: "Personalised Revision Plan", // payment screen with info email, phone number - 20 quid text every week hours a day target score and intensity. 
-      description: "Tailored study plan to maximise your strengths and address weaknesses.",
-      features: ["Personalised Reminders", "Weekly Check-ins", "Progress Tracking"],
-      icon: CalculatorIcon,
-      color: "bg-purple-50 border-purple-200",
-      buttonColor: "bg-purple-600 hover:bg-purple-700",
-      link: "/personalised-revision-plan",
-      buttonText: "Get Started"
-    },
-
-  ];
-
   const ucatSections = [
-    {
-      name: "Verbal Reasoning",
-      description: "Reading comprehension and critical thinking",
-      duration: "22 minutes",
-      questions: "44 questions",
-      icon: BookOpenIcon,
-      color: "border-blue-500"
-    },
-    {
-      name: "Quantitative Reasoning", 
-      description: "Mathematical problem solving and data analysis",
-      duration: "26 minutes",
-      questions: "36 questions", 
-      icon: CalculatorIcon,
-      color: "border-green-500"
-    },
-    {
-      name: "Decision Making",
-      description: "Logical reasoning and problem solving",
-      duration: "37 minutes", 
-      questions: "35 questions",
-      icon: TrophyIcon,
-      color: "border-orange-500"
-    },
-    {
-      name: "Situational Judgement",
-      description: "Professional behavior and ethics",
-      duration: "26 minutes",
-      questions: "69 questions",
-      icon: UserGroupIcon,
-      color: "border-indigo-500"
-    }
+    { name: "Verbal Reasoning", time: "22 min", questions: 44 },
+    { name: "Quantitative Reasoning", time: "26 min", questions: 36 },
+    { name: "Decision Making", time: "37 min", questions: 35 },
+    { name: "Situational Judgement", time: "26 min", questions: 69 },
   ];
-
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-white py-24 px-6 overflow-hidden">
-        
-        {/* --- Soft Background Washes --- */}
-        {/* These replace the 'dark mode' glows with light, airy colors */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 pointer-events-none">
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-100/50 rounded-full blur-[100px]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[60%] bg-purple-100/60 rounded-full blur-[100px]" />
-            <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] bg-pink-100/40 rounded-full blur-[80px]" />
-        </div>
+      <section className="relative pt-12 pb-20 px-6 overflow-hidden">
+        {/* Background effects */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-400/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 translate-x-1/3 translate-y-1/3 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px]" />
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="relative max-w-5xl mx-auto text-center z-10">
           
-          {/* Friendly Icon Badge */}
-          <div className="mx-auto w-20 h-20 mb-8 bg-white rounded-2xl flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 rotate-[-6deg] hover:rotate-0 transition-transform duration-300">
-            <span className="text-4xl">🧠</span>
-          </div>
+          {/* Badge */}
+          <a 
+            href="#tutoring-packages" 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/5 border border-slate-200 shadow-sm backdrop-blur-md mb-8 hover:bg-slate-900/10 hover:border-slate-300 transition-all duration-200"
+          >
+             <span className="text-sm font-semibold text-slate-700 tracking-wide">15%+ Score Increase Guaranteed</span>
+             <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+             </svg>
+          </a>
 
-          {/* Headline */}
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-tight">
             Master the <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-fuchsia-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600">
               UCAT Exam
             </span>
           </h1>
 
-          {/* Description - Lighter text for a welcoming vibe */}
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-            Turn test anxiety into test mastery. Join the program designed to guide you 
-            through every section with expert tutoring and unlimited practice.
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Stop guessing what the test requires. Build confidence with expert tutoring from top 5% scorers, 
+            proven strategies, and unlimited support.
           </p>
-          
-          {/* Buttons - Soft shadows and gradients */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-                href="#tutoring-packages" 
-                className="px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full font-semibold shadow-lg shadow-violet-200 hover:shadow-violet-300 hover:-translate-y-1 transition-all duration-300"
-              >
-                Join Our Programs
-              </Link>
 
-              <Link 
-                  href="/interviews/free-resources" 
-                  className="group px-8 py-4 bg-white text-slate-600 border border-slate-200 rounded-full font-semibold hover:border-violet-200 hover:text-violet-600 hover:bg-violet-50 transition-all duration-300 flex items-center gap-2"
-              >
-                  Free Resources
-                  <span className="text-lg leading-none group-hover:translate-x-1 transition-transform">→</span>
-              </Link>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <Link 
+              href="#tutoring-packages" 
+              className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.3)] hover:-translate-y-1"
+            >
+              View Packages
+            </Link>
+            
+            <Link 
+              href="/ucat/resources" 
+              className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50/50 transition-all duration-300 shadow-sm"
+            >
+              Free Resources
+            </Link>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="mt-16 flex flex-wrap justify-center gap-4 sm:gap-8 text-sm font-semibold text-slate-400">
-            <span className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-violet-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-              5-Star Rated Tutoring
-            </span>
-            <span className="hidden sm:inline text-slate-300">•</span>
-            <span>100+ Practice Questions</span>
-            <span className="hidden sm:inline text-slate-300">•</span>
-            <span>1-on-1 Strategy</span>
+          {/* Stats / Social Proof */}
+          <div className="inline-flex flex-col md:flex-row items-center gap-8 md:gap-12 px-8 py-6 bg-white/40 backdrop-blur-lg border border-white/60 rounded-2xl shadow-xl shadow-blue-900/5">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-slate-900">500+</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Students Helped</p>
+            </div>
+            <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-slate-900">92%</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Improve Score</p>
+            </div>
+            <div className="hidden md:block w-px h-10 bg-slate-200/60"></div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-slate-900">+450</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Avg. Increase</p>
+            </div>
           </div>
-
         </div>
       </section>
 
-      {/* UCAT Calculator Component */}
+      {/* UCAT Overview - Condensed */}
+      <section className="py-16 px-6 bg-white border-y border-slate-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+            <div>
+              <h2 className="text-2xl font-semibold text-slate-900">The Test</h2>
+              <p className="text-slate-500 mt-1">2 hours. 233 questions. 4 sections.</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {ucatSections.map((section) => (
+              <div 
+                key={section.name}
+                className="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors"
+              >
+                <h3 className="font-medium text-slate-900 mb-3">{section.name}</h3>
+                <div className="flex items-center gap-4 text-sm text-slate-500">
+                  <span>{section.time}</span>
+                  <span className="w-1 h-1 bg-slate-300 rounded-full" />
+                  <span>{section.questions}q</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Calculator */}
       <UCATCalculator />
 
-      {/* Why UCAT Prep Matters */}
-      <section className="py-16 px-4 bg-white">
+      {/* Tutoring Packages */}
+      <section id="packages" className="py-20 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why UCAT Preparation is Essential</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              The UCAT is a crucial component of your medical school application. Don't leave it to chance.
+          <div className="max-w-2xl mb-16">
+            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
+              Tutoring Packages
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
+              1-on-1 expert guidance
+            </h2>
+            <p className="text-lg text-slate-600 leading-relaxed">
+              Work directly with tutors who scored in the top 5%. Each package includes a 
+              personalised 10-week action plan tailored to your strengths and weaknesses.
             </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-xl bg-blue-50 border border-blue-100">
-              <ClockIcon className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Time Pressure</h3>
-              <p className="text-gray-600">Only 2 hours to complete 233 questions across 5 sections</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-green-50 border border-green-100">
-              <TrophyIcon className="w-12 h-12 mx-auto text-green-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">High Stakes</h3>
-              <p className="text-gray-600">UCAT scores significantly impact medical school admission chances</p>
-            </div>
-            <div className="text-center p-6 rounded-xl bg-purple-50 border border-purple-100">
-              <ChartBarIcon className="w-12 h-12 mx-auto text-purple-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Skill-Based</h3>
-              <p className="text-gray-600">Success requires specific strategies and extensive practice</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* UCAT Sections Overview */}
-      <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">UCAT Test Sections</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Understanding each section is key to effective preparation
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {ucatSections.map((section, index) => (
-              <div 
-                key={index} 
-                className={`bg-white p-8 rounded-2xl border-2 ${section.color} shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group`}
-              >
-                <div className="flex items-start gap-5 mb-6">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${
-                    section.color.includes('blue') ? 'from-blue-50 to-blue-100' :
-                    section.color.includes('green') ? 'from-green-50 to-green-100' :
-                    section.color.includes('orange') ? 'from-orange-50 to-orange-100' :
-                    'from-indigo-50 to-indigo-100'
-                  } group-hover:scale-110 transition-transform duration-300`}>
-                    <section.icon className={`w-8 h-8 ${
-                      section.color.includes('blue') ? 'text-blue-600' :
-                      section.color.includes('green') ? 'text-green-600' :
-                      section.color.includes('orange') ? 'text-orange-600' :
-                      'text-indigo-600'
-                    } flex-shrink-0`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {section.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {section.description}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <ClockIcon className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-700">{section.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <PuzzlePieceIcon className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm font-semibold text-gray-700">{section.questions}</span>
-                  </div>
-                </div>
+          {/* What's included banner */}
+          <div className="bg-slate-900 text-white rounded-2xl p-6 md:p-8 mb-10">
+            <p className="text-amber-400 font-medium text-sm mb-3">Included in all packages</p>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-start gap-3">
+                <CheckIcon className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-300">Tutors scored in the top 5% internationally</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our UCAT Preparation Services</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Comprehensive courses designed to maximise your UCAT score
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className={`p-6 rounded-xl border-2 ${service.color} hover:shadow-lg transition-all duration-300 flex flex-col h-full`}>
-                <div className="flex items-start gap-4 mb-6">
-                  <service.icon className="w-10 h-10 text-current flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                    <p className="text-gray-600 text-sm">{service.description}</p>
-                  </div>
-                </div>
-                
-                <div className="mb-6 flex-grow">
-                  <h4 className="font-semibold text-gray-900 mb-3">Key features:</h4>
-                  <ul className="space-y-2">
-                    {service.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2 text-gray-600 text-sm">
-                        <span className="text-green-500">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <Link href={service.link} className="mt-auto">
-                  <button className={`w-full ${service.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300`}>
-                  {service.buttonText}
-                  </button>
-                </Link>
+              <div className="flex items-start gap-3">
+                <CheckIcon className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-300">Updated question bank with worked examples</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* UCAT Tutoring Packages 
-        make into a table better 
-      */}
-      <section id="tutoring-packages" className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">UCAT Tutoring Packages</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Join our expert UCAT tutoring program and get one-on-one guidance from current medical and dental students who scored in the top 1% of UCAT test-takers.
-            </p>
-          </div>
-          
-          <div className="mb-10">
-            <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-md border border-gray-100 mb-12">
-              <p className="text-lg text-gray-700 mb-6">
-                Each student receives a fully personalised 10-week action plan tailored to their strengths and weaknesses, with weekly updates and structured days to help you maximise your study time outside tutoring sessions.
-              </p>
-              <p className="text-lg text-gray-700">
-                Whether you're just starting out or looking to fine-tune your skills, our structured, strategic approach will keep you on track and boost your confidence every step of the way.
-              </p>
-              <div className="mt-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">All packages include:</h3>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <li className="flex items-center text-gray-700">
-                    <span className="text-green-500 mr-2">✓</span> Tutors scored in the top 5% internationally
-                  </li>
-                  <li className="flex items-center text-gray-700">
-                    <span className="text-green-500 mr-2">✓</span> Continuous updated question bank with worked examples
-                  </li>
-                  <li className="flex items-center text-gray-700 col-span-1 md:col-span-2">
-                    <span className="text-green-500 mr-2">✓</span> Free cheat sheets for each area, including the best approaches – available for everyone
-                  </li>
-                </ul>
+              <div className="flex items-start gap-3">
+                <CheckIcon className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-300">Free strategy cheat sheets for each section</span>
               </div>
             </div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {ucatPackages.map((pkg) => (
               <div 
                 key={pkg.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 relative"
+                className={`relative bg-white rounded-2xl border-2 transition-all hover:shadow-lg ${
+                  pkg.popular ? 'border-amber-400' : 'border-slate-200 hover:border-slate-300'
+                }`}
               >
                 {pkg.popular && (
-                  <div className="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
-                    MOST POPULAR
+                  <div className="absolute -top-3 left-6 bg-amber-400 text-slate-900 px-3 py-1 rounded-full text-xs font-semibold">
+                    Most Popular
                   </div>
                 )}
-                <div className={`${pkg.color} p-6 text-white`}>
-                  <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
-                  <p className="opacity-90">{pkg.description}</p>
-                  {getTotalTeachingHours(pkg) !== null && (
-                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
-                      <span className="uppercase tracking-wide text-white/80">Total teaching</span>
-                      <span className="text-white">
-                        {getTotalTeachingHours(pkg)} hours
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  {pkg.baseFeatures && (
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">
-                        {pkg.id === 'ucat_advance' ? 'Includes everything in Kickstart:' : 'Includes everything in Kickstart & Advance:'}
-                      </h4>
-                      <ul className="space-y-2 text-sm">
-                        {pkg.baseFeatures.map((feature, idx) => (
-                          <li key={idx} className="flex items-start">
-                            <span className="text-green-500 mr-2 mt-0.5">✓</span>
-                            <span className="text-gray-600">{highlightHours(feature)}</span>
+                
+                <div className="p-6 md:p-8">
+                  <div className="mb-6">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">{pkg.name}</h3>
+                    <p className="text-slate-500 text-sm">{pkg.description}</p>
+                    {getTotalTeachingHours(pkg) && (
+                      <div className="mt-3 inline-flex items-center gap-2 text-sm">
+                        <ClockIcon className="w-4 h-4 text-slate-400" />
+                        <span className="text-slate-600">
+                          {getTotalTeachingHours(pkg)} hours total
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-4 mb-8">
+                    {pkg.baseFeatures && (
+                      <div>
+                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+                          {pkg.id === 'ucat_advance' ? 'Includes Kickstart' : 'Includes Kickstart & Advance'}
+                        </p>
+                        <ul className="space-y-2">
+                          {pkg.baseFeatures.map((feature, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm">
+                              <CheckIcon className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <span className={feature.includes('FREE') || feature.includes('£') ? 'font-medium text-emerald-600' : 'text-slate-600'}>
+                                {highlightHours(feature)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {pkg.advancedFeatures && (
+                      <div className="pt-4 border-t border-slate-100">
+                        <p className="text-xs font-medium text-amber-600 uppercase tracking-wide mb-2">
+                          Plus
+                        </p>
+                        <ul className="space-y-2">
+                          {pkg.advancedFeatures.map((feature, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm">
+                              <CheckIcon className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <span className={feature.includes('FREE') || feature.includes('£') ? 'font-medium text-emerald-600' : 'text-slate-600'}>
+                                {highlightHours(feature)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {!pkg.baseFeatures && (
+                      <ul className="space-y-2">
+                        {pkg.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-sm">
+                            <CheckIcon className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            <span className={feature.includes('FREE') || feature.includes('£') ? 'font-medium text-emerald-600' : 'text-slate-600'}>
+                              {highlightHours(feature)}
+                            </span>
                           </li>
                         ))}
                       </ul>
-                    </div>
-                  )}
+                    )}
+                  </div>
                   
-                  {pkg.advancedFeatures && (
-                    <div className="border-t border-gray-200 pt-4">
-                      <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                        <span className="inline-flex items-center rounded-full bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white">
-                          Added on top
-                        </span>
-                        <span>
-                          {pkg.id === 'ucat_advance' ? 'Extra advanced features:' : 'Extra mastery features:'}
-                        </span>
-                      </h4>
-                      <ul className="space-y-3 mb-8">
-                        {pkg.advancedFeatures.map((feature, idx) => (
-                          <li key={idx} className="flex items-start">
-                            <span className="text-green-500 mr-2 mt-1">✓</span>
-                            <span>{highlightHours(feature)}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  
-                  {!pkg.baseFeatures && (
-                    <ul className="space-y-3 mb-8">
-                      {pkg.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <span className="text-green-500 mr-2 mt-1">✓</span>
-                          <span>{highlightHours(feature)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  
-                  <div className="border-t pt-6 mt-4">
-                    <div className="flex justify-between items-center mb-6">
-                      <span className="text-3xl font-bold text-gray-900">£{pkg.price}</span>
+                  <div className="pt-6 border-t border-slate-100">
+                    <div className="flex items-baseline gap-1 mb-4">
+                      <span className="text-3xl font-semibold text-slate-900">£{pkg.price}</span>
                     </div>
                     <Link 
-                      href={`/ucat/payment?package=${pkg.id}`} 
-                      className={`w-full ${pkg.buttonColor} text-white py-3 rounded-lg font-semibold transition-all duration-300 block text-center`}
+                      href={`/ucat/payment?package=${pkg.id}`}
+                      className={`block w-full py-3 rounded-full font-medium text-center transition-colors ${
+                        pkg.popular 
+                          ? 'bg-slate-900 text-white hover:bg-slate-800' 
+                          : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
+                      }`}
                     >
                       Get Started
                     </Link>
@@ -448,51 +288,202 @@ export default function UCATPage() {
         </div>
       </section>
 
-      {/* Score Improvement Stats */}
-      <section className="py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Proven Results</h2>
-            <p className="text-lg text-gray-600">Our students consistently achieve significant score improvements</p>
+      {/* Conferences */}
+      <section className="py-20 px-6 bg-stone-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mb-12">
+            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
+              Conferences
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
+              Expert-led deep dives
+            </h2>
+            <p className="text-lg text-slate-600">
+              Comprehensive sessions covering strategy, techniques, and practice for each section.
+            </p>
           </div>
-          
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-blue-600 mb-2">+450</div>
-              <div className="text-gray-600">Average Score Increase</div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Free Intro */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 hover:shadow-md transition-shadow">
+              <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-6">
+                <span>Free</span>
+              </div>
+              
+              <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                Introduction to UCAT
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Get started with test structure, timing overview, and foundational strategies for all five sections.
+              </p>
+
+              <ul className="space-y-2 mb-8">
+                {['Test format & structure', 'Section overviews', 'Core strategies', 'How to prepare effectively'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                    <CheckIcon className="w-4 h-4 text-emerald-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <Link 
+                href="/ucat/conference/intro"
+                className="block w-full py-3 bg-slate-900 text-white rounded-full font-medium text-center hover:bg-slate-800 transition-colors"
+              >
+                Register Free
+              </Link>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-green-600 mb-2">92%</div>
-              <div className="text-gray-600">Students Improve Score</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-purple-600 mb-2">2100+</div>
-              <div className="text-gray-600">Average Final Score</div>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="text-3xl font-bold text-orange-600 mb-2">500+</div>
-              <div className="text-gray-600">Students Helped</div>
+
+            {/* Bundle */}
+            <div className="bg-slate-900 text-white rounded-2xl p-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="relative">
+                <div className="inline-flex items-center gap-2 bg-amber-400 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold mb-6">
+                  Save £10
+                </div>
+                
+                <h3 className="text-xl font-semibold mb-3">
+                  Complete Conference Pack
+                </h3>
+                <p className="text-slate-400 mb-6">
+                  All four section conferences: VR, DM, QR, and AR. 1.5 hours each.
+                </p>
+
+                <ul className="space-y-2 mb-8">
+                  {['Verbal Reasoning Mastery', 'Decision Making Workshop', 'Quantitative Reasoning', 'Abstract Reasoning Techniques'].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-sm text-slate-300">
+                      <CheckIcon className="w-4 h-4 text-amber-400" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex items-baseline gap-3 mb-6">
+                  <span className="text-3xl font-semibold">£50</span>
+                  <span className="text-slate-500 line-through">£60</span>
+                </div>
+
+                <Link 
+                  href="ucat/add-ons"
+                  className="block w-full py-3 bg-amber-400 text-slate-900 rounded-full font-semibold text-center hover:bg-amber-300 transition-colors"
+                >
+                  Get Bundle
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Boost Your UCAT Score?</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join our proven program and unlock your medical school dreams
+      {/* Add-ons */}
+      <section className="py-20 px-6 bg-white border-t border-slate-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mb-12">
+            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
+              Add-ons
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
+              Extra support tools
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Revision Plan */}
+            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <BookOpenIcon className="w-6 h-6 text-violet-600" />
+              </div>
+              
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Personalised Revision Plan
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Custom study schedule delivered weekly via text. Tailored to your target score, 
+                available hours, and intensity preferences.
+              </p>
+
+              <ul className="space-y-2 mb-8">
+                {['Weekly personalised schedule', 'Text message reminders', 'Progress tracking', 'Intensity customization'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                    <CheckIcon className="w-4 h-4 text-violet-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-semibold text-slate-900">£30</span>
+                <Link 
+                  href="/personalised-revision-plan"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
+                >
+                  Get Started
+                  <ArrowRightIcon className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Unlimited Questions */}
+            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <AcademicCapIcon className="w-6 h-6 text-sky-600" />
+              </div>
+              
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Unlimited Question Support
+              </h3>
+              <p className="text-slate-600 mb-6">
+                24/7 access to expert tutors. Submit any question via phone, get detailed 
+                video explanations. Never feel stuck again.
+              </p>
+
+              <ul className="space-y-2 mb-8">
+                {['Unlimited submissions', 'Video explanations', 'Direct tutor access', 'Fast turnaround'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                    <CheckIcon className="w-4 h-4 text-sky-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-semibold text-slate-900">£65</span>
+                <Link 
+                  href="ucat/add-ons"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
+                >
+                  Get Started
+                  <ArrowRightIcon className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-6 bg-slate-900">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4">
+            Ready to start?
+          </h2>
+          <p className="text-lg text-slate-400 mb-10">
+            Join hundreds of students who've transformed their UCAT preparation with our proven approach.
           </p>
+          
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="#tutoring-packages" className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300">
-              Join Our Programs
+            <Link 
+              href="#packages" 
+              className="inline-flex items-center justify-center px-8 py-4 bg-amber-400 text-slate-900 rounded-full font-semibold hover:bg-amber-300 transition-colors"
+            >
+              View Packages
             </Link>
             <Link 
-              href="#ucat-calculator"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300"
+              href="/ucat/conference/intro"
+              className="inline-flex items-center justify-center px-8 py-4 bg-transparent text-white border border-slate-700 rounded-full font-medium hover:border-slate-500 hover:bg-slate-800 transition-colors"
             >
-              Calculate Hours Needed
+              Start with Free Intro
             </Link>
           </div>
         </div>

@@ -340,14 +340,15 @@ export class StripeService {
       } else {
         console.log(`One-time payment completed: ${session.payment_intent}`);
         
-        // For bookings (interview, UCAT, personal statement, career consultation, event, or revision plan), get the payment intent and handle it
+        // For bookings (interview, UCAT, personal statement, career consultation, event, revision plan, or UCAT addon), get the payment intent and handle it
         if (session.payment_intent && (
           session.metadata?.type === 'interview_booking' || 
           session.metadata?.type === 'ucat_tutoring' ||
           session.metadata?.type === 'personal_statement_review' ||
           session.metadata?.type === 'career_consultation' ||
           session.metadata?.type === 'event_booking' ||
-          session.metadata?.type === 'revision_plan'
+          session.metadata?.type === 'revision_plan' ||
+          session.metadata?.type === 'ucat_addon'
         )) {
           console.log('Processing payment for type:', session.metadata?.type);
           
@@ -422,6 +423,9 @@ export class StripeService {
           break;
         case 'revision_plan':
           await this.handleRevisionPlanPayment(paymentIntent);
+          break;
+        case 'ucat_addon':
+          await this.handleUCATAddonPayment(paymentIntent);
           break;
         default:
           console.log('Unknown booking type, using default interview booking handler');
@@ -1162,6 +1166,147 @@ export class StripeService {
       console.log('=== Revision Plan Payment Handler Completed Successfully ===');
     } catch (error) {
       console.error('=== Revision Plan Payment Handler Error ===');
+      console.error('Error:', error);
+      console.error('Error stack:', (error as Error).stack);
+      // Don't throw error to avoid webhook retry loops
+    }
+  }
+
+  private async handleUCATAddonPayment(paymentIntent: Stripe.PaymentIntent): Promise<void> {
+    console.log('=== UCAT Add-on Payment Handler Started ===');
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Payment Intent Metadata:', paymentIntent.metadata);
+    
+    try {
+      // Import services here to avoid circular dependencies
+      const supabaseService = (await import('./supabaseService')).default;
+      const emailService = (await import('./emailService')).default;
+      
+      // Get payment metadata
+      const metadata = paymentIntent.metadata;
+      const customerEmail = metadata.customer_email;
+      const customerName = metadata.customer_name;
+      const firstName = metadata.first_name;
+      const lastName = metadata.last_name;
+      const packageId = metadata.package_id;
+      const packageName = metadata.package_name;
+      const phone = metadata.phone;
+      const amount = paymentIntent.amount / 100; // Convert from cents
+      
+      console.log('Extracted metadata:', {
+        customerEmail,
+        customerName,
+        firstName,
+        lastName,
+        packageId,
+        packageName,
+        phone,
+        amount
+      });
+      
+      if (!customerEmail) {
+        console.error('No customer email found in payment metadata');
+        return;
+      }
+      
+      console.log('Processing UCAT add-on payment for:', {
+        customerEmail,
+        customerName,
+        packageId,
+        packageName,
+        amount
+      });
+      
+      // 1. Check if user exists, create if not
+      console.log('Step 1: Checking if user exists...');
+      let user = await supabaseService.getUserByEmail(customerEmail);
+      
+      if (!user) {
+        console.log('Creating new user for email:', customerEmail);
+        user = await supabaseService.createUser({
+          email: customerEmail,
+          full_name: customerName || `${firstName} ${lastName}` || '',
+          role: 'student',
+          stripe_customer_id: paymentIntent.customer as string || undefined
+        });
+        console.log('Created user:', user.id);
+      } else {
+        console.log('Found existing user:', user.id);
+      }
+      
+      // 2. Check for subscription, create free subscription if not exists
+      console.log('Step 2: Checking subscription...');
+      let subscription = await supabaseService.getSubscriptionByEmail(customerEmail);
+      
+      if (!subscription) {
+        console.log('Creating free subscription for email:', customerEmail);
+        subscription = await supabaseService.createSubscription({
+          email: customerEmail,
+          user_id: user.id,
+          subscription_tier: 'free',
+          opt_in_newsletter: true
+        });
+        console.log('Created subscription for user:', user.id);
+      } else {
+        console.log('Found existing subscription:', subscription);
+        if (!subscription.user_id) {
+          console.log('Linking subscription to user...');
+          await supabaseService.linkSubscriptionToUser(customerEmail, user.id);
+          console.log('Linked subscription to user:', user.id);
+        }
+      }
+      
+      // 3. Create booking entry
+      console.log('Step 3: Creating booking entry...');
+      const bookingData = {
+        user_id: user.id,
+        package: packageId || packageName || 'ucat_addon',
+        amount: amount,
+        email: customerEmail,
+        notes: `${packageName} - ${customerName || `${firstName} ${lastName}`}${phone ? ` - Phone: ${phone}` : ''}`,
+        payment_status: 'paid' as const
+      };
+      console.log('Booking data to create:', bookingData);
+      
+      const booking = await supabaseService.createBooking(bookingData);
+      
+      console.log('Created UCAT add-on booking:', booking);
+      
+      // 4. Send confirmation email to customer
+      console.log('Step 4: Sending confirmation email to student...');
+      try {
+        await emailService.sendUCATAddonConfirmationEmail(customerEmail, {
+          id: booking.id,
+          amount,
+          userName: customerName || firstName || 'there',
+          packageType: packageId || '',
+          packageName: packageName || 'UCAT Add-on'
+        });
+        console.log('Sent UCAT add-on confirmation email to:', customerEmail);
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
+      
+      // 5. Send notification email to admin/tutor team
+      console.log('Step 5: Sending notification email to admin team...');
+      try {
+        const adminEmail = process.env.ADMIN_EMAIL || 'contact@nextgenmedprep.com';
+        await emailService.sendUCATAddonAdminNotificationEmail(adminEmail, {
+          bookingId: booking.id,
+          customerEmail,
+          customerName: customerName || `${firstName} ${lastName}` || 'Student',
+          packageType: packageId || '',
+          packageName: packageName || 'UCAT Add-on',
+          amount
+        });
+        console.log('Sent UCAT add-on notification to admin team');
+      } catch (emailError) {
+        console.error('Failed to send admin notification email:', emailError);
+      }
+      
+      console.log('=== UCAT Add-on Payment Handler Completed Successfully ===');
+    } catch (error) {
+      console.error('=== UCAT Add-on Payment Handler Error ===');
       console.error('Error:', error);
       console.error('Error stack:', (error as Error).stack);
       // Don't throw error to avoid webhook retry loops

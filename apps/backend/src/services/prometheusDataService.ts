@@ -28,12 +28,14 @@ export interface UniversityStation {
   created_at: string;
   updated_at: string;
   university: string;
+  field?: string | null;
 }
 
 export interface UniversityTagConfig {
   university_station: string;
   tag: string;
   notes?: Record<string, unknown> | null;
+  field?: string | null;
 }
 
 export interface FollowUpQuestion {
@@ -271,7 +273,7 @@ export const deleteTag = async (tagId: string) => {
 // University Stations & Tag Configs
 // ============================================================================
 
-export const getUniversityStations = async (university?: string) => {
+export const getUniversityStations = async (university?: string, field?: string) => {
   const supabase = createSupabaseClient();
 
   let query = supabase
@@ -281,13 +283,18 @@ export const getUniversityStations = async (university?: string) => {
       *,
       university_tag_configs (
         tag,
-        notes
+        notes,
+        field
       )
     `)
     .order('station_index', { ascending: true });
 
   if (university) {
     query = query.eq('university', university);
+  }
+
+  if (field) {
+    query = query.eq('field', field);
   }
 
   const { data, error } = await query;
@@ -304,6 +311,7 @@ export const createUniversityStation = async (station: {
   notes?: string | null;
   is_active?: boolean;
   university: string;
+  field?: string | null;
 }) => {
   const supabase = createSupabaseClient();
 
@@ -318,12 +326,14 @@ export const createUniversityStation = async (station: {
       notes: station.notes ?? null,
       is_active: station.is_active ?? true,
       university: station.university,
+      field: station.field ?? null,
     })
     .select(`
       *,
       university_tag_configs (
         tag,
-        notes
+        notes,
+        field
       )
     `)
     .single();
@@ -357,6 +367,7 @@ export const setUniversityStationTags = async (
   tagConfigs: Array<{
     tag: string;
     notes?: Record<string, unknown> | null;
+    field?: string | null;
   }>
 ) => {
   const supabase = createSupabaseClient();
@@ -378,6 +389,7 @@ export const setUniversityStationTags = async (
           university_station: stationId,
           tag: config.tag,
           notes: config.notes ?? null,
+          field: config.field ?? null,
         }))
       );
 
@@ -391,7 +403,8 @@ export const setUniversityStationTags = async (
       *,
       university_tag_configs (
         tag,
-        notes
+        notes,
+        field
       )
     `)
     .eq('id', stationId)

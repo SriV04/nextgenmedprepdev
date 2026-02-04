@@ -80,6 +80,9 @@ export default function StudentDashboard() {
   const [managingInterview, setManagingInterview] = useState<DashboardInterview | null>(null);
   const [scheduleSuccess, setScheduleSuccess] = useState(false);
   const [scheduleMessage, setScheduleMessage] = useState('');
+  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
+  const [availabilitySubmitting, setAvailabilitySubmitting] = useState(false);
+  const [availabilitySuccess, setAvailabilitySuccess] = useState(false);
 
   const router = useRouter();
   const supabase = createClient();
@@ -199,6 +202,60 @@ export default function StudentDashboard() {
     setActiveInterview(null);
     setTutorAvailability([]);
     setAvailabilityError(null);
+  };
+
+  const handleOpenAvailability = () => {
+    setIsAvailabilityModalOpen(true);
+    setAvailabilitySuccess(false);
+  };
+
+  const handleCloseAvailability = () => {
+    setIsAvailabilityModalOpen(false);
+  };
+
+  const handleSubmitAvailability = async (selection: {
+    scheduledAt: string;
+  }) => {
+    if (!userRecord?.id) return;
+
+    try {
+      setAvailabilitySubmitting(true);
+      
+      const scheduledDate = new Date(selection.scheduledAt);
+      const date = scheduledDate.toISOString().split('T')[0];
+      const hour = scheduledDate.getUTCHours();
+
+      const response = await fetch(`${backendUrl}/api/v1/users/${userRecord.id}/availability`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date,
+          hour_start: hour,
+          hour_end: hour + 1,
+        }),
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to submit availability');
+      }
+
+      setAvailabilitySuccess(true);
+      
+      // Auto-close modal after 2 seconds
+      setTimeout(() => {
+        handleCloseAvailability();
+        setAvailabilitySuccess(false);
+        refresh();
+      }, 2000);
+    } catch (err: any) {
+      console.error('Error submitting availability:', err);
+      alert(err.message || 'Failed to submit availability');
+    } finally {
+      setAvailabilitySubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -605,6 +662,22 @@ export default function StudentDashboard() {
         </section>
 
         <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Calendar className="w-5 h-5 text-blue-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Manage Your Availability</h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Let us know when you're available for interviews. This helps us match you with tutors more quickly.
+          </p>
+          <button
+            onClick={handleOpenAvailability}
+            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            Submit Availability
+          </button>
+        </section>
+
+        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between flex-col sm:flex-row gap-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Missing interviews?</h3>
@@ -691,6 +764,56 @@ export default function StudentDashboard() {
           onClose={handleCloseManage}
           onSave={handleSaveInterview}
         />
+      )}
+
+      {/* Availability Submission Modal */}
+      {isAvailabilityModalOpen && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Submit Your Availability</h3>
+                <p className="text-sm text-gray-600">Select times when you're available for interviews.</p>
+              </div>
+              <button
+                onClick={handleCloseAvailability}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Close
+              </button>
+            </div>
+            <div className="p-6">
+              {availabilitySuccess ? (
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Availability submitted successfully!
+                  </h3>
+                  <p className="text-gray-600">This modal will close automatically...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-4">
+                    <p className="text-sm">
+                      <strong>Tip:</strong> Select multiple time slots to increase your chances of getting matched with a tutor quickly.
+                    </p>
+                  </div>
+                  <Step3_5InterviewDates
+                    mode="dashboard"
+                    bookingId=""
+                    tutorAvailability={[]}
+                    onConfirm={handleSubmitAvailability}
+                  />
+                  {availabilitySubmitting && (
+                    <div className="mt-4 text-sm text-gray-600">Submitting your availability...</div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

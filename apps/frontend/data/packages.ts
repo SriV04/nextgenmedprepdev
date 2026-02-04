@@ -136,44 +136,43 @@ export const interviewPackages: ExtendedPackage[] = [
 export const ucatPackages: UCATPackage[] = [
   {
     id: 'ucat_kickstart',
-    name: 'UCAT Kickstart',
+    name: 'Kickstart',
     description: 'For students building a solid UCAT foundation.',
     price: 200,
     color: 'bg-blue-500',
     buttonColor: 'bg-blue-600 hover:bg-blue-700',
     features: [
       '4 hours of core teaching across all UCAT sections',
-      '24/7 Business Line access: ask questions any time, send tricky problems, get step-by-step video solutions',
+      '£95 Unlimited question submissions to tutors + tutor phone access',
       'Performance tracking for every question you complete',
-      'Personalised weekly revision plan sent by text, guided by your performance data',
+      'FREE Personalised weekly revision plan (£30 value)',
       'After four sessions, all students so far have seen a 15%+ score increase across all areas',
       'Data-led support on weak areas from day one'
     ]
   },
   {
     id: 'ucat_advance',
-    name: 'UCAT Advance',
+    name: 'Advance',
     description: 'For students who want targeted improvement.',
     price: 375,
     color: 'bg-purple-600',
     buttonColor: 'bg-purple-600 hover:bg-purple-700',
     baseFeatures: [
       '4 hours of core teaching',
-      '24/7 Business Line access',
       'Performance tracking on every question',
-      'Personalised weekly content plan',
+      'FREE Personalised weekly revision plan (£30 value)',
     ],
     advancedFeatures: [
       '+4 hours of targeted, question-specific refinement sessions',
       'Deep dives into the exact areas your data shows are weakest',
-      'Focused drills to turn weaknesses into strengths'
-
+      'Focused drills to turn weaknesses into strengths',
+      '£95 Unlimited question submissions to tutors + tutor phone access'
     ],
     features: [
       '8 hours of core teaching',
-      '24/7 Business Line access',
+      '£95 Unlimited question submissions to tutors + tutor phone access',
       'Performance tracking on every question',
-      'Personalised weekly content plan',
+      'FREE Personalised weekly revision plan (£30 value)',
       '15%+ score increase guarantee',
       '4 hours of targeted, question-specific refinement sessions',
       'Deep dives into the exact areas your data shows are weakest',
@@ -182,16 +181,16 @@ export const ucatPackages: UCATPackage[] = [
   },
   {
     id: 'ucat_mastery',
-    name: 'UCAT Mastery',
+    name: 'Mastery',
     description: 'For students aiming for top-10% scores.',
-    price: 550,
+    price: 575,
     popular: true,
     color: 'bg-indigo-600',
     buttonColor: 'bg-indigo-600 hover:bg-indigo-700',
     baseFeatures: [
       '4 hours of core teaching',
       'Performance tracking on every question',
-      'Personalised weekly content plan',
+      'FREE Personalised weekly revision plan (£30 value)',
       '4 hours of targeted refinement sessions',
       'Deep-dive weakness analysis',
       'Smart drills and focused practice'
@@ -201,20 +200,61 @@ export const ucatPackages: UCATPackage[] = [
       'Double the time, double the refinement for peak performance',
       'Built to get you test-day ready with total confidence',
       'Priority support and accelerated response times',
-      'Advanced test-taking strategies for top percentile scores'
+      'Advanced test-taking strategies for top percentile scores',
+      'FREE Four conference tickets (£50 value)',
+      '£95 Unlimited question submissions to tutors + tutor phone access'
     ],
     features: [
-      '4 hours of core teaching',
-      '4 hours of high-intensity, data-led refinement sessions',
-      '+4 hours of targeted refinement sessions',
+      '12 hours of comprehensive teaching',
+      'Four conference tickets included (£50 value)',
+      '£95 Unlimited question submissions to tutors + tutor phone access',
       'Performance tracking on every question',
-      'Personalised weekly content plan',
+      'FREE Personalised weekly revision plan (£30 value)',
       'Deep-dive weakness analysis',
       'Smart drills and focused practice',
-      'Double the time, double the refinement for peak performance',
+      'High-intensity refinement for peak performance',
       'Built to get you test-day ready with total confidence',
       'Priority support and accelerated response times',
       'Advanced test-taking strategies for top percentile scores'
+    ]
+  },
+  {
+    id: 'ucat_elite',
+    name: 'Elite',
+    description: 'For students committed to exceptional results.',
+    price: 800,
+    color: 'bg-gray-900',
+    buttonColor: 'bg-gray-900 hover:bg-gray-800',
+    baseFeatures: [
+      'Complete core teaching foundation',
+      'Performance tracking on every question',
+      'FREE Personalised weekly revision plan (£30 value)',
+      'Targeted refinement sessions',
+      'Deep-dive weakness analysis',
+      'Smart drills and focused practice'
+    ],
+    advancedFeatures: [
+      '20 hours comprehensive intensive teaching',
+      'Maximum contact time for mastery',
+      'Extended practice with expert feedback',
+      'FREE Four conference tickets (£50 value)',
+      '£95 Unlimited question submissions to tutors + tutor phone access',
+      'Exam day prep & mental strategies',
+      'Full mock exam analysis'
+    ],
+    features: [
+      '20 hours of comprehensive intensive teaching',
+      'Maximum contact time with expert tutors',
+      'Four conference tickets included (£50 value)',
+      '£95 Unlimited question submissions to tutors + tutor phone access',
+      'FREE Personalised weekly revision plan (£30 value)',
+      'Extended practice with live expert feedback',
+      'Complete deep-dive weakness analysis',
+      'Advanced drills and practice sessions',
+      'Exam day preparation and mental strategies',
+      'Full mock exam analysis and feedback',
+      'Priority support with 2-hour response times',
+      'Maximum preparation - leave nothing to chance'
     ]
   }
 ];
