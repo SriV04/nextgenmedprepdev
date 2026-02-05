@@ -234,6 +234,18 @@ class EmailService {
     }, 'new_joiner_confirmation');
   }
 
+  async sendUcatConferenceConfirmationEmail(email: string): Promise<void> {
+    const template = this.getUcatConferenceConfirmationTemplate();
+    
+    await this.sendMailWithTracking({
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: template.subject,
+      text: template.text,
+      html: template.html,
+    }, 'ucat_conference_signup');
+  }
+
   async sendNewJoinerNotificationEmail(newJoiner: any): Promise<void> {
     const template = this.getNewJoinerNotificationTemplate(newJoiner);
     const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
@@ -387,6 +399,55 @@ class EmailService {
           </div>
           <p>We appreciate your interest in helping future medical and dental students achieve their dreams.</p>
           <p style="margin-top: 30px;">Best regards,<br><strong>The NextGen MedPrep Team</strong></p>
+        </div>
+      `
+    };
+  }
+
+  private getUcatConferenceConfirmationTemplate(): EmailTemplate {
+    return {
+      subject: '✨ You\'re Registered for the Free UCAT Introduction Conference!',
+      text: `Thank you for signing up!\n\nWe're excited to have you join us for the Free Introduction to UCAT conference.\n\nConference Details:\nDetails coming soon! We'll send you the conference link and login information shortly.\n\nWhat to expect:\n- Expert-led introduction to UCAT format and structure\n- Proven timing strategies for each section\n- Core problem-solving techniques\n- Q&A session with top scorers\n- Comprehensive study resources\n\nKeep an eye on your inbox for the full conference details. If you have any questions, feel free to reach out to us.\n\nBest of luck with your UCAT preparation!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #374151;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 12px 12px 0 0; color: white; text-align: center;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">✨ Registration Confirmed!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.95;">You're all set for the Free UCAT Introduction Conference</p>
+          </div>
+
+          <div style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none;">
+            <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+              Thank you for signing up! We're thrilled to have you join us for the <strong>Free Introduction to UCAT</strong> conference.
+            </p>
+
+            <div style="background-color: white; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin: 20px 0;">
+              <h3 style="margin-top: 0; color: #059669; font-size: 18px;">📌 What's Coming Next</h3>
+              <p style="margin: 10px 0; line-height: 1.6;">
+                <strong style="color: #059669;">Details coming soon!</strong> We'll send you the conference link and login information shortly. Keep an eye on your inbox.
+              </p>
+            </div>
+
+            <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb;">
+              <h3 style="margin-top: 0; color: #1f2937; font-size: 18px;">🎓 What to Expect:</h3>
+              <ul style="margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                <li>Expert-led introduction to UCAT format and structure</li>
+                <li>Proven timing strategies for each section</li>
+                <li>Core problem-solving techniques</li>
+                <li>Q&A session with top scorers</li>
+              </ul>
+            </div>
+
+            <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin: 20px 0;">
+              <p style="margin: 0; font-size: 14px; color: #166534;">
+                💡 <strong>Tip:</strong> If you have any questions, feel free to reach out to us. We're here to help!
+              </p>
+            </div>
+
+            <p style="text-align: center; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
+              Best of luck with your UCAT preparation!<br>
+              <strong style="color: #059669;">The NextGen MedPrep Team</strong>
+            </p>
+          </div>
         </div>
       `
     };
@@ -1099,10 +1160,9 @@ The NextGen MedPrep Team
     const universitiesStr = data.universities.join(', ');
     
     // Generate dashboard link
-    // const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    // const dashboardLink = data.studentId 
-    //   ? `${frontendUrl}/student-dashboard?student_id=${data.studentId}` 
-    //   : `${frontendUrl}/student-dashboard`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const dashboardLink = `${frontendUrl}/student-dashboard`;
+
     
     const subject = 'Interview Preparation Booking Confirmed - NextGen MedPrep';
     
@@ -1122,14 +1182,14 @@ Booking Details:
 ${data.preferredDate ? `- Preferred Date: ${data.preferredDate}` : ''}
 ${data.notes ? `- Notes: ${data.notes}` : ''}
 
-// 🎓 YOUR STUDENT DASHBOARD:
-// We've created a personal dashboard for you to:
-// • Submit your availability for interview sessions
-// • View your upcoming and past sessions
-// • Access session materials and Zoom links
-// • Track your progress
-//
-// Access your dashboard here: [LINK]
+🎓 YOUR STUDENT DASHBOARD:
+We've created a personal dashboard for you to:
+• Schedule and manage your interview preparation sessions
+• View your upcoming and past sessions
+• Access session materials and Zoom links
+• Track your progress
+
+Access your dashboard here: ${dashboardLink}
 
 What happens next:
 • Our team will review your personal statement and university choices
@@ -1197,21 +1257,30 @@ The NextGen MedPrep Team
           </div>
           ` : ''}
 
-          <!-- Student Dashboard section commented out
+
           <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb; text-align: center;">
             <h3 style="margin-top: 0; color: #1e40af;">🎓 Your Student Dashboard</h3>
             <p style="color: #374151; margin-bottom: 15px;">We've created a personal dashboard for you to manage your interview preparation:</p>
             <ul style="color: #374151; text-align: left; margin: 15px 0; padding-left: 20px;">
-              <li>Submit your availability for interview sessions</li>
+              <li>Schedule and manage your interview preparation sessions</li>
               <li>View your upcoming and past sessions</li>
               <li>Access session materials and Zoom links</li>
               <li>Track your preparation progress</li>
             </ul>
-            <a href="[DASHBOARD_LINK]" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
+            <a href="${dashboardLink}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">
               Access Your Dashboard →
             </a>
           </div>
-          -->
+
+          <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+            <h3 style="margin-top: 0; color: #92400e;">⚠️ Important: Email Account</h3>
+            <p style="margin: 10px 0 0 0; color: #78350f; font-size: 14px; line-height: 1.6;">
+              Please make sure you sign up for your student dashboard using the same email address you're receiving this confirmation to (<strong>${data.userName ? 'your email' : 'this email'}</strong>). This ensures you'll see all your sessions and interview materials on your dashboard.
+            </p>
+            <p style="margin: 10px 0 0 0; color: #78350f; font-size: 14px; line-height: 1.6;">
+              If you need to use a different email address, please contact us at <a href="mailto:contact@nextgenmedprep.com" style="color: #92400e; font-weight: bold; text-decoration: none;">contact@nextgenmedprep.com</a> and we'll help you set this up.
+            </p>
+          </div>
 
           <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669;">
             <h3 style="margin-top: 0; color: #065f46;">What happens next?</h3>

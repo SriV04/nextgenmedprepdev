@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { LogIn } from 'lucide-react';
 
 interface MenuItem {
   title: string;
@@ -96,6 +97,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ megaMenuItems }) => {
               <nav className="p-4">
                 {megaMenuItems.map((menuConfig) => {
                   const isPrometheus = menuConfig.title === "Prometheus";
+                  const isLogin = menuConfig.title === "Login";
                   
                   return (
                     <div key={menuConfig.title} className="mb-2">
@@ -103,13 +105,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ megaMenuItems }) => {
                         // Direct link without submenu
                         <Link
                           href={menuConfig.href}
-                          className={`block w-full text-left p-3 rounded-lg font-medium transition-colors duration-200 ${
+                          className={`flex items-center gap-2 w-full text-left p-3 rounded-lg font-medium transition-colors duration-200 ${
                             isPrometheus
                               ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-md"
+                              : isLogin
+                              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-md"
                               : "text-gray-700 hover:bg-gray-100"
                           }`}
                           onClick={closeMenu}
                         >
+                          {isLogin && <LogIn className="w-4 h-4 flex-shrink-0" />}
                           {menuConfig.title}
                         </Link>
                       ) : (
@@ -123,9 +128,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ megaMenuItems }) => {
                             {/* Main title link */}
                             <Link
                               href={menuConfig.href || `/${menuConfig.title.toLowerCase().replace(/\s+/g, "-")}`}
-                              className="flex-1 p-3 text-left font-medium transition-colors duration-200 hover:bg-black hover:bg-opacity-10"
+                              className="flex-1 p-3 text-left font-medium transition-colors duration-200 hover:bg-black hover:bg-opacity-10 flex items-center gap-2"
                               onClick={closeMenu}
                             >
+                              {isLogin && <LogIn className="w-4 h-4 flex-shrink-0" />}
                               {menuConfig.title}
                             </Link>
                             

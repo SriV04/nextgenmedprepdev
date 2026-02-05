@@ -1,6 +1,6 @@
 "use client";
-
 import { useState } from 'react';
+import { LogIn } from 'lucide-react';
 
 interface MenuItem {
   title: string;
@@ -16,8 +16,9 @@ interface MegaMenuProps {
 const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Determine if this is the Prometheus menu item or if there are no items
+  // Determine if this is the Prometheus menu item or Login item
   const isPrometheus = title === "Prometheus";
+  const isLogin = title === "Login";
   const hasItems = items.length > 0;
 
   const linkPath = href || `/${title.toLowerCase().replace(/\s+/g, "-")}`;
@@ -25,12 +26,15 @@ const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
   const trigger = (
     <a
       href={linkPath}
-      className={`px-2 py-1.5 mx-0.5 rounded-full transition-all duration-300 font-medium text-xs whitespace-nowrap flex items-center gap-1 ${
+      className={`px-1.5 py-1.5 mr-0.5 rounded-full transition-all duration-300 font-medium text-xs whitespace-nowrap flex items-center gap-1 ${
         isPrometheus
           ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-md"
+          : isLogin
+          ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-md"
           : "text-text-secondary hover:bg-background-accent"
       }`}
     >
+      {isLogin && <LogIn className="w-3.5 h-3.5 flex-shrink-0" />}
       <span className="whitespace-nowrap">{title}</span>
       {hasItems && (
         <svg
@@ -64,7 +68,7 @@ const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
     >
       {/* Trigger */}
       {trigger}
-      
+
       {/* Mega Menu Panel - Only render if there are items */}
       {hasItems && (
         <div
@@ -95,7 +99,6 @@ const MegaMenu = ({ title, href, items }: MegaMenuProps) => {
               ))}
             </div>
           </div>
-          
           {/* Arrow pointing up */}
           <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
             <div className={`w-4 h-4 rotate-45 ${

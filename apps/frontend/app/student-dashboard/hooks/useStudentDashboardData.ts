@@ -12,6 +12,9 @@ export interface DashboardInterview {
   field?: string;
   status?: string;
   proposed_time?: string | null;
+  zoom_join_url?: string | null;
+  zoom_host_email?: string | null;
+  zoom_meeting_id?: string | null;
   tutor?: {
     id: string;
     name: string;
@@ -116,6 +119,7 @@ export function useStudentDashboardData({ userEmail, backendUrl }: UseStudentDas
             }
           : undefined,
         booking: interview.booking,
+        zoom_join_url: interview.zoom_join_url
       }));
       setInterviews(transformedInterviews);
 

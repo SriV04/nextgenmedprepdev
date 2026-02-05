@@ -82,6 +82,11 @@ const megaMenuItems: MegaMenuConfig[] = [
     href: "/prometheus",
     items: [],
   },
+  {
+    title: "Login",
+    href: "/student-dashboard",
+    items: [],
+  },
 ];
 
 export const metadata: Metadata = {
@@ -136,7 +141,7 @@ export default function RootLayout({
       <body className="bg-background-primary text-text-primary font-sans overflow-x-hidden">
         <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID || ''} />
         <header className="w-full bg-background-secondary border-b border-border-accent fixed top-0 z-[100]">
-          <div className="w-full px-3 sm:px-4 py-3 mx-auto">
+          <div className="w-full px-2 sm:px-3 py-3 mx-auto">
             <div className="flex items-center justify-between min-w-0 max-w-full">
               <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
                 <Link href="/" className="flex items-center space-x-2">

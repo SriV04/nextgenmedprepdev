@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Calendar, CalendarClock, CheckCircle, Clock } from 'lucide-react';
+import { AlertCircle, Calendar, CalendarClock, CheckCircle, Clock, Video } from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -508,7 +508,7 @@ export default function StudentDashboard() {
                     key={interview.id}
                     className="flex flex-col gap-4 rounded-xl border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="space-y-1">
+                    <div className="space-y-3 flex-1">
                       <div className="text-sm font-semibold text-indigo-700">
                         {getSessionType(interview)} • {formatPackageName(interview.booking?.package)}
                       </div>
@@ -519,13 +519,39 @@ export default function StudentDashboard() {
                         Tutor: {interview.tutor?.name || 'Assigned'}
                         {dateTime && ` • ${dateTime.date} • ${dateTime.time}`}
                       </div>
+                      {interview.zoom_join_url && (
+                        <div className="flex items-center gap-2 pt-2">
+                          <Video className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <a
+                            href={interview.zoom_join_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-medium text-blue-600 hover:text-blue-700 underline break-all"
+                          >
+                            Zoom meeting link
+                          </a>
+                        </div>
+                      )}
                     </div>
-                    <button
-                      onClick={() => handleOpenManage(interview)}
-                      className="inline-flex items-center justify-center rounded-lg border border-indigo-200 px-4 py-2 text-sm font-semibold text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50"
-                    >
-                      Manage
-                    </button>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {interview.zoom_join_url && (
+                        <a
+                          href={interview.zoom_join_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                          <Video className="w-4 h-4" />
+                          Join
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleOpenManage(interview)}
+                        className="inline-flex items-center justify-center rounded-lg border border-indigo-200 px-4 py-2 text-sm font-semibold text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50"
+                      >
+                        Manage
+                      </button>
+                    </div>
                   </div>
                 );
               })}

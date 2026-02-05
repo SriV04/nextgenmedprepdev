@@ -12,6 +12,7 @@ import universityRoutes from './universities';
 import userRoutes from './users';
 import studentRoutes from './students';
 import prometheusRoutes from './prometheus';
+import ucatConferenceRoutes from './ucatConference';
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.use('/api/v1', interviewRoutes);
 router.use('/api/v1', universityRoutes);
 router.use('/api/v1', userRoutes);
 router.use('/api/v1', studentRoutes);
+router.use('/api/v1', ucatConferenceRoutes);
 router.use('/api/v1/prometheus', prometheusRoutes);
 
 export default router;

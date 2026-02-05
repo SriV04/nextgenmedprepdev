@@ -9,7 +9,7 @@ import emailService from './src/services/emailService';
 const BOOKING_ID = 'TEST-' + Date.now();
 
 const bookingDetails = {
-  email: 'contact@nextgenmedprep.com', // Customer email
+  email: 'sriharsha.vitta@gmail.com', // Customer email
   name: 'Test User',
   packageType: 'single',
   serviceType: 'live',

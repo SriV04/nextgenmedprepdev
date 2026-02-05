@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import UCATCalculator from '../../components/ucat/UCATCalculator';
+import FreeConferenceSignup from '../../components/ucat/FreeConferenceSignup';
 import { ucatPackages } from '@/data/packages';
 import { 
   ClockIcon,
@@ -8,6 +9,7 @@ import {
   ArrowRightIcon,
   BookOpenIcon,
   AcademicCapIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 export default function UCATPage() {
@@ -145,6 +147,185 @@ export default function UCATPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Conferences */}
+      <section className="py-20 px-6 bg-stone-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mb-12">
+            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
+              Free Introduction
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
+              Start with our free UCAT conference
+            </h2>
+            <p className="text-lg text-slate-600">
+              Join us for an expert-led introduction covering test structure, timing strategy, and proven techniques for each section. 
+              No experience needed. Perfect for beginners and those looking to refine their approach.
+            </p>
+          </div>
+
+          <div className="max-w-2xl bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-6">
+              <span>✨ Completely Free</span>
+            </div>
+
+            <h3 className="text-2xl font-semibold text-slate-900 mb-2">
+              Introduction to UCAT
+            </h3>
+            <p className="text-slate-600 mb-6">
+              Expert-led session covering strategy, techniques, and practice for all sections.
+            </p>
+
+            <ul className="space-y-3 mb-8">
+              {['Test format & structure', 'Timing strategies for each section', 'Core problem-solving techniques', 'How to create an effective study plan', 'Q&A with top scorers'].map((item) => (
+                <li key={item} className="flex items-center gap-3 text-slate-700">
+                  <CheckIcon className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  <span className="font-medium">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-100">
+              <h4 className="font-semibold text-slate-900 mb-3">Ready to get started?</h4>
+              <p className="text-sm text-slate-600 mb-4">
+                Enter your email below and we'll send you direct access to the conference with all the details.
+              </p>
+              <FreeConferenceSignup />
+            </div>
+
+            <p className="text-xs text-slate-500 text-center">
+              Spots are limited. Register now to secure your place.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Add-ons */}
+      <section className="py-20 px-6 bg-white border-t border-slate-100">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mb-12">
+            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
+              Add-ons
+            </p>
+            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
+              Extra support tools
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Revision Plan */}
+            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <BookOpenIcon className="w-6 h-6 text-violet-600" />
+              </div>
+              
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Personalised Revision Plan
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Custom study schedule delivered weekly via text. Tailored to your target score, 
+                available hours, and intensity preferences.
+              </p>
+
+              <ul className="space-y-2 mb-8">
+                {['Weekly personalised schedule', 'Text message reminders', 'Progress tracking', 'Intensity customization'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                    <CheckIcon className="w-4 h-4 text-violet-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-semibold text-slate-900">£30</span>
+                <Link 
+                  href="/personalised-revision-plan"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
+                >
+                  Get Started
+                  <ArrowRightIcon className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Unlimited Questions */}
+            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
+              <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <AcademicCapIcon className="w-6 h-6 text-sky-600" />
+              </div>
+              
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Unlimited Question Support
+              </h3>
+              <p className="text-slate-600 mb-6">
+                24/7 access to expert tutors. Submit any question via phone, get detailed 
+                video explanations. Never feel stuck again.
+              </p>
+
+              <ul className="space-y-2 mb-8">
+                {['Unlimited submissions', 'Video explanations', 'Direct tutor access', 'Fast turnaround'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
+                    <CheckIcon className="w-4 h-4 text-sky-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-semibold text-slate-900">£65</span>
+                <Link 
+                  href="ucat/add-ons"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
+                >
+                  Get Started
+                  <ArrowRightIcon className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Complete Conference Pack */}
+            <div className="group p-8 rounded-2xl border border-amber-300 hover:border-amber-400 hover:shadow-md transition-all bg-gradient-to-br from-amber-50 to-orange-50">
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <SparklesIcon className="w-6 h-6 text-amber-600" />
+              </div>
+              
+              <div className="inline-flex items-center gap-2 bg-amber-200 text-amber-900 px-2 py-1 rounded text-xs font-semibold mb-3">
+                Save £10
+              </div>
+
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Complete Conference Pack
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Master all four UCAT sections with expert-led sessions. 1.5 hours each: VR, DM, QR, and AR.
+              </p>
+
+              <ul className="space-y-2 mb-8">
+                {['Verbal Reasoning Mastery', 'Decision Making Workshop', 'Quantitative Reasoning', 'Abstract Reasoning Techniques'].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-slate-700">
+                    <CheckIcon className="w-4 h-4 text-amber-600" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-2xl font-semibold text-slate-900">£50</span>
+                  <span className="text-sm text-slate-500 line-through ml-2">£60</span>
+                </div>
+                <Link 
+                  href="/ucat/add-ons"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 text-white rounded-full font-medium hover:bg-amber-700 transition-colors"
+                >
+                  Get Bundle
+                  <ArrowRightIcon className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -288,179 +469,7 @@ export default function UCATPage() {
         </div>
       </section>
 
-      {/* Conferences */}
-      <section className="py-20 px-6 bg-stone-50">
-        <div className="max-w-5xl mx-auto">
-          <div className="max-w-2xl mb-12">
-            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
-              Conferences
-            </p>
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
-              Expert-led deep dives
-            </h2>
-            <p className="text-lg text-slate-600">
-              Comprehensive sessions covering strategy, techniques, and practice for each section.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Free Intro */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 hover:shadow-md transition-shadow">
-              <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-6">
-                <span>Free</span>
-              </div>
-              
-              <h3 className="text-xl font-semibold text-slate-900 mb-3">
-                Introduction to UCAT
-              </h3>
-              <p className="text-slate-600 mb-6">
-                Get started with test structure, timing overview, and foundational strategies for all five sections.
-              </p>
-
-              <ul className="space-y-2 mb-8">
-                {['Test format & structure', 'Section overviews', 'Core strategies', 'How to prepare effectively'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckIcon className="w-4 h-4 text-emerald-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <Link 
-                href="/ucat/conference/intro"
-                className="block w-full py-3 bg-slate-900 text-white rounded-full font-medium text-center hover:bg-slate-800 transition-colors"
-              >
-                Register Free
-              </Link>
-            </div>
-
-            {/* Bundle */}
-            <div className="bg-slate-900 text-white rounded-2xl p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-              
-              <div className="relative">
-                <div className="inline-flex items-center gap-2 bg-amber-400 text-slate-900 px-3 py-1 rounded-full text-sm font-semibold mb-6">
-                  Save £10
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-3">
-                  Complete Conference Pack
-                </h3>
-                <p className="text-slate-400 mb-6">
-                  All four section conferences: VR, DM, QR, and AR. 1.5 hours each.
-                </p>
-
-                <ul className="space-y-2 mb-8">
-                  {['Verbal Reasoning Mastery', 'Decision Making Workshop', 'Quantitative Reasoning', 'Abstract Reasoning Techniques'].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-sm text-slate-300">
-                      <CheckIcon className="w-4 h-4 text-amber-400" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex items-baseline gap-3 mb-6">
-                  <span className="text-3xl font-semibold">£50</span>
-                  <span className="text-slate-500 line-through">£60</span>
-                </div>
-
-                <Link 
-                  href="ucat/add-ons"
-                  className="block w-full py-3 bg-amber-400 text-slate-900 rounded-full font-semibold text-center hover:bg-amber-300 transition-colors"
-                >
-                  Get Bundle
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Add-ons */}
-      <section className="py-20 px-6 bg-white border-t border-slate-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="max-w-2xl mb-12">
-            <p className="text-amber-700 font-medium tracking-wide uppercase text-sm mb-3">
-              Add-ons
-            </p>
-            <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">
-              Extra support tools
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Revision Plan */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-                <BookOpenIcon className="w-6 h-6 text-violet-600" />
-              </div>
-              
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                Personalised Revision Plan
-              </h3>
-              <p className="text-slate-600 mb-6">
-                Custom study schedule delivered weekly via text. Tailored to your target score, 
-                available hours, and intensity preferences.
-              </p>
-
-              <ul className="space-y-2 mb-8">
-                {['Weekly personalised schedule', 'Text message reminders', 'Progress tracking', 'Intensity customization'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckIcon className="w-4 h-4 text-violet-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-semibold text-slate-900">£30</span>
-                <Link 
-                  href="/personalised-revision-plan"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
-                >
-                  Get Started
-                  <ArrowRightIcon className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Unlimited Questions */}
-            <div className="group p-8 rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
-                <AcademicCapIcon className="w-6 h-6 text-sky-600" />
-              </div>
-              
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                Unlimited Question Support
-              </h3>
-              <p className="text-slate-600 mb-6">
-                24/7 access to expert tutors. Submit any question via phone, get detailed 
-                video explanations. Never feel stuck again.
-              </p>
-
-              <ul className="space-y-2 mb-8">
-                {['Unlimited submissions', 'Video explanations', 'Direct tutor access', 'Fast turnaround'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                    <CheckIcon className="w-4 h-4 text-sky-500" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-semibold text-slate-900">£65</span>
-                <Link 
-                  href="ucat/add-ons"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-colors"
-                >
-                  Get Started
-                  <ArrowRightIcon className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* CTA */}
       <section className="py-20 px-6 bg-slate-900">
