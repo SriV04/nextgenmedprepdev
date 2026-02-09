@@ -41,6 +41,7 @@ export default function InterviewsPaymentPage() {
     handleServiceTypeChange,
     handlePackageSelection,
     handleUniversityToggle,
+    handleRemoveUniversity,
     handleContactChange,
     handleProceedToNext,
     handleProceedToPayment,
@@ -139,6 +140,7 @@ export default function InterviewsPaymentPage() {
               selectedUniversities={universities}
               selectedPackage={selectedPackage}
               onUniversityToggle={handleUniversityToggle}
+              onRemoveUniversity={handleRemoveUniversity}
               onProceedToNext={handleProceedToNext}
             />
           )}

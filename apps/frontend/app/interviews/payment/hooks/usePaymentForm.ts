@@ -112,18 +112,27 @@ export function usePaymentForm() {
     if (!selectedPackage) return;
     
     setUniversities(prev => {
-      const isSelected = prev.includes(universityId);
+      const maxUniversities = selectedPackage.interviews;
       
-      if (isSelected) {
-        return prev.filter(id => id !== universityId);
+      // Check if we can add more
+      if (prev.length < maxUniversities) {
+        // Always add - allow duplicates
+        return [...prev, universityId];
       } else {
-        const maxUniversities = selectedPackage.interviews;
-        if (prev.length < maxUniversities) {
-          return [...prev, universityId];
-        } else {
-          return [...prev.slice(1), universityId];
-        }
+        // At capacity, don't add more (user would need to remove one first)
+        return prev;
       }
+    });
+  };
+
+  const handleRemoveUniversity = (universityId: string) => {
+    // Remove the first occurrence of this university
+    setUniversities(prev => {
+      const index = prev.indexOf(universityId);
+      if (index !== -1) {
+        return prev.filter((_, i) => i !== index);
+      }
+      return prev;
     });
   };
 
@@ -278,6 +287,7 @@ export function usePaymentForm() {
     handleServiceTypeChange,
     handlePackageSelection,
     handleUniversityToggle,
+    handleRemoveUniversity,
     handleContactChange,
     handleProceedToNext,
     handleProceedToPayment,

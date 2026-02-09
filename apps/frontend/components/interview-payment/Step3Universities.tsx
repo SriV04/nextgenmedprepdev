@@ -9,13 +9,15 @@ interface Step3UniversitiesProps {
   selectedUniversities: string[];
   selectedPackage: ExtendedPackage | null;
   onUniversityToggle: (universityId: string) => void;
+  onRemoveUniversity: (universityId: string) => void;
   onProceedToNext: () => void;
 }
 
 export default function Step3Universities({ 
   selectedUniversities, 
   selectedPackage, 
-  onUniversityToggle, 
+  onUniversityToggle,
+  onRemoveUniversity,
   onProceedToNext 
 }: Step3UniversitiesProps) {
   const [mounted, setMounted] = useState(false);
@@ -23,18 +25,25 @@ export default function Step3Universities({
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Show 10 universities per page
+  const itemsPerPage = 10;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Reset to page 1 when search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
 
   if (!selectedPackage) return null;
+
+  // Count how many times each university is selected
+  const getSelectionCount = (universityId: string) => {
+    return selectedUniversities.filter(id => id === universityId).length;
+  };
+
+  // Check if we can add more interviews
+  const canAddMore = selectedUniversities.length < selectedPackage.interviews;
 
   // Filter universities based on search term
   const filteredUniversities = universities.filter(university =>
@@ -48,8 +57,20 @@ export default function Step3Universities({
   const endIndex = startIndex + itemsPerPage;
   const paginatedUniversities = filteredUniversities.slice(startIndex, endIndex);
 
+  const handleAddInterview = (universityId: string) => {
+    if (canAddMore) {
+      onUniversityToggle(universityId);
+    }
+  };
+
+  const handleRemoveInterview = (universityId: string) => {
+    onRemoveUniversity(universityId);
+  };
+
   const handleSearchSelect = (university: typeof universities[0]) => {
-    onUniversityToggle(university.id);
+    if (canAddMore) {
+      onUniversityToggle(university.id);
+    }
     setSearchTerm('');
     setShowDropdown(false);
     setSelectedIndex(-1);
@@ -90,8 +111,14 @@ export default function Step3Universities({
     }
   };
 
-  // Popular universities (most commonly selected)
+  // Popular universities
   const popularUniversities = ['oxford', 'cambridge', 'imperial', 'ucl', 'kings'];
+
+  // Group selected universities for display
+  const groupedSelections = selectedUniversities.reduce((acc, id) => {
+    acc[id] = (acc[id] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <motion.div
@@ -104,10 +131,20 @@ export default function Step3Universities({
     >
       <div className="text-center mb-12">
         <h2 className="text-4xl md:text-5xl font-bold mb-4">
-          Select <span className="text-gradient-aurora">Universities</span>
+          Choose Your <span className="text-gradient-aurora">Mock Interviews</span>
         </h2>
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-          Choose up to {selectedPackage.interviews} universities (selected: {selectedUniversities.length})
+        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-2">
+          Select {selectedPackage.interviews} mock interview{selectedPackage.interviews !== 1 ? 's' : ''} from our university list
+        </p>
+        <div className="max-w-2xl mx-auto mb-6">
+          <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-4 text-sm">
+            <p className="text-gray-300">
+              <span className="text-indigo-400 font-semibold">💡 Tip:</span> You can select the same university multiple times if you want extra practice for a specific interview style.
+            </p>
+          </div>
+        </div>
+        <p className="text-sm text-gray-400 max-w-3xl mx-auto mb-8">
+          <span className="text-indigo-400">Your selections can be changed in the student portal</span> after booking.
         </p>
 
         {/* Search Bar */}
@@ -116,14 +153,13 @@ export default function Step3Universities({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search universities..."
+                placeholder="Search universities to add mock interviews..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="w-full px-4 py-3 pl-12 bg-black/50 border border-indigo-500/30 rounded-lg text-white placeholder-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-base"
                 onFocus={() => setShowDropdown(searchTerm.length > 0)}
                 onBlur={() => {
-                  // Delay hiding dropdown to allow clicks
                   setTimeout(() => setShowDropdown(false), 200);
                 }}
               />
@@ -141,7 +177,6 @@ export default function Step3Universities({
                 />
               </svg>
               
-              {/* Clear Button */}
               {searchTerm && (
                 <button
                   onClick={() => {
@@ -167,41 +202,45 @@ export default function Step3Universities({
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute top-full left-0 right-0 mt-2 bg-black/95 border border-indigo-500/30 rounded-lg backdrop-blur-xl z-50 max-h-64 overflow-y-auto"
                 >
-                  {filteredUniversities.map((university, index) => (
-                    <motion.button
-                      key={university.id}
-                      onClick={() => handleSearchSelect(university)}
-                      className={`w-full px-4 py-3 text-left transition-colors border-b border-indigo-500/10 last:border-b-0 focus:outline-none ${
-                        index === selectedIndex 
-                          ? 'bg-indigo-500/30' 
-                          : 'hover:bg-indigo-500/20 focus:bg-indigo-500/20'
-                      } ${
-                        selectedUniversities.includes(university.id)
-                          ? 'bg-indigo-500/20 border-l-4 border-l-indigo-500'
-                          : ''
-                      }`}
-                      whileHover={{ x: 4 }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-semibold text-white flex items-center gap-2">
-                            {university.name}
-                            {selectedUniversities.includes(university.id) && (
-                              <span className="text-indigo-400 text-sm">✓ Selected</span>
-                            )}
+                  {filteredUniversities.map((university, index) => {
+                    const count = getSelectionCount(university.id);
+                    return (
+                      <motion.button
+                        key={university.id}
+                        onClick={() => handleSearchSelect(university)}
+                        disabled={!canAddMore}
+                        className={`w-full px-4 py-3 text-left transition-colors border-b border-indigo-500/10 last:border-b-0 focus:outline-none ${
+                          !canAddMore
+                            ? 'opacity-50 cursor-not-allowed'
+                            : index === selectedIndex 
+                              ? 'bg-indigo-500/30' 
+                              : 'hover:bg-indigo-500/20 focus:bg-indigo-500/20'
+                        }`}
+                        whileHover={canAddMore ? { x: 4 } : {}}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-semibold text-white flex items-center gap-2">
+                              {university.name}
+                              {count > 0 && (
+                                <span className="text-indigo-400 text-sm bg-indigo-500/20 px-2 py-0.5 rounded-full">
+                                  {count} interview{count > 1 ? 's' : ''} added
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-400">{university.country}</div>
                           </div>
-                          <div className="text-sm text-gray-400">{university.country}</div>
+                          <div className="flex flex-wrap gap-1">
+                            {university.interviewTypes.slice(0, 2).map((type) => (
+                              <span key={type} className="px-2 py-1 bg-gray-700/50 text-xs rounded text-gray-300">
+                                {type.toUpperCase()}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-1">
-                          {university.interviewTypes.slice(0, 2).map((type) => (
-                            <span key={type} className="px-2 py-1 bg-gray-700/50 text-xs rounded text-gray-300">
-                              {type.toUpperCase()}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
+                      </motion.button>
+                    );
+                  })}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -222,29 +261,31 @@ export default function Step3Universities({
           </div>
         )}
 
-        {/* Popular Universities Pills */}
+        {/* Popular Universities Quick Add */}
         {mounted && (
           <div className="flex flex-wrap justify-center gap-2 mb-8">
-            <span className="text-sm text-gray-400 mr-2">Popular:</span>
+            <span className="text-sm text-gray-400 mr-2">Quick Add:</span>
             {popularUniversities.map((universityId) => {
               const university = universities.find(u => u.id === universityId);
               if (!university) return null;
+              const count = getSelectionCount(universityId);
               return (
                 <motion.button
                   key={universityId}
-                  onClick={() => onUniversityToggle(universityId)}
+                  onClick={() => handleAddInterview(universityId)}
+                  disabled={!canAddMore}
                   className={`px-3 py-1 text-sm rounded-full transition-all ${
-                    selectedUniversities.includes(universityId)
-                      ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30'
+                    !canAddMore
+                      ? 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
                       : 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30'
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={canAddMore ? { scale: 1.05 } : {}}
+                  whileTap={canAddMore ? { scale: 0.95 } : {}}
                 >
                   <span className="flex items-center gap-1">
-                    {university.displayName ? university.displayName : university.name.split(' ').slice(-1)[0]} {/* Show last word (e.g., "Oxford", "Cambridge") */}
-                    {selectedUniversities.includes(universityId) && (
-                      <span className="text-xs">✓</span>
+                    + {university.displayName ? university.displayName : university.name.split(' ').slice(-1)[0]}
+                    {count > 0 && (
+                      <span className="text-xs bg-indigo-500 px-1.5 rounded-full text-white">{count}</span>
                     )}
                   </span>
                 </motion.button>
@@ -254,38 +295,102 @@ export default function Step3Universities({
         )}
       </div>
 
-      {/* University Selection Progress Bar */}
-      {selectedUniversities.length > 0 && (
-        <motion.div 
-          className="mb-8 bg-black/40 rounded-lg p-4 border border-indigo-500/30"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-300">Selection Progress</span>
-            <span className="text-sm text-indigo-400 font-semibold">
-              {selectedUniversities.length} of {selectedPackage.interviews}
-            </span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
-            <motion.div 
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${(selectedUniversities.length / selectedPackage.interviews) * 100}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          {selectedUniversities.length >= selectedPackage.interviews && (
-            <motion.p 
-              className="text-xs text-green-400 mt-2 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              ✓ Selection complete! You can proceed to the next step.
-            </motion.p>
-          )}
-        </motion.div>
-      )}
+      {/* Interview Selection Progress */}
+      <motion.div 
+        className="mb-8 bg-black/40 rounded-lg p-4 border border-indigo-500/30"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-gray-300">Mock Interviews Selected</span>
+          <span className={`text-sm font-semibold ${
+            selectedUniversities.length >= selectedPackage.interviews 
+              ? 'text-green-400' 
+              : 'text-indigo-400'
+          }`}>
+            {selectedUniversities.length} of {selectedPackage.interviews}
+          </span>
+        </div>
+        <div className="w-full bg-gray-700 rounded-full h-2">
+          <motion.div 
+            className={`h-2 rounded-full ${
+              selectedUniversities.length >= selectedPackage.interviews
+                ? 'bg-gradient-to-r from-green-500 to-emerald-500'
+                : 'bg-gradient-to-r from-indigo-500 to-purple-500'
+            }`}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min((selectedUniversities.length / selectedPackage.interviews) * 100, 100)}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+        
+        {/* Selected Interviews Display */}
+        {selectedUniversities.length > 0 && (
+          <motion.div 
+            className="mt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Your Mock Interviews:</p>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(groupedSelections).map(([universityId, count]) => {
+                const university = universities.find(u => u.id === universityId);
+                if (!university) return null;
+                return (
+                  <motion.div
+                    key={universityId}
+                    className="flex items-center gap-2 px-3 py-2 bg-indigo-500/20 text-indigo-300 rounded-lg text-sm border border-indigo-500/30"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    layout
+                  >
+                    <span className="font-medium">{university.name}</span>
+                    {count > 1 && (
+                      <span className="bg-indigo-500 text-white text-xs px-1.5 py-0.5 rounded">
+                        ×{count}
+                      </span>
+                    )}
+                    <div className="flex items-center gap-1 ml-1 border-l border-indigo-500/30 pl-2">
+                      {count > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveInterview(universityId);
+                          }}
+                          className="text-gray-400 hover:text-white transition-colors text-xs px-1"
+                          title="Remove one"
+                        >
+                          −
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveInterview(universityId);
+                        }}
+                        className="text-indigo-400 hover:text-red-400 transition-colors"
+                        title="Remove"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {selectedUniversities.length >= selectedPackage.interviews && (
+          <motion.p 
+            className="text-xs text-green-400 mt-3 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            ✓ All {selectedPackage.interviews} mock interview{selectedPackage.interviews > 1 ? 's' : ''} selected! You can proceed to the next step.
+          </motion.p>
+        )}
+      </motion.div>
 
       {/* Top Continue Button */}
       <AnimatePresence>
@@ -302,7 +407,6 @@ export default function Step3Universities({
               whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(99, 102, 241, 0.4)" }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Animated background overlay */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-white/10 to-purple-600/0"
                 initial={{ x: "-100%" }}
@@ -324,126 +428,100 @@ export default function Step3Universities({
                 </motion.svg>
               </span>
             </motion.button>
-            
-            <motion.p 
-              className="text-sm text-gray-400 mt-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              {selectedUniversities.length === 1 
-                ? `1 university selected` 
-                : `${selectedUniversities.length} universities selected`}
-            </motion.p>
-
-            {/* Selected Universities Summary */}
-            <motion.div 
-              className="mt-4 flex flex-wrap justify-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              {selectedUniversities.map((universityId) => {
-                const university = universities.find(u => u.id === universityId);
-                if (!university) return null;
-                return (
-                  <motion.div
-                    key={universityId}
-                    className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-sm border border-indigo-500/30"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <span>{university.name}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUniversityToggle(universityId);
-                      }}
-                      className="text-indigo-400 hover:text-red-400 transition-colors"
-                    >
-                      ×
-                    </button>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* University Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {paginatedUniversities.map((university, index) => (
-          <motion.button
-            key={university.id}
-            onClick={() => onUniversityToggle(university.id)}
-            disabled={!selectedUniversities.includes(university.id) && selectedUniversities.length >= selectedPackage.interviews}
-            className={`p-6 rounded-xl border-2 text-left transition-all feature-card relative overflow-hidden ${
-              selectedUniversities.includes(university.id)
-                ? 'border-indigo-500 bg-indigo-500/20 shadow-lg shadow-indigo-500/25'
-                : !selectedUniversities.includes(university.id) && selectedUniversities.length >= selectedPackage.interviews
-                ? 'border-gray-700 bg-gray-900/40 opacity-50 cursor-not-allowed'
-                : 'border-gray-600 bg-black/40 hover:border-indigo-400 hover:bg-indigo-500/10'
-            }`}
-            whileHover={selectedUniversities.includes(university.id) || selectedUniversities.length < selectedPackage.interviews ? { y: -2, scale: 1.02 } : {}}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-          >
-            {/* Animated background for selected universities */}
-            {selectedUniversities.includes(university.id) && (
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
-            )}
+        {paginatedUniversities.map((university, index) => {
+          const count = getSelectionCount(university.id);
+          const isSelected = count > 0;
+          
+          return (
+            <motion.div
+              key={university.id}
+              className={`p-6 rounded-xl border-2 text-left transition-all feature-card relative overflow-hidden ${
+                isSelected
+                  ? 'border-indigo-500 bg-indigo-500/20 shadow-lg shadow-indigo-500/25'
+                  : 'border-gray-600 bg-black/40'
+              }`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
+              {/* Selection count badge */}
+              {isSelected && (
+                <motion.div
+                  className="absolute top-4 right-4 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <span className="text-white text-sm font-bold">{count}</span>
+                </motion.div>
+              )}
 
-            <div className="relative z-10">
-              <div className="flex items-start justify-between mb-3">
-                <h4 className="text-lg font-semibold pr-2">{university.name}</h4>
-                {selectedUniversities.includes(university.id) && (
-                  <motion.div 
-                    className="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <span className="text-white text-sm">✓</span>
-                  </motion.div>
-                )}
-              </div>
-              
-              <p className="text-gray-400 text-sm mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 bg-indigo-400 rounded-full"></span>
-                {university.country}
-              </p>
-              
-              <div className="space-y-2">
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Interview Types</p>
-                <div className="flex flex-wrap gap-2">
-                  {university.interviewTypes.map((type) => (
-                    <span key={type} className="px-3 py-1 bg-gray-700/60 text-xs rounded-full text-gray-300 border border-gray-600">
-                      {type.toUpperCase()}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Popular badge for popular universities */}
-              {popularUniversities.includes(university.id) && (
+              {/* Popular badge */}
+              {popularUniversities.includes(university.id) && !isSelected && (
                 <div className="absolute top-4 right-4">
                   <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded-full border border-yellow-500/30">
                     Popular
                   </span>
                 </div>
               )}
-            </div>
-          </motion.button>
-        ))}
+
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-3 pr-12">
+                  <h4 className="text-lg font-semibold">{university.name}</h4>
+                </div>
+                
+                <p className="text-gray-400 text-sm mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-indigo-400 rounded-full"></span>
+                  {university.country}
+                </p>
+                
+                <div className="space-y-2 mb-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Interview Types</p>
+                  <div className="flex flex-wrap gap-2">
+                    {university.interviewTypes.map((type) => (
+                      <span key={type} className="px-3 py-1 bg-gray-700/60 text-xs rounded-full text-gray-300 border border-gray-600">
+                        {type.toUpperCase()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-700/50">
+                  {isSelected && (
+                    <motion.button
+                      onClick={() => handleRemoveInterview(university.id)}
+                      className="flex-1 px-4 py-2 bg-red-500/20 text-red-400 rounded-lg text-sm font-medium hover:bg-red-500/30 transition-colors border border-red-500/30"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Remove Interview
+                    </motion.button>
+                  )}
+                  <motion.button
+                    onClick={() => handleAddInterview(university.id)}
+                    disabled={!canAddMore}
+                    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      canAddMore
+                        ? 'bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-500/30'
+                        : 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
+                    }`}
+                    whileHover={canAddMore ? { scale: 1.02 } : {}}
+                    whileTap={canAddMore ? { scale: 0.98 } : {}}
+                  >
+                    {isSelected ? '+ Add Another' : '+ Add Interview'}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Pagination Controls */}
@@ -453,7 +531,6 @@ export default function Step3Universities({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          {/* Previous Button */}
           <motion.button
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
@@ -470,15 +547,12 @@ export default function Step3Universities({
             </svg>
           </motion.button>
 
-          {/* Page Numbers */}
           <div className="flex gap-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-              // Show first page, last page, current page, and pages around current
               const showPage = pageNum === 1 || 
                                pageNum === totalPages || 
                                Math.abs(pageNum - currentPage) <= 1;
               
-              // Show ellipsis
               const showEllipsis = (pageNum === currentPage - 2 && currentPage > 3) ||
                                   (pageNum === currentPage + 2 && currentPage < totalPages - 2);
 
@@ -512,7 +586,6 @@ export default function Step3Universities({
             })}
           </div>
 
-          {/* Next Button */}
           <motion.button
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
@@ -542,7 +615,7 @@ export default function Step3Universities({
         </motion.p>
       )}
 
-      {/* Continue Button */}
+      {/* Bottom Continue Button */}
       <AnimatePresence>
         {selectedUniversities.length > 0 && (
           <motion.div 
@@ -557,7 +630,6 @@ export default function Step3Universities({
               whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(99, 102, 241, 0.4)" }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* Animated background overlay */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-white/10 to-purple-600/0"
                 initial={{ x: "-100%" }}
@@ -586,41 +658,8 @@ export default function Step3Universities({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              {selectedUniversities.length === 1 
-                ? `1 university selected` 
-                : `${selectedUniversities.length} universities selected`}
+              {selectedUniversities.length} mock interview{selectedUniversities.length !== 1 ? 's' : ''} selected
             </motion.p>
-
-            {/* Selected Universities Summary */}
-            <motion.div 
-              className="mt-4 flex flex-wrap justify-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              {selectedUniversities.map((universityId) => {
-                const university = universities.find(u => u.id === universityId);
-                if (!university) return null;
-                return (
-                  <motion.div
-                    key={universityId}
-                    className="flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-sm border border-indigo-500/30"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <span>{university.name}</span>
-                    <button
-                      onClick={() => onUniversityToggle(universityId)}
-                      className="text-indigo-400 hover:text-red-400 transition-colors"
-                    >
-                      ×
-                    </button>
-                  </motion.div>
-                );
-              })}
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
