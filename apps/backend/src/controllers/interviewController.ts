@@ -10,7 +10,7 @@ const createInterviewSchema = z.object({
   student_id: z.string().uuid().optional(),
   tutor_id: z.string().uuid().optional(),
   booking_id: z.string().uuid().optional(),
-  scheduled_at: z.string().datetime(),
+  scheduled_at: z.string().datetime().optional().default(() => new Date().toISOString()),
   notes: z.string().optional(),
   field: z.enum(['medicine', 'dentistry']).optional(),
   status: z.enum(['time_requested', 'pending', 'confirmed', 'completed', 'cancelled']).optional().default('pending'),
