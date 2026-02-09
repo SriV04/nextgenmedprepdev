@@ -6,7 +6,8 @@ import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import type { UnassignedInterviewsProps, StudentAvailabilitySlot } from '../../types/tutor-calendar';
 
 const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
-  onInterviewClick
+  onInterviewClick,
+  field
 }) => {
   const { unassignedInterviews, openInterviewDetailsModal, selectedInterviewDetails } = useTutorCalendar();
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,9 +20,14 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
     return Array.from(packages).sort();
   }, [unassignedInterviews]);
   
-  // Filter interviews based on search and filters
+  // Filter interviews based on search, field, and filters
   const filteredInterviews = useMemo(() => {
     return unassignedInterviews.filter(interview => {
+      // Field filter - if field is specified, only show interviews for that field
+      if (field && interview.field !== field) {
+        return false;
+      }
+      
       // Search filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -40,7 +46,7 @@ const UnassignedInterviews: React.FC<UnassignedInterviewsProps> = ({
       
       return true;
     });
-  }, [unassignedInterviews, searchQuery, packageFilter]);
+  }, [unassignedInterviews, searchQuery, packageFilter, field]);
   
   const interviews = filteredInterviews;
   const [studentAvailabilities, setStudentAvailabilities] = useState<Record<string, StudentAvailabilitySlot[]>>({});

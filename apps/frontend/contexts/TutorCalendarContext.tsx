@@ -24,7 +24,7 @@ const getTutorColor = (index: number): string => {
   return colors[index % colors.length];
 };
 
-export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const TutorCalendarProvider: React.FC<{ children: ReactNode; field?: 'medicine' | 'dentistry' | 'ucat' | 'alevels' }> = ({ children, field }) => {
   const [tutors, setTutors] = useState<TutorSchedule[]>([]);
   const [unassignedInterviews, setUnassignedInterviews] = useState<UnassignedInterview[]>([]);
   const [interviewsDataMap, setInterviewsDataMap] = useState<Map<string, BackendInterviewData>>(new Map());
@@ -38,6 +38,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<'admin' | 'manager' | 'tutor' | null>(null);
+  const [selectedField, setSelectedField] = useState<'medicine' | 'dentistry' | 'ucat' | 'alevels' | null>(field || null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
   const hasPendingChanges = pendingChanges.length > 0;
@@ -58,10 +59,12 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
       const startDate = startOfWeek.toISOString().split('T')[0];
       const endDateStr = endDate.toISOString().split('T')[0];
 
+      // Build query params with field filter if specified
+      const fieldParam = selectedField ? `&field=${selectedField}` : '';
+      const tutorsUrl = `${backendUrl}/api/v1/tutors/with-availability?start_date=${startDate}&end_date=${endDateStr}${fieldParam}`;
+
       // Fetch tutors with availability
-      const tutorsRes = await fetch(
-        `${backendUrl}/api/v1/tutors/with-availability?start_date=${startDate}&end_date=${endDateStr}`
-      );
+      const tutorsRes = await fetch(tutorsUrl);
       const tutorsData = await tutorsRes.json();
 
       if (tutorsData.success) {
@@ -113,8 +116,9 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
         setTutors(transformedTutors);
       }
 
-      // Fetch unassigned interviews
-      const interviewsRes = await fetch(`${backendUrl}/api/v1/interviews/unassigned`);
+      // Fetch unassigned interviews with field filter if specified
+      const interviewsFieldParam = selectedField ? `?field=${selectedField}` : '';
+      const interviewsRes = await fetch(`${backendUrl}/api/v1/interviews/unassigned${interviewsFieldParam}`);
       const interviewsData = await interviewsRes.json();
 
       if (interviewsData.success) {
@@ -154,7 +158,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
   // Fetch data on mount
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedField]);
 
   const assignInterview = async (tutorId: string, date: string, time: string, interviewId: string) => {
     try {
@@ -695,6 +699,7 @@ export const TutorCalendarProvider: React.FC<{ children: ReactNode }> = ({ child
     discardChanges,
     setCurrentUserId,
     setUserRole,
+    setSelectedField,
   };
 
   return (

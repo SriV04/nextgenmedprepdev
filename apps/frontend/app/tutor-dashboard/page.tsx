@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, List, LogOut, User, HomeIcon, Tag as TagIcon } from 'lucide-react';
 import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
+import FieldAwareTutorCalendar from '../../components/tutor-calendar/FieldAwareTutorCalendar';
 import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
 import InterviewDetailsModal from '../../components/tutor-calendar/InterviewDetailsModal';
 import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
@@ -504,17 +505,20 @@ function DashboardContent() {
             <HomeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             Home
           </button>
-          <button
-            onClick={() => setActiveTab('calendar')}
-            className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
-              activeTab === 'calendar'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            Calendar
-          </button>
+          
+          {(isAdmin || isManager) && (
+            <button
+              onClick={() => setActiveTab('calendar')}
+              className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-3 border-b-2 font-medium transition-colors whitespace-nowrap text-sm sm:text-base ${
+                activeTab === 'calendar'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              Calendar
+            </button>
+          )}
           
           {(isAdmin || isManager) && (
             <button
@@ -976,23 +980,11 @@ function DashboardContent() {
           />
         )}
 
-        {/* Calendar Tab Content */}
-        {activeTab === 'calendar' && (
+        {/* Calendar Tab Content - Admin/Manager Only */}
+        {activeTab === 'calendar' && (isAdmin || isManager) && (
           <div className="flex flex-col gap-6">
-            {/* Commit Changes Bar - Show for admins and managers */}
-            {(isAdmin || isManager) && <CommitChangesBar />}
-
-            {/* Unassigned Interviews - Show for admins and managers */}
-            {(isAdmin || isManager) && (
-              <UnassignedInterviews
-                onInterviewClick={handleUnassignedInterviewClick}
-              />
-            )}
-
-            {/* Calendar Grid - Full Width */}
-            <TutorCalendar
+            <FieldAwareTutorCalendar
               onSlotClick={handleSlotClick}
-              isAdmin={isAdmin || isManager}
             />
           </div>
         )}
@@ -1002,11 +994,13 @@ function DashboardContent() {
           <UniversityConfigManager backendUrl={backendUrl} userId={user?.id ?? ''} />
         )}
 
-        {/* Availability Modal */}
-        <AvailabilityModal />
-        
-        {/* Interview Details Modal */}
-        <InterviewDetailsModal />
+        {/* Modals - only for regular tutors (admin/manager have modals in FieldAwareTutorCalendar) */}
+        {!isAdmin && !isManager && (
+          <>
+            <AvailabilityModal />
+            <InterviewDetailsModal />
+          </>
+        )}
 
         {/* Password Dialog for Bookings Tab */}
         {showPasswordDialog && (

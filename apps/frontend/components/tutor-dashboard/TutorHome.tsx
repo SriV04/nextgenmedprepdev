@@ -1,11 +1,29 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, CheckCircle, User, Video, Mail, GraduationCap, TrendingUp, Plus, ClipboardList, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  CheckCircle,
+  User,
+  Video,
+  Mail,
+  GraduationCap,
+  TrendingUp,
+  Plus,
+  ClipboardList,
+  CalendarClock,
+  Zap,
+  ArrowRight,
+  Sparkles,
+  CircleDollarSign,
+  Eye,
+  AlertCircle,
+} from 'lucide-react';
 import SessionFeedbackModal from './SessionFeedbackModal';
 import AddQuestionModal from './AddQuestionModal';
 import QuestionViewModal from './QuestionViewModal';
-import PendingInterviewsCard from './PendingInterviewsCard';
+import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
 
 interface UpcomingSession {
   id: string;
@@ -39,20 +57,27 @@ interface TutorHomeProps {
   tutorName?: string;
   userRole?: 'admin' | 'manager' | 'tutor' | null;
   onOpenInterviewModal?: (interviewId: string) => void;
+  onOpenAvailability?: () => void;
 }
 
-const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onOpenInterviewModal }) => {
+const TutorHome: React.FC<TutorHomeProps> = ({
+  tutorId,
+  tutorName,
+  userRole,
+  onOpenInterviewModal,
+  onOpenAvailability,
+}) => {
   const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
   const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
   const [questionSubmissions, setQuestionSubmissions] = useState<QuestionSubmission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [submissionsTab, setSubmissionsTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
-  const [expandedSubmissionIds, setExpandedSubmissionIds] = useState<string[]>([]);
   const [selectedSubmission, setSelectedSubmission] = useState<QuestionSubmission | null>(null);
 
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
@@ -66,7 +91,6 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
       setLoading(true);
       setError(null);
 
-      // Fetch upcoming sessions and stats
       const [sessionsRes, statsRes] = await Promise.all([
         fetch(`${backendUrl}/api/v1/tutors/${tutorId}/upcoming-sessions`),
         fetch(`${backendUrl}/api/v1/tutors/${tutorId}/session-stats`),
@@ -74,16 +98,12 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
 
       if (sessionsRes.ok) {
         const sessionsData = await sessionsRes.json();
-        if (sessionsData.success) {
-          setUpcomingSessions(sessionsData.data);
-        }
+        if (sessionsData.success) setUpcomingSessions(sessionsData.data);
       }
 
       if (statsRes.ok) {
         const statsData = await statsRes.json();
-        if (statsData.success) {
-          setStats(statsData.data);
-        }
+        if (statsData.success) setStats(statsData.data);
       }
 
       await fetchQuestionSubmissions();
@@ -101,13 +121,9 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
       const response = await fetch(
         `${backendUrl}/api/v1/prometheus/questions?contributor_id=${encodeURIComponent(tutorId)}`
       );
-      if (!response.ok) {
-        throw new Error('Failed to load question submissions');
-      }
+      if (!response.ok) throw new Error('Failed to load question submissions');
       const result = await response.json();
-      if (result.success) {
-        setQuestionSubmissions(result.data);
-      }
+      if (result.success) setQuestionSubmissions(result.data);
     } catch (err: any) {
       console.error('Error fetching question submissions:', err);
     } finally {
@@ -127,10 +143,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   };
 
   const getTimeUntil = (dateString: string) => {
@@ -141,11 +154,23 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffDays > 0) return `in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
-    if (diffHours > 0) return `in ${diffHours} hour${diffHours > 1 ? 's' : ''}`;
-    if (diffMins > 0) return `in ${diffMins} minute${diffMins > 1 ? 's' : ''}`;
-    if (diffMins < 0 && diffMins > -60) return 'happening now';
+    if (diffDays > 0) return `in ${diffDays}d`;
+    if (diffHours > 0) return `in ${diffHours}h`;
+    if (diffMins > 0) return `in ${diffMins}m`;
+    if (diffMins < 0 && diffMins > -60) return 'NOW';
     return 'passed';
+  };
+
+  const getTimeUntilColor = (dateString: string) => {
+    const now = new Date();
+    const sessionDate = new Date(dateString);
+    const diffMs = sessionDate.getTime() - now.getTime();
+    const diffHours = diffMs / 3600000;
+
+    if (diffHours <= 0) return 'text-rose-600 bg-rose-50 border-rose-200';
+    if (diffHours <= 2) return 'text-amber-700 bg-amber-50 border-amber-200';
+    if (diffHours <= 24) return 'text-blue-700 bg-blue-50 border-blue-200';
+    return 'text-slate-600 bg-slate-50 border-slate-200';
   };
 
   const handleSessionClick = (session: UpcomingSession) => {
@@ -158,30 +183,9 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
     setSelectedSession(null);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  const getStatusBadgeStyles = (status?: string | null) => {
-    const normalizedStatus = status || 'pending';
-    if (normalizedStatus === 'approved') {
-      return 'bg-emerald-100 text-emerald-700';
-    }
-    if (normalizedStatus === 'rejected') {
-      return 'bg-red-100 text-red-700';
-    }
-    return 'bg-amber-100 text-amber-700';
-  };
-
   const normalizeSubmissionStatus = (status?: string | null) => {
     const normalized = (status || 'pending').toLowerCase();
-    if (normalized === 'approved' || normalized === 'rejected') {
-      return normalized;
-    }
+    if (normalized === 'approved' || normalized === 'rejected') return normalized;
     return 'pending';
   };
 
@@ -198,14 +202,6 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
     (submission) => normalizeSubmissionStatus(submission.status) === submissionsTab
   );
 
-  const approvedEarnings = submissionCounts.approved;
-
-  const toggleSubmissionExpanded = (submissionId: string) => {
-    setExpandedSubmissionIds((prev) =>
-      prev.includes(submissionId) ? prev.filter((id) => id !== submissionId) : [...prev, submissionId]
-    );
-  };
-
   const handleQuestionUpdated = (updatedQuestion: QuestionSubmission) => {
     setQuestionSubmissions((prev) =>
       prev.map((item) => (item.id === updatedQuestion.id ? updatedQuestion : item))
@@ -213,328 +209,460 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
     setSelectedSubmission(updatedQuestion);
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  // Next session helper
+  const nextSession = upcomingSessions.length > 0 ? upcomingSessions[0] : null;
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <div className="relative">
+          <div className="w-14 h-14 rounded-full border-[3px] border-slate-200"></div>
+          <div className="absolute inset-0 w-14 h-14 rounded-full border-[3px] border-t-indigo-600 animate-spin"></div>
+        </div>
+        <p className="text-sm text-slate-500 font-medium animate-pulse">Loading your dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg p-6 text-white">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            Welcome back{tutorName ? `, ${tutorName}` : ''}! 👋
-          </h1>
-          <p className="text-blue-100 text-sm sm:text-base">
-            Here's an overview of your tutoring sessions
-          </p>
+    <div className="space-y-5 pb-8">
+      {/* ── Hero / Welcome ────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 p-5 sm:p-7 text-white shadow-xl">
+        {/* decorative shapes */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full bg-white/5"></div>
+        <div className="pointer-events-none absolute -left-6 bottom-0 h-32 w-32 rounded-full bg-white/5"></div>
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div>
+            <p className="text-indigo-200 text-sm font-medium tracking-wide uppercase mb-1">
+              {getGreeting()}
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              {tutorName || 'Tutor'}
+            </h1>
+            {stats && (
+              <p className="text-indigo-200 text-sm mt-2 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                {stats.thisWeekCompleted} session{stats.thisWeekCompleted !== 1 ? 's' : ''} completed
+                this week
+              </p>
+            )}
+          </div>
+
+          {/* ── Availability CTA ── */}
+          <button
+            type="button"
+            onClick={() => setIsAvailabilityModalOpen(true)}
+            className="group relative flex items-center gap-3 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-5 py-3 sm:py-3.5 text-left transition-all hover:bg-white/25 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl w-full sm:w-auto"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors flex-shrink-0">
+              <CalendarClock className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="block text-sm font-bold text-white">Set Your Availability</span>
+              <span className="block text-xs text-indigo-200">Let students book sessions</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-indigo-200 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+          </button>
         </div>
       </div>
 
-      {/* Statistics Cards */}
+      {/* ── Quick Stats Row ──────────────────────────────────── */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-green-500">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500">Total Completed</h3>
-              <CheckCircle className="w-5 h-5 text-green-500" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            {
+              label: 'Total Completed',
+              value: stats.totalCompleted,
+              sub: 'all time',
+              icon: CheckCircle,
+              accent: 'text-emerald-600',
+              bg: 'bg-emerald-50',
+              border: 'border-emerald-100',
+            },
+            {
+              label: 'Upcoming',
+              value: stats.totalUpcoming,
+              sub: 'scheduled',
+              icon: Calendar,
+              accent: 'text-indigo-600',
+              bg: 'bg-indigo-50',
+              border: 'border-indigo-100',
+            },
+            {
+              label: 'This Week',
+              value: stats.thisWeekCompleted,
+              sub: 'completed',
+              icon: Zap,
+              accent: 'text-violet-600',
+              bg: 'bg-violet-50',
+              border: 'border-violet-100',
+            },
+            {
+              label: 'This Month',
+              value: stats.thisMonthCompleted,
+              sub: 'completed',
+              icon: TrendingUp,
+              accent: 'text-amber-600',
+              bg: 'bg-amber-50',
+              border: 'border-amber-100',
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className={`rounded-xl border ${stat.border} ${stat.bg} p-4 transition-shadow hover:shadow-md`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  {stat.label}
+                </span>
+                <stat.icon className={`w-4 h-4 ${stat.accent}`} />
+              </div>
+              <p className="text-2xl sm:text-3xl font-extrabold text-slate-900">{stat.value}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">{stat.sub}</p>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalCompleted}</p>
-            <p className="text-xs text-gray-500 mt-1">All time</p>
+          ))}
+        </div>
+      )}
+
+      {/* ── Next Session Spotlight ────────────────────────────── */}
+      {nextSession && (
+        <div className="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/80 to-white p-4 sm:p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></div>
+            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+              Next Session
+            </span>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500">Upcoming</h3>
-              <Calendar className="w-5 h-5 text-blue-500" />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex flex-col items-center justify-center h-14 w-14 rounded-xl bg-indigo-600 text-white flex-shrink-0 shadow-md">
+                <span className="text-[10px] font-bold uppercase leading-none mt-0.5">
+                  {new Date(nextSession.scheduled_at).toLocaleDateString('en-GB', { month: 'short' })}
+                </span>
+                <span className="text-xl font-extrabold leading-none">
+                  {new Date(nextSession.scheduled_at).getDate()}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-slate-900 text-base truncate">
+                  {nextSession.studentName}
+                </h3>
+                <p className="text-sm text-slate-500 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  {formatTime(nextSession.scheduled_at)}
+                  <span className={`ml-1 text-xs font-bold px-2 py-0.5 rounded-full border ${getTimeUntilColor(nextSession.scheduled_at)}`}>
+                    {getTimeUntil(nextSession.scheduled_at)}
+                  </span>
+                </p>
+                <p className="text-xs text-slate-400 mt-0.5 truncate">{nextSession.package}</p>
+              </div>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalUpcoming}</p>
-            <p className="text-xs text-gray-500 mt-1">Scheduled</p>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-purple-500">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500">This Week</h3>
-              <TrendingUp className="w-5 h-5 text-purple-500" />
+            <div className="flex gap-2 flex-shrink-0">
+              {nextSession.zoom_join_url && (
+                <a
+                  href={nextSession.zoom_join_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all text-sm font-bold shadow-md hover:shadow-lg active:scale-[0.97]"
+                >
+                  <Video className="w-4 h-4" />
+                  Join
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => handleSessionClick(nextSession)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all text-sm font-medium active:scale-[0.97]"
+              >
+                Add Feedback
+              </button>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.thisWeekCompleted}</p>
-            <p className="text-xs text-gray-500 mt-1">Completed</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-orange-500">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs sm:text-sm font-medium text-gray-500">This Month</h3>
-              <TrendingUp className="w-5 h-5 text-orange-500" />
-            </div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.thisMonthCompleted}</p>
-            <p className="text-xs text-gray-500 mt-1">Completed</p>
           </div>
         </div>
       )}
 
-      {/* Pending Interviews Section */}
-      <PendingInterviewsCard
-        tutorId={tutorId}
-        backendUrl={backendUrl}
-        userRole={userRole}
-        onInterviewClick={onOpenInterviewModal}
-        onAssignSuccess={() => {
-          fetchTutorData();
-        }}
-      />
-
-      {/* Question Submissions */}
-      <div className="bg-white rounded-xl shadow-md">
-        <div className="p-4 sm:p-6 border-b border-gray-200">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Question Submissions</h2>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs sm:text-sm text-emerald-700">
-                <span className="font-semibold">Earnings</span>
-                <span>£{approvedEarnings}</span>
-                <span className="text-emerald-600">({submissionCounts.approved} approved)</span>
-              </div>
-              <span className="text-xs sm:text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
-                {questionSubmissions.length} submission{questionSubmissions.length !== 1 ? 's' : ''}
-              </span>
-              <button
-                onClick={() => setIsAddQuestionModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add Question
-              </button>
-            </div>
+      {/* ── Upcoming Sessions ────────────────────────────────── */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Calendar className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">Upcoming Sessions</h2>
           </div>
-          <p className="text-xs sm:text-sm text-gray-500 mt-3">
-            💡 Earn £1 for each approved question submission
-          </p>
+          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+            {upcomingSessions.length}
+          </span>
         </div>
 
-        <div className="divide-y divide-gray-200">
-          {submissionsLoading ? (
-            <div className="p-6 text-sm text-gray-500">Loading submissions...</div>
-          ) : questionSubmissions.length === 0 ? (
-            <div className="p-8 text-center">
-              <ClipboardList className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500">No question submissions yet</p>
-              <p className="text-sm text-gray-400 mt-1">Submit a question to earn £1 per approval</p>
+        {upcomingSessions.length === 0 ? (
+          <div className="p-10 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-100 mb-3">
+              <Calendar className="w-7 h-7 text-slate-300" />
             </div>
-          ) : (
-            <>
-              <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <div className="flex flex-wrap items-center gap-2">
-                  {(['pending', 'approved', 'rejected'] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setSubmissionsTab(tab)}
-                      className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors ${
-                        submissionsTab === tab
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span className="capitalize">{tab}</span> ({submissionCounts[tab]})
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {filteredSubmissions.length === 0 ? (
-                <div className="p-8 text-center">
-                  <ClipboardList className="w-10 h-10 mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500">No {submissionsTab} submissions</p>
-                </div>
-              ) : (
-                filteredSubmissions.map((submission) => {
-                  return (
-                    <div key={submission.id} className="p-4 sm:p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                        <div className="flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-semibold text-gray-900">
-                              {submission.title || 'Untitled question'}
-                            </h3>
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeStyles(
-                                submission.status
-                              )}`}
-                            >
-                              {submission.status || 'pending'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                            {submission.question_text}
-                          </p>
-                          {submission.created_at && (
-                            <div className="text-xs text-gray-500 mt-2">
-                              Submitted {formatDate(submission.created_at)}
-                            </div>
-                          )}
-                          {normalizeSubmissionStatus(submission.status) === 'rejected' &&
-                            submission.rejection_reason && (
-                            <div className="mt-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
-                              <span className="font-semibold text-red-800">Rejection reason:</span>{' '}
-                              {submission.rejection_reason}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedSubmission(submission as any)}
-                            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                          >
-                            View Full Details
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Upcoming Sessions */}
-      <div className="bg-white rounded-xl shadow-md">
-        <div className="p-4 sm:p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">Upcoming Sessions</h2>
-            </div>
-            <span className="text-xs sm:text-sm text-gray-500 bg-blue-50 px-3 py-1 rounded-full">
-              {upcomingSessions.length} session{upcomingSessions.length !== 1 ? 's' : ''}
-            </span>
+            <p className="text-slate-500 font-medium">No upcoming sessions</p>
+            <p className="text-sm text-slate-400 mt-1">
+              Set your availability so students can book with you
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsAvailabilityModalOpen(true)}
+              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-700"
+            >
+              <CalendarClock className="w-4 h-4" />
+              Set Availability
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-        </div>
-
-        <div className="divide-y divide-gray-200">
-          {upcomingSessions.length === 0 ? (
-            <div className="p-8 text-center">
-              <Calendar className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-gray-500">No upcoming sessions scheduled</p>
-              <p className="text-sm text-gray-400 mt-1">Check back later for new bookings</p>
-            </div>
-          ) : (
-            upcomingSessions.map((session) => {
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {upcomingSessions.map((session, idx) => {
               const timeUntil = getTimeUntil(session.scheduled_at);
-              const isImminentOrNow = timeUntil.includes('hour') || timeUntil === 'happening now';
-              
+              const isNow = timeUntil === 'NOW';
+
+              // Skip the first session if it's already shown in the spotlight
+              // Actually, let's keep all for completeness
+
               return (
                 <div
                   key={session.id}
                   onClick={() => handleSessionClick(session)}
-                  className={`p-4 sm:p-6 hover:bg-gray-50 transition-colors cursor-pointer ${
-                    isImminentOrNow ? 'bg-blue-50' : ''
+                  className={`group flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4 cursor-pointer transition-colors ${
+                    isNow
+                      ? 'bg-rose-50/50 hover:bg-rose-50'
+                      : 'hover:bg-slate-50'
                   }`}
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                    {/* Date & Time */}
-                    <div className="flex items-center gap-3 lg:w-48 flex-shrink-0">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                        <span className="text-xs text-blue-600 font-semibold">
-                          {new Date(session.scheduled_at).toLocaleDateString('en-GB', { month: 'short' })}
-                        </span>
-                        <span className="text-lg font-bold text-blue-600">
-                          {new Date(session.scheduled_at).getDate()}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1 text-sm font-medium text-gray-900">
-                          <Clock className="w-4 h-4 text-gray-400" />
-                          {formatTime(session.scheduled_at)}
-                        </div>
-                        <p className={`text-xs ${isImminentOrNow ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
-                          {timeUntil}
-                        </p>
-                      </div>
+                  {/* Date badge */}
+                  <div className="flex items-center gap-3 sm:w-44 flex-shrink-0">
+                    <div
+                      className={`flex flex-col items-center justify-center h-11 w-11 rounded-lg flex-shrink-0 ${
+                        isNow ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      <span className="text-[9px] font-bold uppercase leading-none">
+                        {new Date(session.scheduled_at).toLocaleDateString('en-GB', { month: 'short' })}
+                      </span>
+                      <span className="text-base font-extrabold leading-none">
+                        {new Date(session.scheduled_at).getDate()}
+                      </span>
                     </div>
-
-                    {/* Student Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-2 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-gray-900 truncate">{session.studentName}</h3>
-                          <div className="flex items-center gap-1 text-xs text-gray-600 truncate">
-                            <Mail className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{session.studentEmail}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-sm">
-                          <GraduationCap className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          <span className="text-gray-700 font-medium">{session.package}</span>
-                        </div>
-                        {session.universities && (
-                          <p className="text-sm text-gray-600 line-clamp-1 pl-5">
-                            {session.universities}
-                          </p>
-                        )}
-                        {session.notes && (
-                          <p className="text-xs text-gray-500 line-clamp-2 pl-5 mt-1">
-                            {session.notes}
-                          </p>
-                        )}
-                      </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        {formatTime(session.scheduled_at)}
+                      </p>
+                      <span
+                        className={`inline-block text-[11px] font-bold px-1.5 py-0.5 rounded mt-0.5 border ${getTimeUntilColor(
+                          session.scheduled_at
+                        )}`}
+                      >
+                        {timeUntil}
+                      </span>
                     </div>
-
-                    {/* Action Button */}
-                    {session.zoom_join_url && (
-                      <div className="lg:w-40 flex-shrink-0">
-                        <a
-                          href={session.zoom_join_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                        >
-                          <Video className="w-4 h-4" />
-                          Join Session
-                        </a>
-                      </div>
-                    )}
                   </div>
-                  
-                  {/* Click indicator */}
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs text-blue-600 text-center">
-                      Click to add feedback for this session
-                    </p>
+
+                  {/* Student info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex-shrink-0">
+                        <User className="w-3 h-3" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900 text-sm truncate">
+                        {session.studentName}
+                      </h3>
+                    </div>
+                    <div className="pl-8 space-y-0.5">
+                      <p className="text-xs text-slate-500 truncate flex items-center gap-1">
+                        <GraduationCap className="w-3 h-3 flex-shrink-0" />
+                        {session.package}
+                      </p>
+                      {session.universities && (
+                        <p className="text-xs text-slate-400 truncate">{session.universities}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 flex-shrink-0 pl-8 sm:pl-0">
+                    {session.zoom_join_url && (
+                      <a
+                        href={session.zoom_join_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-xs font-bold shadow-sm"
+                      >
+                        <Video className="w-3.5 h-3.5" />
+                        Join
+                      </a>
+                    )}
+                    <span className="text-xs text-slate-400 group-hover:text-indigo-500 transition-colors hidden sm:inline">
+                      Add feedback →
+                    </span>
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Session Feedback Modal */}
+      {/* ── Question Submissions ─────────────────────────────── */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <ClipboardList className="w-5 h-5 text-indigo-600" />
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">Question Bank</h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
+                <CircleDollarSign className="w-3.5 h-3.5" />
+                £{submissionCounts.approved} earned
+              </div>
+              <button
+                onClick={() => setIsAddQuestionModalOpen(true)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all text-xs font-bold shadow-sm active:scale-[0.97]"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Submit Question
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            Earn £1 for each approved question
+          </p>
+        </div>
+
+        {/* Tabs */}
+        {questionSubmissions.length > 0 && (
+          <div className="px-5 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center gap-1.5">
+            {(['pending', 'approved', 'rejected'] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setSubmissionsTab(tab)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  submissionsTab === tab
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-white'
+                }`}
+              >
+                <span className="capitalize">{tab}</span>
+                <span className={`ml-1 ${submissionsTab === tab ? 'text-indigo-200' : 'text-slate-400'}`}>
+                  {submissionCounts[tab]}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Submissions list */}
+        {submissionsLoading ? (
+          <div className="p-8 text-center text-sm text-slate-400">Loading submissions...</div>
+        ) : questionSubmissions.length === 0 ? (
+          <div className="p-10 text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-100 mb-3">
+              <ClipboardList className="w-7 h-7 text-slate-300" />
+            </div>
+            <p className="text-slate-500 font-medium">No submissions yet</p>
+            <p className="text-sm text-slate-400 mt-1">Submit questions to start earning</p>
+          </div>
+        ) : filteredSubmissions.length === 0 ? (
+          <div className="p-8 text-center">
+            <p className="text-slate-400 text-sm">No {submissionsTab} submissions</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {filteredSubmissions.map((submission) => {
+              const status = normalizeSubmissionStatus(submission.status);
+              const statusStyles =
+                status === 'approved'
+                  ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                  : status === 'rejected'
+                  ? 'text-rose-700 bg-rose-50 border-rose-200'
+                  : 'text-amber-700 bg-amber-50 border-amber-200';
+
+              return (
+                <div key={submission.id} className="px-5 py-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-slate-900 text-sm">
+                          {submission.title || 'Untitled question'}
+                        </h3>
+                        <span
+                          className={`text-[11px] font-bold px-2 py-0.5 rounded-full border capitalize ${statusStyles}`}
+                        >
+                          {status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {submission.question_text}
+                      </p>
+                      {submission.created_at && (
+                        <p className="text-[11px] text-slate-400 mt-1.5">
+                          {formatDate(submission.created_at)}
+                        </p>
+                      )}
+                      {status === 'rejected' && submission.rejection_reason && (
+                        <div className="mt-2 flex items-start gap-2 rounded-lg bg-rose-50 border border-rose-100 px-3 py-2">
+                          <AlertCircle className="w-3.5 h-3.5 text-rose-500 flex-shrink-0 mt-0.5" />
+                          <p className="text-xs text-rose-700">{submission.rejection_reason}</p>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSubmission(submission as any)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors flex-shrink-0 active:scale-[0.97]"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      View
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Error Banner ──────────────────────────────────────── */}
+      {error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-rose-800">Something went wrong</p>
+            <p className="text-xs text-rose-600 mt-0.5">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modals ────────────────────────────────────────────── */}
       <SessionFeedbackModal
         isOpen={isFeedbackModalOpen}
         onClose={handleCloseFeedbackModal}
         session={selectedSession}
       />
 
-      {/* Add Question Modal */}
       <AddQuestionModal
         isOpen={isAddQuestionModalOpen}
         onClose={() => setIsAddQuestionModalOpen(false)}
         userId={tutorId}
-        onSuccess={() => {
-          fetchQuestionSubmissions();
-        }}
+        onSuccess={() => fetchQuestionSubmissions()}
       />
 
-      {/* Question View Modal */}
       <QuestionViewModal
         isOpen={!!selectedSubmission}
         onClose={() => setSelectedSubmission(null)}
@@ -545,10 +673,9 @@ const TutorHome: React.FC<TutorHomeProps> = ({ tutorId, tutorName, userRole, onO
         allowStatusChange={false}
       />
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800 text-sm">{error}</p>
-        </div>
+      {/* Availability Modal */}
+      {isAvailabilityModalOpen && (
+        <AvailabilityModal />
       )}
     </div>
   );

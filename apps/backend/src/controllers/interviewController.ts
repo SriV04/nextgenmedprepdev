@@ -154,10 +154,11 @@ export const getUnassignedInterviews = async (
 ): Promise<void> => {
   try {
     const supabase = createSupabaseClient();
+    const { field } = req.query;
 
     const cutoffDate = new Date('2025-11-29T00:00:00Z').toISOString();
 
-    const { data: interviews, error } = await supabase
+    let query = supabase
       .from('interviews')
       .select(`
       *,
@@ -173,8 +174,14 @@ export const getUnassignedInterviews = async (
       `)
       .is('tutor_id', null)
       .eq('completed', false)
-      .gt('updated_at', cutoffDate)
-      .order('updated_at', { ascending: true });
+      .gt('updated_at', cutoffDate);
+
+    // Apply field filter if specified
+    if (field && (field === 'medicine' || field === 'dentistry')) {
+      query = query.eq('booking.field', field);
+    }
+
+    const { data: interviews, error } = await query.order('updated_at', { ascending: true });
 
     if (error) {
       throw new Error(error.message);

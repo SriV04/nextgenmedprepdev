@@ -161,6 +161,7 @@ export interface TutorCalendarContextType {
   discardChanges: () => void;
   setCurrentUserId: (userId: string | null) => void;
   setUserRole: (role: 'admin' | 'manager' | 'tutor' | null) => void;
+  setSelectedField?: (field: 'medicine' | 'dentistry' | 'ucat' | 'alevels') => void;
 }
 
 // ============================================================================
@@ -173,7 +174,8 @@ export interface TutorCalendarProps {
 }
 
 export interface UnassignedInterviewsProps {
-  onInterviewClick: (interview: UnassignedInterview) => void;
+  onInterviewClick?: (interview: UnassignedInterview) => void;
+  field?: 'medicine' | 'dentistry' | 'ucat' | 'alevels';
 }
 
 // ============================================================================
