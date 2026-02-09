@@ -38,14 +38,14 @@ export const FieldAwareTutorCalendar: React.FC<FieldAwareTutorCalendarProps> = (
     }
   }, [activeTab, setSelectedField]);
 
+  // Always call hooks at the top level
+  useEffect(() => {
+    if (!showBothFields && setSelectedField) {
+      setSelectedField('medicine');
+    }
+  }, [showBothFields, setSelectedField]);
+
   if (!showBothFields) {
-    // Single field mode - set medicine by default
-    useEffect(() => {
-      if (setSelectedField) {
-        setSelectedField('medicine');
-      }
-    }, [setSelectedField]);
-    
     return (
       <>
         <CommitChangesBar />

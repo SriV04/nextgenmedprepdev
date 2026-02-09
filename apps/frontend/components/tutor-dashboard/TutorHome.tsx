@@ -73,7 +73,9 @@ const TutorHome: React.FC<TutorHomeProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const [isAvailabilityModalOpen, setIsAvailabilityModalOpen] = useState(false);
+  // Remove local modal state, use context
+    // Use TutorCalendarContext for modal state
+    const { isAvailabilityModalOpen, openAvailabilityModal, closeAvailabilityModal } = require('../../contexts/TutorCalendarContext').useTutorCalendar();
   const [isAddQuestionModalOpen, setIsAddQuestionModalOpen] = useState(false);
   const [questionSubmissions, setQuestionSubmissions] = useState<QuestionSubmission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
@@ -259,7 +261,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({
           {/* ── Availability CTA ── */}
           <button
             type="button"
-            onClick={() => setIsAvailabilityModalOpen(true)}
+            onClick={() => openAvailabilityModal()}
             className="group relative flex items-center gap-3 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 px-5 py-3 sm:py-3.5 text-left transition-all hover:bg-white/25 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl w-full sm:w-auto"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors flex-shrink-0">
@@ -414,7 +416,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({
             </p>
             <button
               type="button"
-              onClick={() => setIsAvailabilityModalOpen(true)}
+              onClick={() => openAvailabilityModal()}
               className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-indigo-600 hover:text-indigo-700"
             >
               <CalendarClock className="w-4 h-4" />
@@ -675,7 +677,7 @@ const TutorHome: React.FC<TutorHomeProps> = ({
 
       {/* Availability Modal */}
       {isAvailabilityModalOpen && (
-        <AvailabilityModal />
+        <AvailabilityModal mode="home" />
       )}
     </div>
   );
