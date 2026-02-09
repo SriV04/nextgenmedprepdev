@@ -10,7 +10,6 @@ import { usePaymentForm } from './hooks/usePaymentForm';
 import Step1ServiceType from '../../../components/interview-payment/Step1ServiceType';
 import Step2Package from '../../../components/interview-payment/Step2Package';
 import Step3Universities from '../../../components/interview-payment/Step3Universities';
-import Step3_5InterviewDates from '../../../components/interview-payment/Step3_5InterviewDates';
 import Step4Contact from '../../../components/interview-payment/Step4Contact';
 import { TutorCalendarProvider } from '../../../contexts/TutorCalendarContext';
 
@@ -32,7 +31,6 @@ export default function InterviewsPaymentPage() {
     
     // Validation functions
     canProceedToUniversities,
-    canProceedToInterviewDates,
     canProceedToDetails,
     canProceedToPayment,
     
@@ -99,21 +97,16 @@ export default function InterviewsPaymentPage() {
             </div>
             <div className="ml-auto">
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <span>Step {currentStep === 3.5 ? '3.5' : currentStep} of {serviceType === 'live' ? '4' : '4'}</span>
+                <span>Step {currentStep} of 4</span>
                 <div className="flex gap-1">
-                  {[1, 2, 3, 3.5, 4].map((step) => {
-                    // Skip 3.5 for generated service type
-                    if (step === 3.5 && serviceType === 'generated') return null;
-                    
-                    return (
-                      <div 
-                        key={step}
-                        className={`w-2 h-2 rounded-full ${
-                          step <= currentStep ? 'bg-indigo-500' : 'bg-gray-600'
-                        }`}
-                      />
-                    );
-                  })}
+                  {[1, 2, 3, 4].map((step) => (
+                    <div 
+                      key={step}
+                      className={`w-2 h-2 rounded-full ${
+                        step <= currentStep ? 'bg-indigo-500' : 'bg-gray-600'
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -146,18 +139,6 @@ export default function InterviewsPaymentPage() {
               selectedUniversities={universities}
               selectedPackage={selectedPackage}
               onUniversityToggle={handleUniversityToggle}
-              onProceedToNext={handleProceedToNext}
-            />
-          )}
-
-          {/* Step 3.5: Interview Dates Selection (Live sessions only) */}
-          {currentStep === 3.5 && serviceType === 'live' && canProceedToInterviewDates() && (
-            <Step3_5InterviewDates
-              mode="checkout"
-              selectedUniversities={universities}
-              selectedPackage={selectedPackage}
-              availability={availability}
-              onAvailabilityChange={handleAvailabilityChange}
               onProceedToNext={handleProceedToNext}
             />
           )}

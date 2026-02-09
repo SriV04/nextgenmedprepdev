@@ -98,7 +98,7 @@ const Hero: React.FC = () => {
           </p>
         </div>
 
-        {/* 🚀 Call-to-action buttons */}
+        {/* Call-to-action buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <Link
             href="/get-started"

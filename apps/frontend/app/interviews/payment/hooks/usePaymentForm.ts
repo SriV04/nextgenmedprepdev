@@ -81,12 +81,10 @@ export function usePaymentForm() {
   const isStep1Complete = !!serviceType;
   const isStep2Complete = !!packageId && !!selectedPackage;
   const isStep3Complete = universities.length > 0;
-  const isStep3_5Complete = true; // Availability is optional
   const isStep4Complete = !!(contact.firstName && contact.lastName && contact.email && contact.field);
 
   const canProceedToUniversities = (): boolean => isStep1Complete && isStep2Complete;
-  const canProceedToInterviewDates = (): boolean => canProceedToUniversities() && isStep3Complete;
-  const canProceedToDetails = (): boolean => canProceedToInterviewDates() && isStep3_5Complete;
+  const canProceedToDetails = (): boolean => canProceedToUniversities() && isStep3Complete;
   const canProceedToPayment = (): boolean => canProceedToDetails() && isStep4Complete;
 
   const calculatePrice = () => {
@@ -144,22 +142,9 @@ export function usePaymentForm() {
   };
 
   const handleProceedToNext = () => {
-    if (currentStep === 3 && canProceedToInterviewDates()) {
-      // For generated questions, skip interview dates and go straight to contact
-      if (serviceType === 'generated') {
-        setCurrentStep(4);
-      } else {
-        setCurrentStep(3.5); // Go to interview dates step for live sessions
-      }
-    } else if (currentStep === 3.5 && canProceedToDetails()) {
-      console.log('Selected availability:', availability);
+    if (currentStep === 3 && canProceedToDetails()) {
+      // Go directly to contact details (step 4)
       setCurrentStep(4);
-    }
-  };
-
-  const handleProceedToInterviewDates = () => {
-    if (canProceedToInterviewDates()) {
-      setCurrentStep(3.5);
     }
   };
 
@@ -257,13 +242,6 @@ export function usePaymentForm() {
   const goBack = () => {
     if (currentStep === 4) {
       // From contact details, go back to interview dates (if live) or universities (if generated)
-      if (serviceType === 'live') {
-        setCurrentStep(3.5);
-      } else {
-        setCurrentStep(3);
-      }
-    } else if (currentStep === 3.5) {
-      // From interview dates, go back to universities
       setCurrentStep(3);
     } else if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -286,12 +264,10 @@ export function usePaymentForm() {
     isStep1Complete,
     isStep2Complete,
     isStep3Complete,
-    isStep3_5Complete,
     isStep4Complete,
     
     // Validation functions
     canProceedToUniversities,
-    canProceedToInterviewDates,
     canProceedToDetails,
     canProceedToPayment,
     
@@ -304,7 +280,6 @@ export function usePaymentForm() {
     handleUniversityToggle,
     handleContactChange,
     handleProceedToNext,
-    handleProceedToInterviewDates,
     handleProceedToPayment,
     goBack,
     setPersonalStatement,
