@@ -78,7 +78,7 @@ interface PrometheusQuestion {
   status?: string | null;
   notes?: string | null;
   rejection_reason?: string | null;
-  field?: string[] | null;
+  field?: string | null;
   follow_up_questions?: FollowUpQuestion[];
   question_tags?: Array<{ tag: string }>;
   question_skill_criteria?: QuestionSkillCriterion[];
