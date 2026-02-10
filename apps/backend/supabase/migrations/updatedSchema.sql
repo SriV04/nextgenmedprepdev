@@ -160,7 +160,6 @@ CREATE TABLE public.tutors (
   name text NOT NULL,
   email text NOT NULL UNIQUE,
   subjects ARRAY NOT NULL,
-  field text[] NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   role text,
   field text,

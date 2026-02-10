@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Download, RefreshCw, Calendar as CalendarIcon, 
 import InterviewBookingModal from '../../components/InterviewBookingModal';
 import TutorCalendar from '../../components/tutor-calendar/TutorCalendar';
 import FieldAwareTutorCalendar from '../../components/tutor-calendar/FieldAwareTutorCalendar';
+import PendingInterviewsCard from '../../components/tutor-dashboard/PendingInterviewsCard';
 import AvailabilityModal from '../../components/tutor-calendar/AvailabilityModal';
 import InterviewDetailsModal from '../../components/tutor-calendar/InterviewDetailsModal';
 import UnassignedInterviews from '../../components/tutor-calendar/UnassignedInterviews';
@@ -551,6 +552,22 @@ function DashboardContent() {
             )}
           </button>
         </div>
+
+        {/* Pending Interviews Card - Shows for Admin/Manager on Calendar Tab */}
+        {activeTab === 'calendar' && (isAdmin || isManager) && user && (
+          <div className="mb-6">
+            <PendingInterviewsCard
+              tutorId={user.id}
+              backendUrl={backendUrl}
+              userRole={userRole}
+              onInterviewClick={openInterviewDetailsModal}
+              onAssignSuccess={() => {
+                // Refresh data if needed
+                fetchData();
+              }}
+            />
+          </div>
+        )}
 
         {/* Statistics Cards */}
         {activeTab === 'bookings' && stats && (

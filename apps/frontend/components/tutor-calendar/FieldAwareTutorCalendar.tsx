@@ -6,7 +6,6 @@ import UnassignedInterviews from './UnassignedInterviews';
 import AvailabilityModal from './AvailabilityModal';
 import InterviewDetailsModal from './InterviewDetailsModal';
 import CommitChangesBar from './CommitChangesBar';
-import PendingInterviewsCard from '../tutor-dashboard/PendingInterviewsCard';
 import { useTutorCalendar } from '../../contexts/TutorCalendarContext';
 import type { TutorCalendarProps } from '../../types/tutor-calendar';
 import { Stethoscope, Smile, BookOpen, GraduationCap } from 'lucide-react';
@@ -28,7 +27,7 @@ export const FieldAwareTutorCalendar: React.FC<FieldAwareTutorCalendarProps> = (
   onInterviewClick,
 }) => {
   const [activeTab, setActiveTab] = useState<'medicine' | 'dentistry' | 'ucat' | 'alevels'>('medicine');
-  const { setSelectedField, currentUserId } = useTutorCalendar();
+  const { setSelectedField, currentUserId, userRole } = useTutorCalendar();
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
 
   // Update the context field when tab changes
@@ -156,19 +155,6 @@ export const FieldAwareTutorCalendar: React.FC<FieldAwareTutorCalendarProps> = (
 
       {/* Commit Changes Bar */}
       <CommitChangesBar />
-
-      {/* Pending Interviews Card */}
-      {currentUserId && (
-        <PendingInterviewsCard
-          tutorId={currentUserId}
-          backendUrl={backendUrl}
-          userRole={undefined}
-          onInterviewClick={onInterviewClick}
-          onAssignSuccess={() => {
-            // Refresh calendar data if needed
-          }}
-        />
-      )}
 
       {/* Unassigned Interviews */}
       <UnassignedInterviews
