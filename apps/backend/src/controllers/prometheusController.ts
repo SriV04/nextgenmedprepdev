@@ -413,7 +413,7 @@ export const getQuestions = async (req: Request, res: Response): Promise<void> =
 export const updateQuestionStatus = async (req: Request, res: Response): Promise<void> => {
   try {
     const { questionId } = req.params;
-    const { status, rejection_reason } = req.body;
+    const { status, rejection_reason, field } = req.body;
 
     if (!status) {
       res.status(400).json({
@@ -426,6 +426,9 @@ export const updateQuestionStatus = async (req: Request, res: Response): Promise
     const updates: any = { status };
     updates.rejection_reason =
       status === 'rejected' ? (rejection_reason ?? null) : null;
+    if (field !== undefined) {
+      updates.field = field;
+    }
     const question = await prometheusService.updateQuestion(questionId, updates);
 
     if (!question) {

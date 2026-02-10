@@ -28,6 +28,7 @@ interface PrometheusQuestion {
   status?: string | null;
   notes?: string | null;
   rejection_reason?: string | null;
+  field?: string | null;
   follow_up_questions?: FollowUpQuestion[];
   question_tags?: Array<{ tag: string }>;
   question_skill_criteria?: QuestionSkillCriterion[];
@@ -147,6 +148,7 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
         category: questionDraft.category || undefined,
         difficulty: questionDraft.difficulty || undefined,
         notes: questionDraft.notes || undefined,
+        field: questionDraft.field || undefined,
         follow_up_questions: followUps,
         skill_criteria: skillCriteria,
       };
@@ -280,6 +282,59 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
                     className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-50"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 block mb-2">Assign to Field</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(questionDraft.field || '').includes('medicine')}
+                      onChange={(e) => {
+                        if (!canEdit && !canChangeStatus) return;
+                        const currentField = questionDraft.field || '';
+                        const fields = currentField.split(',').filter(f => f.trim());
+                        if (e.target.checked) {
+                          if (!fields.includes('medicine')) fields.push('medicine');
+                        } else {
+                          const index = fields.indexOf('medicine');
+                          if (index > -1) fields.splice(index, 1);
+                        }
+                        setQuestionDraft((prev) =>
+                          prev ? { ...prev, field: fields.join(',') } : prev
+                        );
+                      }}
+                      disabled={!canEdit && !canChangeStatus}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                    />
+                    <span className="text-sm text-gray-700">Medicine</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(questionDraft.field || '').includes('dentistry')}
+                      onChange={(e) => {
+                        if (!canEdit && !canChangeStatus) return;
+                        const currentField = questionDraft.field || '';
+                        const fields = currentField.split(',').filter(f => f.trim());
+                        if (e.target.checked) {
+                          if (!fields.includes('dentistry')) fields.push('dentistry');
+                        } else {
+                          const index = fields.indexOf('dentistry');
+                          if (index > -1) fields.splice(index, 1);
+                        }
+                        setQuestionDraft((prev) =>
+                          prev ? { ...prev, field: fields.join(',') } : prev
+                        );
+                      }}
+                      disabled={!canEdit && !canChangeStatus}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                    />
+                    <span className="text-sm text-gray-700">Dentistry</span>
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Select one or both fields for this question</p>
               </div>
 
               <div className="text-sm text-gray-600">
@@ -548,7 +603,7 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
                 {/* Show Approve button for pending and rejected */}
                 {(isPending || isRejected) && (
                   <button
-                    onClick={() => updateQuestionStatus(question.id, 'approved')}
+                    onClick={() => updateQuestionStatus(question.id, 'approved', undefined, questionDraft?.field || undefined)}
                     disabled={updatingQuestionId === question.id}
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60"
                   >
@@ -564,7 +619,7 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
                 {/* Show Reject button for pending and approved */}
                 {(isPending || isApproved) && (
                   <button
-                    onClick={() => updateQuestionStatus(question.id, 'rejected', rejectionReasonDraft)}
+                    onClick={() => updateQuestionStatus(question.id, 'rejected', rejectionReasonDraft, questionDraft?.field || undefined)}
                     disabled={updatingQuestionId === question.id}
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60"
                   >
@@ -580,7 +635,7 @@ const QuestionViewModal: React.FC<QuestionViewModalProps> = ({
                 {/* Show Reset to Pending button for approved and rejected */}
                 {(isApproved || isRejected) && (
                   <button
-                    onClick={() => updateQuestionStatus(question.id, 'pending')}
+                    onClick={() => updateQuestionStatus(question.id, 'pending', undefined, questionDraft?.field || undefined)}
                     disabled={updatingQuestionId === question.id}
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-60"
                   >
