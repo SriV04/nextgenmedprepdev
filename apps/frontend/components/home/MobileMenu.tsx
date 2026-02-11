@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { LogIn } from 'lucide-react';
+import SmartLoginLink from '../SmartLoginLink';
 
 interface MenuItem {
   title: string;
@@ -13,6 +14,7 @@ interface MegaMenuConfig {
   title: string;
   href?: string;
   items: MenuItem[];
+  isSmartLogin?: boolean;
 }
 
 interface MobileMenuProps {
@@ -98,6 +100,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ megaMenuItems }) => {
                 {megaMenuItems.map((menuConfig) => {
                   const isPrometheus = menuConfig.title === "Prometheus";
                   const isLogin = menuConfig.title === "Login";
+                  
+                  if (isLogin && menuConfig.isSmartLogin) {
+                    return (
+                      <div key={menuConfig.title} className="mb-2">
+                        <SmartLoginLink className="w-full p-3 rounded-lg font-medium transition-colors duration-200 bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-md flex items-center gap-2 justify-center" />
+                      </div>
+                    );
+                  }
                   
                   return (
                     <div key={menuConfig.title} className="mb-2">

@@ -6,6 +6,7 @@ import Script from "next/script";
 import MegaMenu from "@/components/home/MegaMenu";
 import MobileMenu from "@/components/home/MobileMenu";
 import MetaPixel from "@/components/MetaPixel";
+import SmartLoginLink from "@/components/SmartLoginLink";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from '@vercel/analytics/react';
 
@@ -32,6 +33,7 @@ interface MegaMenuConfig {
   title: string;
   href?: string;
   items: MenuItem[];
+  isSmartLogin?: boolean;
 }
 
 const megaMenuItems: MegaMenuConfig[] = [
@@ -86,6 +88,7 @@ const megaMenuItems: MegaMenuConfig[] = [
     title: "Login",
     href: "/student-dashboard",
     items: [],
+    isSmartLogin: true,
   },
 ];
 
@@ -159,12 +162,19 @@ export default function RootLayout({
                 <nav className="hidden lg:flex items-center justify-center flex-1 max-w-2xl mx-4">
                   <div className="flex items-center space-x-1">
                     {megaMenuItems.map((menuConfig) => (
-                      <MegaMenu
-                        key={menuConfig.title}
-                        title={menuConfig.title}
-                        href={menuConfig.href}
-                        items={menuConfig.items}
-                      />
+                      menuConfig.isSmartLogin ? (
+                        <SmartLoginLink
+                          key={menuConfig.title}
+                          className="px-1.5 py-1.5 mr-0.5 rounded-full transition-all duration-300 font-medium text-xs whitespace-nowrap flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-md"
+                        />
+                      ) : (
+                        <MegaMenu
+                          key={menuConfig.title}
+                          title={menuConfig.title}
+                          href={menuConfig.href}
+                          items={menuConfig.items}
+                        />
+                      )
                     ))}
                   </div>
               </nav>
