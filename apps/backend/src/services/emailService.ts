@@ -406,8 +406,8 @@ class EmailService {
 
   private getUcatConferenceConfirmationTemplate(): EmailTemplate {
     return {
-      subject: '✨ You\'re Registered for the Free UCAT Introduction Conference!',
-      text: `Thank you for signing up!\n\nWe're excited to have you join us for the Free Introduction to UCAT conference.\n\nConference Details:\nDetails coming soon! We'll send you the conference link and login information shortly.\n\nWhat to expect:\n- Expert-led introduction to UCAT format and structure\n- Proven timing strategies for each section\n- Core problem-solving techniques\n- Q&A session with top scorers\n- Comprehensive study resources\n\nKeep an eye on your inbox for the full conference details. If you have any questions, feel free to reach out to us.\n\nBest of luck with your UCAT preparation!\n\nBest regards,\nThe NextGen MedPrep Team`,
+      subject: '✨ You\'re Registered for the Free UCAT Introduction Conference - 8th March!',
+      text: `Thank you for signing up!\n\nWe're excited to have you join us for the Free Introduction to UCAT conference.\n\nConference Details:\n📅 Date: 8th March 2026\nDetails coming soon! We'll send you the conference link and login information shortly.\n\nWhat to expect:\n- Expert-led introduction to UCAT format and structure\n- Proven timing strategies for each section\n- Core problem-solving techniques\n- Q&A session with top scorers\n- Comprehensive study resources\n\n🎁 BONUS: You'll receive a £10 UCAT Package Voucher after attendance!\n\nKeep an eye on your inbox for the full conference details. If you have any questions, feel free to reach out to us.\n\nBest of luck with your UCAT preparation!\n\nBest regards,\nThe NextGen MedPrep Team`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #374151;">
           <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 12px 12px 0 0; color: white; text-align: center;">
@@ -421,7 +421,10 @@ class EmailService {
             </p>
 
             <div style="background-color: white; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin: 20px 0;">
-              <h3 style="margin-top: 0; color: #059669; font-size: 18px;">📌 What's Coming Next</h3>
+              <h3 style="margin-top: 0; color: #059669; font-size: 18px;">📅 Conference Date</h3>
+              <p style="margin: 10px 0; line-height: 1.6; font-size: 18px; color: #059669;">
+                <strong>8th March 2026</strong>
+              </p>
               <p style="margin: 10px 0; line-height: 1.6;">
                 <strong style="color: #059669;">Details coming soon!</strong> We'll send you the conference link and login information shortly. Keep an eye on your inbox.
               </p>
@@ -435,6 +438,15 @@ class EmailService {
                 <li>Core problem-solving techniques</li>
                 <li>Q&A session with top scorers</li>
               </ul>
+            </div>
+
+            <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #d97706; margin: 20px 0; border: 2px solid #d97706;">
+              <p style="margin: 0; font-size: 16px; color: #92400e;">
+                🎁 <strong style="color: #b45309; font-size: 18px;">BONUS: £10 UCAT Package Voucher Included!</strong>
+              </p>
+              <p style="margin: 10px 0 0 0; font-size: 14px; color: #92400e;">
+                You'll receive this voucher after attending the conference. It's our way of thanking you for joining us!
+              </p>
             </div>
 
             <div style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin: 20px 0;">

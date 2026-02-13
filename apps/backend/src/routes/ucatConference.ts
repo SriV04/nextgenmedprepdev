@@ -61,18 +61,27 @@ router.post('/ucat-conference/signup', async (req: Request, res: Response): Prom
     }
 
     // Check if user already has a subscription for this conference
-    const { data: existingSubscription } = await supabase
+    const { data: existingSubscription, error: checkError } = await supabase
       .from('subscriptions')
       .select('id')
       .eq('user_id', userId)
       .eq('subscription_tier', 'ucat_conf')
-      .single();
+      .maybeSingle();
 
     if (existingSubscription) {
       res.status(200).json({
         success: true,
         message: 'You are already signed up for the UCAT conference',
         userId,
+      });
+      return;
+    }
+
+    if (checkError) {
+      console.error('Error checking existing subscription:', checkError);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to check subscription status',
       });
       return;
     }
@@ -92,6 +101,17 @@ router.post('/ucat-conference/signup', async (req: Request, res: Response): Prom
 
     if (subscriptionError || !subscription) {
       console.error('Error creating subscription:', subscriptionError);
+      
+      // Check if this is a duplicate key error
+      if (subscriptionError?.code === '23505') {
+        res.status(200).json({
+          success: true,
+          message: 'You are already signed up for the UCAT conference',
+          userId,
+        });
+        return;
+      }
+      
       res.status(500).json({
         success: false,
         message: 'Failed to create subscription',

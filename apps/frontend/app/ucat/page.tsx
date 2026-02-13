@@ -11,6 +11,7 @@ import {
   AcademicCapIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
+import { Gift } from 'lucide-react';
 
 export default function UCATPage() {
   const highlightHours = (text: string) => {
@@ -175,8 +176,11 @@ export default function UCATPage() {
             <h3 className="text-2xl font-semibold text-slate-900 mb-2">
               Introduction to UCAT
             </h3>
-            <p className="text-slate-600 mb-6">
+            <p className="text-slate-600 mb-2">
               Expert-led session covering strategy, techniques, and practice for all sections.
+            </p>
+            <p className="text-sm text-slate-500 mb-6">
+              📅 <span className="font-semibold text-slate-700">8th March 2026</span>
             </p>
 
             <ul className="space-y-3 mb-8">
@@ -187,6 +191,13 @@ export default function UCATPage() {
                 </li>
               ))}
             </ul>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+              <p className="text-amber-900 font-semibold">
+                <Gift className="w-4 h-4 inline mr-2" />
+                <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-md font-bold">£10 UCAT Package Voucher</span> included with registration!
+              </p>
+            </div>
 
             <div className="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-100">
               <h4 className="font-semibold text-slate-900 mb-3">Ready to get started?</h4>
